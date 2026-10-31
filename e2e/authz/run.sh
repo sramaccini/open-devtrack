@@ -2,7 +2,8 @@
 # End-to-end check of the OpenDevTrack back end with authz-library (docs/check-authz-end-to-end.md).
 #
 #   e2e/authz/run.sh up      generate test credentials, start PostgreSQL, Redis and Keycloak, build and start the back
-#                            end on the host (profile dev), then the Quadrava runtime in front of it
+#                            end on the host (profile dev), publish ui/ to its registry, then the Quadrava runtime in
+#                            front of it
 #   e2e/authz/run.sh check   sign in through the runtime and run the Quadrava conformance kits (BFF, authorization,
 #                            registry) and the tenant checks
 #   e2e/authz/run.sh down    stop the back end and remove the containers
@@ -78,6 +79,9 @@ up() {
       --spring.profiles.active=dev > "$work/backend.log" 2>&1 &
   echo $! > "$work/backend.pid"
   wait_for "http://localhost:$APP_PORT/actuator/health" "The back end"
+
+  log "ui/ published to the registry (environment development, author mario.rossi)"
+  node "$root/tools/publish-ui.mjs" --registry "http://localhost:$APP_PORT" --env development --token "$(token mario.rossi)"
 
   # nginx resolves the BFF when it starts: the runtime comes last.
   "${compose[@]}" up -d runtime

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "home",
+  "title": "{{ t('home.title', 'Home') }}",
+  "components": [
+    {
+      "id": "welcome",
+      "type": "text",
+      "style": "heading",
+      "text": "{{ t('home.welcome', 'Welcome to OpenDevTrack') }}"
+    },
+    {
+      "id": "intro",
+      "type": "text",
+      "text": "{{ t('home.intro', 'Projects, issues, boards and reports of your team, in one place.') }}"
+    },
+    {
+      "id": "status",
+      "type": "alert",
+      "kind": "info",
+      "text": "{{ t('home.status', 'This is an early version: projects and issues arrive with the next releases.') }}"
+    }
+  ]
+}

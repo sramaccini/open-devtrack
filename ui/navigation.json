@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0",
+  "navigation": "main",
+  "default": "home",
+  "areas": [
+    {
+      "id": "home",
+      "label": "{{ t('nav.home', 'Home') }}",
+      "icon": "inbox",
+      "items": [
+        {
+          "id": "overview",
+          "label": "{{ t('nav.overview', 'Overview') }}",
+          "icon": "inbox",
+          "screen": "home"
+        }
+      ]
+    },
+    {
+      "id": "projects",
+      "label": "{{ t('nav.projects', 'Projects') }}",
+      "icon": "folder",
+      "requires": "odt.project.browse",
+      "items": [
+        {
+          "id": "all-projects",
+          "label": "{{ t('nav.all_projects', 'All projects') }}",
+          "icon": "list",
+          "screen": "project-list"
+        }
+      ]
+    }
+  ]
+}

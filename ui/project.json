@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0",
+  "project": "opendevtrack",
+  "name": "OpenDevTrack",
+  "description": "The screens of OpenDevTrack: an open-source issue tracker.",
+  "languages": ["en", "it"],
+  "defaultLanguage": "en",
+  "themes": ["odt-light", "odt-dark"]
+}

@@ -1,4 +1,12 @@
 {
-  "definitions": { "source": "examples" },
+  "definitions": {
+    "source": "registry",
+    "app": "opendevtrack",
+    "env": "development",
+    "navigation": "main",
+    "themes": ["odt-light", "odt-dark"],
+    "languages": ["en", "it"],
+    "defaultLanguage": "en"
+  },
   "services": { "source": "bff", "appId": "opendevtrack", "tenantSwitchUrl": "/bff/tenant" }
 }

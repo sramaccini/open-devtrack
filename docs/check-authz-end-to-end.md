@@ -42,6 +42,7 @@ Maven must reach the authz-library packages: see [backend/README.md](../backend/
 | `odt.*` permissions in the session of `mario.rossi` | `odt.project.browse`, `odt.project.create`, `odt.user.browse` |
 | Quadrava kit `conformance-bff`, session of `anna.bianchi` with two tenants | 13 of 13 (tenants, switch by POST only, CSRF, logout) |
 | Quadrava kit `conformance-registry`, bearer tokens of `mario.rossi` (author) and `anna.bianchi` (reviewer), from F1 | 23 of 23 (validation, If-Match, four eyes, protected environment, references) |
+| `ui/` published to the registry (`development`) and served by the runtime, from F1 | 7 documents; home and projects screens in both themes and languages |
 | Tenant switch kept for the next login (ADR-08) | ACME → GLOBEX, then GLOBEX after a new login |
 | In the browser: login through the runtime, the user menu | «Spazio di lavoro» with both tenants, GLOBEX selected, 2 permissions |
 

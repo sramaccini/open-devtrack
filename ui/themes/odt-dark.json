@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0",
+  "theme": "odt-dark",
+  "label": "OpenDevTrack dark",
+  "mode": "dark",
+  "brand": {
+    "name": "OpenDevTrack",
+    "logo": "odt-brand/odt-logo-horizontal-dark.svg",
+    "logoOnDark": "odt-brand/odt-logo-horizontal-dark.svg",
+    "icon": "odt-brand/odt-mark-dark.svg",
+    "height": 32
+  },
+  "tokens": {
+    "colors": {
+      "primary": "#2DD4BF",
+      "onPrimary": "#0B1220",
+      "background": "#0B1220",
+      "surface": "#111B2E",
+      "onSurface": "#E2E8F0",
+      "mutedText": "#94A3B8",
+      "border": "#1E293B",
+      "danger": "#F87171",
+      "success": "#4ADE80",
+      "warning": "#FBBF24"
+    },
+    "typography": {
+      "fontFamily": "Segoe UI, Roboto, Arial, sans-serif",
+      "baseSize": 15
+    },
+    "shape": {
+      "radius": 6
+    },
+    "density": "comfortable",
+    "layout": {
+      "sider": {
+        "tone": "dark",
+        "background": "#0B1220",
+        "text": "#E2E8F0",
+        "mutedText": "#94A3B8",
+        "activeBackground": "#13233F",
+        "activeText": "#2DD4BF",
+        "border": "#1E293B",
+        "width": 256,
+        "collapsedWidth": 80
+      },
+      "header": {
+        "background": "#111B2E",
+        "text": "#E2E8F0",
+        "height": 56
+      },
+      "pageHeader": {
+        "background": "#111B2E"
+      },
+      "content": {
+        "padding": 24
+      }
+    }
+  }
+}

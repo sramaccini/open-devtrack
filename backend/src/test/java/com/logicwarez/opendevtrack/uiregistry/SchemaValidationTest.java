@@ -10,13 +10,48 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.logicwarez.opendevtrack.uiregistry.Model.Issue;
 import com.logicwarez.opendevtrack.uiregistry.Model.Kind;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 /** Validation against the schemas of the pinned Quadrava version, read from the classpath. */
 class SchemaValidationTest {
 
     private final SchemaValidation validation = new SchemaValidation();
+    private static final Path UI = Path.of("..", "ui");
+
+    @Test
+    void everyDocumentOfTheUiProjectIsValid() throws IOException {
+        int checked = 0;
+        for (String folder : List.of("screens", "themes", "datasources")) {
+            Kind kind = switch (folder) {
+                case "screens" -> Kind.SCREEN;
+                case "themes" -> Kind.THEME;
+                default -> Kind.DATASOURCES;
+            };
+            if (!Files.isDirectory(UI.resolve(folder))) {
+                continue;
+            }
+            try (Stream<Path> files = Files.list(UI.resolve(folder))) {
+                for (Path file : files.filter(f -> f.toString().endsWith(".json")).toList()) {
+                    assertThat(validation.validate(kind, Files.readString(file, StandardCharsets.UTF_8))).as(file.toString()).isEmpty();
+                    checked++;
+                }
+            }
+        }
+        assertThat(validation.validate(Kind.NAVIGATION, Files.readString(UI.resolve("navigation.json"), StandardCharsets.UTF_8))).isEmpty();
+        // The catalogues are flat maps in the project and messages documents in the registry (tools/publish-ui.mjs).
+        for (String locale : List.of("en", "it")) {
+            String texts = Files.readString(UI.resolve("i18n").resolve(locale + ".json"), StandardCharsets.UTF_8);
+            String document = "{\"schemaVersion\":\"1.0\",\"messages\":\"" + locale + "\",\"texts\":" + texts + "}";
+            assertThat(validation.validate(Kind.MESSAGES, document)).as(locale).isEmpty();
+        }
+        assertThat(checked).isGreaterThanOrEqualTo(4);
+    }
 
     @Test
     void validDocumentsOfEveryKindPass() {
