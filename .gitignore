@@ -1,0 +1,22 @@
+# Build
+target/
+*.class
+node_modules/
+
+# IDE
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+.classpath
+.project
+.settings/
+
+# System and local secrets
+.DS_Store
+Thumbs.db
+.env
+*.log
+
+# Generated files of the local environments
+e2e/**/.work/
