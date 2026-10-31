@@ -37,3 +37,7 @@ The project is published as open source: **everything is in English** (code, com
 ## 5. Formatting
 
 `.editorconfig`: UTF-8, LF, two spaces (four in Java), final newline. New code looks like the code around it: same names, same density of comments, same idioms.
+
+## 6. Brand
+
+The logo, icons, colours and type are in [brand/](brand/README.md) and are used as they are wherever the project shows its identity: the `ui/` theme (palette and favicon), documentation, slides, the site. No redrawn, recoloured or locally edited copies; a missing variant is added to `brand/` first, following its rules.
