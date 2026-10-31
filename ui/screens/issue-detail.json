@@ -30,6 +30,12 @@
     },
     "history": {
       "ref": "issues/history"
+    },
+    "transitions": {
+      "ref": "issues/transitions"
+    },
+    "move": {
+      "ref": "issues/move"
     }
   },
   "components": [
@@ -154,6 +160,9 @@
               "refresh": "history"
             },
             {
+              "refresh": "transitions"
+            },
+            {
               "toast": "{{ t('common.saved', 'Saved') }}"
             }
           ]
@@ -229,6 +238,81 @@
               "params": {
                 "key": "{{params.key}}"
               }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "workflow-title",
+      "type": "text",
+      "style": "heading",
+      "text": "{{ t('issues.next_steps', 'Next steps') }}"
+    },
+    {
+      "id": "transition-table",
+      "type": "table",
+      "source": "transitions",
+      "columns": [
+        {
+          "field": "code",
+          "label": "{{ t('issues.transition', 'Transition') }}",
+          "valueKey": "values.transition"
+        },
+        {
+          "field": "to",
+          "label": "{{ t('issues.to_status', 'To status') }}",
+          "valueKey": "values.status"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-move",
+          "label": "{{ t('issues.move', 'Move') }}",
+          "onClick": [
+            {
+              "call": "move",
+              "args": {
+                "transition": "{{row.code}}",
+                "version": "{{row.version}}"
+              },
+              "onError": [
+                {
+                  "if": "{{error.status == 409}}",
+                  "then": [
+                    {
+                      "toast": "{{ t('issues.conditions_not_met', 'The conditions of this step are not met') }}"
+                    }
+                  ],
+                  "else": [
+                    {
+                      "if": "{{error.status == 412}}",
+                      "then": [
+                        {
+                          "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                        }
+                      ],
+                      "else": [
+                        {
+                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "refresh": "issue"
+            },
+            {
+              "refresh": "transitions"
+            },
+            {
+              "refresh": "history"
+            },
+            {
+              "toast": "{{ t('issues.moved', 'Status changed') }}"
             }
           ]
         }

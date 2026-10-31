@@ -80,6 +80,12 @@
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-starter-jdbc</artifactId>
         </dependency>
+        <!-- Module workflow: the CEL guards of the transitions (ADR-10), the language of the expressions of the screens -->
+        <dependency>
+            <groupId>dev.cel</groupId>
+            <artifactId>cel</artifactId>
+            <version>0.14.0</version>
+        </dependency>
         <!-- Module uiregistry: versions on PostgreSQL, validation against the schemas of Quadrava, tokens of the tools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

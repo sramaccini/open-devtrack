@@ -4,6 +4,7 @@
  */
 package com.logicwarez.opendevtrack.access;
 
+import com.logicwarez.opendevtrack.platform.CurrentUser;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
@@ -21,6 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * <p>Until authz-library has an extension point for the capabilities (request A1), these permissions reach the screens
  * as row permissions ({@code _perm}) in the answers of the modules, not through {@code /authz/capabilities}.
+ *
+ * <p>The admin of the tenant (global permission {@value #TENANT_ADMIN}) holds the role admin in every project of the
+ * tenant, member or not (ADR-07).
  */
 @Service
 @Transactional(readOnly = true)
@@ -29,19 +33,33 @@ public class ProjectAccess {
     /** Outcome of a change of role or of a removal. */
     public enum Change { DONE, NOT_A_MEMBER, LAST_ADMIN }
 
-    private final MemberRepository members;
+    /** Global permission of the admin of the tenant. */
+    public static final String TENANT_ADMIN = "odt.project.admin";
 
-    ProjectAccess(MemberRepository members) {
+    private final MemberRepository members;
+    private final CurrentUser user;
+
+    ProjectAccess(MemberRepository members, CurrentUser user) {
         this.members = members;
+        this.user = user;
     }
 
     public Optional<ProjectRole> role(UUID projectId, String username) {
         return members.findByProjectIdAndUsername(projectId, username).map(MemberEntity::role);
     }
 
-    /** Permissions of the user in the project; empty for someone who is not a member. */
+    /**
+     * Permissions of the user in the project; empty for someone who is not a member. For the user of the session who is
+     * admin of the tenant, those of the role admin.
+     */
     public Set<String> permissions(UUID projectId, String username) {
-        return role(projectId, username).map(ProjectRole::permissions).orElse(Set.of());
+        Optional<ProjectRole> own = role(projectId, username);
+        return (username.equals(user.username()) ? effective(own) : own).map(ProjectRole::permissions).orElse(Set.of());
+    }
+
+    /** The role that decides what the user of the session can do: admin for an admin of the tenant, else their own. */
+    public Optional<ProjectRole> effective(Optional<ProjectRole> own) {
+        return user.can(TENANT_ADMIN) ? Optional.of(ProjectRole.ADMIN) : own;
     }
 
     /** Roles of the user in several projects at once, for lists: project → role, only where the user is a member. */

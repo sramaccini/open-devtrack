@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -59,12 +60,15 @@ class ProjectController {
     private final ProjectAccess access;
     private final TenantUsers users;
     private final CurrentUser user;
+    private final ApplicationEventPublisher events;
 
-    ProjectController(ProjectRepository projects, ProjectAccess access, TenantUsers users, CurrentUser user) {
+    ProjectController(ProjectRepository projects, ProjectAccess access, TenantUsers users, CurrentUser user,
+                      ApplicationEventPublisher events) {
         this.projects = projects;
         this.access = access;
         this.users = users;
         this.user = user;
+        this.events = events;
     }
 
     @GetMapping("/api/projects")
@@ -98,6 +102,7 @@ class ProjectController {
         ProjectEntity project = projects.saveAndFlush(new ProjectEntity(user.tenantId(), key, request.name().strip(),
                 blankToNull(request.description()), user.username(), Instant.now()));
         access.grant(project.id(), user.username(), ProjectRole.ADMIN, user.username());
+        events.publishEvent(new ProjectCreated(project.id(), project.tenantId(), key, user.username(), project.createdAt()));
         return ResponseEntity.status(HttpStatus.CREATED).body(view(project, Optional.of(ProjectRole.ADMIN)));
     }
 
@@ -222,7 +227,7 @@ class ProjectController {
     }
 
     private ProjectView view(ProjectEntity p, Optional<ProjectRole> role) {
-        Set<String> permissions = role.map(ProjectRole::permissions).orElse(Set.of());
+        Set<String> permissions = access.effective(role).map(ProjectRole::permissions).orElse(Set.of());
         Map<String, Boolean> perm = Map.of(
                 "edit", permissions.contains("odt.project.edit"),
                 "manageMembers", permissions.contains("odt.member.manage"),

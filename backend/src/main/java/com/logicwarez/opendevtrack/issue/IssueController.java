@@ -8,6 +8,8 @@ import com.logicwarez.opendevtrack.access.ProjectAccess;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueRequest;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueRow;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueView;
+import com.logicwarez.opendevtrack.issue.IssueApi.TransitionRequest;
+import com.logicwarez.opendevtrack.issue.IssueApi.TransitionView;
 import com.logicwarez.opendevtrack.issue.IssueEvents.FieldChange;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueCreated;
@@ -17,8 +19,11 @@ import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.project.ProjectRef;
 import com.logicwarez.opendevtrack.project.Projects;
+import com.logicwarez.opendevtrack.workflow.Workflows;
+import com.logicwarez.opendevtrack.workflow.Workflows.Decision;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -49,9 +54,11 @@ import org.springframework.web.bind.annotation.RestController;
  * <ul>
  *   <li>{@code odt.issue.browse} (viewer): list and read them;</li>
  *   <li>{@code odt.issue.create}, {@code odt.issue.edit} (developer): create them, change their fields;</li>
+ *   <li>{@code odt.issue.transition} (developer): move them through the workflow of the project, when the guard of the
+ *   transition is true (module workflow, ADR-10);</li>
  *   <li>{@code odt.issue.delete} (admin): delete them.</li>
  * </ul>
- * The status changes only through the transitions of the workflows (E3). An issue of a project of another tenant
+ * The status changes only through the transitions. An issue of a project of another tenant
  * answers 404, as one that does not exist (ADR-09). Every change is published as an event of {@link IssueEvents}.
  */
 @RestController
@@ -72,9 +79,11 @@ class IssueController {
     private final ProjectAccess access;
     private final CurrentUser user;
     private final ApplicationEventPublisher events;
+    private final Workflows workflows;
 
     IssueController(IssueRepository issues, Issues finder, Projects projects, ProjectAccess access, CurrentUser user,
-                    ApplicationEventPublisher events) {
+                    ApplicationEventPublisher events, Workflows workflows) {
+        this.workflows = workflows;
         this.issues = issues;
         this.finder = finder;
         this.projects = projects;
@@ -122,7 +131,7 @@ class IssueController {
         }
         Instant now = Instant.now();
         IssueEntity issue = new IssueEntity(user.tenantId(), project.get().id(), projects.nextIssueNumber(project.get().id()),
-                user.username(), now);
+                workflows.initialStatus(project.get().id()), user.username(), now);
         fields.applyTo(issue, now);
         issues.saveAndFlush(issue);
         events.publishEvent(new IssueCreated(issue.id(), project.get().id(), key(project.get(), issue), user.username(), now,
@@ -195,6 +204,91 @@ class IssueController {
         events.publishEvent(new IssueDeleted(found.get().issue().id(), found.get().project().id(),
                 key(found.get().project(), found.get().issue()), user.username(), Instant.now()));
         return ResponseEntity.noContent().build();
+    }
+
+    /** The transitions that can run now on the issue, for the user (empty without {@code odt.issue.transition}). */
+    @GetMapping("/api/issues/{issueKey}/transitions")
+    ResponseEntity<?> transitions(@PathVariable String issueKey) {
+        Optional<Found> found = find(issueKey);
+        if (found.isEmpty()) {
+            return Problems.notFound(NOT_FOUND);
+        }
+        Set<String> permissions = permissions(found.get().project());
+        if (!permissions.contains("odt.issue.browse")) {
+            return Problems.forbidden(NOT_A_MEMBER);
+        }
+        IssueEntity issue = found.get().issue();
+        return ResponseEntity.ok(workflows.available(issue.projectId(), issue.status(), guardInput(found.get()), userInput(),
+                permissions).stream().map(t -> new TransitionView(t.code(), t.to(), issue.version())).toList());
+    }
+
+    /** Runs a transition, from the version read with the issue: 409 when it cannot run now, 412 if the issue changed. */
+    @PostMapping("/api/issues/{issueKey}/transitions")
+    @Transactional
+    ResponseEntity<?> transition(@PathVariable String issueKey, @RequestBody TransitionRequest request) {
+        Optional<Found> found = find(issueKey);
+        if (found.isEmpty()) {
+            return Problems.notFound(NOT_FOUND);
+        }
+        ProjectRef project = found.get().project();
+        IssueEntity issue = found.get().issue();
+        Set<String> permissions = permissions(project);
+        if (!permissions.contains("odt.issue.browse")) {
+            return Problems.forbidden(NOT_A_MEMBER);
+        }
+        Decision decision = workflows.decide(issue.projectId(), request.transition() == null ? "" : request.transition(),
+                issue.status(), guardInput(found.get()), userInput(), permissions);
+        switch (decision.outcome()) {
+            case UNKNOWN -> {
+                return Problems.badRequest("No transition with this name in the workflow of the project");
+            }
+            case NOT_PERMITTED -> {
+                return Problems.forbidden("Only a developer or an admin of the project moves issues");
+            }
+            case NOT_FROM_HERE -> {
+                return Problems.conflict("The transition does not start from the status of the issue");
+            }
+            case GUARD_FALSE -> {
+                return Problems.conflict("The conditions of the transition are not met");
+            }
+            case ALLOWED -> {
+                // Below.
+            }
+        }
+        if (request.version() == null || request.version() != issue.version()) {
+            return Problems.changedMeanwhile();
+        }
+        String from = issue.status();
+        Instant now = Instant.now();
+        issue.moveTo(decision.transition().to(), now);
+        try {
+            issues.saveAndFlush(issue);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            return Problems.changedMeanwhile();
+        }
+        events.publishEvent(new IssueChanged(issue.id(), project.id(), key(project, issue), user.username(), now,
+                List.of(new FieldChange("status", from, issue.status()))));
+        return ResponseEntity.ok(view(project, issue, permissions));
+    }
+
+    /** The issue as the guards see it ({@code issue.assignee}, {@code issue.labels}…); workflow adds the status. */
+    private static Map<String, Object> guardInput(Found found) {
+        IssueEntity i = found.issue();
+        Map<String, Object> issue = new HashMap<>();
+        issue.put("key", key(found.project(), i));
+        issue.put("project", found.project().key());
+        issue.put("type", i.type().value());
+        issue.put("summary", i.summary());
+        issue.put("description", i.description());
+        issue.put("priority", i.priority().value());
+        issue.put("assignee", i.assignee());
+        issue.put("reporter", i.reporter());
+        issue.put("labels", i.labels() == null ? List.of() : i.labels());
+        return issue;
+    }
+
+    private Map<String, Object> userInput() {
+        return Map.of("username", user.username(), "roles", List.copyOf(user.session().roles()));
     }
 
     private Optional<Found> find(String issueKey) {

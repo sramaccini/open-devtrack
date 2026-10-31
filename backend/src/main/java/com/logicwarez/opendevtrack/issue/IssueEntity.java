@@ -22,9 +22,6 @@ import org.hibernate.type.SqlTypes;
 @Table(schema = "odt_issue", name = "issue")
 class IssueEntity {
 
-    /** Status of a new issue until the workflows of E3. */
-    static final String INITIAL_STATUS = "todo";
-
     @Id
     @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
     private UUID id;
@@ -59,12 +56,12 @@ class IssueEntity {
     protected IssueEntity() {
     }
 
-    IssueEntity(String tenantId, UUID projectId, long number, String reporter, Instant createdAt) {
+    IssueEntity(String tenantId, UUID projectId, long number, String status, String reporter, Instant createdAt) {
         this.tenantId = tenantId;
         this.projectId = projectId;
         this.number = number;
         this.reporter = reporter;
-        this.status = INITIAL_STATUS;
+        this.status = status;
         this.createdAt = createdAt;
         this.updatedAt = createdAt;
     }
@@ -77,6 +74,12 @@ class IssueEntity {
         this.priority = priority;
         this.assignee = assignee;
         this.labels = labels;
+        this.updatedAt = now;
+    }
+
+    /** The status after a transition of the workflow (module workflow). */
+    void moveTo(String status, Instant now) {
+        this.status = status;
         this.updatedAt = now;
     }
 

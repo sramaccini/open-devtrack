@@ -112,5 +112,20 @@
   "values.issue_field.assignee": "Assignee",
   "values.issue_field.labels": "Labels",
   "values.issue_field.description": "Description",
-  "values.issue_field.status": "Status"
+  "values.issue_field.status": "Status",
+  "issues.next_steps": "Next steps",
+  "issues.transition": "Transition",
+  "issues.to_status": "To status",
+  "issues.move": "Move",
+  "issues.conditions_not_met": "The conditions of this step are not met",
+  "issues.moved": "Status changed",
+  "projects.workflow": "Workflow",
+  "projects.from_status": "From status",
+  "projects.condition": "Condition",
+  "projects.edit_condition": "Edit condition",
+  "projects.condition_help": "A CEL expression on issue and user, for example issue.assignee != null; empty for none",
+  "projects.condition_invalid": "The condition is not a valid CEL expression",
+  "values.transition.start": "Start",
+  "values.transition.finish": "Finish",
+  "values.transition.reopen": "Reopen"
 }

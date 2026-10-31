@@ -24,6 +24,12 @@
     },
     "users": {
       "ref": "users/search"
+    },
+    "transitions": {
+      "ref": "projects/transitions"
+    },
+    "setGuard": {
+      "ref": "projects/setGuard"
     }
   },
   "components": [
@@ -302,6 +308,92 @@
             },
             {
               "refresh": "members"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "workflow-title",
+      "type": "text",
+      "style": "heading",
+      "text": "{{ t('projects.workflow', 'Workflow') }}"
+    },
+    {
+      "id": "workflow-table",
+      "type": "table",
+      "source": "transitions",
+      "columns": [
+        {
+          "field": "code",
+          "label": "{{ t('issues.transition', 'Transition') }}",
+          "valueKey": "values.transition"
+        },
+        {
+          "field": "from",
+          "label": "{{ t('projects.from_status', 'From status') }}",
+          "valueKey": "values.status"
+        },
+        {
+          "field": "to",
+          "label": "{{ t('issues.to_status', 'To status') }}",
+          "valueKey": "values.status"
+        },
+        {
+          "field": "guard",
+          "label": "{{ t('projects.condition', 'Condition') }}"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-condition",
+          "label": "{{ t('projects.edit_condition', 'Edit condition') }}",
+          "visibleIf": "{{row._perm.edit}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('projects.edit_condition', 'Edit condition') }}",
+                "submitLabel": "{{ t('common.save', 'Save') }}",
+                "initial": {
+                  "guard": "{{row.guard}}"
+                },
+                "fields": [
+                  {
+                    "name": "guard",
+                    "type": "textarea",
+                    "rows": 3,
+                    "maxLength": 1000,
+                    "label": "{{ t('projects.condition', 'Condition') }}",
+                    "tooltip": "{{ t('projects.condition_help', 'A CEL expression on issue and user, for example issue.assignee != null; empty for none') }}"
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "setGuard",
+                    "args": {
+                      "code": "{{row.code}}"
+                    },
+                    "onError": [
+                      {
+                        "if": "{{error.status == 400}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('projects.condition_invalid', 'The condition is not a valid CEL expression') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "transitions"
             }
           ]
         }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "datasources": "projects",
-  "description": "Projects of the workspace and their members (module project).",
+  "description": "Projects of the workspace, their members and their workflow (modules project and workflow).",
   "sources": {
     "list": {
       "type": "rest",
@@ -46,6 +46,17 @@
       "type": "rest",
       "method": "DELETE",
       "url": "/api/projects/{{params.key}}/members/{{username}}"
+    },
+    "transitions": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/workflow/transitions"
+    },
+    "setGuard": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/projects/{{params.key}}/workflow/transitions/{{code}}",
+      "body": "{{form}}"
     }
   }
 }

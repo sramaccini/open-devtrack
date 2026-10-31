@@ -112,5 +112,20 @@
   "values.issue_field.assignee": "Assegnatario",
   "values.issue_field.labels": "Etichette",
   "values.issue_field.description": "Descrizione",
-  "values.issue_field.status": "Stato"
+  "values.issue_field.status": "Stato",
+  "issues.next_steps": "Prossimi passi",
+  "issues.transition": "Transizione",
+  "issues.to_status": "Verso lo stato",
+  "issues.move": "Sposta",
+  "issues.conditions_not_met": "Le condizioni di questo passo non sono soddisfatte",
+  "issues.moved": "Stato cambiato",
+  "projects.workflow": "Workflow",
+  "projects.from_status": "Dallo stato",
+  "projects.condition": "Condizione",
+  "projects.edit_condition": "Modifica la condizione",
+  "projects.condition_help": "Un'espressione CEL su issue e user, per esempio issue.assignee != null; vuota per nessuna",
+  "projects.condition_invalid": "La condizione non è un'espressione CEL valida",
+  "values.transition.start": "Inizia",
+  "values.transition.finish": "Completa",
+  "values.transition.reopen": "Riapri"
 }

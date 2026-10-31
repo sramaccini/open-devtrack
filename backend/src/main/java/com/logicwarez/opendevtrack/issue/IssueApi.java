@@ -26,6 +26,13 @@ final class IssueApi {
                      @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
+    /** A transition that can run now: its code, the status it leads to and the version of the issue to send back. */
+    record TransitionView(String code, String to, long version) {
+    }
+
+    record TransitionRequest(String transition, Long version) {
+    }
+
     /** Fields of a new issue or of a change; {@code version} only for a change. */
     record IssueRequest(String type, String summary, String description, String priority, String assignee,
                         List<String> labels, Long version) {

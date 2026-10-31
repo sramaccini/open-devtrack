@@ -6,10 +6,10 @@ Quadrava and authz-library, and the ADRs say where.
 
 ## Status
 
-**31 October 2026 — phase F1 (skeleton, registry, ui/, CI) done; F2 started with E1 Projects.**
+**1 November 2026 — phase F1 done; F2 with E1 Projects, E2 Issues, E3 Workflow and E4 Collaboration (first slices): gate M1 covered.**
 
 - Repository github.com/sramaccini/open-devtrack, branch `main`: licence MPL-2.0 with CLA, contribution rules and
-  project rules as Quadrava (ADR-05). Decisions D1–D9 accepted as ADRs in `docs/`.
+  project rules as Quadrava (ADR-05). Decisions D1–D9 and ADR-10 accepted, in `docs/`.
 - `backend/`: the monolith on authz-library 2.0.1, split into the Spring Modulith modules of the plan
   (`ModularityTests`: `verify()` and the module documentation). The `odt.*` permission catalogue is a repeatable
   Flyway migration of the RBAC schema (ADR-07); the dev profile adds tenants, users and the UI author/approver roles.
@@ -29,7 +29,12 @@ Quadrava and authz-library, and the ADRs say where.
   until A1 (ADR-07). `ProjectApiTest` covers two tenants and users without the permissions.
 - F2 E2 Issues (first slice): module `issue` with type, priority, summary, Markdown description, assignee, labels and
   numbering per project; screens `issue-list`, `issue-new`, `issue-detail`. Labels are in the API only (request Q5);
-  the status stays `todo` until E3.
+  the status changes through the workflow (E3).
+- F2 E3 Workflow (ADR-10, accepted 1 November 2026): module `workflow`, one workflow per project copied from the
+  default, CEL guards with cel-java 0.14.0, transitions listed and run on `issue-detail` («Next steps»), conditions
+  edited on `project-detail`. With it gate M1 is covered: create, edit, transition and comment an issue, with
+  permissions and changelog. The admin of the tenant (`odt.project.admin`, role `ODT_ADMIN`) is admin of every
+  project.
 - F2 E4 (first slice): comments (module `collaboration`) and the changelog of the issues (module `audit`), both from
   the events of `issue` after the commit (Event Publication Registry of Spring Modulith on PostgreSQL); tabs Comments
   and History on `issue-detail`. The values in the history are shown as stored (`task`, `medium`), not translated.
@@ -59,9 +64,8 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F2 (per the plan): E3 Workflow once ADR-10 is accepted (transitions are the missing piece of gate M1), then the
-   rest of E2 (links, watchers, custom fields) and of E4 (mentions, attachments).
-   Open question for review: keep project roles, or only tenant-wide roles from the catalogue.
+1. F2 (per the plan): the rest of E2 (links, watchers, custom fields) and of E4 (mentions, attachments); workflows
+   by issue type and editing statuses and transitions when a project needs them (ADR-10).
 2. Adopt Quadrava 0.2.0 when released: `quadrava validate` and `publish` in CI instead of `tools/publish-ui.mjs`,
    schemas refreshed with `backend/tools/sync-quadrava-schemas.sh`, the kits from the release tag.
 3. Deployment: publish `ui/` to `testing`/`production` with an author and an approver token.

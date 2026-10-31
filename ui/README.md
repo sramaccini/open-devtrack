@@ -9,7 +9,7 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 | `project.json` | (not published) | Identifier `opendevtrack`, languages and themes; the runtime gets them from its configuration |
 | `navigation.json` | `navigation/main` | Areas and items of the side bar, with the permission each one requires |
 | `screens/*.json` | `screen/<id>` | One screen per file |
-| `datasources/*.json` | `datasources/<id>` | Data sources shared by screens: `projects`, `users`, `issues` |
+| `datasources/*.json` | `datasources/<id>` | Data sources shared by screens: `projects` (with members and workflow), `users`, `issues` (with transitions, comments and history) |
 | `themes/*.json` | `theme/<id>` | `odt-light` (the default) and `odt-dark`, with the palette of [brand/](../brand/README.md) |
 | `i18n/<lang>.json` | `messages/<lang>` | English and Italian texts, key → text; labels use `t('key', 'English default')` |
 

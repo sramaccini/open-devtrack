@@ -197,6 +197,21 @@ class ProjectApiTest {
     }
 
     @Test
+    void theAdminOfTheTenantAdministersEveryProject() throws Exception {
+        createOdt();
+        SessionAuthentication paola = session("paola", "ALPHA", List.of("odt.project.browse", "odt.user.browse", "odt.project.admin"));
+        mvc.perform(as(get("/api/projects/ODT"), paola))
+                .andExpect(jsonPath("$.role").doesNotExist())
+                .andExpect(jsonPath("$._perm.edit").value(true))
+                .andExpect(jsonPath("$._perm.manageMembers").value(true));
+        mvc.perform(as(post("/api/projects/ODT/members"), paola).content("{\"username\":\"luisa\",\"role\":\"admin\"}"))
+                .andExpect(status().isOk());
+        // Not in another tenant.
+        mvc.perform(as(get("/api/projects/ODT"), session("ugo", "BETA", List.of("odt.project.browse", "odt.project.admin"))))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void usersOfTheTenantForThePickers() throws Exception {
         mvc.perform(as(get("/api/users").param("q", "LU"), mario))
                 .andExpect(jsonPath("$.length()").value(1))

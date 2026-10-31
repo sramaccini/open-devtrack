@@ -66,15 +66,26 @@ tenant for the pickers (`GET /api/users`, temporary until A5).
 - `odt.project.browse`: list and read the projects of the tenant and their members.
 - `odt.project.create` (role `ODT_PROJECT_CREATOR`): create one; the creator becomes its lead and admin.
 - `odt.user.browse`: search the users of the tenant.
+- `odt.project.admin` (role `ODT_ADMIN`): admin of the tenant, with the role admin in every project of the tenant.
 
 ## Issues (`issue`)
 
 Issues of a project (`odt_issue`), keyed by the project and their number (`ODT-42`): type, summary, description
 (restricted Markdown), priority, assignee (a member), reporter, labels. Only the members of the project see them;
 developers create and edit them, admins delete them; edits carry the version read and get 412 if it changed. The status
-is `todo` until the workflows of E3 add the transitions. `GET /api/projects/{key}/issues` takes `status`,
+changes only through the transitions of the workflow of the project (below). `GET /api/projects/{key}/issues` takes `status`,
 `assignee` (`me` for the user) and `q` (text of the summary). Each change is published as an event
 (`IssueEvents`); other modules find an issue by its key through `Issues`.
+
+## Workflows (`workflow`)
+
+Each project gets a copy of the built-in workflow when it is created (`odt_workflow`, ADR-10): statuses `todo`,
+`in_progress`, `done` and transitions `start`, `finish`, `reopen`. A transition may have a guard in CEL (cel-java),
+on `issue` (its fields after the transition, with `status`), `user` (`username`, `roles`) and `can(permission)` on
+the project permissions of the user: `issue.assignee != null`, `can('odt.issue.delete')`. A guard is checked when an
+admin of the project saves it (`PUT /api/projects/{key}/workflow/transitions/{code}`); one that fails to evaluate is
+false. `GET /api/issues/{key}/transitions` lists the transitions that can run now; `POST` with `transition` and
+`version` runs one (`odt.issue.transition`): 409 when it does not start from the status or its guard is false.
 
 ## Comments and changelog (`collaboration`, `audit`)
 

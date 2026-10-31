@@ -43,7 +43,7 @@ spring:
     # One schema and one folder per module (ADR-04), all under db/odt with one history table in odt: the version
     # numbers are global across the folders (V1 uiregistry, V2 access, V3 project, V4 issue, V5 the event
     # publications, …). The RBAC schema has its own Flyway and history, run by authz-rbac.
-    schemas: odt,odt_uiregistry,odt_access,odt_project,odt_issue,odt_audit,odt_collaboration
+    schemas: odt,odt_uiregistry,odt_access,odt_project,odt_issue,odt_audit,odt_collaboration,odt_workflow
     locations: classpath:db/odt
   modulith:
     events:
