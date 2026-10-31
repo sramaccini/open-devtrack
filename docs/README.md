@@ -15,6 +15,7 @@ The decisions D1–D9 of the project plan, all accepted by the maintainer on 31 
 | [07](adr-07-permission-format.md) | Permission format (D7) | `odt.<resource>.<action>` everywhere, catalogue by a migration script; authz-library A1 for project permissions | Accepted |
 | [08](adr-08-tenant-selection.md) | Choosing the tenant (D8) | Optional selector of the Quadrava shell, last tenant at login | Accepted |
 | [09](adr-09-multi-tenant-data.md) | Multi-tenant data (D9) | `tenant_id` on the project, filtered from the session | Accepted |
+| [10](adr-10-workflows.md) | Workflows and their CEL guards (E3) | Workflow per project from a built-in default, guards in CEL with cel-java, transitions allowed as an API | Proposed |
 
 ## Requests to the dependencies
 
