@@ -23,6 +23,13 @@ digits, three parts separated by dots, `CHECK (permission_code ~ '^[a-z0-9]+\.[a
 | Single row | `row._perm.transition` | computed by `access` in every answer |
 
 - No translation layer in `access`: a code is never renamed between back end and front end.
+- **The catalogue is registered in the ms-authz database by a script** (decided by the maintainer): a Flyway migration
+  of OpenDevTrack in its own folder, added to the ones of `authz-rbac` (`authz.rbac.flyway.locations:
+  classpath:db/authz/migration,classpath:db/authz/odt`), the mechanism the ms-authz demo uses for its data. Proposed
+  form: a **repeatable** migration `R__odt_permission_catalogue.sql` with `INSERT … ON CONFLICT DO NOTHING` for the
+  permissions, the global roles and their links. A repeatable one runs after the versioned ones and again when it
+  changes, so it never collides with the next `V4`, `V5` of ms-authz and needs no `out-of-order` in production. A
+  permission is removed by a versioned migration of its own, never by editing the list.
 - No hyphens, no underscores, no fourth part (`odt.issue.edit.own` is refused by the constraint): an action with a
   scope gets its own word (`odt.issue.editown`) or a row permission.
 - Permissions of ms-authz itself keep their own domain (`authz.rbac.manage`).

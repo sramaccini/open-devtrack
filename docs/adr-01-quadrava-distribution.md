@@ -42,7 +42,7 @@ ui/ (JSON) ──quadrava validate (CI)──▶ ok
 
 - F1 needs Quadrava **0.2.0** released (the CLI for the CI of `ui/`). Until then, `ui/` is checked by running the
   validation of a Quadrava checkout at tag `v0.1.0` in CI, never by copying it here.
-- How the definitions reach the image in production is ADR-03: today the image loads them only from a registry or
-  shows the demo.
+- How the definitions reach the image in production is ADR-03: a registry module of the monolith, which the image
+  reads with `QUADRAVA_REGISTRY_APP`.
 - GitHub Packages and GitHub Container Registry need a token with `read:packages` in CI and on developer machines,
   also for public packages (Maven and npm).
