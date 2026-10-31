@@ -9,7 +9,7 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 | `project.json` | (not published) | Identifier `opendevtrack`, languages and themes; the runtime gets them from its configuration |
 | `navigation.json` | `navigation/main` | Areas and items of the side bar, with the permission each one requires |
 | `screens/*.json` | `screen/<id>` | One screen per file |
-| `datasources/*.json` | `datasources/<id>` | Data sources shared by screens (none yet) |
+| `datasources/*.json` | `datasources/<id>` | Data sources shared by screens: `projects`, `users` |
 | `themes/*.json` | `theme/<id>` | `odt-light` (the default) and `odt-dark`, with the palette of [brand/](../brand/README.md) |
 | `i18n/<lang>.json` | `messages/<lang>` | English and Italian texts, key → text; labels use `t('key', 'English default')` |
 
@@ -19,9 +19,12 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   `#F8FAFC`/`#0B1220`). The logos are the files of `brand/svg`, served next to the runtime under `odt-brand/`; the themes
   reference them, they are not copied here.
 - **Permissions**: an area, item or screen that needs one says so with `requires` (`odt.<resource>.<action>`, ADR-07).
+  Global permissions with `can()`; those of a project role with the `_perm` the back end puts on each row and form
+  (until authz-library A1).
 - **Texts**: every visible text goes through `t()` and has its key in both catalogues. The catalogues also carry the
   shell texts of the runtime (`app.*`): with the registry the runtime takes them from the project (request Q4).
-- **Validation**: `SchemaValidationTest` in the back end checks every document here with the validator of the registry.
+- **Validation**: `SchemaValidationTest` in the back end checks every document here with the validator of the registry;
+  `UiCataloguesTest` checks that every `t('key')` is in both catalogues.
 
 ## Publishing
 

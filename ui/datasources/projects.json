@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "1.0",
+  "datasources": "projects",
+  "description": "Projects of the workspace and their members (module project).",
+  "sources": {
+    "list": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects"
+    },
+    "get": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}"
+    },
+    "create": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects",
+      "body": "{{form}}"
+    },
+    "save": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/projects/{{params.key}}",
+      "body": "{{form}}"
+    },
+    "members": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/members"
+    },
+    "addMember": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{params.key}}/members",
+      "body": "{{form}}"
+    },
+    "changeRole": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/projects/{{params.key}}/members/{{username}}",
+      "body": "{{form}}"
+    },
+    "removeMember": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/projects/{{params.key}}/members/{{username}}"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0",
+  "datasources": "users",
+  "description": "Users of the workspace, for the pickers.",
+  "sources": {
+    "search": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/users",
+      "params": {
+        "q": "{{search}}"
+      }
+    }
+  }
+}

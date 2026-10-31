@@ -11,6 +11,19 @@ INSERT INTO app_permission (permission_code, description) VALUES
     ('odt.uidefinition.approve', 'Approve or reject screen definitions in the registry')
 ON CONFLICT (permission_code) DO NOTHING;
 
+-- Permissions held through a project role (module access, ProjectRole): registered here so that every odt.* code is in
+-- the catalogue, but granted per project by OpenDevTrack, not by a global role.
+INSERT INTO app_permission (permission_code, description) VALUES
+    ('odt.issue.browse', 'See the issues of a project'),
+    ('odt.issue.create', 'Create issues in a project'),
+    ('odt.issue.edit', 'Edit the issues of a project'),
+    ('odt.issue.transition', 'Move the issues of a project through their workflow'),
+    ('odt.issue.comment', 'Comment on the issues of a project'),
+    ('odt.issue.delete', 'Delete issues of a project'),
+    ('odt.project.edit', 'Edit the details of a project'),
+    ('odt.member.manage', 'Add and remove the members of a project and change their roles')
+ON CONFLICT (permission_code) DO NOTHING;
+
 INSERT INTO app_role (role_code, description) VALUES
     ('ODT_MEMBER', 'Member of the tenant: sees its projects and users'),
     ('ODT_PROJECT_CREATOR', 'Creates projects'),

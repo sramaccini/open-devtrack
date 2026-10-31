@@ -6,7 +6,7 @@ Quadrava and authz-library, and the ADRs say where.
 
 ## Status
 
-**31 October 2026 — phase F1 (skeleton, registry, ui/, CI) done.**
+**31 October 2026 — phase F1 (skeleton, registry, ui/, CI) done; F2 started with E1 Projects.**
 
 - Repository github.com/sramaccini/open-devtrack, branch `main`: licence MPL-2.0 with CLA, contribution rules and
   project rules as Quadrava (ADR-05). Decisions D1–D9 accepted as ADRs in `docs/`.
@@ -23,12 +23,16 @@ Quadrava and authz-library, and the ADRs say where.
   registry 23/23, tenant switch kept across logins, `ui/` served by the runtime 0.1.0 from the registry.
 - CI (`.github/workflows/ci.yml`), green on its first run: back end tests, then the e2e with the kits. It reads authz-library from GitHub
   Packages with the secret `AUTHZ_PACKAGES_TOKEN` (or the workflow token if the packages grant this repository access).
+- F2 E1 Projects: modules `project` (projects of the tenant, issue numbering), `access` (members and project roles
+  viewer/developer/admin, always one admin) and `identity` (users of the tenant for pickers); screens
+  `project-list`, `project-new`, `project-detail` with members. Project permissions reach the screens as `_perm`
+  until A1 (ADR-07). `ProjectApiTest` covers two tenants and users without the permissions.
 
 ## Requests to the dependencies
 
 In `docs/README.md`: Q2 (Quadrava 0.2.0 with its CLI), Q3 (favicon and title of the runtime image), Q4 (shell texts of
-the runtime built in), A1 (extension point for project permissions, F2), A2 (schema of the RBAC tables), A3 (Problem
-texts in English), A4 (bearer access for tools). Each is built in its own repository.
+the runtime built in), A1 (extension point for project permissions; `_perm` meanwhile), A2 (schema of the RBAC tables), A3 (Problem
+texts in English), A4 (bearer access for tools), A5 (read-only list of the tenant users). Each is built in its own repository.
 
 ## Environment of this machine
 
@@ -49,8 +53,8 @@ texts in English), A4 (bearer access for tools). Each is built in its own reposi
 
 ## Next steps
 
-1. F2 (per the plan): the `project` and `access` modules with the first real screens of `ui/`, project permissions
-   through authz-library A1.
+1. F2 (per the plan): E2 Issues, E3 Workflow (CEL guards), E4 Collaboration (comments, changelog), towards gate M1.
+   Open question for review: keep project roles, or only tenant-wide roles from the catalogue.
 2. Adopt Quadrava 0.2.0 when released: `quadrava validate` and `publish` in CI instead of `tools/publish-ui.mjs`,
    schemas refreshed with `backend/tools/sync-quadrava-schemas.sh`, the kits from the release tag.
 3. Deployment: publish `ui/` to `testing`/`production` with an author and an approver token.

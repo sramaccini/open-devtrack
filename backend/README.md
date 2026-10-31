@@ -53,3 +53,16 @@ access token of a client listed in `odt.security.bearer.clients` (`platform/Bear
 - `odt.uidefinition.approve` (role `ODT_UI_APPROVER`): approve or reject, never a version of one's own.
 - `odt.uiregistry.protected-environments` (default `testing,production`): only approved versions are published there.
 - Any signed-in user reads what is published.
+
+## Projects and members (`project`, `access`, `identity`)
+
+Projects belong to the tenant of the session (`odt_project`, ADR-09): another tenant gets 404, and the key is unique per
+tenant. Each project numbers its issues (`Projects.nextIssueNumber`). The module `access` keeps the members and their
+project role (`odt_access`, `ProjectRole`): viewer browses, developer also creates, edits, transitions and comments,
+admin also deletes issues, edits the project and manages its members; a project always keeps one admin. The codes are
+in the catalogue (ADR-07) and reach the screens as `_perm` until authz-library A1. `identity` lists the users of the
+tenant for the pickers (`GET /api/users`, temporary until A5).
+
+- `odt.project.browse`: list and read the projects of the tenant and their members.
+- `odt.project.create` (role `ODT_PROJECT_CREATOR`): create one; the creator becomes its lead and admin.
+- `odt.user.browse`: search the users of the tenant.

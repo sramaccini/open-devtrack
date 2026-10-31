@@ -46,4 +46,8 @@ digits, three parts separated by dots, `CHECK (permission_code ~ '^[a-z0-9]+\.[a
   project. Request to authz-library (**A1**, in its repository): an optional bean, for example a
   `PermissionContributor`, that adds permissions for the session and decides the checks with a `resource`; without
   it, today's behaviour. Needed by F2 (project roles); F1 only needs the global permissions.
+- **Until A1** (F2): the project roles of the module `access` (`ProjectRole`: viewer, developer, admin, each with
+  catalogue codes) are checked by the back end on every request, and reach the screens as `_perm` on each row and form
+  (for example `_perm.edit` of a project), which Quadrava already reads. `can()` in the screens stays for the global
+  permissions.
 - The Definition of Done keeps its check «permission defined and tried with a user without it».

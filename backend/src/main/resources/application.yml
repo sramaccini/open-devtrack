@@ -40,10 +40,11 @@ spring:
         # indexed: index by user name, used by the revocation of sessions
         repository-type: indexed
   flyway:
-    # One schema and one folder per module (ADR-04); the history table is in odt. The RBAC schema has its own
+    # One schema and one folder per module (ADR-04), all under db/odt with one history table in odt: the version
+    # numbers are global across the folders (V1 uiregistry, V2 access, V3 project, …). The RBAC schema has its own
     # Flyway and history, run by authz-rbac.
-    schemas: odt,odt_uiregistry
-    locations: classpath:db/odt/uiregistry
+    schemas: odt,odt_uiregistry,odt_access,odt_project
+    locations: classpath:db/odt
   jpa:
     open-in-view: false
     hibernate:

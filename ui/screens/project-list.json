@@ -3,18 +3,85 @@
   "screen": "project-list",
   "title": "{{ t('projects.title', 'Projects') }}",
   "requires": "odt.project.browse",
+  "dataSources": {
+    "projects": {
+      "ref": "projects/list"
+    }
+  },
   "components": [
     {
-      "id": "title",
-      "type": "text",
-      "style": "heading",
-      "text": "{{ t('projects.title', 'Projects') }}"
+      "id": "toolbar",
+      "type": "box",
+      "direction": "row",
+        "align": "center",
+      "components": [
+        {
+          "id": "title",
+          "type": "text",
+          "style": "heading",
+          "grow": 1,
+          "text": "{{ t('projects.title', 'Projects') }}"
+        },
+        {
+          "id": "btn-new",
+          "type": "button",
+          "label": "{{ t('projects.new', 'New project') }}",
+          "visibleIf": "{{can('odt.project.create')}}",
+          "onClick": [
+            {
+              "navigate": "project-new"
+            }
+          ]
+        }
+      ]
     },
     {
-      "id": "empty",
-      "type": "alert",
-      "kind": "info",
-      "text": "{{ t('projects.coming', 'The projects of your workspace will be listed here.') }}"
+      "id": "project-table",
+      "type": "table",
+      "source": "projects",
+      "columns": [
+        {
+          "field": "key",
+          "label": "{{ t('projects.key', 'Key') }}",
+          "sortable": true,
+          "onClick": [
+            {
+              "navigate": "project-detail",
+              "params": {
+                "key": "{{row.key}}"
+              }
+            }
+          ]
+        },
+        {
+          "field": "name",
+          "label": "{{ t('projects.name', 'Name') }}",
+          "sortable": true
+        },
+        {
+          "field": "lead",
+          "label": "{{ t('projects.lead', 'Lead') }}"
+        },
+        {
+          "field": "role",
+          "label": "{{ t('projects.my_role', 'My role') }}",
+          "valueKey": "values.role"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-open",
+          "label": "{{ t('common.open', 'Open') }}",
+          "onClick": [
+            {
+              "navigate": "project-detail",
+              "params": {
+                "key": "{{row.key}}"
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }

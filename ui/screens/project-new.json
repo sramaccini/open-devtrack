@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "project-new",
+  "title": "{{ t('projects.new', 'New project') }}",
+  "requires": "odt.project.create",
+  "dataSources": {
+    "create": {
+      "ref": "projects/create"
+    }
+  },
+  "components": [
+    {
+      "id": "project-form",
+      "type": "form",
+      "columns": 2,
+      "fields": [
+        {
+          "name": "key",
+          "type": "text",
+          "label": "{{ t('projects.key', 'Key') }}",
+          "required": true,
+          "transform": [
+            "trim",
+            "uppercase"
+          ],
+          "pattern": "[A-Z][A-Z0-9]{1,9}",
+          "tooltip": "{{ t('projects.key_help', '2 to 10 capital letters or digits, starting with a letter: it prefixes the issues (ODT-42)') }}",
+          "messages": {
+            "pattern": "{{ t('projects.key_invalid', '2 to 10 capital letters or digits, starting with a letter') }}"
+          }
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "label": "{{ t('projects.name', 'Name') }}",
+          "required": true,
+          "maxLength": 100
+        },
+        {
+          "name": "description",
+          "type": "textarea",
+          "label": "{{ t('projects.description', 'Description') }}",
+          "maxLength": 2000,
+          "span": 2
+        }
+      ],
+      "actions": [
+        {
+          "id": "btn-create",
+          "label": "{{ t('projects.create', 'Create project') }}",
+          "onClick": [
+            {
+              "call": "create",
+              "as": "created",
+              "onError": [
+                {
+                  "if": "{{error.status == 409}}",
+                  "then": [
+                    {
+                      "toast": "{{ t('projects.key_taken', 'A project with this key already exists') }}"
+                    }
+                  ],
+                  "else": [
+                    {
+                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "toast": "{{ t('projects.created', 'Project created') }}"
+            },
+            {
+              "navigate": "project-detail",
+              "params": {
+                "key": "{{created.key}}"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

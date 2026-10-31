@@ -1,0 +1,299 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "project-detail",
+  "title": "{{ t('projects.project', 'Project') }}",
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "project": {
+      "ref": "projects/get"
+    },
+    "save": {
+      "ref": "projects/save"
+    },
+    "members": {
+      "ref": "projects/members"
+    },
+    "addMember": {
+      "ref": "projects/addMember"
+    },
+    "changeRole": {
+      "ref": "projects/changeRole"
+    },
+    "removeMember": {
+      "ref": "projects/removeMember"
+    },
+    "users": {
+      "ref": "users/search"
+    }
+  },
+  "components": [
+    {
+      "id": "project-form",
+      "type": "form",
+      "source": "project",
+      "columns": 2,
+      "fields": [
+        {
+          "name": "key",
+          "type": "text",
+          "label": "{{ t('projects.key', 'Key') }}",
+          "readOnlyIf": "{{true}}"
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "label": "{{ t('projects.name', 'Name') }}",
+          "required": true,
+          "maxLength": 100,
+          "readOnlyIf": "{{!form._perm.edit}}"
+        },
+        {
+          "name": "lead",
+          "type": "text",
+          "label": "{{ t('projects.lead', 'Lead') }}",
+          "required": true,
+          "readOnlyIf": "{{!form._perm.edit}}",
+          "tooltip": "{{ t('projects.lead_help', 'A member of the project') }}"
+        },
+        {
+          "name": "role",
+          "type": "select",
+          "label": "{{ t('projects.my_role', 'My role') }}",
+          "options": [
+            "viewer",
+            "developer",
+            "admin"
+          ],
+          "optionKey": "values.role",
+          "readOnlyIf": "{{true}}"
+        },
+        {
+          "name": "description",
+          "type": "textarea",
+          "label": "{{ t('projects.description', 'Description') }}",
+          "maxLength": 2000,
+          "span": 2,
+          "readOnlyIf": "{{!form._perm.edit}}"
+        }
+      ],
+      "actions": [
+        {
+          "id": "btn-save",
+          "label": "{{ t('common.save', 'Save') }}",
+          "visibleIf": "{{form._perm.edit}}",
+          "onClick": [
+            {
+              "call": "save",
+              "onError": [
+                {
+                  "if": "{{error.status == 412}}",
+                  "then": [
+                    {
+                      "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                    }
+                  ],
+                  "else": [
+                    {
+                      "if": "{{error.status == 400}}",
+                      "then": [
+                        {
+                          "toast": "{{ t('projects.lead_not_member', 'Check the fields: the lead must be a member of the project') }}"
+                        }
+                      ],
+                      "else": [
+                        {
+                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "refresh": "project"
+            },
+            {
+              "toast": "{{ t('common.saved', 'Saved') }}"
+            }
+          ]
+        },
+        {
+          "id": "btn-add-member",
+          "label": "{{ t('projects.add_member', 'Add member') }}",
+          "visibleIf": "{{form._perm.manageMembers}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('projects.add_member', 'Add member') }}",
+                "submitLabel": "{{ t('projects.add', 'Add') }}",
+                "initial": {
+                  "role": "developer"
+                },
+                "fields": [
+                  {
+                    "name": "username",
+                    "type": "lookup",
+                    "label": "{{ t('projects.user', 'User') }}",
+                    "required": true,
+                    "lookup": {
+                      "source": "users",
+                      "valueField": "username",
+                      "labelField": "username",
+                      "minChars": 1
+                    }
+                  },
+                  {
+                    "name": "role",
+                    "type": "select",
+                    "label": "{{ t('projects.role', 'Role') }}",
+                    "options": [
+                      "viewer",
+                      "developer",
+                      "admin"
+                    ],
+                    "optionKey": "values.role",
+                    "required": true
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "addMember",
+                    "onError": [
+                      {
+                        "toast": "{{ t('projects.member_failed', 'The member could not be added') }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "members"
+            },
+            {
+              "toast": "{{ t('projects.member_added', 'Member added') }}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "members-title",
+      "type": "text",
+      "style": "heading",
+      "text": "{{ t('projects.members', 'Members') }}"
+    },
+    {
+      "id": "member-table",
+      "type": "table",
+      "source": "members",
+      "columns": [
+        {
+          "field": "username",
+          "label": "{{ t('projects.user', 'User') }}"
+        },
+        {
+          "field": "role",
+          "label": "{{ t('projects.role', 'Role') }}",
+          "valueKey": "values.role"
+        },
+        {
+          "field": "grantedBy",
+          "label": "{{ t('projects.granted_by', 'Added by') }}"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-change-role",
+          "label": "{{ t('projects.change_role', 'Change role') }}",
+          "visibleIf": "{{row._perm.change}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('projects.change_role', 'Change role') }}",
+                "initial": {
+                  "role": "{{row.role}}"
+                },
+                "fields": [
+                  {
+                    "name": "role",
+                    "type": "select",
+                    "label": "{{ t('projects.role', 'Role') }}",
+                    "options": [
+                      "viewer",
+                      "developer",
+                      "admin"
+                    ],
+                    "optionKey": "values.role",
+                    "required": true
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "changeRole",
+                    "args": {
+                      "username": "{{row.username}}"
+                    },
+                    "onError": [
+                      {
+                        "if": "{{error.status == 409}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('projects.last_admin', 'A project keeps at least one admin') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "members"
+            }
+          ]
+        },
+        {
+          "id": "btn-remove",
+          "label": "{{ t('projects.remove', 'Remove') }}",
+          "visibleIf": "{{row._perm.remove}}",
+          "onClick": [
+            {
+              "confirm": "{{ t('projects.remove_confirm', 'Remove {name} from the project?', {'name': row.username}) }}"
+            },
+            {
+              "call": "removeMember",
+              "args": {
+                "username": "{{row.username}}"
+              },
+              "onError": [
+                {
+                  "if": "{{error.status == 409}}",
+                  "then": [
+                    {
+                      "toast": "{{ t('projects.last_admin', 'A project keeps at least one admin') }}"
+                    }
+                  ],
+                  "else": [
+                    {
+                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "refresh": "members"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
