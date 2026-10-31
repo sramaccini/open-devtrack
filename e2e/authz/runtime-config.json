@@ -1,0 +1,4 @@
+{
+  "definitions": { "source": "examples" },
+  "services": { "source": "bff", "appId": "opendevtrack", "tenantSwitchUrl": "/bff/tenant" }
+}

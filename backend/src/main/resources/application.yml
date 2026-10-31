@@ -1,0 +1,80 @@
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+  # Behind the Quadrava runtime image (QUADRAVA_BFF_URL) or another trusted proxy: X-Forwarded-Host and
+  # X-Forwarded-Proto give the public address to the login callback and to the check of the return page.
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      # Sliding inactivity timeout; the absolute lifetime is authz.bff.session.absolute-timeout
+      timeout: 30m
+      cookie:
+        name: SESSION_ID
+        http-only: true
+        secure: true
+        # Lax, not Strict: the cookie must come back with the return from the identity provider (a cross-site
+        # navigation). Writes stay protected by the CSRF token and the Origin check of the BFF.
+        same-site: lax
+
+spring:
+  application:
+    name: opendevtrack
+  mvc:
+    async:
+      # Event streams (live data sources of Quadrava): no time limit
+      request-timeout: -1
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/opendevtrack}
+    username: ${DB_USER:opendevtrack}
+    password: ${DB_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 500ms
+  session:
+    data:
+      redis:
+        namespace: opendevtrack
+        # indexed: index by user name, used by the revocation of sessions
+        repository-type: indexed
+  flyway:
+    # The modules of OpenDevTrack have no migrations yet; the RBAC schema is migrated by authz-rbac
+    enabled: false
+  security:
+    oauth2:
+      client:
+        registration:
+          iam:
+            provider: iam
+            client-id: ${IAM_CLIENT_ID:opendevtrack-bff}
+            client-secret: ${IAM_CLIENT_SECRET}
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid,profile,email
+        provider:
+          iam:
+            issuer-uri: ${IAM_ISSUER_URI:http://localhost:8180/realms/opendevtrack}
+            user-name-attribute: preferred_username
+
+authz:
+  rbac:
+    flyway:
+      # The schema of authz-library, then the permission catalogue of OpenDevTrack (ADR-07)
+      locations: classpath:db/authz/migration,classpath:db/authz/odt
+  bff:
+    frontend:
+      login-success-url: ${FRONTEND_URL:http://localhost:8090}/
+      login-failure-url: ${FRONTEND_URL:http://localhost:8090}/login-error
+      post-logout-url: ${FRONTEND_URL:http://localhost:8090}/
+      allowed-origins:
+        - ${FRONTEND_URL:http://localhost:8090}
+    session:
+      absolute-timeout: 10h
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

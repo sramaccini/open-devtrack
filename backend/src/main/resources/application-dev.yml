@@ -1,0 +1,13 @@
+# Local development: development tenants and users (aligned with the Keycloak realm of e2e/authz) and the session
+# cookie also on http.
+server:
+  servlet:
+    session:
+      cookie:
+        secure: false
+authz:
+  rbac:
+    flyway:
+      locations: classpath:db/authz/migration,classpath:db/authz/odt,classpath:db/authz/dev
+      # The development data have versions above the schema of authz-library: allowed only here
+      out-of-order: true
