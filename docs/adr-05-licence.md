@@ -11,8 +11,8 @@ commercial editions or services later.
 ## Decision
 
 **The same licence and contribution rules as Quadrava**: MPL-2.0 ([LICENSE](../LICENSE)), contributions under the
-[CLA](../CLA.md) accepted in the pull request ([CONTRIBUTING.md](../CONTRIBUTING.md)), the name protected by
-[TRADEMARKS.md](../TRADEMARKS.md). The repository is github.com/sramaccini/open-devtrack.
+[CLA](../CLA.md) accepted in the pull request ([CONTRIBUTING.md](../CONTRIBUTING.md)), the name and the logo (the
+files in `brand/`, outside the MPL) protected by [TRADEMARKS.md](../TRADEMARKS.md). The repository is github.com/sramaccini/open-devtrack.
 
 ## Alternatives considered
 
