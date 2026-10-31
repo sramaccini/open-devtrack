@@ -50,4 +50,7 @@ digits, three parts separated by dots, `CHECK (permission_code ~ '^[a-z0-9]+\.[a
   catalogue codes) are checked by the back end on every request, and reach the screens as `_perm` on each row and form
   (for example `_perm.edit` of a project), which Quadrava already reads. `can()` in the screens stays for the global
   permissions.
+- **Admin of the tenant** (accepted 1 November 2026): the global permission `odt.project.admin` (role `ODT_ADMIN`)
+  counts as the role admin in every project of the tenant, member or not, so no project is left without someone who
+  manages it.
 - The Definition of Done keeps its check «permission defined and tried with a user without it».

@@ -1,6 +1,6 @@
 # ADR-10: Workflows and their CEL guards
 
-Status: Proposed (31 October 2026) — needed by F2 E3; not applied until accepted
+Status: Accepted (1 November 2026), with two simplifications of the proposal (below) — F2 E3
 
 ## Context
 
@@ -16,9 +16,10 @@ The screens already speak CEL: Quadrava evaluates `visibleIf`, `readOnlyIf` and 
 ## Decision
 
 1. **Data** (`odt_workflow`, Flyway): `workflow (id, tenant_id, project_id, name)`, `status (workflow_id, code, category,
-   position)` with the category one of `todo`, `in_progress`, `done` (for boards and reports), `transition (id,
-   workflow_id, from_status, to_status, name, guard_cel, required_fields)`, and `workflow_scheme (project_id, issue_type,
-   workflow_id)`. A transition with no `from_status` is allowed from every status.
+   position)` with the category one of `todo`, `in_progress`, `done` (for boards and reports), and `transition (id,
+   workflow_id, code, from_status, to_status, guard_cel)`. A transition with no `from_status` is allowed from every
+   status. **One workflow per project**: the schemes by issue type (`workflow_scheme (project_id, issue_type,
+   workflow_id)`) come when a project needs them; the tables already allow several workflows per project.
 2. **Default workflow**: when a project is created, the module `workflow` (listening to a `ProjectCreated` event of
    `project`) gives it a copy of the built-in one: To do → In progress → Done, Done → To do (reopen), with no guard. Each
    project then changes its own copy; a template shared by the tenant comes later, if needed.
@@ -29,11 +30,17 @@ The screens already speak CEL: Quadrava evaluates `visibleIf`, `readOnlyIf` and 
    error is a 400 with the position) and cached compiled; it evaluates with a time limit and no I/O.
 4. **API**: `GET /api/issues/{key}/transitions` gives the transitions allowed now (the guard is evaluated for each, so
    the screens show only what can be done, as `_perm`); `POST /api/issues/{key}/transitions {transition, version}` runs
-   one: `odt.issue.transition` in the project, the guard true, the `required_fields` filled, then the status changes in
-   the transaction of the module `issue`, which publishes `IssueChanged` (field `status`) for the changelog.
+   one: `odt.issue.transition` in the project and the guard true, then the status changes in the transaction of the
+   module `issue`, which publishes `IssueChanged` (field `status`) for the changelog.
 5. `issue` asks `workflow` (its public API, `Workflows.check(…)`) and keeps the status; `workflow` does not know the
    entity of the issue, only the map it receives. No cycle: `workflow` depends on `project` and `access`, `issue` on
    `workflow`.
+
+## Simplifications at the acceptance
+
+- No schemes by issue type in the first version: one workflow per project.
+- No `required_fields` on the transitions: a guard says the same (`issue.assignee != null`), so there is one mechanism
+  to explain and test.
 
 ## Alternatives considered
 
@@ -45,8 +52,9 @@ The screens already speak CEL: Quadrava evaluates `visibleIf`, `readOnlyIf` and 
 
 ## Consequences
 
-- New dependency `dev.cel:cel` (with protobuf and Guava, which it brings). It is pre-1.0: the version is pinned and the
-  guards are covered by tests of the expressions the default workflow and the documentation use.
+- New dependency `dev.cel:cel` 0.14.0 (with protobuf and Guava, which it brings). It is pre-1.0: the version is pinned,
+  raised only when needed, and the guards are covered by tests of the expressions the default workflow and the
+  documentation use.
 - The screen of an issue shows one button per transition allowed (a data source over `GET …/transitions`); the board
   (F3, ADR-06) calls the same `POST` when a card moves to another column.
 - Editing workflows (statuses, transitions, guards) is a screen of the project admin, after the transitions themselves.
