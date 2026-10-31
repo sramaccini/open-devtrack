@@ -25,6 +25,7 @@ Found while writing the ADRs; each is built in its own repository, optional for 
 | Q2 | Quadrava | Release 0.2.0 with the CLI `quadrava validate` and `publish` (ADR-01, ADR-03) | Start of F1 |
 | Q3 | Quadrava | Favicon and page title of the runtime image set by the application (today the icons of the image are mounted over, and the tab reads «Quadrava») | F5 |
 | Q4 | Quadrava | Shell texts of the runtime (`app.theme`, `app.language`, errors) built in, as with the examples, instead of required in the catalogue of every project | F5 |
+| Q5 | Quadrava | A field for a free list of short texts (tags), for the labels of the issues: `multiselect` only takes fixed `options` (the API has the labels, the screens do not show them yet) | F2 |
 | A1 | authz-library | Extension point for permissions that depend on a resource (ADR-07; until then `_perm` on rows and forms) | F2 |
 | A2 | authz-library | A configurable schema for the RBAC tables (today they go into `public`, next to the `odt_*` schemas of the modules) | F1 |
 | A3 | authz-library | Problem titles and details in English (today Italian, for example «Troppi tentativi di accesso») | F5 |

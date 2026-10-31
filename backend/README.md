@@ -66,3 +66,11 @@ tenant for the pickers (`GET /api/users`, temporary until A5).
 - `odt.project.browse`: list and read the projects of the tenant and their members.
 - `odt.project.create` (role `ODT_PROJECT_CREATOR`): create one; the creator becomes its lead and admin.
 - `odt.user.browse`: search the users of the tenant.
+
+## Issues (`issue`)
+
+Issues of a project (`odt_issue`), keyed by the project and their number (`ODT-42`): type, summary, description
+(restricted Markdown), priority, assignee (a member), reporter, labels. Only the members of the project see them;
+developers create and edit them, admins delete them; edits carry the version read and get 412 if it changed. The status
+is `todo` until the workflows of E3 add the transitions. `GET /api/projects/{key}/issues` takes `status`,
+`assignee` (`me` for the user) and `q` (text of the summary).

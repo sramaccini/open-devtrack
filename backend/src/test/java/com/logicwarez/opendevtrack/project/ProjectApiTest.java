@@ -176,6 +176,9 @@ class ProjectApiTest {
                 .andExpect(status().isBadRequest());
         mvc.perform(as(post("/api/projects/ODT/members"), mario).content("{\"username\":\"paola\",\"role\":\"owner\"}"))
                 .andExpect(status().isBadRequest());
+        mvc.perform(as(get("/api/projects/ODT/members").param("q", "LU"), mario))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].username").value("luisa"));
         // A developer does not manage members.
         mvc.perform(as(post("/api/projects/ODT/members"), luisa).content("{\"username\":\"paola\",\"role\":\"viewer\"}"))
                 .andExpect(status().isForbidden());

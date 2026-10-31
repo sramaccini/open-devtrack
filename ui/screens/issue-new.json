@@ -1,0 +1,118 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "issue-new",
+  "title": "{{ t('issues.new', 'New issue') }}",
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "create": {
+      "ref": "issues/create"
+    },
+    "assignees": {
+      "ref": "issues/assignees"
+    }
+  },
+  "components": [
+    {
+      "id": "issue-form",
+      "type": "form",
+      "columns": 2,
+      "initial": {
+        "type": "task",
+        "priority": "medium"
+      },
+      "fields": [
+        {
+          "name": "summary",
+          "type": "text",
+          "label": "{{ t('issues.summary', 'Summary') }}",
+          "required": true,
+          "maxLength": 255,
+          "span": 2
+        },
+        {
+          "name": "type",
+          "type": "select",
+          "label": "{{ t('issues.type', 'Type') }}",
+          "options": [
+            "task",
+            "bug",
+            "story",
+            "epic"
+          ],
+          "optionKey": "values.issue_type",
+          "required": true
+        },
+        {
+          "name": "priority",
+          "type": "select",
+          "label": "{{ t('issues.priority', 'Priority') }}",
+          "options": [
+            "lowest",
+            "low",
+            "medium",
+            "high",
+            "highest"
+          ],
+          "optionKey": "values.priority",
+          "required": true
+        },
+        {
+          "name": "assignee",
+          "type": "lookup",
+          "label": "{{ t('issues.assignee', 'Assignee') }}",
+          "tooltip": "{{ t('issues.assignee_help', 'A member of the project') }}",
+          "lookup": {
+            "source": "assignees",
+            "valueField": "username",
+            "labelField": "username",
+            "minChars": 0
+          }
+        },
+        {
+          "name": "description",
+          "type": "richtext",
+          "label": "{{ t('issues.description', 'Description') }}",
+          "span": 2,
+          "rows": 8
+        }
+      ],
+      "actions": [
+        {
+          "id": "btn-create",
+          "label": "{{ t('issues.create', 'Create issue') }}",
+          "onClick": [
+            {
+              "call": "create",
+              "as": "created",
+              "onError": [
+                {
+                  "if": "{{error.status == 403}}",
+                  "then": [
+                    {
+                      "toast": "{{ t('issues.cannot_create', 'Only a developer or an admin of the project creates issues') }}"
+                    }
+                  ],
+                  "else": [
+                    {
+                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "toast": "{{ t('issues.created', 'Issue created') }}"
+            },
+            {
+              "navigate": "issue-detail",
+              "params": {
+                "key": "{{params.key}}",
+                "issue": "{{created.key}}"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

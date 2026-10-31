@@ -175,6 +175,18 @@
               "toast": "{{ t('projects.member_added', 'Member added') }}"
             }
           ]
+        },
+        {
+          "id": "btn-issues",
+          "label": "{{ t('issues.title', 'Issues') }}",
+          "onClick": [
+            {
+              "navigate": "issue-list",
+              "params": {
+                "key": "{{form.key}}"
+              }
+            }
+          ]
         }
       ]
     },

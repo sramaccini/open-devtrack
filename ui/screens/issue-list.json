@@ -1,0 +1,137 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "issue-list",
+  "title": "{{ t('issues.title', 'Issues') }}",
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "project": {
+      "ref": "projects/get"
+    },
+    "issues": {
+      "ref": "issues/list"
+    }
+  },
+  "components": [
+    {
+      "id": "project-summary",
+      "type": "form",
+      "source": "project",
+      "columns": 3,
+      "fields": [
+        {
+          "name": "key",
+          "type": "text",
+          "label": "{{ t('projects.key', 'Key') }}",
+          "readOnlyIf": "{{true}}"
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "label": "{{ t('projects.name', 'Name') }}",
+          "readOnlyIf": "{{true}}"
+        },
+        {
+          "name": "role",
+          "type": "select",
+          "label": "{{ t('projects.my_role', 'My role') }}",
+          "options": [
+            "viewer",
+            "developer",
+            "admin"
+          ],
+          "optionKey": "values.role",
+          "readOnlyIf": "{{true}}"
+        }
+      ],
+      "actions": [
+        {
+          "id": "btn-new-issue",
+          "label": "{{ t('issues.new', 'New issue') }}",
+          "visibleIf": "{{form._perm.createIssue}}",
+          "onClick": [
+            {
+              "navigate": "issue-new",
+              "params": {
+                "key": "{{form.key}}"
+              }
+            }
+          ]
+        },
+        {
+          "id": "btn-project",
+          "label": "{{ t('issues.project_settings', 'Project and members') }}",
+          "onClick": [
+            {
+              "navigate": "project-detail",
+              "params": {
+                "key": "{{form.key}}"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "issue-table",
+      "type": "table",
+      "source": "issues",
+      "columns": [
+        {
+          "field": "key",
+          "label": "{{ t('issues.key', 'Key') }}",
+          "sortable": true,
+          "onClick": [
+            {
+              "navigate": "issue-detail",
+              "params": {
+                "key": "{{params.key}}",
+                "issue": "{{row.key}}"
+              }
+            }
+          ]
+        },
+        {
+          "field": "type",
+          "label": "{{ t('issues.type', 'Type') }}",
+          "valueKey": "values.issue_type"
+        },
+        {
+          "field": "summary",
+          "label": "{{ t('issues.summary', 'Summary') }}",
+          "sortable": true
+        },
+        {
+          "field": "status",
+          "label": "{{ t('issues.status', 'Status') }}",
+          "format": "badge",
+          "badges": {
+            "todo": "neutral",
+            "in_progress": "primary",
+            "done": "success"
+          },
+          "valueKey": "values.status"
+        },
+        {
+          "field": "priority",
+          "label": "{{ t('issues.priority', 'Priority') }}",
+          "format": "badge",
+          "badges": {
+            "high": "danger",
+            "highest": "danger"
+          },
+          "valueKey": "values.priority"
+        },
+        {
+          "field": "assignee",
+          "label": "{{ t('issues.assignee', 'Assignee') }}"
+        },
+        {
+          "field": "updatedAt",
+          "label": "{{ t('issues.updated', 'Updated') }}",
+          "format": "datetime",
+          "sortable": true
+        }
+      ]
+    }
+  ]
+}

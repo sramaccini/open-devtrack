@@ -13,7 +13,7 @@
       "id": "toolbar",
       "type": "box",
       "direction": "row",
-        "align": "center",
+      "align": "center",
       "components": [
         {
           "id": "title",
@@ -46,7 +46,7 @@
           "sortable": true,
           "onClick": [
             {
-              "navigate": "project-detail",
+              "navigate": "issue-list",
               "params": {
                 "key": "{{row.key}}"
               }
@@ -69,6 +69,18 @@
         }
       ],
       "rowActions": [
+        {
+          "id": "btn-issues",
+          "label": "{{ t('issues.title', 'Issues') }}",
+          "onClick": [
+            {
+              "navigate": "issue-list",
+              "params": {
+                "key": "{{row.key}}"
+              }
+            }
+          ]
+        },
         {
           "id": "btn-open",
           "label": "{{ t('common.open', 'Open') }}",

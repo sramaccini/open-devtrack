@@ -18,6 +18,7 @@ import com.logicwarez.opendevtrack.project.ProjectApi.MemberView;
 import com.logicwarez.opendevtrack.project.ProjectApi.ProjectView;
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -131,11 +133,15 @@ class ProjectController {
         return ResponseEntity.ok(view(project, access.role(project.id(), user.username())));
     }
 
+    /** Members of the project; {@code q} keeps those whose name contains it (the pickers of assignees). */
     @GetMapping("/api/projects/{key}/members")
-    ResponseEntity<?> members(@PathVariable String key) {
+    ResponseEntity<?> members(@PathVariable String key, @RequestParam(required = false) String q) {
+        String text = q == null ? "" : q.strip().toLowerCase(Locale.ROOT);
         return find(key).<ResponseEntity<?>>map(p -> {
             boolean manage = can(p, "odt.member.manage");
-            return ResponseEntity.ok(access.members(p.id()).stream().map(m -> memberView(m, manage)).toList());
+            return ResponseEntity.ok(access.members(p.id()).stream()
+                    .filter(m -> m.username().toLowerCase(Locale.ROOT).contains(text))
+                    .map(m -> memberView(m, manage)).toList());
         }).orElseGet(() -> Problems.notFound(NOT_FOUND));
     }
 

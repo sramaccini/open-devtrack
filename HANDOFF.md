@@ -27,11 +27,14 @@ Quadrava and authz-library, and the ADRs say where.
   viewer/developer/admin, always one admin) and `identity` (users of the tenant for pickers); screens
   `project-list`, `project-new`, `project-detail` with members. Project permissions reach the screens as `_perm`
   until A1 (ADR-07). `ProjectApiTest` covers two tenants and users without the permissions.
+- F2 E2 Issues (first slice): module `issue` with type, priority, summary, Markdown description, assignee, labels and
+  numbering per project; screens `issue-list`, `issue-new`, `issue-detail`. Labels are in the API only (request Q5);
+  the status stays `todo` until E3.
 
 ## Requests to the dependencies
 
 In `docs/README.md`: Q2 (Quadrava 0.2.0 with its CLI), Q3 (favicon and title of the runtime image), Q4 (shell texts of
-the runtime built in), A1 (extension point for project permissions; `_perm` meanwhile), A2 (schema of the RBAC tables), A3 (Problem
+the runtime built in), Q5 (a tags field), A1 (extension point for project permissions; `_perm` meanwhile), A2 (schema of the RBAC tables), A3 (Problem
 texts in English), A4 (bearer access for tools), A5 (read-only list of the tenant users). Each is built in its own repository.
 
 ## Environment of this machine
@@ -53,7 +56,7 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F2 (per the plan): E2 Issues, E3 Workflow (CEL guards), E4 Collaboration (comments, changelog), towards gate M1.
+1. F2 (per the plan): the rest of E2 (links, watchers, custom fields), E3 Workflow (CEL guards), E4 Collaboration (comments, changelog), towards gate M1.
    Open question for review: keep project roles, or only tenant-wide roles from the catalogue.
 2. Adopt Quadrava 0.2.0 when released: `quadrava validate` and `publish` in CI instead of `tools/publish-ui.mjs`,
    schemas refreshed with `backend/tools/sync-quadrava-schemas.sh`, the kits from the release tag.

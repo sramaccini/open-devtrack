@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0",
+  "datasources": "issues",
+  "description": "Issues of a project (module issue) and the members who can be assigned.",
+  "sources": {
+    "list": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/issues"
+    },
+    "create": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{params.key}}/issues",
+      "body": "{{form}}"
+    },
+    "get": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/issues/{{params.issue}}"
+    },
+    "save": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/issues/{{params.issue}}",
+      "body": "{{form}}"
+    },
+    "remove": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/issues/{{params.issue}}"
+    },
+    "assignees": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/members",
+      "params": {
+        "q": "{{search}}"
+      }
+    }
+  }
+}
