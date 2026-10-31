@@ -8,6 +8,6 @@ file, you can obtain one at https://mozilla.org/MPL/2.0/.
 The OpenDevTrack name is not covered by the MPL: see TRADEMARKS.md.
 
 OpenDevTrack is built on third-party software under their own licences, among
-them Quadrava (MPL-2.0), ms-authz (com.logicwarez.authz), Spring Boot and
+them Quadrava (MPL-2.0), authz-library (com.logicwarez.authz), Spring Boot and
 Spring Modulith (Apache-2.0), PostgreSQL (PostgreSQL License), Redis and
 Keycloak (Apache-2.0). The full list is added with the first release.

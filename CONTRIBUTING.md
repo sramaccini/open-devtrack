@@ -18,5 +18,5 @@ If you contribute on behalf of your employer, make sure you are allowed to, or a
 - Everything is in English: code, comments, tests, documentation, commit messages. Italian exists only as a translation catalogue.
 - One change per pull request, with its tests and documentation; Conventional Commits for the messages.
 - Run the checks of the project rules before opening the pull request; CI repeats them.
-- What OpenDevTrack misses in Quadrava or in ms-authz is added there, in their own repositories, not here.
+- What OpenDevTrack misses in Quadrava or in authz-library is added there, in their own repositories, not here.
 - Report security problems privately, not in a public issue: see [SECURITY.md](SECURITY.md).

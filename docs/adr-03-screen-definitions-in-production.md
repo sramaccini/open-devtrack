@@ -33,7 +33,7 @@ Proposed details:
   module, with its MPL-2.0 headers and a note of the Quadrava commit it comes from, then belongs to OpenDevTrack. Same
   licence and same author: nothing to clear.
 - **What changes from the reference**: versions stored in PostgreSQL (schema `odt_uiregistry`, one Flyway folder)
-  instead of files or memory; security from the ms-authz session and `odt.uidefinition.*` permissions instead of a
+  instead of files or memory; security from the authz-library session and `odt.uidefinition.*` permissions instead of a
   JWT resource server and realm roles; the approver never the author, as in the reference; Java 25 and the module
   rules of Spring Modulith.
 - **Proven by the kit**: `conformance:registry` of the Quadrava version pinned in ADR-01 runs in CI against the module.
@@ -51,7 +51,7 @@ Proposed details:
 
 - One more module in F1 (`uiregistry`, the 12th application module), with its tests and the registry kit.
 - **Open point**: `quadrava publish` authenticates with a token from an environment variable, while the monolith knows
-  only the ms-authz session. To settle in F1: a bearer token of Keycloak accepted only on `/registry/**` writes (the
+  only the authz-library session. To settle in F1: a bearer token of Keycloak accepted only on `/registry/**` writes (the
   reference does this), or a publication step inside the deployment.
 - Code copied from the reference does not follow later fixes of Quadrava by itself: the Quadrava changelog is read at
   every raise of the pinned version, and fixes to the contract come with the kit.

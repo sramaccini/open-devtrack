@@ -4,7 +4,7 @@ Status: Proposed (31 October 2026) — decision D8 of the project plan
 
 ## Context
 
-A user of ms-authz may belong to several tenants. The first ms-authz 2.0 sent such a user to
+A user of authz-library may belong to several tenants. The first authz-library 2.0 sent such a user to
 `login-error?error=tenant_selection_required`, and Quadrava had no page to choose: the user looped on the login.
 
 Both sides are now done, following the direction of the plan:
@@ -12,7 +12,7 @@ Both sides are now done, following the direction of the plan:
 - Quadrava ADR-18 (`contracts/bff.yaml` 0.3.0, optional part): the user may carry `tenants: [{ id, label }]` and
   `currentTenant`; `POST /bff/tenant` with `{ "tenant": "<id>" }` and the CSRF token switches; the shell shows a
   selector in the user menu only when `tenantSwitchUrl` is configured and the list has more than one entry.
-- ms-authz 2.0.1: the login opens the session on the last tenant used (then the first by code), never asks; the switch
+- authz-library 2.0.1: the login opens the session on the last tenant used (then the first by code), never asks; the switch
   is a POST, keeps the session id and its absolute expiry, and recomputes the permissions.
 
 ## Decision (proposed)

@@ -8,7 +8,7 @@ The modules write aggregates (an issue with its fields, a board with its columns
 queries turned into SQL, board columns with hundreds of cards, aggregates for burndown and cumulative flow. The options
 were JPA only, or JPA for the commands plus jOOQ for search and reports.
 
-ms-authz, inside the same process, uses `JdbcClient` and its own Flyway history (`authz_schema_history`); it does not
+authz-library, inside the same process, uses `JdbcClient` and its own Flyway history (`authz_schema_history`); it does not
 constrain the choice of the application.
 
 ## Decision (proposed)
@@ -25,7 +25,7 @@ constrain the choice of the application.
 
 - **JPA only.** Criteria API or JPQL for ODQL: dynamic queries become hard to read and to keep safe; aggregates over
   JSONB and `tsvector` fall back to native SQL anyway.
-- **JdbcClient only, like ms-authz.** Light, but the commands lose optimistic locking and dirty checking for free and
+- **JdbcClient only, like authz-library.** Light, but the commands lose optimistic locking and dirty checking for free and
   ODQL still needs a typed builder.
 
 ## Consequences

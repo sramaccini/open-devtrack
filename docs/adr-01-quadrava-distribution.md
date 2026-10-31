@@ -27,7 +27,7 @@ ui/ (JSON) ──quadrava validate (CI)──▶ ok
 - The exact version is pinned in one place (the Compose and Helm files: `quadrava-runtime:0.1.0`, never `latest` or
   the minor line), raised by a pull request that reads the Quadrava changelog.
 - The image is the front: `QUADRAVA_BFF_URL` points at the monolith, so the browser talks to one origin. Behind TLS the
-  monolith honours `X-Forwarded-Proto` (`server.forward-headers-strategy=framework`, already the default of ms-authz).
+  monolith honours `X-Forwarded-Proto` (`server.forward-headers-strategy=framework`, already the default of authz-library).
 - CI validates `ui/` with the Quadrava CLI of the same version as the image, so the schemas checked are the ones the
   runtime reads.
 - npm packages are not used: OpenDevTrack has no Angular code to import them into.

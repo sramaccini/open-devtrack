@@ -4,7 +4,7 @@ Status: Proposed (31 October 2026) — decision D9 of the project plan
 
 ## Context
 
-ms-authz has tenants (organisations, customers, offices) and puts the current one in the `SessionContext`. OpenDevTrack
+authz-library has tenants (organisations, customers, offices) and puts the current one in the `SessionContext`. OpenDevTrack
 can either be installed once per organisation, or hold the data of several tenants in one installation.
 
 ## Decision (proposed)
@@ -28,7 +28,7 @@ GET /api/issues/ODT-42   session: mario.rossi, TENANT_A
 ## Alternatives considered
 
 - **One installation per organisation.** Simplest isolation, but one database, Keycloak realm and deployment each;
-  and the tenants of ms-authz would go unused.
+  and the tenants of authz-library would go unused.
 - **One PostgreSQL schema per tenant.** Strong isolation, but migrations multiplied by the tenants, and the
   Spring Modulith schemas per module would multiply too.
 - **Row-level security of PostgreSQL** as the only barrier. A good second line, considered for F5; as the only one
