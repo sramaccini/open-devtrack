@@ -38,4 +38,4 @@ Phase **F0** (start-up): the decisions to take before writing the back end are p
 
 ## Licence
 
-[Mozilla Public License 2.0](LICENSE). Contributions need the [CLA](CLA.md) (see [CONTRIBUTING.md](CONTRIBUTING.md)); the name is covered by [TRADEMARKS.md](TRADEMARKS.md).
+[Mozilla Public License 2.0](LICENSE). Contributions need the [CLA](CLA.md) (see [CONTRIBUTING.md](CONTRIBUTING.md)); the name and the logo are covered by [TRADEMARKS.md](TRADEMARKS.md).

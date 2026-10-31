@@ -7,6 +7,11 @@ the line goes on.
 Everything that shows the OpenDevTrack identity (the `ui/` theme, the favicon, documentation, slides, the site) uses the
 files in this folder and the rules below. The files are not redrawn or edited: a missing variant is added here first.
 
+## Licence
+
+The files in this folder are not covered by the MPL of the code: the name and the logo are all rights reserved,
+with the uses allowed in [TRADEMARKS.md](../TRADEMARKS.md). A modified fork removes or replaces them.
+
 ## Files
 
 | File | Use |

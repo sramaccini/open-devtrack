@@ -5,7 +5,9 @@ The source code of OpenDevTrack is licensed under the Mozilla Public License,
 version 2.0 (see LICENSE). If a copy of the MPL was not distributed with a
 file, you can obtain one at https://mozilla.org/MPL/2.0/.
 
-The OpenDevTrack name is not covered by the MPL: see TRADEMARKS.md.
+The OpenDevTrack name and logo are not covered by the MPL, and neither are
+the files in brand/ (logos, symbol, icons, favicons): they are all rights
+reserved, with the uses allowed in TRADEMARKS.md.
 
 OpenDevTrack is built on third-party software under their own licences, among
 them Quadrava (MPL-2.0), authz-library (com.logicwarez.authz), Spring Boot and
