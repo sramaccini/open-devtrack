@@ -73,4 +73,14 @@ Issues of a project (`odt_issue`), keyed by the project and their number (`ODT-4
 (restricted Markdown), priority, assignee (a member), reporter, labels. Only the members of the project see them;
 developers create and edit them, admins delete them; edits carry the version read and get 412 if it changed. The status
 is `todo` until the workflows of E3 add the transitions. `GET /api/projects/{key}/issues` takes `status`,
-`assignee` (`me` for the user) and `q` (text of the summary).
+`assignee` (`me` for the user) and `q` (text of the summary). Each change is published as an event
+(`IssueEvents`); other modules find an issue by its key through `Issues`.
+
+## Comments and changelog (`collaboration`, `audit`)
+
+Comments in restricted Markdown (`odt_collaboration`): whoever sees the issue reads them, `odt.issue.comment`
+(developer) writes them, the author edits them (with the version read) and deletes them, an admin of the project also
+deletes those of others. The changelog (`odt_audit`, `GET /api/issues/{key}/history`) has a row per field changed and
+one for the creation. Both react to the events of `issue` with `@ApplicationModuleListener`: after the commit, in a
+transaction of their own, through the Event Publication Registry in `odt.event_publication` (an event whose listener
+fails is republished at the next start). The comments of a deleted issue are removed the same way.

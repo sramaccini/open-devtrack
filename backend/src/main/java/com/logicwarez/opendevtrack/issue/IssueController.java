@@ -8,6 +8,11 @@ import com.logicwarez.opendevtrack.access.ProjectAccess;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueRequest;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueRow;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueView;
+import com.logicwarez.opendevtrack.issue.IssueEvents.FieldChange;
+import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
+import com.logicwarez.opendevtrack.issue.IssueEvents.IssueCreated;
+import com.logicwarez.opendevtrack.issue.IssueEvents.IssueDeleted;
+import com.logicwarez.opendevtrack.issue.Issues.Found;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.project.ProjectRef;
@@ -18,10 +23,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Limit;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,14 +52,13 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>{@code odt.issue.delete} (admin): delete them.</li>
  * </ul>
  * The status changes only through the transitions of the workflows (E3). An issue of a project of another tenant
- * answers 404, as one that does not exist (ADR-09).
+ * answers 404, as one that does not exist (ADR-09). Every change is published as an event of {@link IssueEvents}.
  */
 @RestController
 @Transactional(readOnly = true)
 @PreAuthorize("hasAuthority('odt.project.browse')")
 class IssueController {
 
-    private static final Pattern ISSUE_KEY = Pattern.compile("^([A-Z][A-Z0-9]{1,9})-([1-9][0-9]{0,17})$");
     private static final Pattern LABEL = Pattern.compile("^[a-z0-9][a-z0-9._-]{0,49}$");
     private static final int MAX_LABELS = 20;
     private static final int MAX_DESCRIPTION = 32_000;
@@ -62,15 +67,20 @@ class IssueController {
     private static final String NOT_A_MEMBER = "Only the members of the project see its issues";
 
     private final IssueRepository issues;
+    private final Issues finder;
     private final Projects projects;
     private final ProjectAccess access;
     private final CurrentUser user;
+    private final ApplicationEventPublisher events;
 
-    IssueController(IssueRepository issues, Projects projects, ProjectAccess access, CurrentUser user) {
+    IssueController(IssueRepository issues, Issues finder, Projects projects, ProjectAccess access, CurrentUser user,
+                    ApplicationEventPublisher events) {
         this.issues = issues;
+        this.finder = finder;
         this.projects = projects;
         this.access = access;
         this.user = user;
+        this.events = events;
     }
 
     /** Issues of the project, newest first; {@code assignee=me} for those of the user. */
@@ -115,6 +125,8 @@ class IssueController {
                 user.username(), now);
         fields.applyTo(issue, now);
         issues.saveAndFlush(issue);
+        events.publishEvent(new IssueCreated(issue.id(), project.get().id(), key(project.get(), issue), user.username(), now,
+                Fields.of(issue).changesFrom(Fields.EMPTY)));
         return ResponseEntity.status(HttpStatus.CREATED).body(view(project.get(), issue, permissions));
     }
 
@@ -154,12 +166,18 @@ class IssueController {
         if (request.version() == null || request.version() != issue.version()) {
             return Problems.changedMeanwhile();
         }
-        fields.applyTo(issue, Instant.now());
+        List<FieldChange> changes = fields.changesFrom(Fields.of(issue));
+        if (changes.isEmpty()) {
+            return ResponseEntity.ok(view(project, issue, permissions));
+        }
+        Instant now = Instant.now();
+        fields.applyTo(issue, now);
         try {
             issues.saveAndFlush(issue);
         } catch (ObjectOptimisticLockingFailureException e) {
             return Problems.changedMeanwhile();
         }
+        events.publishEvent(new IssueChanged(issue.id(), project.id(), key(project, issue), user.username(), now, changes));
         return ResponseEntity.ok(view(project, issue, permissions));
     }
 
@@ -174,19 +192,13 @@ class IssueController {
             return Problems.forbidden("Only an admin of the project deletes issues");
         }
         issues.delete(found.get().issue());
+        events.publishEvent(new IssueDeleted(found.get().issue().id(), found.get().project().id(),
+                key(found.get().project(), found.get().issue()), user.username(), Instant.now()));
         return ResponseEntity.noContent().build();
     }
 
-    private record Found(ProjectRef project, IssueEntity issue) {
-    }
-
     private Optional<Found> find(String issueKey) {
-        Matcher m = ISSUE_KEY.matcher(issueKey);
-        if (!m.matches()) {
-            return Optional.empty();
-        }
-        return projects.find(m.group(1)).flatMap(p -> issues.findByProjectIdAndNumber(p.id(), Long.parseLong(m.group(2)))
-                .map(i -> new Found(p, i)));
+        return finder.findEntity(issueKey);
     }
 
     private Set<String> permissions(ProjectRef project) {
@@ -199,6 +211,36 @@ class IssueController {
 
         void applyTo(IssueEntity issue, Instant now) {
             issue.edit(type, summary, description, priority, assignee, labels, now);
+        }
+
+        static final Fields EMPTY = new Fields(null, null, null, null, null, List.of());
+
+        static Fields of(IssueEntity issue) {
+            return new Fields(issue.type(), issue.summary(), issue.description(), issue.priority(), issue.assignee(),
+                    issue.labels());
+        }
+
+        /** The fields that differ from {@code before}, in the order of the form. */
+        List<FieldChange> changesFrom(Fields before) {
+            List<FieldChange> changes = new ArrayList<>();
+            change(changes, "type", before.type == null ? null : before.type.value(), type == null ? null : type.value());
+            change(changes, "summary", before.summary, summary);
+            change(changes, "priority", before.priority == null ? null : before.priority.value(),
+                    priority == null ? null : priority.value());
+            change(changes, "assignee", before.assignee, assignee);
+            change(changes, "labels", text(before.labels), text(labels));
+            change(changes, "description", before.description, description);
+            return changes;
+        }
+
+        private static void change(List<FieldChange> changes, String field, String from, String to) {
+            if (!Objects.equals(from, to)) {
+                changes.add(new FieldChange(field, from, to));
+            }
+        }
+
+        private static String text(List<String> labels) {
+            return labels == null || labels.isEmpty() ? null : String.join(", ", labels);
         }
     }
 

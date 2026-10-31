@@ -75,6 +75,11 @@
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-starter-core</artifactId>
         </dependency>
+        <!-- Event Publication Registry on PostgreSQL: listeners after the commit, republished if they fail (plan) -->
+        <dependency>
+            <groupId>org.springframework.modulith</groupId>
+            <artifactId>spring-modulith-starter-jdbc</artifactId>
+        </dependency>
         <!-- Module uiregistry: versions on PostgreSQL, validation against the schemas of Quadrava, tokens of the tools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

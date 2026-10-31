@@ -41,10 +41,20 @@ spring:
         repository-type: indexed
   flyway:
     # One schema and one folder per module (ADR-04), all under db/odt with one history table in odt: the version
-    # numbers are global across the folders (V1 uiregistry, V2 access, V3 project, V4 issue, …). The RBAC schema has
-    # its own Flyway and history, run by authz-rbac.
-    schemas: odt,odt_uiregistry,odt_access,odt_project,odt_issue
+    # numbers are global across the folders (V1 uiregistry, V2 access, V3 project, V4 issue, V5 the event
+    # publications, …). The RBAC schema has its own Flyway and history, run by authz-rbac.
+    schemas: odt,odt_uiregistry,odt_access,odt_project,odt_issue,odt_audit,odt_collaboration
     locations: classpath:db/odt
+  modulith:
+    events:
+      # Event Publication Registry in odt (table from V5): a listener that fails keeps its event, republished at the
+      # next start; the completed ones are removed.
+      jdbc:
+        schema: odt
+        schema-initialization:
+          enabled: false
+      completion-mode: delete
+      republish-outstanding-events-on-restart: true
   jpa:
     open-in-view: false
     hibernate:

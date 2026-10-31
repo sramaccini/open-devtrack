@@ -15,6 +15,21 @@
     },
     "assignees": {
       "ref": "issues/assignees"
+    },
+    "comments": {
+      "ref": "issues/comments"
+    },
+    "addComment": {
+      "ref": "issues/addComment"
+    },
+    "editComment": {
+      "ref": "issues/editComment"
+    },
+    "removeComment": {
+      "ref": "issues/removeComment"
+    },
+    "history": {
+      "ref": "issues/history"
     }
   },
   "components": [
@@ -136,7 +151,45 @@
               "refresh": "issue"
             },
             {
+              "refresh": "history"
+            },
+            {
               "toast": "{{ t('common.saved', 'Saved') }}"
+            }
+          ]
+        },
+        {
+          "id": "btn-comment",
+          "label": "{{ t('issues.add_comment', 'Comment') }}",
+          "visibleIf": "{{form._perm.comment}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('issues.add_comment', 'Comment') }}",
+                "submitLabel": "{{ t('issues.post', 'Post') }}",
+                "fields": [
+                  {
+                    "name": "body",
+                    "type": "richtext",
+                    "label": "{{ t('issues.comment', 'Comment') }}",
+                    "required": true,
+                    "rows": 6
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "addComment",
+                    "onError": [
+                      {
+                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "comments"
             }
           ]
         },
@@ -176,6 +229,152 @@
               "params": {
                 "key": "{{params.key}}"
               }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "issue-tabs",
+      "type": "tabs",
+      "tabs": [
+        {
+          "id": "tab-comments",
+          "label": "{{ t('issues.comments', 'Comments') }}",
+          "components": [
+            {
+              "id": "comment-table",
+              "type": "table",
+              "source": "comments",
+              "columns": [
+                {
+                  "field": "author",
+                  "label": "{{ t('issues.author', 'Author') }}"
+                },
+                {
+                  "field": "body",
+                  "label": "{{ t('issues.comment', 'Comment') }}",
+                  "format": "markdown"
+                },
+                {
+                  "field": "createdAt",
+                  "label": "{{ t('issues.when', 'When') }}",
+                  "format": "datetime"
+                }
+              ],
+              "rowActions": [
+                {
+                  "id": "btn-edit-comment",
+                  "label": "{{ t('issues.edit', 'Edit') }}",
+                  "visibleIf": "{{row._perm.edit}}",
+                  "onClick": [
+                    {
+                      "dialog": {
+                        "title": "{{ t('issues.edit_comment', 'Edit comment') }}",
+                        "submitLabel": "{{ t('common.save', 'Save') }}",
+                        "initial": {
+                          "body": "{{row.body}}",
+                          "version": "{{row.version}}"
+                        },
+                        "fields": [
+                          {
+                            "name": "body",
+                            "type": "richtext",
+                            "label": "{{ t('issues.comment', 'Comment') }}",
+                            "required": true,
+                            "rows": 6
+                          }
+                        ],
+                        "onSubmit": [
+                          {
+                            "call": "editComment",
+                            "args": {
+                              "id": "{{row.id}}"
+                            },
+                            "onError": [
+                              {
+                                "if": "{{error.status == 412}}",
+                                "then": [
+                                  {
+                                    "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                  }
+                                ],
+                                "else": [
+                                  {
+                                    "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "refresh": "comments"
+                    }
+                  ]
+                },
+                {
+                  "id": "btn-delete-comment",
+                  "label": "{{ t('issues.delete', 'Delete') }}",
+                  "visibleIf": "{{row._perm.delete}}",
+                  "onClick": [
+                    {
+                      "confirm": "{{ t('issues.delete_comment_confirm', 'Delete this comment?') }}"
+                    },
+                    {
+                      "call": "removeComment",
+                      "args": {
+                        "id": "{{row.id}}"
+                      },
+                      "onError": [
+                        {
+                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                        }
+                      ]
+                    },
+                    {
+                      "refresh": "comments"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tab-history",
+          "label": "{{ t('issues.history', 'History') }}",
+          "components": [
+            {
+              "id": "history-table",
+              "type": "table",
+              "source": "history",
+              "columns": [
+                {
+                  "field": "at",
+                  "label": "{{ t('issues.when', 'When') }}",
+                  "format": "datetime"
+                },
+                {
+                  "field": "author",
+                  "label": "{{ t('issues.author', 'Author') }}"
+                },
+                {
+                  "field": "field",
+                  "label": "{{ t('issues.field', 'Field') }}",
+                  "valueKey": "values.issue_field"
+                },
+                {
+                  "field": "from",
+                  "label": "{{ t('issues.from', 'From') }}"
+                },
+                {
+                  "field": "to",
+                  "label": "{{ t('issues.to', 'To') }}"
+                }
+              ]
             }
           ]
         }

@@ -30,6 +30,9 @@ Quadrava and authz-library, and the ADRs say where.
 - F2 E2 Issues (first slice): module `issue` with type, priority, summary, Markdown description, assignee, labels and
   numbering per project; screens `issue-list`, `issue-new`, `issue-detail`. Labels are in the API only (request Q5);
   the status stays `todo` until E3.
+- F2 E4 (first slice): comments (module `collaboration`) and the changelog of the issues (module `audit`), both from
+  the events of `issue` after the commit (Event Publication Registry of Spring Modulith on PostgreSQL); tabs Comments
+  and History on `issue-detail`. The values in the history are shown as stored (`task`, `medium`), not translated.
 
 ## Requests to the dependencies
 
@@ -56,7 +59,8 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F2 (per the plan): the rest of E2 (links, watchers, custom fields), E3 Workflow (CEL guards), E4 Collaboration (comments, changelog), towards gate M1.
+1. F2 (per the plan): E3 Workflow once ADR-10 is accepted (transitions are the missing piece of gate M1), then the
+   rest of E2 (links, watchers, custom fields) and of E4 (mentions, attachments).
    Open question for review: keep project roles, or only tenant-wide roles from the catalogue.
 2. Adopt Quadrava 0.2.0 when released: `quadrava validate` and `publish` in CI instead of `tools/publish-ui.mjs`,
    schemas refreshed with `backend/tools/sync-quadrava-schemas.sh`, the kits from the release tag.

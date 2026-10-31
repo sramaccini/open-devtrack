@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "datasources": "issues",
-  "description": "Issues of a project (module issue) and the members who can be assigned.",
+  "description": "Issues of a project (module issue), the members who can be assigned, the comments (module collaboration) and the changelog (module audit).",
   "sources": {
     "list": {
       "type": "rest",
@@ -37,6 +37,33 @@
       "params": {
         "q": "{{search}}"
       }
+    },
+    "comments": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/issues/{{params.issue}}/comments"
+    },
+    "addComment": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/issues/{{params.issue}}/comments",
+      "body": "{{form}}"
+    },
+    "editComment": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/issues/{{params.issue}}/comments/{{id}}",
+      "body": "{{form}}"
+    },
+    "removeComment": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/issues/{{params.issue}}/comments/{{id}}"
+    },
+    "history": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/issues/{{params.issue}}/history"
     }
   }
 }
