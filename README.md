@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="brand/svg/odt-logo-horizontal-dark.svg">
+    <img src="brand/svg/odt-logo-horizontal.svg" alt="OpenDevTrack" width="360">
+  </picture>
+</p>
+
 # OpenDevTrack
 
 An open-source issue tracker for software teams: projects, issues with custom fields, configurable workflows, Kanban and Scrum boards, backlog and sprints, search with a query language, dashboards and reports.
@@ -24,6 +31,7 @@ Phase **F0** (start-up): the decisions to take before writing the back end are p
 ## Documentation
 
 - [docs/](docs/README.md): architecture decision records and checks.
+- [brand/](brand/README.md): logo, icons, colours and how to use them.
 - [backend/README.md](backend/README.md): building and running the back end.
 - [AGENTS.md](AGENTS.md): rules for working on the project.
 - [HANDOFF.md](HANDOFF.md): status and next steps.

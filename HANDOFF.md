@@ -16,6 +16,7 @@ Quadrava and authz-library, and the ADRs say where.
   catalogue (repeatable Flyway migration, ADR-07) and the development data.
 - End-to-end check passed (`docs/check-authz-end-to-end.md`): Quadrava kits bff 13/13 with and without a session, authz
   11/11, tenant switch kept across logins, login in the browser through the runtime image 0.1.0.
+- `brand/`: the Commit Ring logo with its icons, favicon, colours and rules of use; the README shows it.
 
 ## Requests to the dependencies
 
@@ -41,4 +42,4 @@ A2 (schema of the RBAC tables, F1), A3 (Problem texts in English). Each is built
 
 1. Approval of the proposed ADRs (D1, D2, D4, D6–D9, details of D3).
 2. Then F1: Spring Modulith skeleton with the modules and `verify()`, the `uiregistry` module from the Quadrava
-   reference registry (ADR-03), the `ui/` project with navigation and theme, CI with the kits (bff, authz, registry).
+   reference registry (ADR-03), the `ui/` project with navigation and theme (palette and favicon from `brand/`), CI with the kits (bff, authz, registry).
