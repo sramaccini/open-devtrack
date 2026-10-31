@@ -18,6 +18,7 @@ browser / kits ──▶ quadrava-runtime 0.1.0 (:28090) ──/bff /authz /logo
 - `R__odt_permission_catalogue.sql`: the global permissions and roles of OpenDevTrack, applied by the Flyway of
   `authz-rbac` after its own migrations (ADR-07). With the `dev` profile, `V100__dev_tenants_and_users.sql` adds two
   tenants (ACME, GLOBEX) and two users: `mario.rossi` (one tenant) and `anna.bianchi` (two tenants).
+- From F1 the registry kit calls `backend/` directly (`:28080/registry/**`) with access tokens of the public client `opendevtrack-tools` (password grant, development only).
 - `e2e/authz/`: Compose file, Keycloak realm `opendevtrack` and the script. Credentials are generated at each first
   start into `e2e/authz/.work/.env` (gitignored).
 
@@ -40,6 +41,7 @@ Maven must reach the authz-library packages: see [backend/README.md](../backend/
 | Quadrava kit `conformance-authz`, sessions of `mario.rossi` and `anna.bianchi` | 11 of 11 |
 | `odt.*` permissions in the session of `mario.rossi` | `odt.project.browse`, `odt.project.create`, `odt.user.browse` |
 | Quadrava kit `conformance-bff`, session of `anna.bianchi` with two tenants | 13 of 13 (tenants, switch by POST only, CSRF, logout) |
+| Quadrava kit `conformance-registry`, bearer tokens of `mario.rossi` (author) and `anna.bianchi` (reviewer), from F1 | 23 of 23 (validation, If-Match, four eyes, protected environment, references) |
 | Tenant switch kept for the next login (ADR-08) | ACME → GLOBEX, then GLOBEX after a new login |
 | In the browser: login through the runtime, the user menu | «Spazio di lavoro» with both tenants, GLOBEX selected, 2 permissions |
 

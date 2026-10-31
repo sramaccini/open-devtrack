@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lowcode.example/schemas/datasources.schema.json",
+  "title": "Data sources",
+  "description": "Data sources of a project, shared by its screens: one document holds one or more of them (for example all the calls of the orders service). A screen uses one with a reference such as {\"ref\": \"orders/list\"} in its dataSources.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "datasources",
+    "sources"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0",
+      "description": "Version of the format."
+    },
+    "datasources": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "maxLength": 60,
+      "description": "Identifier of the document (kebab-case): the first part of the references, orders in orders/list."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "What these data sources are for, for whoever chooses them in the editor."
+    },
+    "baseUrl": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Address put in front of the url of every data source of the document, for example /api/orders or {{ settings.ordersApi }}: the url of each data source is then the rest of the path (/{{ params.id }}). Relative to the same origin, as every url; none if missing."
+    },
+    "sources": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 200,
+      "propertyNames": {
+        "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "$ref": "https://lowcode.example/schemas/screen.schema.json#/$defs/dataSource"
+      },
+      "description": "The data sources, by name: the second part of the references, list in orders/list."
+    }
+  }
+}

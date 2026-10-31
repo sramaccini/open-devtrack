@@ -26,6 +26,18 @@
         "pkce.code.challenge.method": "S256",
         "post.logout.redirect.uris": "${FRONT_URL}/*"
       }
+    },
+    {
+      "clientId": "opendevtrack-tools",
+      "name": "OpenDevTrack tools (registry)",
+      "description": "Command-line tools that call /registry/** with a bearer token: the Quadrava CLI, the conformance kit",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false
     }
   ],
   "users": [

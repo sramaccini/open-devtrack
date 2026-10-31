@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lowcode.example/schemas/theme.schema.json",
+  "title": "Theme of a Quadrava application",
+  "description": "Design tokens of a theme. The runtime applies them as CSS custom properties (--lc-*). The allowed values are deliberately restricted: a theme cannot inject arbitrary CSS.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "theme",
+    "tokens"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "theme": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,63}$",
+      "description": "Identifier of the theme."
+    },
+    "label": {
+      "type": "string",
+      "maxLength": 80
+    },
+    "mode": {
+      "enum": [
+        "light",
+        "dark"
+      ],
+      "description": "Helps the runtime set color-scheme."
+    },
+    "brand": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Logo and name of the application at the top left of the side bar. If absent, the Quadrava logo. Images are relative addresses (images/logo.svg, served next to the application), https:// or data:image/…;base64 (svg, png, jpeg, gif, webp, up to about 75 kB): any other address is not shown.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60,
+          "description": "Name of the application: the accessible name of the logo, and the text next to it with showName or when there is no logo."
+        },
+        "logo": {
+          "type": "string",
+          "maxLength": 100000,
+          "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
+          "description": "Image of the logo in the expanded side bar (it usually holds the name too).",
+          "contentMediaType": "image/*"
+        },
+        "logoOnDark": {
+          "type": "string",
+          "maxLength": 100000,
+          "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
+          "description": "Variant of the logo for a dark side bar (sider tone dark); the logo if absent.",
+          "contentMediaType": "image/*"
+        },
+        "icon": {
+          "type": "string",
+          "maxLength": 100000,
+          "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
+          "description": "Square image for the collapsed side bar; without it the collapsed bar shows the logo, reduced.",
+          "contentMediaType": "image/*"
+        },
+        "showName": {
+          "type": "boolean",
+          "description": "Shows the name next to the logo (for a logo that is only a symbol)."
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 16,
+          "maximum": 64,
+          "description": "Height of the logo in px (32 if absent)."
+        }
+      }
+    },
+    "tokens": {
+      "$ref": "#/$defs/tokens"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "color": {
+      "type": "string",
+      "pattern": "^(#[0-9a-fA-F]{3,8}|(rgb|hsl)a?\\([0-9.,%\\s/]+\\))$"
+    },
+    "tokens": {
+      "type": "object",
+      "required": [
+        "colors"
+      ],
+      "properties": {
+        "colors": {
+          "type": "object",
+          "required": [
+            "primary",
+            "onPrimary",
+            "background",
+            "surface",
+            "onSurface",
+            "border"
+          ],
+          "properties": {
+            "primary": {
+              "$ref": "#/$defs/color"
+            },
+            "onPrimary": {
+              "$ref": "#/$defs/color"
+            },
+            "background": {
+              "$ref": "#/$defs/color"
+            },
+            "surface": {
+              "$ref": "#/$defs/color"
+            },
+            "onSurface": {
+              "$ref": "#/$defs/color"
+            },
+            "mutedText": {
+              "$ref": "#/$defs/color"
+            },
+            "border": {
+              "$ref": "#/$defs/color"
+            },
+            "danger": {
+              "$ref": "#/$defs/color"
+            },
+            "success": {
+              "$ref": "#/$defs/color"
+            },
+            "warning": {
+              "$ref": "#/$defs/color",
+              "description": "Colour of warnings that do not block (validation warnings, password strength «fair») (#ad6800 if absent). Keep a contrast of at least 4.5:1 with the surface."
+            }
+          },
+          "additionalProperties": false
+        },
+        "typography": {
+          "type": "object",
+          "properties": {
+            "fontFamily": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9 ,'\"-]{1,200}$"
+            },
+            "baseSize": {
+              "type": "number",
+              "minimum": 12,
+              "maximum": 20,
+              "description": "Base size in px."
+            }
+          },
+          "additionalProperties": false
+        },
+        "shape": {
+          "type": "object",
+          "properties": {
+            "radius": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 24,
+              "description": "Corner radius in px."
+            }
+          },
+          "additionalProperties": false
+        },
+        "density": {
+          "enum": [
+            "compact",
+            "comfortable"
+          ]
+        },
+        "layout": {
+          "type": "object",
+          "description": "Look of the application shell: side bar, top bar, page header, spacing. All optional: if missing, the side bar is light (surface colours) and the measures are those of Ant Design Pro.",
+          "properties": {
+            "sider": {
+              "type": "object",
+              "properties": {
+                "tone": {
+                  "enum": [
+                    "light",
+                    "dark"
+                  ],
+                  "description": "Style of the menu: light or dark."
+                },
+                "background": {
+                  "$ref": "#/$defs/color"
+                },
+                "text": {
+                  "$ref": "#/$defs/color"
+                },
+                "mutedText": {
+                  "$ref": "#/$defs/color"
+                },
+                "activeBackground": {
+                  "$ref": "#/$defs/color"
+                },
+                "activeText": {
+                  "$ref": "#/$defs/color"
+                },
+                "border": {
+                  "$ref": "#/$defs/color"
+                },
+                "width": {
+                  "type": "number",
+                  "minimum": 180,
+                  "maximum": 360,
+                  "description": "Width in px."
+                },
+                "collapsedWidth": {
+                  "type": "number",
+                  "minimum": 48,
+                  "maximum": 120,
+                  "description": "Collapsed width in px."
+                }
+              },
+              "additionalProperties": false
+            },
+            "header": {
+              "type": "object",
+              "properties": {
+                "background": {
+                  "$ref": "#/$defs/color"
+                },
+                "text": {
+                  "$ref": "#/$defs/color"
+                },
+                "border": {
+                  "$ref": "#/$defs/color"
+                },
+                "height": {
+                  "type": "number",
+                  "minimum": 40,
+                  "maximum": 96,
+                  "description": "Height in px."
+                }
+              },
+              "additionalProperties": false
+            },
+            "pageHeader": {
+              "type": "object",
+              "properties": {
+                "background": {
+                  "$ref": "#/$defs/color"
+                },
+                "text": {
+                  "$ref": "#/$defs/color"
+                },
+                "mutedText": {
+                  "$ref": "#/$defs/color"
+                },
+                "border": {
+                  "$ref": "#/$defs/color"
+                }
+              },
+              "additionalProperties": false
+            },
+            "content": {
+              "type": "object",
+              "properties": {
+                "padding": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 64,
+                  "description": "Inner padding in px."
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

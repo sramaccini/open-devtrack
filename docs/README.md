@@ -26,6 +26,7 @@ Found while writing the ADRs; each is built in its own repository, optional for 
 | A1 | authz-library | Extension point for permissions that depend on a resource (ADR-07) | F2 |
 | A2 | authz-library | A configurable schema for the RBAC tables (today they go into `public`, next to the `odt_*` schemas of the modules) | F1 |
 | A3 | authz-library | Problem titles and details in English (today Italian, for example «Troppi tentativi di accesso») | F5 |
+| A4 | authz-library | Bearer access for tools: a Keycloak access token resolved to the same permissions as a session, on chosen paths (today `platform/BearerTokenSecurity.java`, ADR-03) | F5 |
 
 ## Checks
 

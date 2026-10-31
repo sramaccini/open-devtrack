@@ -40,8 +40,14 @@ spring:
         # indexed: index by user name, used by the revocation of sessions
         repository-type: indexed
   flyway:
-    # The modules of OpenDevTrack have no migrations yet; the RBAC schema is migrated by authz-rbac
-    enabled: false
+    # One schema and one folder per module (ADR-04); the history table is in odt. The RBAC schema has its own
+    # Flyway and history, run by authz-rbac.
+    schemas: odt,odt_uiregistry
+    locations: classpath:db/odt/uiregistry
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
   security:
     oauth2:
       client:
@@ -72,6 +78,15 @@ authz:
         - ${FRONTEND_URL:http://localhost:8090}
     session:
       absolute-timeout: 10h
+
+odt:
+  security:
+    bearer:
+      # Clients whose access tokens may call /registry/** (BearerTokenSecurity, temporary until request A4)
+      clients: opendevtrack-tools
+  uiregistry:
+    # Only versions approved by someone other than their author are published to these environments
+    protected-environments: testing,production
 
 management:
   endpoints:

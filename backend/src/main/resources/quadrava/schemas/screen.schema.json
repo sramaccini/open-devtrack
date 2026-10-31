@@ -1,0 +1,4283 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lowcode.example/schemas/screen.schema.json",
+  "title": "Screen",
+  "description": "Core of the definition language: a screen of a Quadrava application with the catalogue of base components.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "screen",
+    "components"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "screen": {
+      "$ref": "#/$defs/id",
+      "description": "Stable identifier of the screen."
+    },
+    "title": {
+      "type": "string"
+    },
+    "requires": {
+      "$ref": "#/$defs/permission",
+      "description": "Permission needed to open the screen."
+    },
+    "dataSources": {
+      "type": "object",
+      "description": "Data sources of the screen, by name (the name used in source, call and refresh). Each one refers to a data source of the project, defined in a data sources document, with ref (orders/list); the screen can add parameters and replace the body. Data sources are defined only in the data sources documents.",
+      "propertyNames": {
+        "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/dataSourceRef"
+      }
+    },
+    "actions": {
+      "type": "object",
+      "description": "Named sequences of steps, called with the run step from buttons, row actions, forms… They hold what must always happen before and after a call (validate, confirm, call, notify, reload) without copying it into every button.",
+      "propertyNames": {
+        "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/steps"
+      }
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/node"
+      }
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "Sentence shown under the title, in the page header."
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Identifier in kebab-case. It does not change once published."
+    },
+    "permission": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+\\.[a-z0-9]+\\.[a-z0-9]+$",
+      "description": "Permission in the domain.resource.action format (three parts, for example orders.order.approve)."
+    },
+    "expression": {
+      "type": "string",
+      "pattern": "^\\{\\{[\\s\\S]+\\}\\}$",
+      "description": "CEL expression in double braces, for example {{can('orders.order.approve') && row.status == 'sent'}}. Available variables: user, state, params, row, form, value. Available function: can(permission)."
+    },
+    "dataSource": {
+      "type": "object",
+      "required": [
+        "type",
+        "method",
+        "url"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "rest",
+          "description": "Kind of data source: rest."
+        },
+        "method": {
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ],
+          "description": "HTTP method: GET reads (when the screen opens and with refresh), the others write (with call)."
+        },
+        "url": {
+          "type": "string",
+          "description": "Address of the service, relative to the same origin (for example /api/orders); it can hold expressions."
+        },
+        "params": {
+          "type": "object",
+          "description": "Query parameters (GET, DELETE)."
+        },
+        "body": {
+          "description": "Request body (POST, PUT, PATCH): an object with expressions or a single expression, for example {{form}}. If missing, params is used.",
+          "oneOf": [
+            {
+              "type": "object"
+            },
+            {
+              "$ref": "#/$defs/expression"
+            }
+          ]
+        },
+        "paging": {
+          "enum": [
+            "server",
+            "none"
+          ],
+          "description": "server: the table asks the service for one page at a time (page, size, sort, filters); none (default): all the rows at once."
+        },
+        "live": {
+          "type": "object",
+          "required": [
+            "url"
+          ],
+          "additionalProperties": false,
+          "description": "Push updates (GET only): the runtime listens to this event stream (Server-Sent Events) and reads the data source again when one of its events arrives, also after a reconnection. The events only say that something changed: the data comes from the normal request, with its parameters and permissions. Without the platform service for event streams the data source is read as usual.",
+          "properties": {
+            "url": {
+              "type": "string",
+              "pattern": "^/(?!/)[A-Za-z0-9\\-._~/%]*$",
+              "description": "Path of the event stream on the same origin, for example /api/events/tasks; no expressions, query or host."
+            },
+            "events": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "description": "Names of the events (the event field of the stream) that reload the data source; the events without a name if absent."
+            }
+          }
+        }
+      },
+      "description": "A REST call to a service of the application, through the BFF (relative address on the same origin).",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "not": {
+                  "const": "GET"
+                }
+              }
+            },
+            "required": [
+              "method"
+            ]
+          },
+          "then": {
+            "properties": {
+              "live": false
+            }
+          }
+        }
+      ]
+    },
+    "dataSourceRef": {
+      "type": "object",
+      "description": "Reference to a data source of the project: the identifier of the data sources document and the name of the data source in it. params and body, if present, replace those of the referenced data source (params key by key).",
+      "required": [
+        "ref"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*/[A-Za-z][A-Za-z0-9_]*$",
+          "description": "Document and name of the data source, separated by a slash: orders/list."
+        },
+        "params": {
+          "type": "object",
+          "description": "Query parameters added to those of the referenced data source (same name: this one wins)."
+        },
+        "body": {
+          "description": "Request body that replaces the one of the referenced data source: an object with expressions or a single expression.",
+          "oneOf": [
+            {
+              "type": "object"
+            },
+            {
+              "$ref": "#/$defs/expression"
+            }
+          ]
+        }
+      }
+    },
+    "step": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/stepCall"
+        },
+        {
+          "$ref": "#/$defs/stepRefresh"
+        },
+        {
+          "$ref": "#/$defs/stepNavigate"
+        },
+        {
+          "$ref": "#/$defs/stepToast"
+        },
+        {
+          "$ref": "#/$defs/stepSet"
+        },
+        {
+          "$ref": "#/$defs/stepConfirm"
+        },
+        {
+          "$ref": "#/$defs/stepDialog"
+        },
+        {
+          "$ref": "#/$defs/stepValidate"
+        },
+        {
+          "$ref": "#/$defs/stepPrint"
+        },
+        {
+          "$ref": "#/$defs/stepExport"
+        },
+        {
+          "$ref": "#/$defs/stepIf"
+        },
+        {
+          "$ref": "#/$defs/stepRun"
+        }
+      ]
+    },
+    "steps": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/step"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        }
+      ]
+    },
+    "stepCall": {
+      "type": "object",
+      "required": [
+        "call"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "call": {
+          "type": "string",
+          "description": "Name of the data source to run."
+        },
+        "args": {
+          "type": "object"
+        },
+        "onError": {
+          "$ref": "#/$defs/steps",
+          "description": "Steps run if the call fails (instead of the default message). They see error.status: the HTTP code of the response (0 if the service cannot be reached), for example {{ error.status == 409 }}. The server message is not there: it could contain internal details."
+        },
+        "as": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/identifier"
+            },
+            {
+              "not": {
+                "enum": [
+                  "user",
+                  "state",
+                  "params",
+                  "row",
+                  "form",
+                  "value",
+                  "search",
+                  "lookupKey",
+                  "word",
+                  "request",
+                  "file",
+                  "item",
+                  "error",
+                  "from",
+                  "to",
+                  "true",
+                  "false",
+                  "null",
+                  "in",
+                  "as",
+                  "break",
+                  "const",
+                  "continue",
+                  "else",
+                  "for",
+                  "function",
+                  "if",
+                  "import",
+                  "let",
+                  "loop",
+                  "package",
+                  "namespace",
+                  "return",
+                  "var",
+                  "void",
+                  "while",
+                  "settings"
+                ]
+              }
+            }
+          ],
+          "description": "Name under which the following steps of the same sequence see the service response, for example \"created\" and then {{ created.id }}. It cannot be the name of an existing variable (user, state, params, row, form, error…)."
+        }
+      }
+    },
+    "stepRefresh": {
+      "type": "object",
+      "required": [
+        "refresh"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "refresh": {
+          "type": "string",
+          "description": "Name of the data source to reload."
+        }
+      }
+    },
+    "stepNavigate": {
+      "type": "object",
+      "required": [
+        "navigate"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "navigate": {
+          "$ref": "#/$defs/id"
+        },
+        "params": {
+          "type": "object"
+        }
+      }
+    },
+    "stepToast": {
+      "type": "object",
+      "required": [
+        "toast"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "toast": {
+          "type": "string"
+        }
+      }
+    },
+    "stepSet": {
+      "type": "object",
+      "required": [
+        "set"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "set": {
+          "type": "object",
+          "required": [
+            "path",
+            "value"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "value": {}
+          }
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "required": [
+        "label",
+        "onClick"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string"
+        },
+        "visibleIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "hiddenIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "enabledIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "onClick": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        },
+        "tooltip": {
+          "type": "string",
+          "description": "Help text shown on mouse hover or with the focus. Text only (never HTML); it can contain {{ }}."
+        }
+      }
+    },
+    "field": {
+      "type": "object",
+      "required": [
+        "name",
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-zA-Z][A-Za-z0-9]*$"
+        },
+        "type": {
+          "enum": [
+            "text",
+            "number",
+            "select",
+            "checkbox",
+            "date",
+            "textarea",
+            "datetime",
+            "radio",
+            "switch",
+            "multiselect",
+            "lookup",
+            "file",
+            "repeater",
+            "richtext",
+            "password"
+          ],
+          "description": "Field type. textarea: multi-line text (`rows`); datetime: date and time YYYY-MM-DDTHH:mm (local time); radio: choice among `options`; switch: on/off toggle; multiselect: list of values from `options`. lookup: value chosen among the rows of a data source searched while typing (`lookup`). file: a file chosen by the user (`accept`, `maxSizeKb`, `upload`). repeater: list of rows, each with the fields of `fields` (`minRows`, `maxRows`, `addLabel`). richtext: formatted text written with a toolbar (bold, italic, headings, lists, quotes, links); the value is restricted Markdown, never HTML (`rows` for the height). password: masked text with a button that shows it; with newPassword a strength meter (`minStrength`)."
+        },
+        "label": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sensitive": {
+          "type": "boolean",
+          "description": "The value never appears in traces and logs."
+        },
+        "visibleIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "hiddenIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "readOnlyIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "validate": {
+          "type": "object",
+          "required": [
+            "rule",
+            "message"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "rule": {
+              "$ref": "#/$defs/expression",
+              "description": "CEL condition that must be true; it sees the field in value and the form in form."
+            },
+            "message": {
+              "type": "string",
+              "description": "Message shown when the rule is false. Plain text or with {{ }}."
+            }
+          },
+          "description": "CEL rule of the field: rule must be true, otherwise message is shown. For several rules, warnings or conditions use validation."
+        },
+        "minLength": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000,
+          "description": "For text, textarea and richtext: minimum number of characters."
+        },
+        "maxLength": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000,
+          "description": "For text, textarea and richtext: maximum number of characters."
+        },
+        "pattern": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "For text and textarea: regular expression (JavaScript syntax, Unicode) that the whole value must match, as in the HTML pattern attribute (no need for ^ and $). Values longer than 1000 characters never match."
+        },
+        "format": {
+          "enum": [
+            "email",
+            "url",
+            "phone",
+            "iban",
+            "bic",
+            "uuid",
+            "alphanumeric",
+            "vatNumber",
+            "taxCode",
+            "companyId",
+            "postalCode"
+          ],
+          "description": "For text: expected format. email; url (http or https); phone (international, 6 to 15 digits, with + spaces dashes dots and brackets); iban (length of the country and check digits); bic; uuid; alphanumeric (letters A-Z and digits only); vatNumber (VAT number with its national check: IT, DE, FR, ES, NL, BE, AT, PT, PL, SE; without country the prefix of the number decides); taxCode (personal tax number: IT codice fiscale, ES NIF/NIE, PT NIF, NL BSN); companyId (IT partita IVA, FR SIREN/SIRET, ES CIF, PT NIPC, BE enterprise number, NL KvK); postalCode (IT, DE, FR, ES, NL, BE, AT, PT, PL, SE). The text box also gets the right keyboard and autocomplete."
+        },
+        "country": {
+          "type": "string",
+          "pattern": "^([A-Z]{2}|\\{\\{[\\s\\S]+\\}\\})$",
+          "description": "For the national formats: ISO 3166 two-letter country code (IT, DE…) or an expression that gives it, for example {{form.country}}. Required by taxCode, companyId and postalCode; optional for vatNumber."
+        },
+        "min": {
+          "type": "number",
+          "description": "For number: smallest value allowed."
+        },
+        "max": {
+          "type": "number",
+          "description": "For number: largest value allowed."
+        },
+        "step": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "For number: the value must be a multiple of step, counted from min (from 0 without min); it is also the step of the arrows of the box."
+        },
+        "decimals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "For number: maximum number of decimal places."
+        },
+        "integer": {
+          "type": "boolean",
+          "description": "For number: whole numbers only."
+        },
+        "minDate": {
+          "type": "string",
+          "pattern": "^(\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2})?|today([+-]\\d{1,4}[dwmy])?)$",
+          "description": "For date and datetime: earliest date allowed: YYYY-MM-DD (or YYYY-MM-DDTHH:mm), or relative to the day: today, today+30d, today-18y (units d, w, m, y). Earlier days cannot be chosen in the calendar."
+        },
+        "maxDate": {
+          "type": "string",
+          "pattern": "^(\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2})?|today([+-]\\d{1,4}[dwmy])?)$",
+          "description": "For date and datetime: latest date allowed: YYYY-MM-DD (or YYYY-MM-DDTHH:mm), or relative to the day: today, today+30d, today-18y (units d, w, m, y). Later days cannot be chosen in the calendar."
+        },
+        "newPassword": {
+          "type": "boolean",
+          "description": "For password: a new password (registration, change): shows the strength meter and lets the browser propose a generated one. Without it the browser fills in the saved one."
+        },
+        "minStrength": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4,
+          "description": "For password: minimum strength, from 0 (very weak) to 4 (strong). The estimate counts length and kinds of characters, and discounts repetitions, sequences, years, common words and the values of the other fields."
+        },
+        "minItems": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "For multiselect: minimum number of choices (an empty choice is left to required)."
+        },
+        "maxItems": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "For multiselect: maximum number of choices."
+        },
+        "transform": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "trim",
+              "uppercase",
+              "lowercase",
+              "removeSpaces"
+            ]
+          },
+          "description": "For text and textarea: changes applied to the value, in order, when the user leaves the field and before checking and sending it (never while typing). trim: spaces at the ends; uppercase / lowercase; removeSpaces: every space. For example [\"removeSpaces\", \"uppercase\"] for an IBAN."
+        },
+        "messages": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Messages that replace the standard ones, by constraint (required, minLength, format…). Plain text or with {{ }}, for example {{t('order.qtyTooHigh')}}.",
+          "properties": {
+            "required": {
+              "type": "string",
+              "description": "Message when the required constraint is not met."
+            },
+            "minLength": {
+              "type": "string",
+              "description": "Message when the minLength constraint is not met."
+            },
+            "maxLength": {
+              "type": "string",
+              "description": "Message when the maxLength constraint is not met."
+            },
+            "pattern": {
+              "type": "string",
+              "description": "Message when the pattern constraint is not met."
+            },
+            "format": {
+              "type": "string",
+              "description": "Message when the format constraint is not met."
+            },
+            "min": {
+              "type": "string",
+              "description": "Message when the min constraint is not met."
+            },
+            "max": {
+              "type": "string",
+              "description": "Message when the max constraint is not met."
+            },
+            "step": {
+              "type": "string",
+              "description": "Message when the step constraint is not met."
+            },
+            "decimals": {
+              "type": "string",
+              "description": "Message when the decimals constraint is not met."
+            },
+            "integer": {
+              "type": "string",
+              "description": "Message when the integer constraint is not met."
+            },
+            "minDate": {
+              "type": "string",
+              "description": "Message when the minDate constraint is not met."
+            },
+            "maxDate": {
+              "type": "string",
+              "description": "Message when the maxDate constraint is not met."
+            },
+            "minStrength": {
+              "type": "string",
+              "description": "Message when the minStrength constraint is not met."
+            },
+            "minItems": {
+              "type": "string",
+              "description": "Message when the minItems constraint is not met."
+            },
+            "maxItems": {
+              "type": "string",
+              "description": "Message when the maxItems constraint is not met."
+            }
+          }
+        },
+        "validation": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/fieldRule"
+          },
+          "description": "Advanced validation: rules checked in order after the flat constraints, each with an optional message, condition (when) and severity (a warning does not block). For example [{ \"format\": \"vatNumber\", \"country\": \"{{form.country}}\" }, { \"required\": true, \"when\": \"{{form.company}}\" }]."
+        },
+        "tooltip": {
+          "type": "string",
+          "description": "Help text shown on mouse hover or with the focus. Text only (never HTML); it can contain {{ }}."
+        },
+        "optionKey": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+$",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Prefix of the translation keys for the option labels: the label of an option is t('<prefix>.<value>'), with the value as a fallback."
+        },
+        "rows": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 20,
+          "description": "Visible rows of a textarea field (4 if absent)."
+        },
+        "lookup": {
+          "type": "object",
+          "required": [
+            "source",
+            "labelField"
+          ],
+          "additionalProperties": false,
+          "description": "For type lookup: GET data source queried with the `search` variable (for example \"params\": { \"q\": \"{{ search }}\" }).",
+          "properties": {
+            "source": {
+              "type": "string",
+              "description": "Name of the data source (GET) that returns the proposed rows."
+            },
+            "valueField": {
+              "type": "string",
+              "description": "Field of the row that becomes the value (id if absent)."
+            },
+            "labelField": {
+              "type": "string",
+              "description": "Field of the row shown as text."
+            },
+            "minChars": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 5,
+              "description": "Minimum characters before searching (1 if absent; 0 = search even with an empty field)."
+            }
+          }
+        },
+        "suggest": {
+          "type": "object",
+          "required": [
+            "source"
+          ],
+          "additionalProperties": false,
+          "description": "For type text: suggestions from a GET data source while typing; the value stays free text (for example a query). The data source sees `search` (the whole text) and `word` (the word at the cursor, delimited by spaces, brackets and commas), for example \"params\": { \"q\": \"{{ search }}\", \"word\": \"{{ word }}\" }; choosing a suggestion replaces that word.",
+          "properties": {
+            "source": {
+              "type": "string",
+              "description": "Name of the data source (GET) that returns the suggestions."
+            },
+            "valueField": {
+              "type": "string",
+              "description": "Field of the row inserted in the text (value if absent)."
+            },
+            "labelField": {
+              "type": "string",
+              "description": "Field of the row shown in the list (the inserted text if absent)."
+            },
+            "descriptionField": {
+              "type": "string",
+              "description": "Field of the row shown next to the suggestion, in a lighter colour (none if absent)."
+            },
+            "minChars": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 5,
+              "description": "Minimum characters of the word before asking for suggestions (1 if absent; 0 = also at the start of a word)."
+            },
+            "replace": {
+              "enum": [
+                "word",
+                "all"
+              ],
+              "description": "What a chosen suggestion replaces: the word at the cursor (word, default) or the whole text (all)."
+            }
+          }
+        },
+        "accept": {
+          "type": "string",
+          "pattern": "^\\s*(\\.[A-Za-z0-9]+|[a-z]+/(\\*|[A-Za-z0-9.+-]+))(\\s*,\\s*(\\.[A-Za-z0-9]+|[a-z]+/(\\*|[A-Za-z0-9.+-]+)))*\\s*$",
+          "description": "For type file: allowed extensions (.pdf) and MIME types (image/*, application/pdf), separated by commas."
+        },
+        "maxSizeKb": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 102400,
+          "description": "For type file: maximum size in KB (1024 if absent). Up to 102400 with multipart upload; base64 content is limited to 10240."
+        },
+        "upload": {
+          "type": "string",
+          "description": "For type file: data source (POST) to which the file is sent right away. In multipart the file is the \"file\" part of the request and the `file` variable has name, type and size; in base64 it also has content."
+        },
+        "span": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4,
+          "description": "Columns taken by the field in the form grid (1 if absent)."
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "description": "For type repeater: the fields of every row (text, number, select, checkbox, date, textarea, switch, lookup, file; no nested rows). Validation rules see the row in `item`.",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "#/$defs/field"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "text",
+                      "number",
+                      "select",
+                      "checkbox",
+                      "date",
+                      "textarea",
+                      "switch",
+                      "lookup",
+                      "file"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "minRows": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50,
+          "description": "For type repeater: minimum rows (0 if absent)."
+        },
+        "maxRows": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "description": "For type repeater: maximum rows (50 if absent)."
+        },
+        "addLabel": {
+          "type": "string",
+          "description": "For type repeater: text of the button that adds a row."
+        },
+        "uploadAs": {
+          "enum": [
+            "multipart",
+            "base64"
+          ],
+          "description": "For type file with upload: multipart (the file travels as a file, `file` variable with name, type and size; default) or base64 (the content in `file.content` inside the JSON body)."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "lookup"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "lookup"
+            ],
+            "properties": {
+              "lookup": true
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "repeater"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "fields"
+            ],
+            "properties": {
+              "fields": true
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "not": {
+                  "enum": [
+                    "text",
+                    "textarea",
+                    "richtext",
+                    "password"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "minLength": false,
+              "maxLength": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "not": {
+                  "enum": [
+                    "text",
+                    "textarea"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "format": false,
+              "country": false,
+              "transform": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "not": {
+                  "enum": [
+                    "number"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "min": false,
+              "max": false,
+              "step": false,
+              "decimals": false,
+              "integer": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "not": {
+                  "enum": [
+                    "date",
+                    "datetime"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "minDate": false,
+              "maxDate": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "format": {
+                "enum": [
+                  "taxCode",
+                  "companyId",
+                  "postalCode"
+                ]
+              }
+            },
+            "required": [
+              "format"
+            ]
+          },
+          "then": {
+            "required": [
+              "country"
+            ],
+            "properties": {
+              "country": true
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "not": {
+                  "enum": [
+                    "text",
+                    "textarea",
+                    "password"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "pattern": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "not": {
+                  "enum": [
+                    "password"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "newPassword": false,
+              "minStrength": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "not": {
+                  "enum": [
+                    "multiselect"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "minItems": false,
+              "maxItems": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "not": {
+                  "const": "text"
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "suggest": false
+            }
+          }
+        }
+      ]
+    },
+    "column": {
+      "type": "object",
+      "$ref": "#/$defs/columnProps",
+      "unevaluatedProperties": false
+    },
+    "node": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "type": {
+          "enum": [
+            "section",
+            "text",
+            "button",
+            "filterBar",
+            "table",
+            "form",
+            "tabs",
+            "detail",
+            "alert",
+            "stats",
+            "wizard",
+            "tree",
+            "calendar",
+            "chart",
+            "dataTable",
+            "serverDataTable",
+            "input",
+            "box",
+            "grid",
+            "border",
+            "image",
+            "link",
+            "progress",
+            "timeline",
+            "kanban",
+            "comments"
+          ]
+        },
+        "visibleIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "hiddenIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "enabledIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "readOnlyIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "tooltip": {
+          "type": "string",
+          "description": "Help text shown on mouse hover or with the focus. Text only (never HTML); it can contain {{ }}."
+        },
+        "grow": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 12,
+          "description": "Inside a box: share of the free space the component takes compared with its siblings (0 or absent = only the space it needs)."
+        },
+        "span": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12,
+          "description": "Inside a grid: columns taken (1 if absent, never more than those of the grid)."
+        },
+        "region": {
+          "enum": [
+            "north",
+            "south",
+            "west",
+            "east",
+            "center"
+          ],
+          "description": "Inside a border: the region of the component (center if absent). Several components in the same region are stacked."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "section"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "components"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "Title of the section, shown at the top; it can contain {{ }}, for example a translated text."
+              },
+              "components": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/node"
+                },
+                "description": "Components contained in the section, arranged according to layout."
+              },
+              "layout": {
+                "enum": [
+                  "column",
+                  "row"
+                ],
+                "description": "Arrangement of the components: stacked (column, default) or side by side, wrapping when space runs out (row), for example several fields on one line."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "text"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "text"
+            ],
+            "properties": {
+              "text": {
+                "type": "string",
+                "description": "Text to show; it can contain {{ }}. Never HTML."
+              },
+              "style": {
+                "enum": [
+                  "heading",
+                  "body"
+                ],
+                "description": "heading: title; body: normal text (default)."
+              },
+              "format": {
+                "enum": [
+                  "plain",
+                  "markdown"
+                ],
+                "description": "plain (default): simple text. markdown: text formatted with the Quadrava restricted Markdown: paragraphs, headings (#, ##, ###), bulleted (-) and numbered (1.) lists, also nested, quotes (>), **bold**, *italic*, ~~strikethrough~~, `code`, [links](https://…). Never HTML: even a text coming from the data is safe."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "button"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "label",
+              "onClick"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "Text of the button; it can contain {{ }}."
+              },
+              "onClick": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/step"
+                },
+                "description": "Steps run on click, in order (call, set, navigate, refresh…). The button stays busy until they finish."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "filterBar"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "bind",
+              "fields"
+            ],
+            "properties": {
+              "bind": {
+                "type": "string",
+                "description": "Path in the screen state, for example state.filters."
+              },
+              "fields": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/field"
+                },
+                "description": "Filter fields: each one writes its value in the `bind` state, under its own name (for example state.filters.status). textarea and richtext become one-line text."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "table"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "source",
+              "columns"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "Name of the data source that provides the rows."
+              },
+              "columns": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/tableColumn"
+                },
+                "description": "Columns of the table, in order: field, header, format."
+              },
+              "rowActions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/action"
+                },
+                "description": "Actions on a row, in the last column: expressions see the row as `row`."
+              },
+              "sort": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Sorting. With server paging the service does it: the table writes { field, direction } in the `bind` state; otherwise it sorts the loaded rows in the page.",
+                "properties": {
+                  "bind": {
+                    "$ref": "#/$defs/statePath"
+                  },
+                  "default": {
+                    "$ref": "#/$defs/sortSpec",
+                    "description": "Sorting when the screen opens."
+                  }
+                }
+              },
+              "selection": {
+                "type": "object",
+                "required": [
+                  "bind"
+                ],
+                "additionalProperties": false,
+                "description": "Row selection: the keys of the chosen rows are in the `bind` state; bulk actions see the whole rows in `selection`.",
+                "properties": {
+                  "bind": {
+                    "$ref": "#/$defs/statePath"
+                  },
+                  "key": {
+                    "type": "string",
+                    "description": "Field that identifies the row (id if absent)."
+                  }
+                }
+              },
+              "bulkActions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/action"
+                },
+                "description": "Actions on the selected rows, above the table. Expressions see `selection` (list of the chosen rows)."
+              },
+              "rowActionsInline": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10,
+                "description": "How many (visible) row actions to show as buttons; the others go into the «⋯» menu. 0 = all in the menu; if missing, all buttons."
+              },
+              "expand": {
+                "type": "object",
+                "required": [
+                  "components"
+                ],
+                "additionalProperties": false,
+                "description": "Area that opens under the row: its nodes see the row as `row`. Data sources belong to the screen: inside the area the values of `row` are used.",
+                "properties": {
+                  "components": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "$ref": "#/$defs/node"
+                    }
+                  },
+                  "expandIf": {
+                    "$ref": "#/$defs/expression",
+                    "description": "Which rows can be expanded (expression with row); all if absent."
+                  }
+                }
+              },
+              "refreshable": {
+                "type": "boolean",
+                "description": "«Refresh» button in the table footer, on the left (pages are on the right): it reloads the data source like the refresh step. Absent if false or not given."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "form"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "fields"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "Name of the data source that provides the initial values (absent in entry forms)."
+              },
+              "initial": {
+                "type": "object",
+                "description": "Initial values with expressions, resolved once when the screen opens; for example {\"type\": \"{{params.type}}\"}."
+              },
+              "fields": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/field"
+                },
+                "description": "Fields of the form, in order. The values are read as `form` in expressions."
+              },
+              "actions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/action"
+                },
+                "description": "Buttons under the fields: on click the form checks the visible fields and, if they are valid, runs the steps, which see the values in `form`."
+              },
+              "columns": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4,
+                "description": "Columns of the field grid (1 if absent). With little space the form goes back to one column."
+              },
+              "validation": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 30,
+                "items": {
+                  "$ref": "#/$defs/formRule"
+                },
+                "description": "Rules across fields, checked with those of the fields: each says the fields it checks (fields), and the message goes to them. For example [{ \"after\": \"start\", \"fields\": [\"end\"] }, { \"sameAs\": \"email\", \"fields\": [\"emailConfirm\"] }, { \"atLeastOne\": [\"phone\", \"email\"] }]."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "tabs"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "tabs"
+            ],
+            "properties": {
+              "tabs": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/tab"
+                },
+                "description": "Tabs, in order: label and components. A tab with a false visibleIf does not appear; values are not lost when switching tabs."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "detail"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "source",
+              "fields"
+            ],
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "Title of the panel; it can contain {{ }}."
+              },
+              "source": {
+                "type": "string",
+                "description": "Name of the data source that returns a single record (an object)."
+              },
+              "fields": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/column"
+                },
+                "description": "Fields of the record to show, in order: field, label, format."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "alert"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "text"
+            ],
+            "properties": {
+              "text": {
+                "type": "string",
+                "description": "Text of the message; it can contain {{ }}."
+              },
+              "kind": {
+                "enum": [
+                  "info",
+                  "success",
+                  "error"
+                ],
+                "description": "Look of the message; info if absent."
+              },
+              "format": {
+                "enum": [
+                  "plain",
+                  "markdown"
+                ],
+                "description": "plain (default): simple text. markdown: text formatted with the Quadrava restricted Markdown: paragraphs, headings (#, ##, ###), bulleted (-) and numbered (1.) lists, also nested, quotes (>), **bold**, *italic*, ~~strikethrough~~, `code`, [links](https://…). Never HTML: even a text coming from the data is safe."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "stats"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "items"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "Data source that returns a record (object) with the values; optional if every indicator uses value."
+              },
+              "items": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 8,
+                "items": {
+                  "$ref": "#/$defs/statItem"
+                },
+                "description": "Indicators shown side by side (from 1 to 8), each with label and value."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "wizard"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "steps"
+            ],
+            "properties": {
+              "bind": {
+                "$ref": "#/$defs/statePath",
+                "description": "State with the index of the current step (from 0): a button can move it too, with set."
+              },
+              "steps": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 10,
+                "items": {
+                  "$ref": "#/$defs/wizardStep"
+                },
+                "description": "Steps of the wizard (from 2 to 10), each with label and components; one step is shown at a time."
+              },
+              "nextLabel": {
+                "type": "string",
+                "description": "Text of the button for the next step («Next» if absent); it can contain {{ }}."
+              },
+              "backLabel": {
+                "type": "string",
+                "description": "Text of the button for the previous step («Back» if absent); it can contain {{ }}."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "tree"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "source",
+              "labelField"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "Data source that returns the root nodes, with their children nested."
+              },
+              "keyField": {
+                "type": "string",
+                "description": "Field that identifies the node (id if absent)."
+              },
+              "labelField": {
+                "type": "string",
+                "description": "Field shown as the text of the node."
+              },
+              "childrenField": {
+                "type": "string",
+                "description": "Field with the children (children if absent)."
+              },
+              "bind": {
+                "$ref": "#/$defs/statePath",
+                "description": "State where the key of the chosen node is written."
+              },
+              "searchable": {
+                "type": "boolean",
+                "description": "Shows a search box that highlights the nodes and opens the matching branches."
+              },
+              "expandAll": {
+                "type": "boolean",
+                "description": "All branches open at the start (only the first level if absent)."
+              },
+              "onSelect": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/step"
+                },
+                "description": "Steps run when a node is chosen, which see the node in `row`."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "calendar"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "source",
+              "dateField",
+              "labelField"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "Data source with the events (a list of rows)."
+              },
+              "dateField": {
+                "type": "string",
+                "description": "Field with the date of the event (YYYY-MM-DD, also with the time)."
+              },
+              "labelField": {
+                "type": "string",
+                "description": "Field shown as the text of the event."
+              },
+              "badgeField": {
+                "type": "string",
+                "description": "Field that decides the colour of the event according to `badges`."
+              },
+              "badges": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/$defs/tone"
+                },
+                "description": "Colour of the events by value of `badgeField`, for example {\"urgent\": \"danger\"}; values not listed are primary."
+              },
+              "bind": {
+                "$ref": "#/$defs/statePath",
+                "description": "State with the visible month (YYYY-MM), to use in the parameters of the data source."
+              },
+              "maxPerDay": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10,
+                "description": "Events shown per day; the others become «+n» (3 if absent)."
+              },
+              "onSelect": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/step"
+                },
+                "description": "Steps run on click on an event, which see the event in `row`."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "chart"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "kind",
+              "source",
+              "categoryField",
+              "series"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "bar",
+                  "line",
+                  "pie"
+                ],
+                "description": "Bars, lines or pie (the pie uses the first series)."
+              },
+              "source": {
+                "type": "string",
+                "description": "Data source with the rows (one per category)."
+              },
+              "categoryField": {
+                "type": "string",
+                "description": "Field with the category (horizontal axis or slice)."
+              },
+              "categoryFormat": {
+                "enum": [
+                  "text",
+                  "date",
+                  "month"
+                ],
+                "description": "How to show the category: text, date (YYYY-MM-DD) or month (YYYY-MM)."
+              },
+              "categoryKey": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.-]+$",
+                "minLength": 1,
+                "maxLength": 100,
+                "description": "Prefix of the translation keys of the categories (t('<prefix>.<value>'))."
+              },
+              "series": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 6,
+                "items": {
+                  "$ref": "#/$defs/chartSeries"
+                },
+                "description": "Series of values to draw (from 1 to 6), each from a numeric field of the rows."
+              },
+              "format": {
+                "enum": [
+                  "number",
+                  "currency",
+                  "percent"
+                ],
+                "description": "Format of the values (number if absent)."
+              },
+              "currency": {
+                "type": "string",
+                "pattern": "^[A-Z]{3}$",
+                "description": "ISO 4217 code for format currency (EUR if absent)."
+              },
+              "decimals": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 6,
+                "description": "Decimals shown with format number (up to 2 if absent)."
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 160,
+                "maximum": 600,
+                "description": "Height in pixels (280 if absent)."
+              },
+              "caption": {
+                "type": "string",
+                "description": "Caption of the equivalent table read by screen readers."
+              },
+              "stacked": {
+                "type": "boolean",
+                "description": "Stacked bars instead of side by side (negative values stack downwards)."
+              },
+              "rightFormat": {
+                "enum": [
+                  "number",
+                  "currency",
+                  "percent"
+                ],
+                "description": "Format of the values of the right axis (as format if absent)."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "dataTable"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "source",
+              "columns"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "Data source with the rows to analyse in the page (all loaded: no server-side paging)."
+              },
+              "columns": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/dataColumn"
+                },
+                "description": "Columns of the table, in order: field, header, format, and whether they can be sorted, filtered, grouped or totalled."
+              },
+              "groupBy": {
+                "type": "array",
+                "maxItems": 3,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string"
+                },
+                "description": "Initial grouping columns (groupable), in order."
+              },
+              "defaultSort": {
+                "$ref": "#/$defs/sortSpec",
+                "description": "Initial sorting (field and direction); then the user changes it from the headers."
+              },
+              "pageSize": {
+                "type": "integer",
+                "minimum": 5,
+                "maximum": 100,
+                "description": "Items per page, group headers included (10 if absent)."
+              },
+              "rowActions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/action"
+                },
+                "description": "Actions on a row, in the last column: expressions see the row as `row`."
+              },
+              "rowActionsInline": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10,
+                "description": "How many (visible) row actions to show as buttons; the others go into the «⋯» menu. 0 = all in the menu; if missing, all buttons."
+              },
+              "refreshable": {
+                "type": "boolean",
+                "description": "«Refresh» button in the table footer, on the left (pages are on the right): it reloads the data source like the refresh step. Absent if false or not given."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "serverDataTable"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "source",
+              "columns"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "Search data source (usually POST with \"body\": \"{{ request }}\") that receives page, sorting, filters and groups and returns only what is needed: { items, total, totals } for rows, { groups: [{ value, count, aggregates }], total, totals } for groups, { values } for the values of a choice filter."
+              },
+              "columns": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/dataColumn"
+                },
+                "description": "Columns of the table, in order: field, header, format, and whether they can be sorted, filtered, grouped or totalled (the service does it)."
+              },
+              "groupBy": {
+                "type": "array",
+                "maxItems": 3,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string"
+                },
+                "description": "Initial grouping columns (groupable), in order."
+              },
+              "defaultSort": {
+                "$ref": "#/$defs/sortSpec",
+                "description": "Initial sorting (field and direction), sent to the service; then the user changes it from the headers."
+              },
+              "pageSize": {
+                "type": "integer",
+                "minimum": 5,
+                "maximum": 200,
+                "description": "Rows (or groups) per page and rows loaded on every «show more» inside a group (20 if absent)."
+              },
+              "bind": {
+                "$ref": "#/$defs/statePath",
+                "description": "State where the table writes the current request (without the page), for other components, for example an export button."
+              },
+              "rowActions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/action"
+                },
+                "description": "Actions on a row, in the last column: expressions see the row as `row`."
+              },
+              "rowActionsInline": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10,
+                "description": "How many (visible) row actions to show as buttons; the others go into the «⋯» menu. 0 = all in the menu; if missing, all buttons."
+              },
+              "refreshable": {
+                "type": "boolean",
+                "description": "«Refresh» button in the table footer, on the left (pages are on the right): it reloads the data source like the refresh step. Absent if false or not given."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "input"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "field"
+            ],
+            "properties": {
+              "field": {
+                "$ref": "#/$defs/field",
+                "description": "The field to show, with the same properties as the form fields (type, label, options, required, validation rule, lookup, file…). The name identifies the field and, without `bind`, the value in the state."
+              },
+              "bind": {
+                "$ref": "#/$defs/statePath",
+                "description": "State where the field reads and writes the value (state.<field name> if absent). The data sources that use it reload when it changes."
+              },
+              "default": {
+                "description": "Initial value, if the state does not have one already (null if absent; false for checkbox and switch). Texts can contain {{ }}, for example a translated text."
+              },
+              "onChange": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/step"
+                },
+                "description": "Steps run after every change of the value, which see the new value in `value`. Free text is written to the state when leaving the field or with Enter."
+              },
+              "group": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9-]*$",
+                "description": "Validation group: the step { \"validate\": \"<group>\" } checks the fields of the same group together."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "box"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "components"
+            ],
+            "properties": {
+              "components": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/node"
+                },
+                "description": "Contained components, arranged according to direction; each one can grow with grow."
+              },
+              "direction": {
+                "enum": [
+                  "row",
+                  "column"
+                ],
+                "description": "row: side by side (default); column: stacked."
+              },
+              "gap": {
+                "$ref": "#/$defs/gap",
+                "description": "Space between the components, taken from the theme (medium if absent)."
+              },
+              "align": {
+                "enum": [
+                  "start",
+                  "center",
+                  "end",
+                  "stretch"
+                ],
+                "description": "Alignment on the cross axis: in a row it is the vertical one (stretch if absent, end to align fields of different heights)."
+              },
+              "justify": {
+                "enum": [
+                  "start",
+                  "center",
+                  "end",
+                  "between"
+                ],
+                "description": "Distribution on the main axis (start if absent; between = first and last at the ends)."
+              },
+              "wrap": {
+                "type": "boolean",
+                "description": "In a row, wraps when space runs out (true if absent)."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "grid"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "components"
+            ],
+            "properties": {
+              "components": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/node"
+                },
+                "description": "Contained components, one per cell, wrapping after the last column; each one can take several columns with span."
+              },
+              "columns": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 12,
+                "description": "Columns of the grid (2 if absent). Below 600px of width it becomes a single column."
+              },
+              "gap": {
+                "$ref": "#/$defs/gap",
+                "description": "Space between the components, taken from the theme (medium if absent)."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "border"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "components"
+            ],
+            "properties": {
+              "components": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/node"
+                },
+                "description": "Contained components, each in the region given by region (north, west, center, east, south; center if absent)."
+              },
+              "westWidth": {
+                "type": "integer",
+                "minimum": 120,
+                "maximum": 600,
+                "description": "Width in px of the west region (240 if absent)."
+              },
+              "eastWidth": {
+                "type": "integer",
+                "minimum": 120,
+                "maximum": 600,
+                "description": "Width in px of the east region (240 if absent)."
+              },
+              "gap": {
+                "$ref": "#/$defs/gap",
+                "description": "Space between the components, taken from the theme (medium if absent)."
+              },
+              "resizable": {
+                "type": "boolean",
+                "description": "Dividers between the center and the west and east sides, to drag or to move with the arrow keys (from 120 to 600px)."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "image"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "src",
+              "alt"
+            ],
+            "properties": {
+              "src": {
+                "type": "string",
+                "description": "Address of the image: relative (/img/logo.png), https:// or data:image/…; it can contain {{ }}. Any other address is not shown.",
+                "contentMediaType": "image/*",
+                "maxLength": 100000
+              },
+              "alt": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Alternative text (required for accessibility); it is shown also if the image does not load."
+              },
+              "width": {
+                "type": "integer",
+                "minimum": 16,
+                "maximum": 2000,
+                "description": "Maximum width in px (it adapts to the available space)."
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 16,
+                "maximum": 2000,
+                "description": "Height in px."
+              },
+              "fit": {
+                "enum": [
+                  "contain",
+                  "cover"
+                ],
+                "description": "With width and height: contain shows the whole image, cover fills by cropping (contain if absent)."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "link"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "label"
+            ],
+            "anyOf": [
+              {
+                "required": [
+                  "screen"
+                ],
+                "properties": {
+                  "screen": true
+                }
+              },
+              {
+                "required": [
+                  "href"
+                ],
+                "properties": {
+                  "href": true
+                }
+              }
+            ],
+            "not": {
+              "required": [
+                "screen",
+                "href"
+              ],
+              "properties": {
+                "screen": true,
+                "href": true
+              }
+            },
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "Text of the link; it can contain {{ }}."
+              },
+              "screen": {
+                "type": "string",
+                "description": "Screen to open in the application (with params)."
+              },
+              "params": {
+                "type": "object",
+                "description": "Parameters of the screen; values can contain {{ }}."
+              },
+              "href": {
+                "type": "string",
+                "pattern": "^(https://[^\\s]+|/[^/\\s][^\\s]*)$",
+                "description": "External https:// address (it opens in a new tab, without access to this one) or relative path. Never javascript: or other protocols."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "progress"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "value"
+            ],
+            "properties": {
+              "value": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "description": "Value reached, a number or an expression (for example {{ row.completed }})."
+              },
+              "max": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "description": "Value that corresponds to 100% (100 if absent); number or expression."
+              },
+              "label": {
+                "type": "string",
+                "description": "Label shown above the bar; it can contain {{ }}."
+              },
+              "kind": {
+                "enum": [
+                  "line",
+                  "circle"
+                ],
+                "description": "Bar (line, default) or circle."
+              },
+              "tone": {
+                "$ref": "#/$defs/tone",
+                "description": "Colour of the bar, taken from the theme (primary if absent)."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "timeline"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "source",
+              "dateField",
+              "labelField"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "Data source with the events (a list of rows)."
+              },
+              "dateField": {
+                "type": "string",
+                "description": "Field with the date (YYYY-MM-DD, also with the time)."
+              },
+              "labelField": {
+                "type": "string",
+                "description": "Field shown as the title of the event."
+              },
+              "descriptionField": {
+                "type": "string",
+                "description": "Field shown under the title."
+              },
+              "toneField": {
+                "type": "string",
+                "description": "Field that decides the colour according to tones."
+              },
+              "tones": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/$defs/tone"
+                },
+                "description": "Colour of the events by value of `toneField`, for example {\"error\": \"danger\"}; values not listed are primary."
+              },
+              "order": {
+                "enum": [
+                  "desc",
+                  "asc"
+                ],
+                "description": "Newest first (desc, default) or oldest first."
+              },
+              "withTime": {
+                "type": "boolean",
+                "description": "Shows the time too."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "kanban"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "source",
+              "columnField",
+              "titleField"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "Data source with the cards (a list of rows)."
+              },
+              "columnField": {
+                "type": "string",
+                "description": "Field of the row that decides the column (for example status)."
+              },
+              "titleField": {
+                "type": "string",
+                "description": "Field shown as the title of the card."
+              },
+              "descriptionField": {
+                "type": "string",
+                "description": "Field shown under the title of the card."
+              },
+              "keyField": {
+                "type": "string",
+                "description": "Field that identifies the card (id if absent): onMove receives the keys of the neighbours in beforeId and afterId."
+              },
+              "avatarField": {
+                "type": "string",
+                "description": "Field with the name of the person of the card (for example the assignee), shown as a round mark with the initials; the full name is in the tooltip and read by screen readers."
+              },
+              "badges": {
+                "type": "array",
+                "maxItems": 4,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "field"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "field": {
+                      "type": "string",
+                      "description": "Field shown as a label on the card; an empty value shows nothing."
+                    },
+                    "tones": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "$ref": "#/$defs/tone"
+                      },
+                      "description": "Colour of the label by value, for example {\"high\": \"danger\"}; values not listed are neutral."
+                    }
+                  }
+                },
+                "description": "Coloured labels on the card, for example priority and type (at most 4)."
+              },
+              "footerFields": {
+                "type": "array",
+                "maxItems": 4,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "field"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "field": {
+                      "type": "string",
+                      "description": "Field whose value is shown; an empty value shows nothing."
+                    },
+                    "label": {
+                      "type": "string",
+                      "description": "Text before the value, for example \"Points\" (it can contain {{ }})."
+                    }
+                  }
+                },
+                "description": "Values at the bottom of the card, for example the story points or the due date (at most 4)."
+              },
+              "columns": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 10,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "value",
+                        "label"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "value": {
+                          "type": "string",
+                          "description": "Value of `columnField` for the cards of the column."
+                        },
+                        "label": {
+                          "type": "string",
+                          "description": "Header of the column (it can contain {{ }})."
+                        },
+                        "tone": {
+                          "$ref": "#/$defs/tone",
+                          "description": "Colour of the column (neutral if absent)."
+                        },
+                        "limit": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "description": "Maximum number of cards (work in progress): the header shows «3/5» and a warning when the column holds more; moves are not blocked."
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "#/$defs/expression"
+                  }
+                ],
+                "description": "Columns of the board, in order (at most 10); or an expression that returns them as a list of {value, label, tone, limit}, for example {{ params.board == \"bugs\" ? [...] : [...] }}, so one screen serves several boards. In a CEL list all the values of a column are texts ('limit': '5'); labels returned by an expression are shown as they are."
+              },
+              "columnsFrom": {
+                "type": "object",
+                "required": [
+                  "source"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "description": "Data source whose rows are the columns, in order."
+                  },
+                  "valueField": {
+                    "type": "string",
+                    "description": "Field with the value of `columnField` for the column (value if absent)."
+                  },
+                  "labelField": {
+                    "type": "string",
+                    "description": "Field with the header, shown as text (label if absent)."
+                  },
+                  "toneField": {
+                    "type": "string",
+                    "description": "Field with the colour: neutral, primary, success or danger (neutral if absent or different)."
+                  },
+                  "limitField": {
+                    "type": "string",
+                    "description": "Field with the maximum number of cards (no limit if absent or not a positive whole number)."
+                  }
+                },
+                "description": "Columns read from a data source instead of `columns`, for boards whose columns are data (for example the statuses of a workflow)."
+              },
+              "laneField": {
+                "type": "string",
+                "description": "Field of the row that decides the swimlane (for example the assignee): the board is divided into horizontal lanes that can be collapsed. A card moves only within its lane."
+              },
+              "lanes": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 30,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "value",
+                    "label"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "value": {
+                      "type": "string",
+                      "description": "Value of `laneField` for the cards of the lane."
+                    },
+                    "label": {
+                      "type": "string",
+                      "description": "Header of the lane (it can contain {{ }})."
+                    }
+                  }
+                },
+                "description": "Lanes in order, with their headers; rows whose value is not a lane are not shown. Without it every value of `laneField` in the data is a lane, in order of appearance, and the cards without a value go to a last lane «No group»."
+              },
+              "reorder": {
+                "type": "boolean",
+                "description": "Cards can also change place within their column: they are dropped between other cards, or moved up and down from the «Move» menu, and onMove runs for these moves too (false if absent: only moves to another column)."
+              },
+              "moveIf": {
+                "$ref": "#/$defs/expression",
+                "description": "Condition for moving a card (it sees the row in row), for example a permission."
+              },
+              "onMove": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/step"
+                },
+                "description": "Steps that move a card (usually call and refresh): they see the row in row, the starting column in from, the target one in to, and the keys (keyField) of the cards that will be before and after it in beforeId and afterId (null at the ends of the column)."
+              }
+            },
+            "dependentRequired": {
+              "lanes": [
+                "laneField"
+              ]
+            },
+            "anyOf": [
+              {
+                "required": [
+                  "columns"
+                ],
+                "properties": {
+                  "columns": true
+                }
+              },
+              {
+                "required": [
+                  "columnsFrom"
+                ],
+                "properties": {
+                  "columnsFrom": true
+                }
+              }
+            ],
+            "not": {
+              "required": [
+                "columns",
+                "columnsFrom"
+              ],
+              "properties": {
+                "columns": true,
+                "columnsFrom": true
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "comments"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "source"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "Name of the data source (GET) that returns the comments, one row each."
+              },
+              "textField": {
+                "type": "string",
+                "description": "Field of the row with the text of the comment, in restricted Markdown (text if absent). Never HTML."
+              },
+              "authorField": {
+                "type": "string",
+                "description": "Field of the row with the name of the author (author if absent)."
+              },
+              "dateField": {
+                "type": "string",
+                "description": "Field of the row with the date and time, ISO 8601 (date if absent). Comments without a valid date come last, without a date."
+              },
+              "order": {
+                "enum": [
+                  "asc",
+                  "desc"
+                ],
+                "description": "Order of the comments by date: oldest first, the newest next to the box for writing (asc, default), or newest first (desc)."
+              },
+              "onPost": {
+                "$ref": "#/$defs/steps",
+                "description": "Steps that publish a comment: they see text (the Markdown written, without spaces at the ends) and mentions (the values of the people mentioned who are still in the text). Without onPost the thread is read-only. The box is emptied when the steps succeed, so they usually end with a refresh of source."
+              },
+              "postIf": {
+                "$ref": "#/$defs/expression",
+                "description": "Condition for showing the box for writing, for example {{ can('tasks.comments.create') }}; an error counts as false. Always shown with onPost if absent."
+              },
+              "mentions": {
+                "type": "object",
+                "required": [
+                  "source",
+                  "labelField"
+                ],
+                "additionalProperties": false,
+                "description": "People who can be mentioned: typing @ followed by letters asks this GET data source with the search variable (as a lookup does) and the chosen person is inserted as @ followed by the label.",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "description": "Name of the data source (GET) that returns the people."
+                  },
+                  "valueField": {
+                    "type": "string",
+                    "description": "Field of the row that identifies the person in mentions (id if absent)."
+                  },
+                  "labelField": {
+                    "type": "string",
+                    "description": "Field of the row with the name inserted after @."
+                  },
+                  "minChars": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 5,
+                    "description": "Letters after @ before asking (1 if absent; 0 = right after @)."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "stepConfirm": {
+      "type": "object",
+      "required": [
+        "confirm"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "confirm": {
+          "type": "string",
+          "description": "Question asked to the user before going on; it can contain expressions, for example \"Approve order {{row.number}}?\". If the user gives up the sequence stops, without error messages."
+        }
+      }
+    },
+    "tone": {
+      "enum": [
+        "neutral",
+        "primary",
+        "success",
+        "danger"
+      ],
+      "description": "Colour tone, taken from the theme."
+    },
+    "tab": {
+      "type": "object",
+      "required": [
+        "label",
+        "components"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string"
+        },
+        "visibleIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "hiddenIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/node"
+          }
+        }
+      }
+    },
+    "columnProps": {
+      "type": "object",
+      "required": [
+        "field"
+      ],
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "Name of the field in the row returned by the service."
+        },
+        "label": {
+          "type": "string"
+        },
+        "format": {
+          "enum": [
+            "text",
+            "number",
+            "currency",
+            "percent",
+            "date",
+            "datetime",
+            "boolean",
+            "badge",
+            "markdown"
+          ],
+          "description": "How to show the value: number (number with digits grouped according to the language, `decimals` decimals), currency (amount with symbol), percent (the value is already in percentage points, 10 = 10 %), date and datetime (ISO 8601 text), boolean (Yes/No), badge (coloured label according to `badges`). markdown: formatted text (restricted Markdown); in the detail it is shown formatted, in tables as plain text."
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 code for format currency (EUR if absent)."
+        },
+        "badges": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/tone"
+          },
+          "description": "For format badge: colour for every value; values not listed are neutral."
+        },
+        "visibleIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "hiddenIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "tooltip": {
+          "type": "string",
+          "description": "Help text shown on mouse hover or with the focus. Text only (never HTML); it can contain {{ }}."
+        },
+        "valueKey": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+$",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Prefix of the translation keys for the shown values: the text is t('<prefix>.<value>'), with the value as a fallback. Badge colours stay tied to the original value."
+        },
+        "decimals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6,
+          "description": "Decimals shown with format number (up to 2 if absent)."
+        }
+      }
+    },
+    "tableColumnProps": {
+      "type": "object",
+      "$ref": "#/$defs/columnProps",
+      "properties": {
+        "sortable": {
+          "type": "boolean",
+          "description": "The column can be sorted (arrows in the header)."
+        },
+        "onClick": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/step"
+          },
+          "description": "The value becomes a link that runs these steps with the row in `row`."
+        },
+        "aggregate": {
+          "enum": [
+            "sum",
+            "avg",
+            "min",
+            "max",
+            "count"
+          ],
+          "description": "Value of the column in the totals row (sum, average, minimum, maximum, count), computed on the loaded rows."
+        }
+      }
+    },
+    "tableColumn": {
+      "type": "object",
+      "$ref": "#/$defs/tableColumnProps",
+      "unevaluatedProperties": false
+    },
+    "statePath": {
+      "type": "string",
+      "pattern": "^state(\\.[A-Za-z][A-Za-z0-9]*)+$",
+      "description": "Path in the screen state, for example state.sorting."
+    },
+    "sortSpec": {
+      "type": "object",
+      "required": [
+        "field",
+        "direction"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "direction": {
+          "enum": [
+            "asc",
+            "desc"
+          ]
+        }
+      }
+    },
+    "stepDialog": {
+      "type": "object",
+      "required": [
+        "dialog"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "dialog": {
+          "type": "object",
+          "required": [
+            "title",
+            "fields",
+            "onSubmit"
+          ],
+          "additionalProperties": false,
+          "description": "Window with a form: the onSubmit steps see the values in `form`. If they succeed the window closes and the sequence goes on; if the user cancels the sequence stops silently.",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "fields": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/field"
+              }
+            },
+            "initial": {
+              "type": "object",
+              "description": "Initial values with expressions (for example {\"note\": \"{{ row.note }}\"})."
+            },
+            "columns": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4
+            },
+            "submitLabel": {
+              "type": "string"
+            },
+            "onSubmit": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/step"
+              }
+            }
+          }
+        }
+      }
+    },
+    "statItem": {
+      "type": "object",
+      "required": [
+        "label"
+      ],
+      "additionalProperties": false,
+      "description": "An indicator: label and big value. The value comes from a field of the data source record (`field`) or from an expression (`value`, which sees the record as `row`).",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string"
+        },
+        "field": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/expression"
+        },
+        "format": {
+          "enum": [
+            "text",
+            "number",
+            "currency",
+            "percent",
+            "date",
+            "datetime",
+            "boolean",
+            "badge"
+          ]
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217 code for format currency (EUR if absent)."
+        },
+        "decimals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6,
+          "description": "Decimals shown with format number (up to 2 if absent)."
+        },
+        "valueKey": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+$",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Prefix of the translation keys for the shown values: the text is t('<prefix>.<value>'), with the value as a fallback. Badge colours stay tied to the original value."
+        },
+        "tone": {
+          "$ref": "#/$defs/tone"
+        },
+        "caption": {
+          "type": "string",
+          "description": "Small line under the value (for example a comparison); it can contain {{ }} with the record as row."
+        },
+        "tooltip": {
+          "type": "string",
+          "description": "Help text shown on mouse hover or with the focus. Text only (never HTML); it can contain {{ }}."
+        },
+        "visibleIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "hiddenIf": {
+          "$ref": "#/$defs/expression"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "field"
+          ],
+          "properties": {
+            "field": true
+          }
+        },
+        {
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": true
+          }
+        }
+      ]
+    },
+    "wizardStep": {
+      "type": "object",
+      "required": [
+        "label",
+        "components"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/node"
+          }
+        },
+        "nextIf": {
+          "$ref": "#/$defs/expression",
+          "description": "Next is enabled only if the expression is true (always, if absent)."
+        }
+      }
+    },
+    "chartSeries": {
+      "type": "object",
+      "required": [
+        "field"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "Numeric field of the rows."
+        },
+        "label": {
+          "type": "string"
+        },
+        "tone": {
+          "$ref": "#/$defs/tone",
+          "description": "Colour of the series from the theme (otherwise the chart palette)."
+        },
+        "kind": {
+          "enum": [
+            "bar",
+            "line"
+          ],
+          "description": "How to draw this series in a bar or line chart (combined charts); if absent the chart kind applies."
+        },
+        "axis": {
+          "enum": [
+            "left",
+            "right"
+          ],
+          "description": "Value axis of the series: on the right for different quantities (for example a percentage next to amounts)."
+        }
+      }
+    },
+    "dataColumn": {
+      "type": "object",
+      "$ref": "#/$defs/tableColumnProps",
+      "properties": {
+        "filter": {
+          "enum": [
+            "text",
+            "select",
+            "number",
+            "date"
+          ],
+          "description": "Filter in the header: text (contains), choice among the values present, numeric or date range."
+        },
+        "groupable": {
+          "type": "boolean",
+          "description": "The column can be chosen to group the rows."
+        }
+      },
+      "unevaluatedProperties": false
+    },
+    "gap": {
+      "enum": [
+        "none",
+        "small",
+        "medium",
+        "large"
+      ],
+      "description": "Space between the components, taken from the theme (medium if absent)."
+    },
+    "stepValidate": {
+      "type": "object",
+      "required": [
+        "validate"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "validate": {
+          "type": "string",
+          "pattern": "^(\\*|[A-Za-z][A-Za-z0-9-]*)$",
+          "description": "Group of standalone fields (`group` of the input nodes) to check, or * for all the visible ones. If a field is not valid the errors are shown and the sequence stops."
+        }
+      }
+    },
+    "stepPrint": {
+      "type": "object",
+      "required": [
+        "print"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "print": {
+          "const": true,
+          "description": "Opens the browser's print dialog: menus, bars and buttons are not printed."
+        }
+      }
+    },
+    "stepExport": {
+      "type": "object",
+      "required": [
+        "export"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "export": {
+          "type": "object",
+          "required": [
+            "source",
+            "columns"
+          ],
+          "additionalProperties": false,
+          "description": "Downloads as CSV the rows of a GET data source (a list, or the items of a paged response): semicolon separator, UTF-8 with BOM for Excel, cells starting with = + - @ neutralised.",
+          "properties": {
+            "source": {
+              "type": "string",
+              "description": "GET data source that returns the rows."
+            },
+            "fileName": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9 _.-]{1,80}$",
+              "description": "Name of the file (export.csv if absent; the .csv extension is added if missing)."
+            },
+            "args": {
+              "type": "object",
+              "description": "Variables for url and params of the data source (as in call)."
+            },
+            "columns": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": [
+                  "field"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "field": {
+                    "type": "string",
+                    "description": "Field of the row."
+                  },
+                  "label": {
+                    "type": "string",
+                    "description": "Header of the column (the field if absent); it can contain {{ }}."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+      "description": "Simple name: a letter, then letters, digits or _."
+    },
+    "stepIf": {
+      "type": "object",
+      "required": [
+        "if",
+        "then"
+      ],
+      "additionalProperties": false,
+      "description": "Conditional step: runs then if the condition is true, otherwise else (if present).",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/expression",
+          "description": "Condition, for example {{ created.status == 'draft' }}. If it cannot be evaluated the sequence stops (neither branch is run)."
+        },
+        "then": {
+          "$ref": "#/$defs/steps",
+          "description": "Steps if the condition is true."
+        },
+        "else": {
+          "$ref": "#/$defs/steps",
+          "description": "Steps if the condition is false."
+        }
+      }
+    },
+    "stepRun": {
+      "type": "object",
+      "required": [
+        "run"
+      ],
+      "additionalProperties": false,
+      "description": "Runs a named sequence of the screen (actions), with the same variables as the point where it is called (row, form…).",
+      "properties": {
+        "run": {
+          "$ref": "#/$defs/identifier",
+          "description": "Name of the sequence in actions."
+        }
+      }
+    },
+    "ruleOptions": {
+      "description": "Properties shared by the validation rules of fields and forms: each rule names them with true and takes their schema from here.",
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "Message shown when the rule is not met (the standard one of the rule if absent). Plain text or with {{ }}."
+        },
+        "when": {
+          "$ref": "#/$defs/expression",
+          "description": "Condition under which the rule applies (always if absent). If it cannot be evaluated the rule applies."
+        },
+        "severity": {
+          "enum": [
+            "error",
+            "warning"
+          ],
+          "description": "error: blocks sending (default); warning: the message is shown but does not block."
+        }
+      }
+    },
+    "fieldRule": {
+      "description": "Validation rule of a field, named by its key ({ \"minLength\": 3 }, { \"format\": \"iban\" }, { \"rule\": \"{{…}}\" }, { \"use\": \"staffNumber\" } for a validator of the application).",
+      "oneOf": [
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "required"
+          ],
+          "properties": {
+            "required": {
+              "const": true,
+              "description": "The field must be filled in; with when, only while the condition holds (conditional required)."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "minLength"
+          ],
+          "properties": {
+            "minLength": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000,
+              "description": "For text, textarea and richtext: minimum number of characters."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "maxLength"
+          ],
+          "properties": {
+            "maxLength": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000,
+              "description": "For text, textarea and richtext: maximum number of characters."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "pattern"
+          ],
+          "properties": {
+            "pattern": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500,
+              "description": "For text and textarea: regular expression (JavaScript syntax, Unicode) that the whole value must match, as in the HTML pattern attribute (no need for ^ and $). Values longer than 1000 characters never match."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "format"
+          ],
+          "properties": {
+            "format": {
+              "enum": [
+                "email",
+                "url",
+                "phone",
+                "iban",
+                "bic",
+                "uuid",
+                "alphanumeric",
+                "vatNumber",
+                "taxCode",
+                "companyId",
+                "postalCode"
+              ],
+              "description": "For text: expected format. email; url (http or https); phone (international, 6 to 15 digits, with + spaces dashes dots and brackets); iban (length of the country and check digits); bic; uuid; alphanumeric (letters A-Z and digits only); vatNumber (VAT number with its national check: IT, DE, FR, ES, NL, BE, AT, PT, PL, SE; without country the prefix of the number decides); taxCode (personal tax number: IT codice fiscale, ES NIF/NIE, PT NIF, NL BSN); companyId (IT partita IVA, FR SIREN/SIRET, ES CIF, PT NIPC, BE enterprise number, NL KvK); postalCode (IT, DE, FR, ES, NL, BE, AT, PT, PL, SE). The text box also gets the right keyboard and autocomplete."
+            },
+            "country": {
+              "type": "string",
+              "pattern": "^([A-Z]{2}|\\{\\{[\\s\\S]+\\}\\})$",
+              "description": "For the national formats: ISO 3166 two-letter country code (IT, DE…) or an expression that gives it, for example {{form.country}}. Required by taxCode, companyId and postalCode; optional for vatNumber."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "min"
+          ],
+          "properties": {
+            "min": {
+              "type": "number",
+              "description": "For number: smallest value allowed."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "max"
+          ],
+          "properties": {
+            "max": {
+              "type": "number",
+              "description": "For number: largest value allowed."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "step"
+          ],
+          "properties": {
+            "step": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "For number: the value must be a multiple of step, counted from min (from 0 without min); it is also the step of the arrows of the box."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "decimals"
+          ],
+          "properties": {
+            "decimals": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10,
+              "description": "For number: maximum number of decimal places."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "integer"
+          ],
+          "properties": {
+            "integer": {
+              "const": true,
+              "description": "For number: whole numbers only."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "minDate"
+          ],
+          "properties": {
+            "minDate": {
+              "type": "string",
+              "pattern": "^(\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2})?|today([+-]\\d{1,4}[dwmy])?)$",
+              "description": "For date and datetime: earliest date allowed: YYYY-MM-DD (or YYYY-MM-DDTHH:mm), or relative to the day: today, today+30d, today-18y (units d, w, m, y). Earlier days cannot be chosen in the calendar."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "maxDate"
+          ],
+          "properties": {
+            "maxDate": {
+              "type": "string",
+              "pattern": "^(\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2})?|today([+-]\\d{1,4}[dwmy])?)$",
+              "description": "For date and datetime: latest date allowed: YYYY-MM-DD (or YYYY-MM-DDTHH:mm), or relative to the day: today, today+30d, today-18y (units d, w, m, y). Later days cannot be chosen in the calendar."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "minStrength"
+          ],
+          "properties": {
+            "minStrength": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4,
+              "description": "For password: minimum strength, from 0 (very weak) to 4 (strong). The estimate counts length and kinds of characters, and discounts repetitions, sequences, years, common words and the values of the other fields."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "minItems"
+          ],
+          "properties": {
+            "minItems": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "For multiselect: minimum number of choices (an empty choice is left to required)."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "maxItems"
+          ],
+          "properties": {
+            "maxItems": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "For multiselect: maximum number of choices."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "sameAs"
+          ],
+          "properties": {
+            "sameAs": {
+              "type": "string",
+              "pattern": "^[a-zA-Z][A-Za-z0-9]*$",
+              "description": "The value must be equal to that of this other field (a confirmation of an email or a code)."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "after"
+          ],
+          "properties": {
+            "after": {
+              "type": "string",
+              "pattern": "^[a-zA-Z][A-Za-z0-9]*$",
+              "description": "For date and datetime: the date must come after that of this other field (an end after a start). Ignored while the other field is empty."
+            },
+            "inclusive": {
+              "type": "boolean",
+              "description": "The same date is allowed too."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "before"
+          ],
+          "properties": {
+            "before": {
+              "type": "string",
+              "pattern": "^[a-zA-Z][A-Za-z0-9]*$",
+              "description": "For date and datetime: the date must come before that of this other field. Ignored while the other field is empty."
+            },
+            "inclusive": {
+              "type": "boolean",
+              "description": "The same date is allowed too."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "atLeastOne"
+          ],
+          "properties": {
+            "atLeastOne": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 10,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z][A-Za-z0-9]*$"
+              },
+              "description": "At least one of these fields (or this field) must be filled in. On the form, the message goes to all of them unless fields says otherwise."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "unique"
+          ],
+          "properties": {
+            "unique": {
+              "type": "string",
+              "pattern": "^[a-zA-Z][A-Za-z0-9]*$",
+              "description": "For repeater: name of the column whose values must not repeat across rows; the repeated cells are marked."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "rule"
+          ],
+          "properties": {
+            "rule": {
+              "$ref": "#/$defs/expression",
+              "description": "CEL condition that must be true; it sees the field in value, the form in form and the row of a repeater in item."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "use"
+          ],
+          "properties": {
+            "use": {
+              "type": "string",
+              "pattern": "^[a-zA-Z][A-Za-z0-9]*$",
+              "description": "Name of a validator registered by the application (provideValidators)."
+            },
+            "params": {
+              "type": "object",
+              "description": "Parameters of the validator."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/ruleOptions",
+          "required": [
+            "remote"
+          ],
+          "properties": {
+            "remote": {
+              "type": "string",
+              "pattern": "^[a-zA-Z][A-Za-z0-9]*$",
+              "description": "Data source that checks the value on a service; it sees the value in value (for example \"params\": { \"code\": \"{{ value }}\" }) and answers true / false or { \"valid\": false, \"code\": \"taken\" }. It runs when the user stops typing and every other rule passes; a newer value cancels it."
+            },
+            "debounce": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 3000,
+              "description": "Milliseconds without typing before the check starts (400 if absent)."
+            },
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "formRuleOptions": {
+      "description": "Properties shared by the validation rules of forms (those of ruleOptions plus fields).",
+      "type": "object",
+      "$ref": "#/$defs/ruleOptions",
+      "properties": {
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z][A-Za-z0-9]*$"
+          },
+          "description": "Fields of the form the rule checks and the message goes to. Required, except for atLeastOne (its own fields if absent)."
+        }
+      }
+    },
+    "formRule": {
+      "description": "Validation rule of a form across its fields: like the rules of a field, plus fields, the fields it checks.",
+      "oneOf": [
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "required",
+            "fields"
+          ],
+          "properties": {
+            "required": {
+              "const": true,
+              "description": "The field must be filled in; with when, only while the condition holds (conditional required)."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "minLength",
+            "fields"
+          ],
+          "properties": {
+            "minLength": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000,
+              "description": "For text, textarea and richtext: minimum number of characters."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "maxLength",
+            "fields"
+          ],
+          "properties": {
+            "maxLength": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000,
+              "description": "For text, textarea and richtext: maximum number of characters."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "pattern",
+            "fields"
+          ],
+          "properties": {
+            "pattern": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500,
+              "description": "For text and textarea: regular expression (JavaScript syntax, Unicode) that the whole value must match, as in the HTML pattern attribute (no need for ^ and $). Values longer than 1000 characters never match."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "format",
+            "fields"
+          ],
+          "properties": {
+            "format": {
+              "enum": [
+                "email",
+                "url",
+                "phone",
+                "iban",
+                "bic",
+                "uuid",
+                "alphanumeric",
+                "vatNumber",
+                "taxCode",
+                "companyId",
+                "postalCode"
+              ],
+              "description": "For text: expected format. email; url (http or https); phone (international, 6 to 15 digits, with + spaces dashes dots and brackets); iban (length of the country and check digits); bic; uuid; alphanumeric (letters A-Z and digits only); vatNumber (VAT number with its national check: IT, DE, FR, ES, NL, BE, AT, PT, PL, SE; without country the prefix of the number decides); taxCode (personal tax number: IT codice fiscale, ES NIF/NIE, PT NIF, NL BSN); companyId (IT partita IVA, FR SIREN/SIRET, ES CIF, PT NIPC, BE enterprise number, NL KvK); postalCode (IT, DE, FR, ES, NL, BE, AT, PT, PL, SE). The text box also gets the right keyboard and autocomplete."
+            },
+            "country": {
+              "type": "string",
+              "pattern": "^([A-Z]{2}|\\{\\{[\\s\\S]+\\}\\})$",
+              "description": "For the national formats: ISO 3166 two-letter country code (IT, DE…) or an expression that gives it, for example {{form.country}}. Required by taxCode, companyId and postalCode; optional for vatNumber."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "min",
+            "fields"
+          ],
+          "properties": {
+            "min": {
+              "type": "number",
+              "description": "For number: smallest value allowed."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "max",
+            "fields"
+          ],
+          "properties": {
+            "max": {
+              "type": "number",
+              "description": "For number: largest value allowed."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "step",
+            "fields"
+          ],
+          "properties": {
+            "step": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "For number: the value must be a multiple of step, counted from min (from 0 without min); it is also the step of the arrows of the box."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "decimals",
+            "fields"
+          ],
+          "properties": {
+            "decimals": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10,
+              "description": "For number: maximum number of decimal places."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "integer",
+            "fields"
+          ],
+          "properties": {
+            "integer": {
+              "const": true,
+              "description": "For number: whole numbers only."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "minDate",
+            "fields"
+          ],
+          "properties": {
+            "minDate": {
+              "type": "string",
+              "pattern": "^(\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2})?|today([+-]\\d{1,4}[dwmy])?)$",
+              "description": "For date and datetime: earliest date allowed: YYYY-MM-DD (or YYYY-MM-DDTHH:mm), or relative to the day: today, today+30d, today-18y (units d, w, m, y). Earlier days cannot be chosen in the calendar."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "maxDate",
+            "fields"
+          ],
+          "properties": {
+            "maxDate": {
+              "type": "string",
+              "pattern": "^(\\d{4}-\\d{2}-\\d{2}(T\\d{2}:\\d{2})?|today([+-]\\d{1,4}[dwmy])?)$",
+              "description": "For date and datetime: latest date allowed: YYYY-MM-DD (or YYYY-MM-DDTHH:mm), or relative to the day: today, today+30d, today-18y (units d, w, m, y). Later days cannot be chosen in the calendar."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "minStrength",
+            "fields"
+          ],
+          "properties": {
+            "minStrength": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4,
+              "description": "For password: minimum strength, from 0 (very weak) to 4 (strong). The estimate counts length and kinds of characters, and discounts repetitions, sequences, years, common words and the values of the other fields."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "minItems",
+            "fields"
+          ],
+          "properties": {
+            "minItems": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "For multiselect: minimum number of choices (an empty choice is left to required)."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "maxItems",
+            "fields"
+          ],
+          "properties": {
+            "maxItems": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "description": "For multiselect: maximum number of choices."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "sameAs",
+            "fields"
+          ],
+          "properties": {
+            "sameAs": {
+              "type": "string",
+              "pattern": "^[a-zA-Z][A-Za-z0-9]*$",
+              "description": "The value must be equal to that of this other field (a confirmation of an email or a code)."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "after",
+            "fields"
+          ],
+          "properties": {
+            "after": {
+              "type": "string",
+              "pattern": "^[a-zA-Z][A-Za-z0-9]*$",
+              "description": "For date and datetime: the date must come after that of this other field (an end after a start). Ignored while the other field is empty."
+            },
+            "inclusive": {
+              "type": "boolean",
+              "description": "The same date is allowed too."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "before",
+            "fields"
+          ],
+          "properties": {
+            "before": {
+              "type": "string",
+              "pattern": "^[a-zA-Z][A-Za-z0-9]*$",
+              "description": "For date and datetime: the date must come before that of this other field. Ignored while the other field is empty."
+            },
+            "inclusive": {
+              "type": "boolean",
+              "description": "The same date is allowed too."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "atLeastOne"
+          ],
+          "properties": {
+            "atLeastOne": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 10,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-zA-Z][A-Za-z0-9]*$"
+              },
+              "description": "At least one of these fields (or this field) must be filled in. On the form, the message goes to all of them unless fields says otherwise."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "unique",
+            "fields"
+          ],
+          "properties": {
+            "unique": {
+              "type": "string",
+              "pattern": "^[a-zA-Z][A-Za-z0-9]*$",
+              "description": "For repeater: name of the column whose values must not repeat across rows; the repeated cells are marked."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "rule",
+            "fields"
+          ],
+          "properties": {
+            "rule": {
+              "$ref": "#/$defs/expression",
+              "description": "CEL condition that must be true; it sees the field in value, the form in form and the row of a repeater in item."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "$ref": "#/$defs/formRuleOptions",
+          "required": [
+            "use",
+            "fields"
+          ],
+          "properties": {
+            "use": {
+              "type": "string",
+              "pattern": "^[a-zA-Z][A-Za-z0-9]*$",
+              "description": "Name of a validator registered by the application (provideValidators)."
+            },
+            "params": {
+              "type": "object",
+              "description": "Parameters of the validator."
+            },
+            "fields": true,
+            "message": true,
+            "when": true,
+            "severity": true
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

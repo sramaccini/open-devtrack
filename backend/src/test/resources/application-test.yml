@@ -1,0 +1,17 @@
+# Tests that start the application: no identity provider (the login uses a provider whose endpoints are never called,
+# so nothing is discovered at startup), the database and Redis from TestInfrastructure.
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          iam:
+            provider: offline
+            client-secret: test
+        provider:
+          offline:
+            authorization-uri: http://iam.invalid/auth
+            token-uri: http://iam.invalid/token
+            jwk-set-uri: http://iam.invalid/certs
+            user-info-uri: http://iam.invalid/userinfo
+            user-name-attribute: preferred_username

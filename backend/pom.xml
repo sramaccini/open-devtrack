@@ -15,7 +15,7 @@
     <artifactId>opendevtrack-backend</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <name>OpenDevTrack back end</name>
-    <description>The OpenDevTrack monolith: login, session and global roles from authz-library.</description>
+    <description>The OpenDevTrack monolith: login, session and global roles from authz-library, registry of the screen definitions.</description>
 
     <licenses>
         <license>
@@ -28,6 +28,7 @@
         <java.version>25</java.version>
         <authz-library.version>2.0.1</authz-library.version>
         <spring-modulith.version>2.1.2</spring-modulith.version>
+        <json-schema-validator.version>1.5.9</json-schema-validator.version>
     </properties>
 
     <dependencyManagement>
@@ -74,6 +75,28 @@
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-starter-core</artifactId>
         </dependency>
+        <!-- Module uiregistry: versions on PostgreSQL, validation against the schemas of Quadrava, tokens of the tools -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-flyway</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>${json-schema-validator.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -88,6 +111,27 @@
         <dependency>
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- The registry API on a real PostgreSQL and Redis -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -3,7 +3,8 @@
 #
 #   e2e/authz/run.sh up      generate test credentials, start PostgreSQL, Redis and Keycloak, build and start the back
 #                            end on the host (profile dev), then the Quadrava runtime in front of it
-#   e2e/authz/run.sh check   sign in through the runtime and run the Quadrava conformance kits and the tenant checks
+#   e2e/authz/run.sh check   sign in through the runtime and run the Quadrava conformance kits (BFF, authorization,
+#                            registry) and the tenant checks
 #   e2e/authz/run.sh down    stop the back end and remove the containers
 #
 # Needs Docker, curl, JDK 25 (JAVA_HOME), Maven with access to the authz-library packages (backend/README.md) and
@@ -54,7 +55,7 @@ up() {
   fi
 
   log "Quadrava conformance kits"
-  for kit in conformance-lib.mjs conformance-bff.mjs conformance-authz.mjs; do
+  for kit in conformance-lib.mjs conformance-bff.mjs conformance-authz.mjs conformance-registry.mjs; do
     curl -fsS -o "$work/kits/$kit" "$QUADRAVA_KITS/$kit"
   done
 
@@ -98,6 +99,14 @@ login() {
   awk '$6 == "SESSION_ID" || $6 == "XSRF-TOKEN" { printf "%s%s=%s", sep, $6, $7; sep = "; " }' "$jar"
 }
 
+# Access token of a user for the tools client (password grant, development only): the registry takes bearer tokens.
+token() {
+  curl -fs -d grant_type=password -d client_id=opendevtrack-tools -d scope=openid \
+    --data-urlencode "username=$1" --data-urlencode "password=$DEV_USER_PASSWORD" \
+    "http://localhost:$KEYCLOAK_PORT/realms/opendevtrack/protocol/openid-connect/token" \
+    | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4
+}
+
 cookie_value() { awk -v n="$2" '$6 == n { print $7 }' "$work/$1.cookies"; }
 
 user_json() { curl -fs -b "$work/$1.cookies" "$front/bff/user"; }
@@ -124,6 +133,10 @@ check() {
 
   log "Quadrava kit: BFF contract with a session of two tenants (anna.bianchi; the session ends with the logout)"
   node "$kits/conformance-bff.mjs" --bff "$front" --return "$front/" --cookie "$(login anna.bianchi)" || failed=1
+
+  log "Quadrava kit: registry contract (author mario.rossi, reviewer anna.bianchi, bearer tokens)"
+  node "$kits/conformance-registry.mjs" --registry "http://localhost:$APP_PORT" --protected-env production \
+    --token "$(token mario.rossi)" --reviewer-token "$(token anna.bianchi)" || failed=1
 
   log "Tenants: the switch is kept for the next login (ADR-08)"
   login anna.bianchi > /dev/null

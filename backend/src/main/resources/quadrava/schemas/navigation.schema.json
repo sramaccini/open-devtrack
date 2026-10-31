@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lowcode.example/schemas/navigation.schema.json",
+  "title": "Navigation of a Quadrava application",
+  "description": "Side menu organised in areas, up to three levels (group, subgroup, item). The menu works with permissions: roles stay in the identity provider. It is only a navigation convenience: enforcement stays in the screen's `requires` and in the back end.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "navigation",
+    "areas"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "navigation": {
+      "$ref": "#/$defs/id",
+      "description": "Identifier of the navigation document."
+    },
+    "default": {
+      "$ref": "#/$defs/id",
+      "description": "Area opened at start-up, if the user can see it."
+    },
+    "areas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/area"
+      }
+    },
+    "badges": {
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false,
+      "description": "Counters next to the menu items (for example «3» invoices to send): a GET that returns { \"<item id>\": number }. It is read again at intervals and when the user comes back to the page.",
+      "properties": {
+        "url": {
+          "type": "string",
+          "pattern": "^/[^/\\s][^\\s]*$",
+          "description": "Relative path of the service (for example /api/menu/counters)."
+        },
+        "refreshSeconds": {
+          "type": "integer",
+          "minimum": 15,
+          "maximum": 3600,
+          "description": "How often, in seconds, the counters are read again (60 if absent)."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "permission": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+\\.[a-z0-9]+\\.[a-z0-9]+$"
+    },
+    "expression": {
+      "type": "string",
+      "pattern": "^\\{\\{[\\s\\S]+\\}\\}$"
+    },
+    "icon": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Name of an icon of the built-in set (for example file-plus, search, package). An unknown name shows no icon."
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "area": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "items"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "$ref": "#/$defs/label"
+        },
+        "icon": {
+          "$ref": "#/$defs/icon"
+        },
+        "requires": {
+          "$ref": "#/$defs/permission"
+        },
+        "visibleIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/item1"
+          }
+        }
+      }
+    },
+    "leaf": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "screen"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "$ref": "#/$defs/label"
+        },
+        "icon": {
+          "$ref": "#/$defs/icon"
+        },
+        "screen": {
+          "$ref": "#/$defs/id",
+          "description": "Screen opened by the item."
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "description": "Static parameters passed to the screen (they become `params` in expressions)."
+        },
+        "requires": {
+          "$ref": "#/$defs/permission"
+        },
+        "visibleIf": {
+          "$ref": "#/$defs/expression"
+        }
+      }
+    },
+    "group3": {
+      "$ref": "#/$defs/leaf"
+    },
+    "group2": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "children"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "$ref": "#/$defs/label"
+        },
+        "icon": {
+          "$ref": "#/$defs/icon"
+        },
+        "requires": {
+          "$ref": "#/$defs/permission"
+        },
+        "visibleIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/group3"
+          }
+        }
+      }
+    },
+    "item2": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/leaf"
+        },
+        {
+          "$ref": "#/$defs/group2"
+        }
+      ]
+    },
+    "group1": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "children"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "$ref": "#/$defs/label"
+        },
+        "icon": {
+          "$ref": "#/$defs/icon"
+        },
+        "requires": {
+          "$ref": "#/$defs/permission"
+        },
+        "visibleIf": {
+          "$ref": "#/$defs/expression"
+        },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/item2"
+          }
+        }
+      }
+    },
+    "item1": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/leaf"
+        },
+        {
+          "$ref": "#/$defs/group1"
+        }
+      ]
+    }
+  }
+}
