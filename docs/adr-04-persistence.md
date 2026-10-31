@@ -1,6 +1,6 @@
 # ADR-04: Persistence for commands, search and reports
 
-Status: Proposed (31 October 2026) — decision D4 of the project plan
+Status: Accepted (31 October 2026) — decision D4 of the project plan
 
 ## Context
 
@@ -11,7 +11,7 @@ were JPA only, or JPA for the commands plus jOOQ for search and reports.
 authz-library, inside the same process, uses `JdbcClient` and its own Flyway history (`authz_schema_history`); it does not
 constrain the choice of the application.
 
-## Decision (proposed)
+## Decision
 
 **Spring Data JPA (Hibernate 7) for the commands, jOOQ for search and reports.**
 

@@ -1,6 +1,6 @@
 # ADR-07: Permission format
 
-Status: Proposed (31 October 2026) — decision D7 of the project plan
+Status: Accepted (31 October 2026) — decision D7 of the project plan
 
 ## Context
 
@@ -12,7 +12,7 @@ authz-library 2.0.1 adopted the canonical format (migration `V3__permission_form
 digits, three parts separated by dots, `CHECK (permission_code ~ '^[a-z0-9]+\.[a-z0-9]+\.[a-z0-9]+$')`. Codes ending in
 `global` are reserved to `GLOBAL_ADMIN`.
 
-## Decision (proposed)
+## Decision
 
 **One string everywhere, `odt.<resource>.<action>`**, the same in Java, in the JSON of the screens and in the catalogue.
 
@@ -25,7 +25,7 @@ digits, three parts separated by dots, `CHECK (permission_code ~ '^[a-z0-9]+\.[a
 - No translation layer in `access`: a code is never renamed between back end and front end.
 - **The catalogue is registered in the authz-library database by a script** (decided by the maintainer): a Flyway migration
   of OpenDevTrack in its own folder, added to the ones of `authz-rbac` (`authz.rbac.flyway.locations:
-  classpath:db/authz/migration,classpath:db/authz/odt`), the mechanism the authz-library demo uses for its data. Proposed
+  classpath:db/authz/migration,classpath:db/authz/odt`), the mechanism the authz-library demo uses for its data. The
   form: a **repeatable** migration `R__odt_permission_catalogue.sql` with `INSERT … ON CONFLICT DO NOTHING` for the
   permissions, the global roles and their links. A repeatable one runs after the versioned ones and again when it
   changes, so it never collides with the next `V4`, `V5` of authz-library and needs no `out-of-order` in production. A

@@ -1,6 +1,6 @@
 # ADR-08: Choosing the tenant
 
-Status: Proposed (31 October 2026) — decision D8 of the project plan
+Status: Accepted (31 October 2026) — decision D8 of the project plan
 
 ## Context
 
@@ -15,7 +15,7 @@ Both sides are now done, following the direction of the plan:
 - authz-library 2.0.1: the login opens the session on the last tenant used (then the first by code), never asks; the switch
   is a POST, keeps the session id and its absolute expiry, and recomputes the permissions.
 
-## Decision (proposed)
+## Decision
 
 **Optional selection in the Quadrava shell, as implemented.** OpenDevTrack sets `QUADRAVA_TENANT_SWITCH_URL=/bff/tenant`
 on the runtime image; after a switch the runtime reloads permissions, navigation and the current screen.

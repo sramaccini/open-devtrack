@@ -1,13 +1,13 @@
 # ADR-09: Multi-tenant data
 
-Status: Proposed (31 October 2026) — decision D9 of the project plan
+Status: Accepted (31 October 2026) — decision D9 of the project plan
 
 ## Context
 
 authz-library has tenants (organisations, customers, offices) and puts the current one in the `SessionContext`. OpenDevTrack
 can either be installed once per organisation, or hold the data of several tenants in one installation.
 
-## Decision (proposed)
+## Decision
 
 **`tenant_id` on the data, filtered from the session.**
 

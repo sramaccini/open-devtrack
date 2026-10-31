@@ -1,6 +1,6 @@
 # ADR-01: How OpenDevTrack gets Quadrava
 
-Status: Proposed (31 October 2026) — decision D1 of the project plan
+Status: Accepted (31 October 2026) — decision D1 of the project plan
 
 ## Context
 
@@ -14,7 +14,7 @@ everything, a changelog, a release workflow on `v*` tags, and the runtime publis
 variables or a mounted `runtime-config.json`. Version 0.1.0 is out. The command line `quadrava validate` /
 `quadrava publish` (`@sramaccini/quadrava-cli` on GitHub Packages) comes with 0.2.0, not released yet.
 
-## Decision (proposed)
+## Decision
 
 **OpenDevTrack runs the runtime image of a fixed Quadrava version and never builds Angular.**
 

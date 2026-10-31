@@ -10,8 +10,7 @@ Quadrava and authz-library, and the ADRs say where.
 
 - Repository github.com/sramaccini/open-devtrack, branch `main`: licence MPL-2.0 with CLA, contribution rules and
   project rules as Quadrava (ADR-05).
-- Decisions D1–D9 written as ADRs in `docs/`. Accepted: D5 (licence) and the direction of D3 (registry inside the
-  monolith, from the Quadrava reference). The others are **proposed**: F1 does not start before they are accepted.
+- Decisions D1–D9 written as ADRs in `docs/`, all accepted on 31 October 2026: F1 can start.
 - `backend/`: the monolith with only the authz-library 2.0.1 libraries, the security chain, the `odt.*` permission
   catalogue (repeatable Flyway migration, ADR-07) and the development data.
 - End-to-end check passed (`docs/check-authz-end-to-end.md`): Quadrava kits bff 13/13 with and without a session, authz
@@ -40,6 +39,5 @@ A2 (schema of the RBAC tables, F1), A3 (Problem texts in English). Each is built
 
 ## Next steps
 
-1. Approval of the proposed ADRs (D1, D2, D4, D6–D9, details of D3).
-2. Then F1: Spring Modulith skeleton with the modules and `verify()`, the `uiregistry` module from the Quadrava
+1. F1: Spring Modulith skeleton with the modules and `verify()`, the `uiregistry` module from the Quadrava
    reference registry (ADR-03), the `ui/` project with navigation and theme (palette and favicon from `brand/`), CI with the kits (bff, authz, registry).

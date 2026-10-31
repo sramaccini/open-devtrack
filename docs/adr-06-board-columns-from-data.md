@@ -1,6 +1,6 @@
 # ADR-06: Board columns from data
 
-Status: Proposed (31 October 2026) — decision D6 of the project plan
+Status: Accepted (31 October 2026) — decision D6 of the project plan
 
 ## Context
 
@@ -12,7 +12,7 @@ That evolution is done (Quadrava K5, commit `8e85497`, in 0.1.0): `columns` may 
 data source. K1–K4 are done too: order inside a column with the neighbours in `onMove`, swimlanes, WIP limits, rich
 cards (Quadrava component catalogue § 2.24).
 
-## Decision (proposed)
+## Decision
 
 **One generic `board` screen for every board: columns from a data source (`columnsFrom`), cards from another.**
 

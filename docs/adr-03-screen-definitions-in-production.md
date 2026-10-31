@@ -1,6 +1,6 @@
 # ADR-03: Where the screens come from in production
 
-Status: Accepted in its direction (31 October 2026, decided by the maintainer); the details below are proposed —
+Status: Accepted (31 October 2026; direction decided by the maintainer, details approved) —
 decision D3 of the project plan
 
 ## Context
@@ -26,7 +26,7 @@ CI / deploy: quadrava publish ui/ ──▶ POST /registry/…  (draft → revie
 browser ──▶ quadrava-runtime ──/registry/──▶ monolith: module uiregistry ──▶ PostgreSQL odt_uiregistry
 ```
 
-Proposed details:
+Details:
 
 - **Starting point**: `reference/registry` of Quadrava (`com.logicwarez.quadrava.reference.registry`, about 950 lines:
   `RegistryController`, `VersionStore`, `SchemaValidation`, `References`, `Model`). Its code is copied once into the
