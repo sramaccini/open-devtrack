@@ -67,7 +67,7 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F2 (per the plan): the rest of E2 (custom fields, after their ADR) and of E4 (mentions, attachments); workflows
+1. F2 (per the plan): custom fields (E2) once ADR-11, proposed, is accepted; the rest of E4 (mentions, attachments); workflows
    by issue type and editing statuses and transitions when a project needs them (ADR-10).
 2. Adopt Quadrava 0.2.0 when released: `quadrava validate` and `publish` in CI instead of `tools/publish-ui.mjs`,
    schemas refreshed with `backend/tools/sync-quadrava-schemas.sh`, the kits from the release tag.
