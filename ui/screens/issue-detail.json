@@ -60,6 +60,9 @@
     },
     "addWatcher": {
       "ref": "issues/addWatcher"
+    },
+    "fields": {
+      "ref": "issues/fields"
     }
   },
   "components": [
@@ -163,15 +166,25 @@
               "call": "save",
               "onError": [
                 {
-                  "if": "{{error.status == 412}}",
+                  "if": "{{error.fields > 0}}",
                   "then": [
                     {
-                      "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                      "toast": "{{ t('common.check_fields', 'Check the highlighted fields') }}"
                     }
                   ],
                   "else": [
                     {
-                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                      "if": "{{error.status == 412}}",
+                      "then": [
+                        {
+                          "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                        }
+                      ],
+                      "else": [
+                        {
+                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                        }
+                      ]
                     }
                   ]
                 }
@@ -185,6 +198,9 @@
             },
             {
               "refresh": "transitions"
+            },
+            {
+              "refresh": "fields"
             },
             {
               "toast": "{{ t('common.saved', 'Saved') }}"
@@ -431,7 +447,58 @@
             }
           ]
         }
-      ]
+      ],
+      "fieldsFrom": {
+        "source": "fields",
+        "into": "custom",
+        "nameField": "key",
+        "types": {
+          "text": {
+            "name": "text",
+            "type": "text",
+            "maxLength": 1000,
+            "readOnlyIf": "{{!form._perm.edit}}"
+          },
+          "number": {
+            "name": "number",
+            "type": "number",
+            "readOnlyIf": "{{!form._perm.edit}}"
+          },
+          "date": {
+            "name": "date",
+            "type": "date",
+            "readOnlyIf": "{{!form._perm.edit}}"
+          },
+          "checkbox": {
+            "name": "checkbox",
+            "type": "checkbox",
+            "readOnlyIf": "{{!form._perm.edit}}"
+          },
+          "select": {
+            "name": "select",
+            "type": "select",
+            "options": [],
+            "readOnlyIf": "{{!form._perm.edit}}"
+          },
+          "multiselect": {
+            "name": "multiselect",
+            "type": "multiselect",
+            "options": [],
+            "readOnlyIf": "{{!form._perm.edit}}"
+          },
+          "user": {
+            "name": "user",
+            "type": "lookup",
+            "lookup": {
+              "source": "assignees",
+              "valueField": "username",
+              "labelField": "username",
+              "minChars": 0
+            },
+            "readOnlyIf": "{{!form._perm.edit}}"
+          }
+        }
+      }
     },
     {
       "id": "workflow-title",

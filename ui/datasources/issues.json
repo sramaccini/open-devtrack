@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "datasources": "issues",
-  "description": "Issues of a project (module issue) with their links, watchers and transitions (module workflow), the members who can be assigned, the comments (module collaboration) and the changelog (module audit).",
+  "description": "Issues of a project (module issue) with their custom fields, links, watchers and transitions (module workflow), the members who can be assigned, the comments (module collaboration) and the changelog (module audit).",
   "sources": {
     "list": {
       "type": "rest",
@@ -126,6 +126,16 @@
       "type": "rest",
       "method": "DELETE",
       "url": "/api/issues/{{params.issue}}/watchers/{{username}}"
+    },
+    "newFields": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/fields"
+    },
+    "fields": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/issues/{{params.issue}}/fields"
     }
   }
 }

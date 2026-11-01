@@ -9,6 +9,9 @@
     },
     "assignees": {
       "ref": "issues/assignees"
+    },
+    "newFields": {
+      "ref": "issues/newFields"
     }
   },
   "components": [
@@ -86,15 +89,25 @@
               "as": "created",
               "onError": [
                 {
-                  "if": "{{error.status == 403}}",
+                  "if": "{{error.fields > 0}}",
                   "then": [
                     {
-                      "toast": "{{ t('issues.cannot_create', 'Only a developer or an admin of the project creates issues') }}"
+                      "toast": "{{ t('common.check_fields', 'Check the highlighted fields') }}"
                     }
                   ],
                   "else": [
                     {
-                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                      "if": "{{error.status == 403}}",
+                      "then": [
+                        {
+                          "toast": "{{ t('issues.cannot_create', 'Only a developer or an admin of the project creates issues') }}"
+                        }
+                      ],
+                      "else": [
+                        {
+                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                        }
+                      ]
                     }
                   ]
                 }
@@ -112,7 +125,29 @@
             }
           ]
         }
-      ]
+      ],
+      "fieldsFrom": {
+        "source": "newFields",
+        "into": "custom",
+        "nameField": "key",
+        "types": {
+          "text": {
+            "name": "text",
+            "type": "text",
+            "maxLength": 1000
+          },
+          "user": {
+            "name": "user",
+            "type": "lookup",
+            "lookup": {
+              "source": "assignees",
+              "valueField": "username",
+              "labelField": "username",
+              "minChars": 0
+            }
+          }
+        }
+      }
     }
   ]
 }

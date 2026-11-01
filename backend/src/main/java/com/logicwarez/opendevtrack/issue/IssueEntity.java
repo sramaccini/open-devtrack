@@ -12,7 +12,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
@@ -46,6 +48,10 @@ class IssueEntity {
     @JdbcTypeCode(SqlTypes.ARRAY)
     private List<String> labels;
 
+    /** Values of the custom fields of the project, by key (ADR-11). */
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> custom = new HashMap<>();
+
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -67,13 +73,14 @@ class IssueEntity {
     }
 
     void edit(IssueType type, String summary, String description, Priority priority, String assignee, List<String> labels,
-              Instant now) {
+              Map<String, Object> custom, Instant now) {
         this.type = type;
         this.summary = summary;
         this.description = description;
         this.priority = priority;
         this.assignee = assignee;
         this.labels = labels;
+        this.custom = new HashMap<>(custom);
         this.updatedAt = now;
     }
 
@@ -121,6 +128,10 @@ class IssueEntity {
 
     String reporter() {
         return reporter;
+    }
+
+    Map<String, Object> custom() {
+        return custom == null ? Map.of() : custom;
     }
 
     List<String> labels() {

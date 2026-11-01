@@ -32,7 +32,9 @@ Quadrava and authz-library, and the ADRs say where.
   the status changes through the workflow (E3). Links between issues (`blocks`, `relates`, `duplicates`, read from
   both ends, also across projects of the tenant) with a Links tab on `issue-detail`. Watchers: the reporter and the
   assignee from the start, anyone who sees the issue watches it or stops, developers add members; a Watchers tab. Who
-  is told of what comes with the module `notification`.
+  is told of what comes with the module `notification`. Custom fields (ADR-11, accepted 1 November 2026, on
+  `fieldsFrom` of Quadrava 0.2.1): seven types, defined on `project-detail`, set in `issue-new` and `issue-detail`,
+  `required_if` in CEL checked by the back end. In the history a custom field shows its raw name (`custom.customer`).
 - F2 E3 Workflow (ADR-10, accepted 1 November 2026): module `workflow`, one workflow per project copied from the
   default, CEL guards with cel-java 0.14.0, transitions listed and run on `issue-detail` («Next steps»), conditions
   edited on `project-detail`. With it gate M1 is covered: create, edit, transition and comment an issue, with
@@ -69,10 +71,7 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 1. F2 (per the plan): the rest of E4 (mentions; attachments after an ADR on where the files are kept); workflows by
    issue type and editing statuses and transitions when a project needs them (ADR-10).
-2. Custom fields (E2) are on hold until Quadrava implements Q6 (`fieldsFrom`, form fields from a data source),
-   decided on 1 November 2026: no temporary Fields tab. ADR-11 stays proposed; when Q6 is released it is revised so
-   the fields are in the forms of `issue-new` and `issue-detail`, then accepted and built.
-3. Adopt the CLI of Quadrava 0.2.1 (`@sramaccini/quadrava-cli` on GitHub Packages, request Q2 released):
+2. Adopt the CLI of Quadrava 0.2.1 (`@sramaccini/quadrava-cli` on GitHub Packages, request Q2 released):
    `quadrava validate` and `publish` in CI instead of `tools/publish-ui.mjs`. The runtime image, the schemas and the
-   kits are already at 0.2.1.
-4. Deployment: publish `ui/` to `testing`/`production` with an author and an approver token.
+   kits are already at 0.2.1. The CLI also checks the CEL of the screens, which the registry tests do not.
+3. Deployment: publish `ui/` to `testing`/`production` with an author and an approver token.

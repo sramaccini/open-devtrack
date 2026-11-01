@@ -4,6 +4,7 @@
  */
 package com.logicwarez.opendevtrack.platform;
 
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -36,6 +37,19 @@ public final class Problems {
 
     public static ResponseEntity<ProblemDetail> conflict(String title) {
         return of(HttpStatus.CONFLICT, title);
+    }
+
+    /**
+     * 400 with the errors of the fields, as the Problem contract of Quadrava has them: {@code path} a JSON Pointer into
+     * the body sent ({@code /custom/customer}), {@code code} translated by the screens ({@code validation.<code>}).
+     */
+    public static ResponseEntity<ProblemDetail> invalidFields(String title, List<FieldError> errors) {
+        ResponseEntity<ProblemDetail> response = badRequest(title);
+        response.getBody().setProperty("errors", errors);
+        return response;
+    }
+
+    public record FieldError(String path, String code) {
     }
 
     /** 412: someone changed the record after it was read (optimistic locking with its version). */

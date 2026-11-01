@@ -30,6 +30,15 @@
     },
     "setGuard": {
       "ref": "projects/setGuard"
+    },
+    "fieldDefinitions": {
+      "ref": "projects/fieldDefinitions"
+    },
+    "addField": {
+      "ref": "projects/addField"
+    },
+    "saveField": {
+      "ref": "projects/saveField"
     }
   },
   "components": [
@@ -179,6 +188,102 @@
             },
             {
               "toast": "{{ t('projects.member_added', 'Member added') }}"
+            }
+          ]
+        },
+        {
+          "id": "btn-add-field",
+          "label": "{{ t('projects.add_field', 'New field') }}",
+          "visibleIf": "{{form._perm.edit}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('projects.add_field', 'New field') }}",
+                "submitLabel": "{{ t('projects.add', 'Add') }}",
+                "initial": {
+                  "type": "text"
+                },
+                "fields": [
+                  {
+                    "name": "key",
+                    "type": "text",
+                    "label": "{{ t('projects.field_key', 'Key') }}",
+                    "required": true,
+                    "pattern": "^[a-z][a-z0-9_]{0,39}$",
+                    "tooltip": "{{ t('projects.field_key_help', 'Lower-case letters, digits and _, from a letter; it does not change') }}"
+                  },
+                  {
+                    "name": "type",
+                    "type": "select",
+                    "label": "{{ t('projects.field_type', 'Type') }}",
+                    "required": true,
+                    "options": [
+                      "text",
+                      "number",
+                      "date",
+                      "checkbox",
+                      "select",
+                      "multiselect",
+                      "user"
+                    ],
+                    "optionKey": "values.field_type"
+                  },
+                  {
+                    "name": "label",
+                    "type": "text",
+                    "label": "{{ t('projects.field_label', 'Label') }}",
+                    "required": true,
+                    "maxLength": 100
+                  },
+                  {
+                    "name": "options",
+                    "type": "textarea",
+                    "label": "{{ t('projects.field_options', 'Options') }}",
+                    "rows": 4,
+                    "tooltip": "{{ t('projects.field_options_help', 'For select and multiselect: one per line, value or value: Label') }}"
+                  },
+                  {
+                    "name": "requiredIf",
+                    "type": "text",
+                    "label": "{{ t('projects.field_required_if', 'Required when') }}",
+                    "maxLength": 1000,
+                    "tooltip": "{{ t('projects.field_required_if_help', 'A CEL expression on issue and user, for example issue.type == \"bug\"; true for always, empty for never') }}"
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "addField",
+                    "onError": [
+                      {
+                        "if": "{{error.status == 400}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('projects.field_invalid', 'Check the key, the options and the rule') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "if": "{{error.status == 409}}",
+                            "then": [
+                              {
+                                "toast": "{{ t('projects.field_exists', 'The project already has a field with this key') }}"
+                              }
+                            ],
+                            "else": [
+                              {
+                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "fieldDefinitions"
             }
           ]
         },
@@ -394,6 +499,142 @@
             },
             {
               "refresh": "transitions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fields-title",
+      "type": "text",
+      "style": "heading",
+      "text": "{{ t('projects.fields', 'Custom fields') }}"
+    },
+    {
+      "id": "field-table",
+      "type": "table",
+      "source": "fieldDefinitions",
+      "columns": [
+        {
+          "field": "key",
+          "label": "{{ t('projects.field_key', 'Key') }}"
+        },
+        {
+          "field": "label",
+          "label": "{{ t('projects.field_label', 'Label') }}"
+        },
+        {
+          "field": "type",
+          "label": "{{ t('projects.field_type', 'Type') }}",
+          "valueKey": "values.field_type"
+        },
+        {
+          "field": "requiredIf",
+          "label": "{{ t('projects.field_required_if', 'Required when') }}"
+        },
+        {
+          "field": "archived",
+          "label": "{{ t('projects.field_archived', 'Archived') }}",
+          "format": "badge",
+          "badges": {
+            "true": "neutral"
+          },
+          "valueKey": "values.archived"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-edit-field",
+          "label": "{{ t('projects.edit_field', 'Edit') }}",
+          "visibleIf": "{{row._perm.edit}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('projects.edit_field_title', 'Edit field') }}",
+                "submitLabel": "{{ t('common.save', 'Save') }}",
+                "initial": {
+                  "label": "{{row.label}}",
+                  "options": "{{row.options}}",
+                  "requiredIf": "{{row.requiredIf}}",
+                  "archived": "{{row.archived}}",
+                  "version": "{{row.version}}"
+                },
+                "fields": [
+                  {
+                    "name": "label",
+                    "type": "text",
+                    "label": "{{ t('projects.field_label', 'Label') }}",
+                    "required": true,
+                    "maxLength": 100
+                  },
+                  {
+                    "name": "options",
+                    "type": "textarea",
+                    "label": "{{ t('projects.field_options', 'Options') }}",
+                    "rows": 4,
+                    "tooltip": "{{ t('projects.field_options_help', 'For select and multiselect: one per line, value or value: Label') }}"
+                  },
+                  {
+                    "name": "requiredIf",
+                    "type": "text",
+                    "label": "{{ t('projects.field_required_if', 'Required when') }}",
+                    "maxLength": 1000,
+                    "tooltip": "{{ t('projects.field_required_if_help', 'A CEL expression on issue and user, for example issue.type == \"bug\"; true for always, empty for never') }}"
+                  },
+                  {
+                    "name": "archived",
+                    "type": "switch",
+                    "label": "{{ t('projects.field_archived', 'Archived') }}",
+                    "tooltip": "{{ t('projects.field_archived_help', 'Out of the forms; the values stay in the issues') }}"
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "saveField",
+                    "args": {
+                      "fieldKey": "{{row.key}}"
+                    },
+                    "onError": [
+                      {
+                        "if": "{{error.status == 412}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "if": "{{error.status == 400}}",
+                            "then": [
+                              {
+                                "toast": "{{ t('projects.field_invalid', 'Check the key, the options and the rule') }}"
+                              }
+                            ],
+                            "else": [
+                              {
+                                "if": "{{error.status == 409}}",
+                                "then": [
+                                  {
+                                    "toast": "{{ t('projects.field_exists', 'The project already has a field with this key') }}"
+                                  }
+                                ],
+                                "else": [
+                                  {
+                                    "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "fieldDefinitions"
             }
           ]
         }

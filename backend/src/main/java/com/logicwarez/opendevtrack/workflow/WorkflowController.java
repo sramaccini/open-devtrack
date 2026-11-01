@@ -10,6 +10,7 @@ import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.project.ProjectRef;
 import com.logicwarez.opendevtrack.project.Projects;
+import com.logicwarez.opendevtrack.shared.Conditions;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,11 +38,11 @@ class WorkflowController {
     private final Projects projects;
     private final Workflows workflows;
     private final TransitionRepository transitions;
-    private final Guards guards;
+    private final Conditions guards;
     private final ProjectAccess access;
     private final CurrentUser user;
 
-    WorkflowController(Projects projects, Workflows workflows, TransitionRepository transitions, Guards guards,
+    WorkflowController(Projects projects, Workflows workflows, TransitionRepository transitions, Conditions guards,
                        ProjectAccess access, CurrentUser user) {
         this.projects = projects;
         this.workflows = workflows;

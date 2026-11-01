@@ -95,6 +95,20 @@ watches it (`watching`). `GET /api/issues/{key}/watchers` lists them; whoever se
 removes anyone. A member who leaves the project keeps the row: whoever sends notifications checks that they still see
 the issue.
 
+## Custom fields (`issue`)
+
+Fields that the admins of a project (`odt.project.edit`) add to its issues (ADR-11): definitions in
+`odt_issue.field_definition`, values in the `custom` JSONB of the issue. Types `text` (at most 1000 characters),
+`number`, `date`, `checkbox`, `select`, `multiselect` and `user` (a member of the project); the key and the type do
+not change, at most 50 fields per project. `GET/POST /api/projects/{key}/field-definitions` and
+`PUT …/field-definitions/{field}` (label, options, `requiredIf`, `archived`, with the version read) manage them; an
+archived field leaves the forms and keeps its values. `required_if` is CEL on the variables of the guards, checked
+when it is saved and on every save of an issue. `GET /api/projects/{key}/fields` and `GET /api/issues/{key}/fields`
+give the rows of `fieldsFrom` of Quadrava. Wrong or missing values answer 400 with `errors` (`/custom/<key>` and a
+code such as `customFieldRequired`); a request without `custom` keeps the values. Each change is in the changelog as
+`custom.<key>`, and the guards of the transitions see the values as `issue.custom.<key>`. The CEL engine of guards and
+fields is `shared.Conditions`.
+
 ## Workflows (`workflow`)
 
 Each project gets a copy of the built-in workflow when it is created (`odt_workflow`, ADR-10): statuses `todo`,

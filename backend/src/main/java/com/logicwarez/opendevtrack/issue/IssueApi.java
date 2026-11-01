@@ -22,7 +22,7 @@ final class IssueApi {
 
     record IssueView(String key, String project, long number, String type, String summary, String description,
                      String status, String priority, String assignee, String reporter, List<String> labels,
-                     Instant createdAt, Instant updatedAt, long version, boolean watching,
+                     Map<String, Object> custom, Instant createdAt, Instant updatedAt, long version, boolean watching,
                      @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
@@ -35,6 +35,6 @@ final class IssueApi {
 
     /** Fields of a new issue or of a change; {@code version} only for a change. */
     record IssueRequest(String type, String summary, String description, String priority, String assignee,
-                        List<String> labels, Long version) {
+                        List<String> labels, Map<String, Object> custom, Long version) {
     }
 }

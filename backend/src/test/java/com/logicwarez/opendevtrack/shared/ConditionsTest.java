@@ -2,7 +2,7 @@
  * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not
  * distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-package com.logicwarez.opendevtrack.workflow;
+package com.logicwarez.opendevtrack.shared;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,10 +12,10 @@ import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
-/** The guards of ADR-10 and of the documentation, evaluated as the transitions do. */
-class GuardsTest {
+/** The guards of ADR-10 and the conditions of ADR-11 in the documentation, evaluated as the transitions do. */
+class ConditionsTest {
 
-    private final Guards guards = new Guards();
+    private final Conditions guards = new Conditions();
 
     private static Map<String, Object> issue(String assignee, List<String> labels) {
         Map<String, Object> issue = new HashMap<>();
@@ -57,5 +57,16 @@ class GuardsTest {
         assertThat(guards.check("x".repeat(1001))).isPresent();
         // A field that is not there: false, not an error.
         assertThat(guards.allows("issue.sprint == 'S1'", issue(null, List.of()), user, Set.of())).isFalse();
+    }
+
+    @Test
+    void theCustomFieldsOfAdr11() {
+        Map<String, Object> issue = issue(null, List.of());
+        issue.put("custom", Map.of("customer", "ACME", "points", 3));
+        assertThat(guards.allows("issue.type == 'bug'", issue, user, Set.of())).isTrue();
+        assertThat(guards.allows("has(issue.custom.customer)", issue, user, Set.of())).isTrue();
+        assertThat(guards.allows("has(issue.custom.reviewer)", issue, user, Set.of())).isFalse();
+        assertThat(guards.allows("issue.custom.points > 2", issue, user, Set.of())).isTrue();
+        assertThat(guards.allows("true", issue, user, Set.of())).isTrue();
     }
 }

@@ -4,6 +4,7 @@
  */
 package com.logicwarez.opendevtrack.workflow;
 
+import com.logicwarez.opendevtrack.shared.Conditions;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,9 +33,9 @@ public class Workflows {
     private final WorkflowRepository workflows;
     private final StatusRepository statuses;
     private final TransitionRepository transitions;
-    private final Guards guards;
+    private final Conditions guards;
 
-    Workflows(WorkflowRepository workflows, StatusRepository statuses, TransitionRepository transitions, Guards guards) {
+    Workflows(WorkflowRepository workflows, StatusRepository statuses, TransitionRepository transitions, Conditions guards) {
         this.workflows = workflows;
         this.statuses = statuses;
         this.transitions = transitions;

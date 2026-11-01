@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "datasources": "projects",
-  "description": "Projects of the workspace, their members and their workflow (modules project and workflow).",
+  "description": "Projects of the workspace, their members and their workflow (modules project and workflow), and their custom fields (module issue).",
   "sources": {
     "list": {
       "type": "rest",
@@ -56,6 +56,23 @@
       "type": "rest",
       "method": "PUT",
       "url": "/api/projects/{{params.key}}/workflow/transitions/{{code}}",
+      "body": "{{form}}"
+    },
+    "fieldDefinitions": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/field-definitions"
+    },
+    "addField": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{params.key}}/field-definitions",
+      "body": "{{form}}"
+    },
+    "saveField": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/projects/{{params.key}}/field-definitions/{{fieldKey}}",
       "body": "{{form}}"
     }
   }

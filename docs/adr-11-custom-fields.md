@@ -30,11 +30,12 @@ rules that depend on other fields belong to the service.
    with a label; the key and the type of a field do not change once it exists, so the values saved stay valid.
 3. **`required_if` in CEL**, on the variables of the guards (ADR-10: `issue`, `user`, `can()`), for example
    `issue.type == 'bug'`; empty for an optional field, `true` for one always required. The back end checks it on every
-   save and answers 400 with the field errors of the Problem contract of Quadrava (`errors: [{path:
-   "/custom/<key>", code: "required"}]`), which the form shows on the field. The rows of `fieldsFrom` say `required`
-   when the rule is true for the issue as it is (or `true` on a new issue), so the form marks them before the save. The
-   CEL engine of the guards moves from `workflow` to `shared`, one place that compiles and evaluates CEL; the custom
-   values reach the guards as `issue.custom.<key>`, so a transition can ask for a field (`has(issue.custom.customer)`).
+   save and answers 400 with the field errors of the Problem contract of Quadrava (`errors: [{path: "/custom/<key>",
+   code: "customFieldRequired"}]`), which the form shows on the field with the text of `validation.customFieldRequired`.
+   The rows of `fieldsFrom` say `required` when the rule is true for the issue as it is (or `true` on a new issue), so
+   the form marks them before the save. The CEL engine of the guards moves from `workflow` to `shared`, one place that
+   compiles and evaluates CEL; the custom values reach the guards as `issue.custom.<key>`, so a transition can ask for
+   a field (`has(issue.custom.customer)`).
 4. **Who**: the admins of the project (`odt.project.edit`) define the fields on `project-detail`; whoever edits an
    issue (`odt.issue.edit`) sets their values in `issue-new` and `issue-detail`. A field is archived, not deleted: it
    leaves the forms and the API, its values stay in the issues, and restoring it brings them back.

@@ -17,6 +17,7 @@ import com.logicwarez.opendevtrack.issue.IssueEvents.IssueDeleted;
 import com.logicwarez.opendevtrack.issue.Issues.Found;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
+import com.logicwarez.opendevtrack.platform.Problems.FieldError;
 import com.logicwarez.opendevtrack.project.ProjectRef;
 import com.logicwarez.opendevtrack.project.Projects;
 import com.logicwarez.opendevtrack.workflow.Workflows;
@@ -31,6 +32,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Limit;
@@ -82,10 +84,13 @@ class IssueController {
     private final ApplicationEventPublisher events;
     private final Workflows workflows;
     private final WatcherRepository watchers;
+    private final CustomFields customFields;
 
     IssueController(IssueRepository issues, Issues finder, Projects projects, ProjectAccess access, CurrentUser user,
-                    ApplicationEventPublisher events, Workflows workflows, WatcherRepository watchers) {
+                    ApplicationEventPublisher events, Workflows workflows, WatcherRepository watchers,
+                    CustomFields customFields) {
         this.workflows = workflows;
+        this.customFields = customFields;
         this.watchers = watchers;
         this.issues = issues;
         this.finder = finder;
@@ -128,9 +133,13 @@ class IssueController {
         }
         Fields fields;
         try {
-            fields = fields(project.get(), request);
+            fields = fields(project.get(), request, Fields.EMPTY);
+            checkRequired(project.get(), null, fields, workflows.initialStatus(project.get().id()), user.username(),
+                    permissions);
         } catch (InvalidField e) {
             return Problems.badRequest(e.getMessage());
+        } catch (InvalidCustom e) {
+            return Problems.invalidFields(InvalidCustom.TITLE, e.errors);
         }
         Instant now = Instant.now();
         IssueEntity issue = new IssueEntity(user.tenantId(), project.get().id(), projects.nextIssueNumber(project.get().id()),
@@ -173,9 +182,12 @@ class IssueController {
         }
         Fields fields;
         try {
-            fields = fields(project, request);
+            fields = fields(project, request, Fields.of(issue));
+            checkRequired(project, key(project, issue), fields, issue.status(), issue.reporter(), permissions);
         } catch (InvalidField e) {
             return Problems.badRequest(e.getMessage());
+        } catch (InvalidCustom e) {
+            return Problems.invalidFields(InvalidCustom.TITLE, e.errors);
         }
         if (request.version() == null || request.version() != issue.version()) {
             return Problems.changedMeanwhile();
@@ -212,6 +224,21 @@ class IssueController {
         events.publishEvent(new IssueDeleted(found.get().issue().id(), found.get().project().id(),
                 key(found.get().project(), found.get().issue()), user.username(), Instant.now()));
         return ResponseEntity.noContent().build();
+    }
+
+    /** The custom fields of the issue for {@code fieldsFrom}, required as their rules say for the issue as it is. */
+    @GetMapping("/api/issues/{issueKey}/fields")
+    ResponseEntity<?> customFields(@PathVariable String issueKey) {
+        Optional<Found> found = find(issueKey);
+        if (found.isEmpty()) {
+            return Problems.notFound(NOT_FOUND);
+        }
+        Set<String> permissions = permissions(found.get().project());
+        if (!permissions.contains("odt.issue.browse")) {
+            return Problems.forbidden(NOT_A_MEMBER);
+        }
+        return ResponseEntity.ok(customFields.rows(found.get().project().id(), guardInput(found.get()), userInput(),
+                permissions));
     }
 
     /** The transitions that can run now on the issue, for the user (empty without {@code odt.issue.transition}). */
@@ -286,20 +313,38 @@ class IssueController {
         }
     }
 
-    /** The issue as the guards see it ({@code issue.assignee}, {@code issue.labels}…); workflow adds the status. */
+    /** The issue as the guards see it ({@code issue.assignee}, {@code issue.custom.customer}…). */
     private static Map<String, Object> guardInput(Found found) {
         IssueEntity i = found.issue();
+        return conditionInput(found.project(), key(found.project(), i), Fields.of(i), i.status(), i.reporter());
+    }
+
+    /** An issue as the conditions see it (ADR-10, ADR-11), also one not saved yet ({@code key} null). */
+    private static Map<String, Object> conditionInput(ProjectRef project, String key, Fields f, String status,
+                                                      String reporter) {
         Map<String, Object> issue = new HashMap<>();
-        issue.put("key", key(found.project(), i));
-        issue.put("project", found.project().key());
-        issue.put("type", i.type().value());
-        issue.put("summary", i.summary());
-        issue.put("description", i.description());
-        issue.put("priority", i.priority().value());
-        issue.put("assignee", i.assignee());
-        issue.put("reporter", i.reporter());
-        issue.put("labels", i.labels() == null ? List.of() : i.labels());
+        issue.put("key", key);
+        issue.put("project", project.key());
+        issue.put("type", f.type() == null ? null : f.type().value());
+        issue.put("summary", f.summary());
+        issue.put("description", f.description());
+        issue.put("status", status);
+        issue.put("priority", f.priority() == null ? null : f.priority().value());
+        issue.put("assignee", f.assignee());
+        issue.put("reporter", reporter);
+        issue.put("labels", f.labels() == null ? List.of() : f.labels());
+        issue.put("custom", f.custom());
         return issue;
+    }
+
+    /** The custom fields that the issue, as it would be saved, requires and lacks. */
+    private void checkRequired(ProjectRef project, String key, Fields fields, String status, String reporter,
+                               Set<String> permissions) throws InvalidCustom {
+        List<FieldError> missing = customFields.missing(project.id(),
+                conditionInput(project, key, fields, status, reporter), userInput(), permissions);
+        if (!missing.isEmpty()) {
+            throw new InvalidCustom(missing);
+        }
     }
 
     private Map<String, Object> userInput() {
@@ -316,17 +361,17 @@ class IssueController {
 
     /** The fields of a request, checked; type and priority default to task and medium. */
     private record Fields(IssueType type, String summary, String description, Priority priority, String assignee,
-                          List<String> labels) {
+                          List<String> labels, Map<String, Object> custom) {
 
         void applyTo(IssueEntity issue, Instant now) {
-            issue.edit(type, summary, description, priority, assignee, labels, now);
+            issue.edit(type, summary, description, priority, assignee, labels, custom, now);
         }
 
-        static final Fields EMPTY = new Fields(null, null, null, null, null, List.of());
+        static final Fields EMPTY = new Fields(null, null, null, null, null, List.of(), Map.of());
 
         static Fields of(IssueEntity issue) {
             return new Fields(issue.type(), issue.summary(), issue.description(), issue.priority(), issue.assignee(),
-                    issue.labels());
+                    issue.labels(), issue.custom());
         }
 
         /** The fields that differ from {@code before}, in the order of the form. */
@@ -339,6 +384,12 @@ class IssueController {
             change(changes, "assignee", before.assignee, assignee);
             change(changes, "labels", text(before.labels), text(labels));
             change(changes, "description", before.description, description);
+            Set<String> keys = new TreeSet<>(before.custom.keySet());
+            keys.addAll(custom.keySet());
+            for (String key : keys) {
+                change(changes, "custom." + key, CustomFields.text(before.custom.get(key)),
+                        CustomFields.text(custom.get(key)));
+            }
             return changes;
         }
 
@@ -359,7 +410,19 @@ class IssueController {
         }
     }
 
-    private Fields fields(ProjectRef project, IssueRequest request) throws InvalidField {
+    /** Custom fields that are not valid, with the errors on each (ADR-11). */
+    private static final class InvalidCustom extends Exception {
+        static final String TITLE = "Some custom fields are not valid";
+        private final transient List<FieldError> errors;
+
+        InvalidCustom(List<FieldError> errors) {
+            super(TITLE, null, false, false);
+            this.errors = errors;
+        }
+    }
+
+    /** The fields of a request, checked, on top of {@code before}; without {@code custom} its values stay. */
+    private Fields fields(ProjectRef project, IssueRequest request, Fields before) throws InvalidField, InvalidCustom {
         IssueType type = request.type() == null ? IssueType.TASK : IssueType.parse(request.type())
                 .orElseThrow(() -> new InvalidField("The type is one of " + String.join(", ", IssueType.names())));
         Priority priority = request.priority() == null ? Priority.MEDIUM : Priority.parse(request.priority())
@@ -374,8 +437,16 @@ class IssueController {
         if (assignee != null && access.role(project.id(), assignee).isEmpty()) {
             throw new InvalidField("The assignee must be a member of the project");
         }
+        Map<String, Object> custom = before.custom();
+        if (request.custom() != null) {
+            CustomFields.Checked checked = customFields.check(project.id(), request.custom(), before.custom());
+            if (!checked.errors().isEmpty()) {
+                throw new InvalidCustom(checked.errors());
+            }
+            custom = checked.values();
+        }
         return new Fields(type, request.summary().strip(), blankToNull(request.description()), priority, assignee,
-                labels(request.labels()));
+                labels(request.labels()), custom);
     }
 
     /** Labels in lower case, without repetitions, in the order given. */
@@ -412,7 +483,7 @@ class IssueController {
                 "transition", permissions.contains("odt.issue.transition"),
                 "comment", permissions.contains("odt.issue.comment"));
         return new IssueView(key(project, i), project.key(), i.number(), i.type().value(), i.summary(), i.description(),
-                i.status(), i.priority().value(), i.assignee(), i.reporter(), i.labels(), i.createdAt(), i.updatedAt(),
+                i.status(), i.priority().value(), i.assignee(), i.reporter(), i.labels(), i.custom(), i.createdAt(), i.updatedAt(),
                 i.version(), watchers.existsByIssueIdAndUsername(i.id(), user.username()), perm);
     }
 }
