@@ -67,8 +67,11 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F2 (per the plan): custom fields (E2) once ADR-11, proposed, is accepted; the rest of E4 (mentions, attachments); workflows
-   by issue type and editing statuses and transitions when a project needs them (ADR-10).
-2. Adopt Quadrava 0.2.0 when released: `quadrava validate` and `publish` in CI instead of `tools/publish-ui.mjs`,
+1. F2 (per the plan): the rest of E4 (mentions; attachments after an ADR on where the files are kept); workflows by
+   issue type and editing statuses and transitions when a project needs them (ADR-10).
+2. Custom fields (E2) are on hold until Quadrava implements Q6 (`fieldsFrom`, form fields from a data source),
+   decided on 1 November 2026: no temporary Fields tab. ADR-11 stays proposed; when Q6 is released it is revised so
+   the fields are in the forms of `issue-new` and `issue-detail`, then accepted and built.
+3. Adopt Quadrava 0.2.0 when released: `quadrava validate` and `publish` in CI instead of `tools/publish-ui.mjs`,
    schemas refreshed with `backend/tools/sync-quadrava-schemas.sh`, the kits from the release tag.
-3. Deployment: publish `ui/` to `testing`/`production` with an author and an approver token.
+4. Deployment: publish `ui/` to `testing`/`production` with an author and an approver token.
