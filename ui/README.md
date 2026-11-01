@@ -1,7 +1,7 @@
 # OpenDevTrack screens
 
 The front end of OpenDevTrack is this Quadrava project: screens, navigation, themes and translations, as JSON documents
-validated by the schemas of the pinned Quadrava version (0.1.0, ADR-01). No Angular code: the runtime image of Quadrava
+validated by the schemas of the pinned Quadrava version (0.2.1, ADR-01). No Angular code: the runtime image of Quadrava
 loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 | Path | Registry kind | What |
@@ -40,7 +40,7 @@ node tools/publish-ui.mjs --registry <url> --env production --token <author toke
 (http://localhost:28090). In a protected environment (`testing`, `production`) every version needs the approval of
 someone other than its author.
 
-## Served by the runtime 0.1.0, with two temporary workarounds
+## Served by the runtime 0.2.1, with two temporary workarounds
 
 - The favicon and the page title: the image has no setting for them, so the e2e mounts the brand favicon over the icons
   of the image, and the tab still reads «Quadrava» (request Q3).

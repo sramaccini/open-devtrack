@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lowcode.example/schemas/datasources.schema.json",
+  "$id": "https://quadrava.logicwarez.com/schemas/datasources.schema.json",
   "title": "Data sources",
   "description": "Data sources of a project, shared by its screens: one document holds one or more of them (for example all the calls of the orders service). A screen uses one with a reference such as {\"ref\": \"orders/list\"} in its dataSources.",
   "type": "object",
@@ -39,7 +39,7 @@
         "pattern": "^[A-Za-z][A-Za-z0-9_]*$"
       },
       "additionalProperties": {
-        "$ref": "https://lowcode.example/schemas/screen.schema.json#/$defs/dataSource"
+        "$ref": "https://quadrava.logicwarez.com/schemas/screen.schema.json#/$defs/dataSource"
       },
       "description": "The data sources, by name: the second part of the references, list in orders/list."
     }

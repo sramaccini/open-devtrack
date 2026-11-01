@@ -3,6 +3,8 @@
   "app.signIn": "Accedi di nuovo",
   "app.signedOutTitle": "Sessione terminata",
   "app.signedOutText": "Hai effettuato l'uscita.",
+  "app.loginRefusedTitle": "Accesso non riuscito",
+  "app.loginRefusedText": "Il server ha rifiutato la sessione subito dopo l’accesso. Riprova tra poco; se succede ancora, contatta l’amministratore.",
   "app.profile": "Profilo",
   "app.settings": "Impostazioni",
   "app.permissions": "{n, plural, =0 {nessun permesso} one {# permesso} other {# permessi}}",

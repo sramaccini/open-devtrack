@@ -45,13 +45,13 @@ services:
   # The front of OpenDevTrack (ADR-01): the Quadrava runtime forwards the BFF paths to the back end on the host.
   # runtime-config.json: the screens of the Quadrava demo, with session, permissions and tenants from the back end.
   runtime:
-    image: ghcr.io/sramaccini/quadrava-runtime:0.1.0
+    image: ghcr.io/sramaccini/quadrava-runtime:0.2.1
     environment:
       QUADRAVA_BFF_URL: http://host.docker.internal:${APP_PORT:-28080}
     volumes:
       - ./runtime-config.json:/etc/quadrava/runtime-config.json:ro
       # The brand of OpenDevTrack next to the application: the logos of the ui/ themes (odt-brand/...) and, over the
-      # icons of the image, the favicon. Temporary: the runtime 0.1.0 has no setting for the favicon (request Q3).
+      # icons of the image, the favicon. Temporary: the runtime 0.2.1 has no setting for the favicon (request Q3).
       - ../../brand/svg:/usr/share/nginx/html/odt-brand:ro
       - ../../brand/svg/odt-favicon.svg:/usr/share/nginx/html/brand/quadrava-icon-small.svg:ro
       - ../../brand/png/favicon-32.png:/usr/share/nginx/html/brand/quadrava-icon-32.png:ro

@@ -3,6 +3,8 @@
   "app.signIn": "Sign in again",
   "app.signedOutTitle": "Session ended",
   "app.signedOutText": "You have signed out.",
+  "app.loginRefusedTitle": "Signing in did not work",
+  "app.loginRefusedText": "The server refused the session right after signing in. Try again in a moment; if it happens again, contact the administrator.",
   "app.profile": "Profile",
   "app.settings": "Settings",
   "app.permissions": "{n, plural, =0 {no permissions} one {# permission} other {# permissions}}",

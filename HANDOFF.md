@@ -14,13 +14,13 @@ Quadrava and authz-library, and the ADRs say where.
   (`ModularityTests`: `verify()` and the module documentation). The `odt.*` permission catalogue is a repeatable
   Flyway migration of the RBAC schema (ADR-07); the dev profile adds tenants, users and the UI author/approver roles.
 - Module `uiregistry` (ADR-03): `contracts/registry.yaml` 0.6.0 adapted from the Quadrava reference registry
-  (commit 9fa1916), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.1.0 in the classpath.
+  (commit 9fa1916), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.2.1 in the classpath.
   The browser uses the session; tools use Keycloak access tokens of `opendevtrack-tools` on `/registry/**`
   (`platform/BearerTokenSecurity.java`, temporary until A4).
 - `ui/`: the Quadrava project, with the main navigation, home and projects placeholder screens, themes `odt-light` and
   `odt-dark` from `brand/`, English and Italian catalogues. `tools/publish-ui.mjs` publishes it (until Q2).
 - End-to-end check (`docs/check-authz-end-to-end.md`): Quadrava kits bff 13/13 with and without a session, authz 11/11,
-  registry 23/23, tenant switch kept across logins, `ui/` served by the runtime 0.1.0 from the registry.
+  registry 23/23, tenant switch kept across logins, `ui/` served by the runtime 0.2.1 from the registry.
 - CI (`.github/workflows/ci.yml`), green on its first run: back end tests, then the e2e with the kits. It reads authz-library from GitHub
   Packages with the secret `AUTHZ_PACKAGES_TOKEN` (or the workflow token if the packages grant this repository access).
 - F2 E1 Projects: modules `project` (projects of the tenant, issue numbering), `access` (members and project roles
@@ -72,6 +72,7 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 2. Custom fields (E2) are on hold until Quadrava implements Q6 (`fieldsFrom`, form fields from a data source),
    decided on 1 November 2026: no temporary Fields tab. ADR-11 stays proposed; when Q6 is released it is revised so
    the fields are in the forms of `issue-new` and `issue-detail`, then accepted and built.
-3. Adopt Quadrava 0.2.0 when released: `quadrava validate` and `publish` in CI instead of `tools/publish-ui.mjs`,
-   schemas refreshed with `backend/tools/sync-quadrava-schemas.sh`, the kits from the release tag.
+3. Adopt the CLI of Quadrava 0.2.1 (`@sramaccini/quadrava-cli` on GitHub Packages, request Q2 released):
+   `quadrava validate` and `publish` in CI instead of `tools/publish-ui.mjs`. The runtime image, the schemas and the
+   kits are already at 0.2.1.
 4. Deployment: publish `ui/` to `testing`/`production` with an author and an approver token.

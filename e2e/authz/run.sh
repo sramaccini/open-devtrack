@@ -16,9 +16,8 @@ here="$(cd "$(dirname "$0")" && pwd)"
 root="$(cd "$here/../.." && pwd)"
 work="$here/.work"
 
-# The conformance kits of Quadrava, downloaded file by file at a fixed commit. The authorization kit with session
-# cookies is on Quadrava main after 0.1.0: pin the release tag once one carries it.
-QUADRAVA_KITS="${QUADRAVA_KITS:-https://raw.githubusercontent.com/sramaccini/quadrava/9fa1916f4c584ec17734796cc67506d4e23444f6/frontend/tools}"
+# The conformance kits of Quadrava, downloaded file by file from the tag of the pinned release (ADR-01).
+QUADRAVA_KITS="${QUADRAVA_KITS:-https://raw.githubusercontent.com/sramaccini/quadrava/v0.2.1/frontend/tools}"
 
 DB_PORT="${DB_PORT:-25432}"
 REDIS_PORT="${REDIS_PORT:-26379}"

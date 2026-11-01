@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://lowcode.example/schemas/screen.schema.json",
+  "$id": "https://quadrava.logicwarez.com/schemas/screen.schema.json",
   "title": "Screen",
   "description": "Core of the definition language: a screen of a Quadrava application with the catalogue of base components.",
   "type": "object",
@@ -1465,6 +1465,56 @@
                   "$ref": "#/$defs/field"
                 },
                 "description": "Fields of the form, in order. The values are read as `form` in expressions."
+              },
+              "fieldsFrom": {
+                "type": "object",
+                "required": [
+                  "source"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "description": "Data source whose rows describe more fields, in order (at most 50), shown after `fields`: for fields that are data, such as the custom fields of a project. Labels and options are data, shown as they are."
+                  },
+                  "into": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$",
+                    "description": "Name of an object that holds the values of these fields, read and sent as one (form.custom.customer with \"custom\"); a name the fields do not use. Without it the values sit next to those of `fields`, and a field with the name of one of them is left out."
+                  },
+                  "nameField": {
+                    "type": "string",
+                    "description": "Field of the row with the name of the field: letters, digits and _, starting with a letter (name if absent). Rows without a valid name, and names already seen, are left out."
+                  },
+                  "labelField": {
+                    "type": "string",
+                    "description": "Field of the row with the label, shown as text (label if absent; the name when empty)."
+                  },
+                  "typeField": {
+                    "type": "string",
+                    "description": "Field of the row with the type (type if absent): one of `types`, or text, textarea, number, date, datetime, checkbox, switch, select, multiselect or radio. A row of another type is left out."
+                  },
+                  "optionsField": {
+                    "type": "string",
+                    "description": "Field of the row with the options of select, multiselect and radio: a list of values, or of {value, label} (options if absent)."
+                  },
+                  "requiredField": {
+                    "type": "string",
+                    "description": "Field of the row that makes the field required when it is true (required if absent). Conditional rules stay with the service, whose field errors go to the fields."
+                  },
+                  "types": {
+                    "type": "object",
+                    "maxProperties": 20,
+                    "propertyNames": {
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,39}$"
+                    },
+                    "additionalProperties": {
+                      "$ref": "#/$defs/field"
+                    },
+                    "description": "Models of the fields by type of the row, written as fields of the screen: they give a type of the row its control and its rules, for example {\"user\": {\"name\": \"user\", \"type\": \"lookup\", \"lookup\": {\"source\": \"members\", \"labelField\": \"name\"}}} or {\"text\": {\"name\": \"text\", \"type\": \"text\", \"maxLength\": 1000}}. The name, label, options and required of the row replace those of the model."
+                  }
+                },
+                "description": "Fields read from a data source, after those of `fields`, so that one screen serves forms whose fields are data. Checked like the other fields when an action runs; the actions wait for them to load."
               },
               "actions": {
                 "type": "array",
