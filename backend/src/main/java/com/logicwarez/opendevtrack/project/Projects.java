@@ -28,6 +28,11 @@ public class Projects {
         return projects.findByTenantIdAndKey(user.tenantId(), key).map(ProjectEntity::toRef);
     }
 
+    /** The project with this identifier in the tenant of the session; empty also when it belongs to another tenant. */
+    public Optional<ProjectRef> get(UUID id) {
+        return projects.findById(id).map(ProjectEntity::toRef).filter(p -> p.tenantId().equals(user.tenantId()));
+    }
+
     /** Reserves the next issue number of the project (ODT-1, ODT-2…), inside the transaction of the caller. */
     @Transactional
     public long nextIssueNumber(UUID projectId) {

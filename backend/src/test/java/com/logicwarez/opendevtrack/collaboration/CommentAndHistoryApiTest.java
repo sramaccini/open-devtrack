@@ -84,7 +84,7 @@ class CommentAndHistoryApiTest {
     void setUp() throws Exception {
         mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(security).build();
         jdbc.execute("TRUNCATE odt_project.project, odt_access.project_member, odt_issue.issue, odt_audit.issue_change, "
-                + "odt_collaboration.comment");
+                + "odt_collaboration.comment CASCADE");
         mvc.perform(as(post("/api/projects"), mario).content("{\"key\":\"ODT\",\"name\":\"OpenDevTrack\"}"))
                 .andExpect(status().isCreated());
         mvc.perform(as(post("/api/projects/ODT/members"), mario).content("{\"username\":\"luisa\",\"role\":\"developer\"}"))

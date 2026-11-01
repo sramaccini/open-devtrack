@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "datasources": "issues",
-  "description": "Issues of a project (module issue) with their transitions (module workflow), the members who can be assigned, the comments (module collaboration) and the changelog (module audit).",
+  "description": "Issues of a project (module issue) with their links and transitions (module workflow), the members who can be assigned, the comments (module collaboration) and the changelog (module audit).",
   "sources": {
     "list": {
       "type": "rest",
@@ -78,6 +78,30 @@
         "transition": "{{transition}}",
         "version": "{{version}}"
       }
+    },
+    "links": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/issues/{{params.issue}}/links"
+    },
+    "linkCandidates": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/issues/{{params.issue}}/links/candidates",
+      "params": {
+        "q": "{{search}}"
+      }
+    },
+    "addLink": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/issues/{{params.issue}}/links",
+      "body": "{{form}}"
+    },
+    "removeLink": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/issues/{{params.issue}}/links/{{id}}"
     }
   }
 }

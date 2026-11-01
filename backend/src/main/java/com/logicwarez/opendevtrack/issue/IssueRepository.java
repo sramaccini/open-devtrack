@@ -24,4 +24,15 @@ interface IssueRepository extends JpaRepository<IssueEntity, UUID> {
               AND (:text IS NULL OR lower(i.summary) LIKE :text)
             ORDER BY i.number DESC""")
     List<IssueEntity> search(UUID projectId, String status, String assignee, String text, Limit limit);
+
+    /** Issues of a project to link to, by number or by text of the summary ({@code text}: lower case, with the %). */
+    @Query("""
+            SELECT i FROM IssueEntity i
+            WHERE i.projectId = :projectId AND i.id <> :except
+              AND (:number IS NULL OR i.number = :number)
+              AND (:text IS NULL OR lower(i.summary) LIKE :text)
+            ORDER BY i.number DESC""")
+    List<IssueEntity> candidates(UUID projectId, UUID except, Long number, String text, Limit limit);
+
+    List<IssueEntity> findByIdIn(List<UUID> ids);
 }

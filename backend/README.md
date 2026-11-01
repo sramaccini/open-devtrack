@@ -77,6 +77,15 @@ changes only through the transitions of the workflow of the project (below). `GE
 `assignee` (`me` for the user) and `q` (text of the summary). Each change is published as an event
 (`IssueEvents`); other modules find an issue by its key through `Issues`.
 
+## Links (`issue`)
+
+Links between two issues of the tenant (`odt_issue.issue_link`), one row read from both ends: `blocks` /
+`blocked_by`, `relates`, `duplicates` / `duplicated_by`. `GET /api/issues/{key}/links` lists them without the
+issues of projects the user does not see; `odt.issue.edit` adds one (`POST` with `relation` and `issue`, towards an
+issue the user sees; 409 if it is already there) and removes it. `GET …/links/candidates?q=` proposes the issues of
+the same project by key, number or text. Each link added or removed is in the changelog of both issues (field
+`links`), and the links of a deleted issue go with it.
+
 ## Workflows (`workflow`)
 
 Each project gets a copy of the built-in workflow when it is created (`odt_workflow`, ADR-10): statuses `todo`,

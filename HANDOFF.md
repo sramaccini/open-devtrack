@@ -29,7 +29,8 @@ Quadrava and authz-library, and the ADRs say where.
   until A1 (ADR-07). `ProjectApiTest` covers two tenants and users without the permissions.
 - F2 E2 Issues (first slice): module `issue` with type, priority, summary, Markdown description, assignee, labels and
   numbering per project; screens `issue-list`, `issue-new`, `issue-detail`. Labels are in the API only (request Q5);
-  the status changes through the workflow (E3).
+  the status changes through the workflow (E3). Links between issues (`blocks`, `relates`, `duplicates`, read from
+  both ends, also across projects of the tenant) with a Links tab on `issue-detail`.
 - F2 E3 Workflow (ADR-10, accepted 1 November 2026): module `workflow`, one workflow per project copied from the
   default, CEL guards with cel-java 0.14.0, transitions listed and run on `issue-detail` («Next steps»), conditions
   edited on `project-detail`. With it gate M1 is covered: create, edit, transition and comment an issue, with
@@ -64,7 +65,7 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F2 (per the plan): the rest of E2 (links, watchers, custom fields) and of E4 (mentions, attachments); workflows
+1. F2 (per the plan): the rest of E2 (watchers, custom fields) and of E4 (mentions, attachments); workflows
    by issue type and editing statuses and transitions when a project needs them (ADR-10).
 2. Adopt Quadrava 0.2.0 when released: `quadrava validate` and `publish` in CI instead of `tools/publish-ui.mjs`,
    schemas refreshed with `backend/tools/sync-quadrava-schemas.sh`, the kits from the release tag.

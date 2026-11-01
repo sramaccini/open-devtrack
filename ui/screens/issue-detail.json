@@ -36,6 +36,18 @@
     },
     "move": {
       "ref": "issues/move"
+    },
+    "links": {
+      "ref": "issues/links"
+    },
+    "linkCandidates": {
+      "ref": "issues/linkCandidates"
+    },
+    "addLink": {
+      "ref": "issues/addLink"
+    },
+    "removeLink": {
+      "ref": "issues/removeLink"
     }
   },
   "components": [
@@ -199,6 +211,77 @@
             },
             {
               "refresh": "comments"
+            }
+          ]
+        },
+        {
+          "id": "btn-link",
+          "label": "{{ t('issues.add_link', 'Link') }}",
+          "visibleIf": "{{form._perm.edit}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('issues.add_link_title', 'Link to another issue') }}",
+                "submitLabel": "{{ t('issues.add_link', 'Link') }}",
+                "initial": {
+                  "relation": "relates"
+                },
+                "fields": [
+                  {
+                    "name": "relation",
+                    "type": "select",
+                    "label": "{{ t('issues.relation', 'Relation') }}",
+                    "required": true,
+                    "options": [
+                      "blocks",
+                      "blocked_by",
+                      "relates",
+                      "duplicates",
+                      "duplicated_by"
+                    ],
+                    "optionKey": "values.relation"
+                  },
+                  {
+                    "name": "issue",
+                    "type": "lookup",
+                    "label": "{{ t('issues.linked_issue', 'Issue') }}",
+                    "tooltip": "{{ t('issues.linked_issue_help', 'Its key or words of its summary') }}",
+                    "required": true,
+                    "lookup": {
+                      "source": "linkCandidates",
+                      "valueField": "key",
+                      "labelField": "label",
+                      "minChars": 0
+                    }
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "addLink",
+                    "onError": [
+                      {
+                        "if": "{{error.status == 409}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('issues.already_linked', 'The issues are already linked this way') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "links"
+            },
+            {
+              "refresh": "history"
             }
           ]
         },
@@ -420,6 +503,81 @@
                     },
                     {
                       "refresh": "comments"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tab-links",
+          "label": "{{ t('issues.links', 'Links') }}",
+          "components": [
+            {
+              "id": "link-table",
+              "type": "table",
+              "source": "links",
+              "columns": [
+                {
+                  "field": "relation",
+                  "label": "{{ t('issues.relation', 'Relation') }}",
+                  "valueKey": "values.relation"
+                },
+                {
+                  "field": "key",
+                  "label": "{{ t('issues.key', 'Key') }}",
+                  "onClick": [
+                    {
+                      "navigate": "issue-detail",
+                      "params": {
+                        "key": "{{row.project}}",
+                        "issue": "{{row.key}}"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "field": "summary",
+                  "label": "{{ t('issues.summary', 'Summary') }}"
+                },
+                {
+                  "field": "status",
+                  "label": "{{ t('issues.status', 'Status') }}",
+                  "format": "badge",
+                  "badges": {
+                    "todo": "neutral",
+                    "in_progress": "primary",
+                    "done": "success"
+                  },
+                  "valueKey": "values.status"
+                }
+              ],
+              "rowActions": [
+                {
+                  "id": "btn-remove-link",
+                  "label": "{{ t('issues.remove_link', 'Remove') }}",
+                  "visibleIf": "{{row._perm.delete}}",
+                  "onClick": [
+                    {
+                      "confirm": "{{ t('issues.remove_link_confirm', 'Remove the link to {key}?', {'key': row.key}) }}"
+                    },
+                    {
+                      "call": "removeLink",
+                      "args": {
+                        "id": "{{row.id}}"
+                      },
+                      "onError": [
+                        {
+                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                        }
+                      ]
+                    },
+                    {
+                      "refresh": "links"
+                    },
+                    {
+                      "refresh": "history"
                     }
                   ]
                 }
