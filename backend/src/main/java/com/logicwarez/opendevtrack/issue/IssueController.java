@@ -58,8 +58,9 @@ import org.springframework.web.bind.annotation.RestController;
  *   transition is true (module workflow, ADR-10);</li>
  *   <li>{@code odt.issue.delete} (admin): delete them.</li>
  * </ul>
- * The status changes only through the transitions. An issue of a project of another tenant
- * answers 404, as one that does not exist (ADR-09). Every change is published as an event of {@link IssueEvents}.
+ * The status changes only through the transitions; the reporter and the assignee watch the issue
+ * ({@link WatcherController}). An issue of a project of another tenant answers 404, as one that does not exist
+ * (ADR-09). Every change is published as an event of {@link IssueEvents}.
  */
 @RestController
 @Transactional(readOnly = true)
@@ -80,10 +81,12 @@ class IssueController {
     private final CurrentUser user;
     private final ApplicationEventPublisher events;
     private final Workflows workflows;
+    private final WatcherRepository watchers;
 
     IssueController(IssueRepository issues, Issues finder, Projects projects, ProjectAccess access, CurrentUser user,
-                    ApplicationEventPublisher events, Workflows workflows) {
+                    ApplicationEventPublisher events, Workflows workflows, WatcherRepository watchers) {
         this.workflows = workflows;
+        this.watchers = watchers;
         this.issues = issues;
         this.finder = finder;
         this.projects = projects;
@@ -134,6 +137,8 @@ class IssueController {
                 workflows.initialStatus(project.get().id()), user.username(), now);
         fields.applyTo(issue, now);
         issues.saveAndFlush(issue);
+        watchers.watch(issue.id(), issue.reporter(), now);
+        watchAssignee(issue, now);
         events.publishEvent(new IssueCreated(issue.id(), project.get().id(), key(project.get(), issue), user.username(), now,
                 Fields.of(issue).changesFrom(Fields.EMPTY)));
         return ResponseEntity.status(HttpStatus.CREATED).body(view(project.get(), issue, permissions));
@@ -185,6 +190,9 @@ class IssueController {
             issues.saveAndFlush(issue);
         } catch (ObjectOptimisticLockingFailureException e) {
             return Problems.changedMeanwhile();
+        }
+        if (changes.stream().anyMatch(c -> c.field().equals("assignee"))) {
+            watchAssignee(issue, now);
         }
         events.publishEvent(new IssueChanged(issue.id(), project.id(), key(project, issue), user.username(), now, changes));
         return ResponseEntity.ok(view(project, issue, permissions));
@@ -269,6 +277,13 @@ class IssueController {
         events.publishEvent(new IssueChanged(issue.id(), project.id(), key(project, issue), user.username(), now,
                 List.of(new FieldChange("status", from, issue.status()))));
         return ResponseEntity.ok(view(project, issue, permissions));
+    }
+
+    /** Whoever is assigned an issue watches it, until they stop. */
+    private void watchAssignee(IssueEntity issue, Instant now) {
+        if (issue.assignee() != null) {
+            watchers.watch(issue.id(), issue.assignee(), now);
+        }
     }
 
     /** The issue as the guards see it ({@code issue.assignee}, {@code issue.labels}…); workflow adds the status. */
@@ -398,6 +413,6 @@ class IssueController {
                 "comment", permissions.contains("odt.issue.comment"));
         return new IssueView(key(project, i), project.key(), i.number(), i.type().value(), i.summary(), i.description(),
                 i.status(), i.priority().value(), i.assignee(), i.reporter(), i.labels(), i.createdAt(), i.updatedAt(),
-                i.version(), perm);
+                i.version(), watchers.existsByIssueIdAndUsername(i.id(), user.username()), perm);
     }
 }

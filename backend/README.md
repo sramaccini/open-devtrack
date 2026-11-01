@@ -86,6 +86,15 @@ issue the user sees; 409 if it is already there) and removes it. `GET …/links/
 the same project by key, number or text. Each link added or removed is in the changelog of both issues (field
 `links`), and the links of a deleted issue go with it.
 
+## Watchers (`issue`)
+
+The users to tell of the changes of an issue (`odt_issue.watcher`), for the module `notification`. The reporter
+watches an issue from its creation and each assignee from the assignment; the view of an issue says whether the user
+watches it (`watching`). `GET /api/issues/{key}/watchers` lists them; whoever sees the issue watches it (`POST`, no
+`username` or `me`) and stops (`DELETE …/watchers/me`); `odt.issue.edit` also adds a member of the project and
+removes anyone. A member who leaves the project keeps the row: whoever sends notifications checks that they still see
+the issue.
+
 ## Workflows (`workflow`)
 
 Each project gets a copy of the built-in workflow when it is created (`odt_workflow`, ADR-10): statuses `todo`,

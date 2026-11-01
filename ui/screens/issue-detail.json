@@ -48,6 +48,18 @@
     },
     "removeLink": {
       "ref": "issues/removeLink"
+    },
+    "watchers": {
+      "ref": "issues/watchers"
+    },
+    "watch": {
+      "ref": "issues/watch"
+    },
+    "unwatch": {
+      "ref": "issues/unwatch"
+    },
+    "addWatcher": {
+      "ref": "issues/addWatcher"
     }
   },
   "components": [
@@ -282,6 +294,101 @@
             },
             {
               "refresh": "history"
+            }
+          ]
+        },
+        {
+          "id": "btn-watch",
+          "label": "{{ t('issues.watch', 'Watch') }}",
+          "visibleIf": "{{!form.watching}}",
+          "onClick": [
+            {
+              "call": "watch",
+              "onError": [
+                {
+                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                }
+              ]
+            },
+            {
+              "refresh": "issue"
+            },
+            {
+              "refresh": "watchers"
+            },
+            {
+              "toast": "{{ t('issues.watching', 'You are watching this issue') }}"
+            }
+          ]
+        },
+        {
+          "id": "btn-unwatch",
+          "label": "{{ t('issues.unwatch', 'Stop watching') }}",
+          "visibleIf": "{{form.watching}}",
+          "onClick": [
+            {
+              "call": "unwatch",
+              "args": {
+                "username": "me"
+              },
+              "onError": [
+                {
+                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                }
+              ]
+            },
+            {
+              "refresh": "issue"
+            },
+            {
+              "refresh": "watchers"
+            },
+            {
+              "toast": "{{ t('issues.not_watching', 'You are no longer watching this issue') }}"
+            }
+          ]
+        },
+        {
+          "id": "btn-add-watcher",
+          "label": "{{ t('issues.add_watcher', 'Add watcher') }}",
+          "visibleIf": "{{form._perm.edit}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('issues.add_watcher', 'Add watcher') }}",
+                "submitLabel": "{{ t('projects.add', 'Add') }}",
+                "fields": [
+                  {
+                    "name": "username",
+                    "type": "lookup",
+                    "label": "{{ t('issues.watcher', 'User') }}",
+                    "tooltip": "{{ t('issues.assignee_help', 'A member of the project') }}",
+                    "required": true,
+                    "lookup": {
+                      "source": "assignees",
+                      "valueField": "username",
+                      "labelField": "username",
+                      "minChars": 0
+                    }
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "addWatcher",
+                    "onError": [
+                      {
+                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "watchers"
+            },
+            {
+              "refresh": "issue"
             }
           ]
         },
@@ -578,6 +685,54 @@
                     },
                     {
                       "refresh": "history"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tab-watchers",
+          "label": "{{ t('issues.watchers', 'Watchers') }}",
+          "components": [
+            {
+              "id": "watcher-table",
+              "type": "table",
+              "source": "watchers",
+              "columns": [
+                {
+                  "field": "username",
+                  "label": "{{ t('issues.watcher', 'User') }}"
+                },
+                {
+                  "field": "since",
+                  "label": "{{ t('issues.since', 'Since') }}",
+                  "format": "datetime"
+                }
+              ],
+              "rowActions": [
+                {
+                  "id": "btn-remove-watcher",
+                  "label": "{{ t('issues.remove_link', 'Remove') }}",
+                  "visibleIf": "{{row._perm.delete}}",
+                  "onClick": [
+                    {
+                      "call": "unwatch",
+                      "args": {
+                        "username": "{{row.username}}"
+                      },
+                      "onError": [
+                        {
+                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                        }
+                      ]
+                    },
+                    {
+                      "refresh": "watchers"
+                    },
+                    {
+                      "refresh": "issue"
                     }
                   ]
                 }
