@@ -1,12 +1,12 @@
 # End-to-end check of authz-library (F0)
 
 Result on 31 October 2026: **all checks passed**. The OpenDevTrack back end, built on the authz-library 2.0.1
-libraries, talks to the Quadrava runtime 0.2.1 as the contracts of Quadrava ask, with the versions OpenDevTrack targets.
+libraries, talks to the Quadrava runtime 0.5.0 as the contracts of Quadrava ask, with the versions OpenDevTrack targets.
 
 ## What runs
 
 ```
-browser / kits ──▶ quadrava-runtime 0.2.1 (:28090) ──/bff /authz /logout /oauth2──▶ backend/ (:28080, profile dev)
+browser / kits ──▶ quadrava-runtime 0.5.0 (:28090) ──/bff /authz /logout /oauth2──▶ backend/ (:28080, profile dev)
                                                                                     │ authz-bff, authz-session, authz-rbac 2.0.1
                          Keycloak 26.8.0 (:28180, realm opendevtrack) ◀── OIDC ─────┤
                          PostgreSQL 18.6 (:25432) ◀── RBAC schema + odt.* catalogue ┤
@@ -41,12 +41,12 @@ Maven must reach the authz-library packages: see [backend/README.md](../backend/
 | Quadrava kit `conformance-authz`, sessions of `mario.rossi` and `anna.bianchi` | 11 of 11 |
 | `odt.*` permissions in the session of `mario.rossi` | `odt.project.browse`, `odt.project.create`, `odt.user.browse` |
 | Quadrava kit `conformance-bff`, session of `anna.bianchi` with two tenants | 13 of 13 (tenants, switch by POST only, CSRF, logout) |
-| Quadrava kit `conformance-registry`, bearer tokens of `mario.rossi` (author) and `anna.bianchi` (reviewer), from F1 | 23 of 23 (validation, If-Match, four eyes, protected environment, references) |
+| Quadrava kit `conformance-registry`, bearer tokens of `mario.rossi` (author) and `anna.bianchi` (reviewer), from F1 | 24 of 24 with `--protected-env none` (validation, If-Match, four eyes, references; the four checks of a protected environment skipped, ADR-12) |
 | `ui/` published to the registry (`development`) and served by the runtime, from F1 | 7 documents; home and projects screens in both themes and languages |
 | Tenant switch kept for the next login (ADR-08) | ACME → GLOBEX, then GLOBEX after a new login |
 | In the browser: login through the runtime, the user menu | «Spazio di lavoro» with both tenants, GLOBEX selected, 2 permissions |
 
-The kits come from the Quadrava tag `v0.2.1`, the pinned release (downloaded file by file, not cloned); until 0.2.0
+The kits come from the Quadrava tag `v0.5.0`, the pinned release (downloaded file by file, not cloned); until 0.2.0
 they came from `main` at `9fa1916`, since the authorization kit with session cookies was not in `v0.1.0`.
 
 ## Found along the way

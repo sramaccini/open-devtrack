@@ -13,15 +13,16 @@ Quadrava and authz-library, and the ADRs say where.
 - `backend/`: the monolith on authz-library 2.0.1, split into the Spring Modulith modules of the plan
   (`ModularityTests`: `verify()` and the module documentation). The `odt.*` permission catalogue is a repeatable
   Flyway migration of the RBAC schema (ADR-07); the dev profile adds tenants, users and the UI author/approver roles.
-- Module `uiregistry` (ADR-03): `contracts/registry.yaml` 0.6.0 adapted from the Quadrava reference registry
-  (commit 9fa1916), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.2.1 in the classpath.
+- Module `uiregistry` (ADR-03): `contracts/registry.yaml` 0.7.0, adapted from the Quadrava reference registry
+  (commit 9fa1916, contract 0.6.0), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.5.0 in the classpath.
   The browser uses the session; tools use Keycloak access tokens of `opendevtrack-tools` on `/registry/**`
   (`platform/BearerTokenSecurity.java`, temporary until A4).
 - `ui/`: the Quadrava project, with the main navigation, home and projects placeholder screens, themes `odt-light` and
-  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.2.1 checks it (`quadrava validate`) and publishes it
+  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.5.0 checks it (`quadrava validate`) and publishes it
   (`quadrava publish`) to any environment: no environment is protected (ADR-12).
 - End-to-end check (`docs/check-authz-end-to-end.md`): Quadrava kits bff 13/13 with and without a session, authz 11/11,
-  registry 23/23, tenant switch kept across logins, `ui/` served by the runtime 0.2.1 from the registry.
+  registry 24/24 (`--protected-env none`), tenant switch kept across logins, `ui/` served by the runtime 0.5.0 from the
+  registry. Quadrava 0.5.0 adopted on 4 November 2026 (from 0.2.1: same schemas, registry contract 0.7).
 - CI (`.github/workflows/ci.yml`), green on its first run: `quadrava validate` of `ui/` and the back end tests, then the e2e with the
   kits. It reads authz-library and the Quadrava CLI from GitHub Packages with the secret `AUTHZ_PACKAGES_TOKEN` (or the workflow token if the packages grant this repository access).
 - F2 E1 Projects: modules `project` (projects of the tenant, issue numbering), `access` (members and project roles
@@ -74,5 +75,3 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 1. F2 (per the plan): the rest of E4 (mentions; attachments after an ADR on where the files are kept); workflows by
    issue type and editing statuses and transitions when a project needs them (ADR-10).
 2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.
-3. Quadrava 0.5.0 is out (registry contract 0.7, kit option `--protected-env none`): adopt it with its runtime,
-   schemas, kits and CLI, then drop the protected `production` of the e2e.

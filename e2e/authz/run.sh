@@ -18,9 +18,9 @@ root="$(cd "$here/../.." && pwd)"
 work="$here/.work"
 
 # The conformance kits of Quadrava, downloaded file by file from the tag of the pinned release (ADR-01).
-QUADRAVA_KITS="${QUADRAVA_KITS:-https://raw.githubusercontent.com/sramaccini/quadrava/v0.2.1/frontend/tools}"
+QUADRAVA_KITS="${QUADRAVA_KITS:-https://raw.githubusercontent.com/sramaccini/quadrava/v0.5.0/frontend/tools}"
 # The CLI of the same release, which checks and publishes ui/.
-QUADRAVA_CLI="${QUADRAVA_CLI:-@sramaccini/quadrava-cli@0.2.1}"
+QUADRAVA_CLI="${QUADRAVA_CLI:-@sramaccini/quadrava-cli@0.5.0}"
 
 DB_PORT="${DB_PORT:-25432}"
 REDIS_PORT="${REDIS_PORT:-26379}"
@@ -72,14 +72,13 @@ up() {
   local jar
   jar="$(ls "$root"/backend/target/opendevtrack-backend-*.jar | grep -vE -- '-(sources|javadoc)\.jar$' | head -1)"
 
-  # Production protected only here: the registry kit of 0.2.1 expects a protected environment (ADR-12).
   log "back end (start, log in .work/backend.log)"
   set -a; . "$work/.env"; set +a
   DB_URL="jdbc:postgresql://localhost:$DB_PORT/opendevtrack" DB_USER=opendevtrack DB_PASSWORD="$DB_PASSWORD" \
   REDIS_PORT="$REDIS_PORT" IAM_CLIENT_SECRET="$BFF_CLIENT_SECRET" \
   IAM_ISSUER_URI="http://localhost:$KEYCLOAK_PORT/realms/opendevtrack" FRONTEND_URL="$front" PORT="$APP_PORT" \
     nohup "${JAVA_HOME:?set JAVA_HOME to a JDK 25}/bin/java" ${E2E_JAVA_OPTS:-} -jar "$jar" \
-      --spring.profiles.active=dev --odt.uiregistry.protected-environments=production > "$work/backend.log" 2>&1 &
+      --spring.profiles.active=dev > "$work/backend.log" 2>&1 &
   echo $! > "$work/backend.pid"
   wait_for "http://localhost:$APP_PORT/actuator/health" "The back end"
 
@@ -144,7 +143,7 @@ check() {
   node "$kits/conformance-bff.mjs" --bff "$front" --return "$front/" --cookie "$(login anna.bianchi)" || failed=1
 
   log "Quadrava kit: registry contract (author mario.rossi, reviewer anna.bianchi, bearer tokens)"
-  node "$kits/conformance-registry.mjs" --registry "http://localhost:$APP_PORT" --protected-env production \
+  node "$kits/conformance-registry.mjs" --registry "http://localhost:$APP_PORT" --protected-env none \
     --token "$(token mario.rossi)" --reviewer-token "$(token anna.bianchi)" || failed=1
 
   log "Tenants: the switch is kept for the next login (ADR-08)"

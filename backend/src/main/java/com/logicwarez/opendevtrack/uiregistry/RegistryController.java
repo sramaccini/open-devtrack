@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Registry according to contracts/registry.yaml (0.6): separate documents for screens, data sources, navigation, themes
+ * Registry according to contracts/registry.yaml (0.7): separate documents for screens, data sources, navigation, themes
  * and catalogues, each with its own versions and publications.
  *
  * <ul>
