@@ -1,7 +1,7 @@
 # ADR-03: Where the screens come from in production
 
 Status: Accepted (31 October 2026; direction decided by the maintainer, details approved) —
-decision D3 of the project plan
+decision D3 of the project plan. Its protected environments are replaced by ADR-12 (4 November 2026).
 
 ## Context
 

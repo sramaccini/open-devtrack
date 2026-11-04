@@ -46,8 +46,8 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>Permissions (ADR-07): {@code odt.uidefinition.publish} to read the versions, save, request a review and
  *       publish; {@code odt.uidefinition.approve} to approve or reject, never by the author of the version (four eyes).
  *       What is published can be read by every signed-in user: the runtime loads it.</li>
- *   <li>In the protected environments ({@code odt.uiregistry.protected-environments}) only approved versions are
- *       published, and a navigation only if the screens it cites are published in the same environment.</li>
+ *   <li>In the protected environments ({@code odt.uiregistry.protected-environments}, none by default: ADR-12) only
+ *       approved versions are published, and a navigation only if the screens it cites are published in the same environment.</li>
  *   <li>Cross-document references ({@link References}): {@code …/versions/{hash}/references} tells which screens a
  *       version cites and which are missing in an environment.</li>
  * </ul>

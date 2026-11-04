@@ -96,8 +96,9 @@ odt:
       # Clients whose access tokens may call /registry/** (BearerTokenSecurity, temporary until request A4)
       clients: opendevtrack-tools
   uiregistry:
-    # Only versions approved by someone other than their author are published to these environments
-    protected-environments: testing,production
+    # Environments where only versions approved by someone other than their author are published: none (ADR-12, the
+    # review is the one of the code). An installation that wants it lists them:
+    # protected-environments: testing,production
 
 management:
   endpoints:

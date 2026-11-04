@@ -44,7 +44,7 @@ class SchemaValidationTest {
             }
         }
         assertThat(validation.validate(Kind.NAVIGATION, Files.readString(UI.resolve("navigation.json"), StandardCharsets.UTF_8))).isEmpty();
-        // The catalogues are flat maps in the project and messages documents in the registry (tools/publish-ui.mjs).
+        // The catalogues are flat maps in the project and messages documents in the registry (quadrava publish).
         for (String locale : List.of("en", "it")) {
             String texts = Files.readString(UI.resolve("i18n").resolve(locale + ".json"), StandardCharsets.UTF_8);
             String document = "{\"schemaVersion\":\"1.0\",\"messages\":\"" + locale + "\",\"texts\":" + texts + "}";

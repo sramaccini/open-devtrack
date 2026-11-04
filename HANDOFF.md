@@ -18,8 +18,8 @@ Quadrava and authz-library, and the ADRs say where.
   The browser uses the session; tools use Keycloak access tokens of `opendevtrack-tools` on `/registry/**`
   (`platform/BearerTokenSecurity.java`, temporary until A4).
 - `ui/`: the Quadrava project, with the main navigation, home and projects placeholder screens, themes `odt-light` and
-  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.2.1 checks it (`quadrava validate`) and publishes it to
-  `development`; `tools/publish-ui.mjs` stays for the protected environments, which need a review (request Q7).
+  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.2.1 checks it (`quadrava validate`) and publishes it
+  (`quadrava publish`) to any environment: no environment is protected (ADR-12).
 - End-to-end check (`docs/check-authz-end-to-end.md`): Quadrava kits bff 13/13 with and without a session, authz 11/11,
   registry 23/23, tenant switch kept across logins, `ui/` served by the runtime 0.2.1 from the registry.
 - CI (`.github/workflows/ci.yml`), green on its first run: `quadrava validate` of `ui/` and the back end tests, then the e2e with the
@@ -49,7 +49,7 @@ Quadrava and authz-library, and the ADRs say where.
 
 In `docs/README.md`: Q2 (Quadrava 0.2.0 with its CLI), Q3 (favicon and title of the runtime image), Q4 (shell texts of
 the runtime built in), Q5 (a tags field), A1 (extension point for project permissions; `_perm` meanwhile), A2 (schema of the RBAC tables), A3 (Problem
-texts in English), A4 (bearer access for tools), A5 (read-only list of the tenant users), Q7 (review and approval from the CLI). Each is built in its own repository.
+texts in English), A4 (bearer access for tools), A5 (read-only list of the tenant users). Each is built in its own repository.
 
 ## Environment of this machine
 
@@ -73,5 +73,6 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 1. F2 (per the plan): the rest of E4 (mentions; attachments after an ADR on where the files are kept); workflows by
    issue type and editing statuses and transitions when a project needs them (ADR-10).
-2. Deployment: publish `ui/` to `testing`/`production` with an author and an approver token, through
-   `tools/publish-ui.mjs` until the Quadrava CLI can request and approve the review (Q7).
+2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.
+3. Quadrava 0.5.0 is out (registry contract 0.7, kit option `--protected-env none`): adopt it with its runtime,
+   schemas, kits and CLI, then drop the protected `production` of the e2e.

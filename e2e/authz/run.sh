@@ -72,13 +72,14 @@ up() {
   local jar
   jar="$(ls "$root"/backend/target/opendevtrack-backend-*.jar | grep -vE -- '-(sources|javadoc)\.jar$' | head -1)"
 
+  # Production protected only here: the registry kit of 0.2.1 expects a protected environment (ADR-12).
   log "back end (start, log in .work/backend.log)"
   set -a; . "$work/.env"; set +a
   DB_URL="jdbc:postgresql://localhost:$DB_PORT/opendevtrack" DB_USER=opendevtrack DB_PASSWORD="$DB_PASSWORD" \
   REDIS_PORT="$REDIS_PORT" IAM_CLIENT_SECRET="$BFF_CLIENT_SECRET" \
   IAM_ISSUER_URI="http://localhost:$KEYCLOAK_PORT/realms/opendevtrack" FRONTEND_URL="$front" PORT="$APP_PORT" \
     nohup "${JAVA_HOME:?set JAVA_HOME to a JDK 25}/bin/java" ${E2E_JAVA_OPTS:-} -jar "$jar" \
-      --spring.profiles.active=dev > "$work/backend.log" 2>&1 &
+      --spring.profiles.active=dev --odt.uiregistry.protected-environments=production > "$work/backend.log" 2>&1 &
   echo $! > "$work/backend.pid"
   wait_for "http://localhost:$APP_PORT/actuator/health" "The back end"
 

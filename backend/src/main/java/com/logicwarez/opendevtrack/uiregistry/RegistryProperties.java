@@ -10,12 +10,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * Configuration of the registry ({@code odt.uiregistry.*}).
  *
- * @param protectedEnvironments environments where only approved versions are published (usually testing and production)
+ * @param protectedEnvironments environments where only approved versions are published; none by default (ADR-12)
  */
 @ConfigurationProperties("odt.uiregistry")
 record RegistryProperties(List<String> protectedEnvironments) {
 
     RegistryProperties {
-        protectedEnvironments = protectedEnvironments == null ? List.of("testing", "production") : List.copyOf(protectedEnvironments);
+        protectedEnvironments = protectedEnvironments == null ? List.of() : List.copyOf(protectedEnvironments);
     }
 }

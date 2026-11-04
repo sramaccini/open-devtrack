@@ -39,16 +39,11 @@ npx --yes @sramaccini/quadrava-cli@0.2.1 validate ui
 npx --yes @sramaccini/quadrava-cli@0.2.1 publish ui --registry http://localhost:28080 --app opendevtrack --env development
 ```
 
-A protected environment accepts approved versions only, and the CLI cannot request or approve a review yet (request
-Q7): there `tools/publish-ui.mjs` publishes, as author, and approves with the token of someone else:
-
-```bash
-node tools/publish-ui.mjs --registry <url> --env production --token <author token> --reviewer-token <approver token>
-```
+The same command publishes to `testing` and `production`: the registry has no protected environments (ADR-12), the
+review is the one of the code before it reaches `main`.
 
 `e2e/authz/run.sh up` publishes it to `development` as `mario.rossi` and starts the runtime on it
-(http://localhost:28090). In a protected environment (`testing`, `production`) every version needs the approval of
-someone other than its author.
+(http://localhost:28090).
 
 ## Served by the runtime 0.2.1, with two temporary workarounds
 

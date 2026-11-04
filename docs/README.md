@@ -17,6 +17,7 @@ The decisions D1–D9 of the project plan, all accepted by the maintainer on 31 
 | [09](adr-09-multi-tenant-data.md) | Multi-tenant data (D9) | `tenant_id` on the project, filtered from the session | Accepted |
 | [10](adr-10-workflows.md) | Workflows and their CEL guards (E3) | Workflow per project from a built-in default, guards in CEL with cel-java, transitions allowed as an API | Accepted |
 | [11](adr-11-custom-fields.md) | Custom fields of the issues (E2) | JSONB values checked against definitions per project, `required_if` in CEL, in the forms with `fieldsFrom` of Quadrava 0.2.1 | Accepted |
+| [12](adr-12-no-protected-environments.md) | No protected environments in the registry | Every version publishable everywhere by default; the review is the one of the code; `tools/publish-ui.mjs` removed | Accepted |
 
 ## Requests to the dependencies
 
@@ -29,7 +30,7 @@ Found while writing the ADRs; each is built in its own repository, optional for 
 | Q4 | Quadrava | Shell texts of the runtime (`app.theme`, `app.language`, errors) built in, as with the examples, instead of required in the catalogue of every project | F5 |
 | Q5 | Quadrava | A field for a free list of short texts (tags), for the labels of the issues: `multiselect` only takes fixed `options` (the API has the labels, the screens do not show them yet) | F2 |
 | Q6 | Quadrava | Form fields from a data source (`fieldsFrom`, like `columnsFrom` of the `kanban`), for the custom fields of a project in `issue-new` and `issue-detail` (ADR-11; released in 0.2.0, adopted with 0.2.1) | F2 |
-| Q7 | Quadrava | `quadrava publish` to a protected environment: request the review as author and approve as reviewer, with two tokens, for projects without Studio (today it fails until a reviewer approves in Studio, so `tools/publish-ui.mjs` does it) | F5 |
+| Q7 | Quadrava | `quadrava publish` to a protected environment: request the review as author and approve as reviewer, with two tokens, for projects without Studio (declined: contract 0.7 of Quadrava 0.5.0 makes protected environments optional; ADR-12) | F5 |
 | A1 | authz-library | Extension point for permissions that depend on a resource (ADR-07; until then `_perm` on rows and forms) | F2 |
 | A2 | authz-library | A configurable schema for the RBAC tables (today they go into `public`, next to the `odt_*` schemas of the modules) | F1 |
 | A3 | authz-library | Problem titles and details in English (today Italian, for example «Troppi tentativi di accesso») | F5 |

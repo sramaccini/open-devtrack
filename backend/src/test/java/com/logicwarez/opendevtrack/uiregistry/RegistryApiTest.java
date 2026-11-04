@@ -41,9 +41,9 @@ import tools.jackson.databind.json.JsonMapper;
  * The registry.yaml 0.6 contract over HTTP, on PostgreSQL: validation, concurrent changes, review, protected
  * environments, cross-document references. The callers are tools with a bearer token; their permissions come from the
  * RBAC catalogue of authz-library ({@code uiregistry/users.sql}): mario and luisa publish, paola approves, carla does
- * both, ugo is only a member.
+ * both, ugo is only a member. Production is protected here: by default no environment is (ADR-12).
  */
-@SpringBootTest
+@SpringBootTest(properties = "odt.uiregistry.protected-environments=production")
 @ActiveProfiles("test")
 @Import(TestInfrastructure.class)
 @Sql("/uiregistry/users.sql")
