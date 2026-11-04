@@ -1,6 +1,7 @@
 // Publishes the Quadrava project in ui/ to the registry of OpenDevTrack (contracts/registry.yaml 0.6), one document at
-// a time: save a version, then point the environment at it. Temporary, until the CLI of Quadrava 0.2.0
-// (`quadrava publish`, request Q2) replaces it.
+// a time: save a version, then point the environment at it. `quadrava publish` (the Quadrava CLI) does this for
+// `development`; this script stays for the protected environments only, where it also requests the review as author
+// and approves as reviewer, until the CLI can (request Q7).
 //
 //   node tools/publish-ui.mjs --registry http://localhost:8080 --token <access token> [--env development]
 //        [--reviewer-token <access token>]     protected environments: request the review as author, approve as reviewer

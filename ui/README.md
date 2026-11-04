@@ -23,16 +23,26 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   (until authz-library A1).
 - **Texts**: every visible text goes through `t()` and has its key in both catalogues. The catalogues also carry the
   shell texts of the runtime (`app.*`): with the registry the runtime takes them from the project (request Q4).
-- **Validation**: `SchemaValidationTest` in the back end checks every document here with the validator of the registry;
-  `UiCataloguesTest` checks that every `t('key')` is in both catalogues.
+- **Validation**: `quadrava validate ui` (the Quadrava CLI, in CI) checks the documents as the runtime reads them:
+  schemas, references to data sources, CEL expressions, themes and catalogues. In the back end, `SchemaValidationTest`
+  checks them with the validator of the registry and `UiCataloguesTest` that every `t('key')` is in both catalogues.
 
 ## Publishing
 
-Until the CLI of Quadrava 0.2.0 (`quadrava publish`, request Q2), `tools/publish-ui.mjs` saves and publishes each
-document, with Keycloak access tokens of the client `opendevtrack-tools`:
+The Quadrava CLI (`@sramaccini/quadrava-cli@0.2.1`, the version of the runtime) is on GitHub Packages: the `.npmrc`
+of the repository maps `@sramaccini` there, and npm needs a token with `read:packages` for `npm.pkg.github.com` in
+the user config (`~/.npmrc`; in CI, `NODE_AUTH_TOKEN`). From the root of the repository, with a Keycloak access token
+of the client `opendevtrack-tools` in `QUADRAVA_TOKEN`:
 
 ```bash
-node tools/publish-ui.mjs --registry http://localhost:28080 --env development --token <author token>
+npx --yes @sramaccini/quadrava-cli@0.2.1 validate ui
+npx --yes @sramaccini/quadrava-cli@0.2.1 publish ui --registry http://localhost:28080 --app opendevtrack --env development
+```
+
+A protected environment accepts approved versions only, and the CLI cannot request or approve a review yet (request
+Q7): there `tools/publish-ui.mjs` publishes, as author, and approves with the token of someone else:
+
+```bash
 node tools/publish-ui.mjs --registry <url> --env production --token <author token> --reviewer-token <approver token>
 ```
 

@@ -13,13 +13,31 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# authz-library is read from GitHub Packages, which wants a token also to read (backend/README.md). The secret
-# AUTHZ_PACKAGES_TOKEN (a token with read:packages) is used when set; otherwise the token of the workflow, which works
-# once the authz-library packages grant this repository read access.
+# authz-library and the Quadrava CLI are read from GitHub Packages, which wants a token also to read
+# (backend/README.md, ui/README.md). The secret AUTHZ_PACKAGES_TOKEN (a token with read:packages) is used when set;
+# otherwise the token of the workflow, which works once the packages grant this repository read access.
 env:
   PACKAGES_TOKEN: ${{ secrets.AUTHZ_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+  # The CLI of the Quadrava release in use (as in e2e/authz/run.sh).
+  QUADRAVA_CLI: '@sramaccini/quadrava-cli@0.2.1'
 
 jobs:
+  ui:
+    name: Screens (quadrava validate)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          registry-url: https://npm.pkg.github.com
+          scope: '@sramaccini'
+      # Schemas, references to data sources, CEL expressions, themes and catalogues of ui/, as the runtime reads them
+      - name: Validate ui/
+        env:
+          NODE_AUTH_TOKEN: ${{ env.PACKAGES_TOKEN }}
+        run: npx --yes "$QUADRAVA_CLI" validate ui
+
   backend:
     name: Back end (build, modules, tests)
     runs-on: ubuntu-24.04
@@ -43,7 +61,7 @@ jobs:
   e2e:
     name: End to end (Quadrava kits, ui/ on the registry)
     runs-on: ubuntu-24.04
-    needs: backend
+    needs: [ui, backend]
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-java@v5
@@ -57,11 +75,15 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '24'
-      # PostgreSQL, Redis, Keycloak, the back end (profile dev) and the Quadrava runtime; ui/ published to development.
+          registry-url: https://npm.pkg.github.com
+          scope: '@sramaccini'
+      # PostgreSQL, Redis, Keycloak, the back end (profile dev) and the Quadrava runtime; ui/ published to development
+      # with the Quadrava CLI.
       # Then the BFF, authorization and registry kits and the tenant checks (docs/check-authz-end-to-end.md).
       - name: Start the stack
         env:
           PACKAGES_USER: ${{ github.actor }}
+          NODE_AUTH_TOKEN: ${{ env.PACKAGES_TOKEN }}
         run: e2e/authz/run.sh up
       - name: Checks
         run: e2e/authz/run.sh check

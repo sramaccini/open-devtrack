@@ -9,7 +9,8 @@
 #   e2e/authz/run.sh down    stop the back end and remove the containers
 #
 # Needs Docker, curl, JDK 25 (JAVA_HOME), Maven with access to the authz-library packages (backend/README.md) and
-# Node 24 in the PATH. Everything generated goes into e2e/authz/.work (gitignored). Development only.
+# Node 24 in the PATH, with npm reading @sramaccini from GitHub Packages for the Quadrava CLI (ui/README.md).
+# Everything generated goes into e2e/authz/.work (gitignored). Development only.
 set -euo pipefail
 
 here="$(cd "$(dirname "$0")" && pwd)"
@@ -18,6 +19,8 @@ work="$here/.work"
 
 # The conformance kits of Quadrava, downloaded file by file from the tag of the pinned release (ADR-01).
 QUADRAVA_KITS="${QUADRAVA_KITS:-https://raw.githubusercontent.com/sramaccini/quadrava/v0.2.1/frontend/tools}"
+# The CLI of the same release, which checks and publishes ui/.
+QUADRAVA_CLI="${QUADRAVA_CLI:-@sramaccini/quadrava-cli@0.2.1}"
 
 DB_PORT="${DB_PORT:-25432}"
 REDIS_PORT="${REDIS_PORT:-26379}"
@@ -80,7 +83,9 @@ up() {
   wait_for "http://localhost:$APP_PORT/actuator/health" "The back end"
 
   log "ui/ published to the registry (environment development, author mario.rossi)"
-  node "$root/tools/publish-ui.mjs" --registry "http://localhost:$APP_PORT" --env development --token "$(token mario.rossi)"
+  # From the root, whose .npmrc says where the @sramaccini packages are.
+  (cd "$root" && QUADRAVA_TOKEN="$(token mario.rossi)" npx --yes "$QUADRAVA_CLI" publish ui \
+    --registry "http://localhost:$APP_PORT" --app opendevtrack --env development)
 
   # nginx resolves the BFF when it starts: the runtime comes last.
   "${compose[@]}" up -d runtime

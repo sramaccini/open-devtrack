@@ -18,11 +18,12 @@ Quadrava and authz-library, and the ADRs say where.
   The browser uses the session; tools use Keycloak access tokens of `opendevtrack-tools` on `/registry/**`
   (`platform/BearerTokenSecurity.java`, temporary until A4).
 - `ui/`: the Quadrava project, with the main navigation, home and projects placeholder screens, themes `odt-light` and
-  `odt-dark` from `brand/`, English and Italian catalogues. `tools/publish-ui.mjs` publishes it (until Q2).
+  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.2.1 checks it (`quadrava validate`) and publishes it to
+  `development`; `tools/publish-ui.mjs` stays for the protected environments, which need a review (request Q7).
 - End-to-end check (`docs/check-authz-end-to-end.md`): Quadrava kits bff 13/13 with and without a session, authz 11/11,
   registry 23/23, tenant switch kept across logins, `ui/` served by the runtime 0.2.1 from the registry.
-- CI (`.github/workflows/ci.yml`), green on its first run: back end tests, then the e2e with the kits. It reads authz-library from GitHub
-  Packages with the secret `AUTHZ_PACKAGES_TOKEN` (or the workflow token if the packages grant this repository access).
+- CI (`.github/workflows/ci.yml`), green on its first run: `quadrava validate` of `ui/` and the back end tests, then the e2e with the
+  kits. It reads authz-library and the Quadrava CLI from GitHub Packages with the secret `AUTHZ_PACKAGES_TOKEN` (or the workflow token if the packages grant this repository access).
 - F2 E1 Projects: modules `project` (projects of the tenant, issue numbering), `access` (members and project roles
   viewer/developer/admin, always one admin) and `identity` (users of the tenant for pickers); screens
   `project-list`, `project-new`, `project-detail` with members. Project permissions reach the screens as `_perm`
@@ -48,7 +49,7 @@ Quadrava and authz-library, and the ADRs say where.
 
 In `docs/README.md`: Q2 (Quadrava 0.2.0 with its CLI), Q3 (favicon and title of the runtime image), Q4 (shell texts of
 the runtime built in), Q5 (a tags field), A1 (extension point for project permissions; `_perm` meanwhile), A2 (schema of the RBAC tables), A3 (Problem
-texts in English), A4 (bearer access for tools), A5 (read-only list of the tenant users). Each is built in its own repository.
+texts in English), A4 (bearer access for tools), A5 (read-only list of the tenant users), Q7 (review and approval from the CLI). Each is built in its own repository.
 
 ## Environment of this machine
 
@@ -57,7 +58,8 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 - `TEMP` in short 8.3 form: `export JAVA_TOOL_OPTIONS='-Djdk.net.unixdomain.tmpdir=C:\tmp\ud'` before `mvn`, and
   `E2E_JAVA_OPTS='-Djdk.net.unixdomain.tmpdir=C:\tmp\ud'` for `e2e/authz/run.sh up`. A problem of the machine: not in
   the poms.
-- Node through fnm: `eval "$(fnm env --shell bash)"; fnm use 24.21.0`. No `gh`, no Python.
+- Node through fnm: `eval "$(fnm env --shell bash)"; fnm use 24.21.0`. No `gh`, no Python. The token for
+  `npm.pkg.github.com` (Quadrava CLI) is in `~/.npmrc`; the `.npmrc` of the repository only maps `@sramaccini`.
 - Docker is needed by the back end tests (Testcontainers) and by the e2e. The e2e login is limited to 20 per minute per
   IP by authz-library: wait a minute between two `check` runs or a check and a browser login.
 - No `~/.m2/settings.xml`: the authz-library 2.0.1 artifacts resolve from the local Maven repository, where the
@@ -71,7 +73,5 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 1. F2 (per the plan): the rest of E4 (mentions; attachments after an ADR on where the files are kept); workflows by
    issue type and editing statuses and transitions when a project needs them (ADR-10).
-2. Adopt the CLI of Quadrava 0.2.1 (`@sramaccini/quadrava-cli` on GitHub Packages, request Q2 released):
-   `quadrava validate` and `publish` in CI instead of `tools/publish-ui.mjs`. The runtime image, the schemas and the
-   kits are already at 0.2.1. The CLI also checks the CEL of the screens, which the registry tests do not.
-3. Deployment: publish `ui/` to `testing`/`production` with an author and an approver token.
+2. Deployment: publish `ui/` to `testing`/`production` with an author and an approver token, through
+   `tools/publish-ui.mjs` until the Quadrava CLI can request and approve the review (Q7).
