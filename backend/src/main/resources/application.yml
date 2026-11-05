@@ -23,6 +23,10 @@ spring:
     async:
       # Event streams (live data sources of Quadrava): no time limit
       request-timeout: -1
+  web:
+    # The language of a request is its Accept-Language; without one, English (the texts of the messages, ADR-13)
+    locale: en
+    locale-resolver: accept-header
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/opendevtrack}
     username: ${DB_USER:opendevtrack}
@@ -43,7 +47,7 @@ spring:
     # One schema and one folder per module (ADR-04), all under db/odt with one history table in odt: the version
     # numbers are global across the folders (V1 uiregistry, V2 access, V3 project, V4 issue, V5 the event
     # publications, …). The RBAC schema has its own Flyway and history, run by authz-rbac.
-    schemas: odt,odt_uiregistry,odt_access,odt_project,odt_issue,odt_audit,odt_collaboration,odt_workflow
+    schemas: odt,odt_uiregistry,odt_access,odt_project,odt_issue,odt_audit,odt_collaboration,odt_workflow,odt_notification
     locations: classpath:db/odt
   modulith:
     events:

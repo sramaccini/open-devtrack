@@ -127,3 +127,22 @@ deletes those of others. The changelog (`odt_audit`, `GET /api/issues/{key}/hist
 one for the creation. Both react to the events of `issue` with `@ApplicationModuleListener`: after the commit, in a
 transaction of their own, through the Event Publication Registry in `odt.event_publication` (an event whose listener
 fails is republished at the next start). The comments of a deleted issue are removed the same way.
+
+## Mentions (`collaboration`)
+
+A comment mentions a member of the project with `@username` (ADR-13): at the start of the text or after a space, so an
+e-mail address is not a mention. The names are matched case-insensitively against the members and kept as the project
+writes them (`odt_collaboration.mention`); a name that is not a member is plain text. Whoever is mentioned starts
+watching the issue. An edit keeps the mentions of the new text and tells only the people mentioned for the first time.
+Each comment posted or edited publishes `CommentPosted` with the mentions, the author and an excerpt.
+
+## Messages for the user (`notification`)
+
+The bell of the runtime (`notifications` in `navigation.json`) reads the messages of the user (`odt_notification`,
+ADR-13), written after the commit from the events: `mentioned` to the people mentioned, `assigned` to a new assignee,
+`commented` and `transitioned` to the watchers. Nobody is told of what they did, and each user gets one message per
+event, the most direct one. `GET /api/notifications` gives the last 50 of the projects of the session tenant that the
+user still sees, with title and text in the language of `Accept-Language` (English and Italian,
+`notification/messages*.properties`) and the screen `issue-detail` to open; `POST /api/notifications/read` with `ids`
+(1 to 200) marks them read. The messages of a deleted issue go with it, the others are deleted after 90 days
+(`odt.notification.retention-cron`, at 3:30 every night).

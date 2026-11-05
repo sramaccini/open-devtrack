@@ -1,6 +1,6 @@
 # ADR-13: Mentions and messages for the user
 
-Status: Proposed (5 November 2026) — F2 E4
+Status: Accepted (5 November 2026; decided by the maintainer) — F2 E4
 
 ## Context
 
@@ -28,15 +28,15 @@ Titles and texts are shown as they come: the service writes them in the language
    component, as `rowActions` of a table). Until Q8 the Comments tab keeps today's table under the thread, for edit
    and delete only.
 3. **Messages in the module `notification`**, from the events after the commit (Event Publication Registry, as the
-   changelog): `odt_notification.message (id, tenant_id, recipient, kind, issue_key, actor, params, created_at,
-   read_at)`. The first kinds:
+   changelog): `odt_notification.message (id, project_id, recipient, kind, issue_key, actor, params, created_at,
+   read_at)`: the listeners run without a session, so the tenant is the one of the project. The first kinds:
    - `mentioned`: someone mentioned you in a comment;
    - `assigned`: an issue was assigned to you;
    - `commented` and `transitioned`: a comment or a change of status on an issue you watch.
    Never to the user who did it. A message keeps its kind and values, not a text: the text is written when it is read,
    in the language of the request (`Accept-Language`, English or Italian), from a catalogue of the back end.
 4. **The API of ADR-22.** `GET /api/notifications` gives the last 50 messages of the user in the tenant of the session
-   (ADR-09), newest first, each opening `issue-detail` of its issue; `POST /api/notifications/read` with `{ ids }`
+   (ADR-09: their projects are those of the tenant), newest first, each opening `issue-detail` of its issue; `POST /api/notifications/read` with `{ ids }`
    marks them read. A message whose issue the user no longer sees is left out. `ui/navigation.json` declares them, read
    every 60 seconds; the event stream (`live`) comes later, when the back end has one.
 5. **Kept 90 days**, read or not, then deleted by a scheduled job. Email, digests and preferences are later steps of

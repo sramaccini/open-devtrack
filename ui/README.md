@@ -46,6 +46,14 @@ review is the one of the code before it reaches `main`.
 `e2e/authz/run.sh up` publishes it to `development` as `mario.rossi` and starts the runtime on it
 (http://localhost:28090).
 
+## Comments and messages
+
+The Comments tab of `issue-detail` is the `comments` thread of Quadrava: Markdown with `@` to pick a member
+(`assignees`), posted through `issues/addComment`. The box is shown to every member, since the tabs do not see
+the `_perm` of the issue form (request Q9): the back end refuses a viewer and the screen tells that the save failed. Editing and deleting a comment stay in the table under it until
+Quadrava request Q8. The bell of the shell reads `/api/notifications` (`notifications` in `navigation.json`, every
+60 seconds) and opens the issue of a message.
+
 ## Brand in the browser tab
 
 The title of the tab is `brand.name` of the active theme and its icons are `brand.icons` (`svg`, `png32`,

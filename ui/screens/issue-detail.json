@@ -22,6 +22,12 @@
     "addComment": {
       "ref": "issues/addComment"
     },
+    "postComment": {
+      "ref": "issues/addComment",
+      "body": {
+        "body": "{{text}}"
+      }
+    },
     "editComment": {
       "ref": "issues/editComment"
     },
@@ -204,41 +210,6 @@
             },
             {
               "toast": "{{ t('common.saved', 'Saved') }}"
-            }
-          ]
-        },
-        {
-          "id": "btn-comment",
-          "label": "{{ t('issues.add_comment', 'Comment') }}",
-          "visibleIf": "{{form._perm.comment}}",
-          "onClick": [
-            {
-              "dialog": {
-                "title": "{{ t('issues.add_comment', 'Comment') }}",
-                "submitLabel": "{{ t('issues.post', 'Post') }}",
-                "fields": [
-                  {
-                    "name": "body",
-                    "type": "richtext",
-                    "label": "{{ t('issues.comment', 'Comment') }}",
-                    "required": true,
-                    "rows": 6
-                  }
-                ],
-                "onSubmit": [
-                  {
-                    "call": "addComment",
-                    "onError": [
-                      {
-                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "refresh": "comments"
             }
           ]
         },
@@ -583,6 +554,37 @@
           "id": "tab-comments",
           "label": "{{ t('issues.comments', 'Comments') }}",
           "components": [
+            {
+              "id": "comment-thread",
+              "type": "comments",
+              "source": "comments",
+              "textField": "body",
+              "authorField": "author",
+              "dateField": "createdAt",
+              "mentions": {
+                "source": "assignees",
+                "valueField": "username",
+                "labelField": "username"
+              },
+              "onPost": [
+                {
+                  "call": "postComment",
+                  "onError": [
+                    {
+                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                    }
+                  ]
+                },
+                {
+                  "refresh": "comments"
+                }
+              ]
+            },
+            {
+              "id": "comment-actions-note",
+              "type": "text",
+              "text": "{{ t('issues.comment_actions', 'Edit or delete a comment') }}"
+            },
             {
               "id": "comment-table",
               "type": "table",

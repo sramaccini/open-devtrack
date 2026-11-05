@@ -6,15 +6,18 @@ package com.logicwarez.opendevtrack.collaboration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
+import com.logicwarez.opendevtrack.collaboration.CommentEvents.CommentPosted;
 import com.logicwarez.opendevtrack.issue.IssueRef;
 import com.logicwarez.opendevtrack.issue.Issues;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -31,7 +34,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Comments of the issues (E4), in restricted Markdown. Whoever sees the issue reads them; {@code odt.issue.comment}
  * (developer) writes them; the author edits and deletes their own, an admin of the project ({@code odt.issue.delete})
- * also deletes those of others.
+ * also deletes those of others. The members named as {@code @username} are its mentions (ADR-13): each comment written
+ * or edited is published with the people it newly mentions.
  */
 @RestController
 @Transactional(readOnly = true)
@@ -39,6 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 class CommentController {
 
     private static final int MAX_BODY = 32_000;
+    private static final int EXCERPT = 140;
     private static final String ISSUE_NOT_FOUND = "Issue not found";
     private static final String NOT_FOUND = "Comment not found";
 
@@ -46,12 +51,17 @@ class CommentController {
     private final CommentRepository comments;
     private final ProjectAccess access;
     private final CurrentUser user;
+    private final Mentions mentions;
+    private final ApplicationEventPublisher events;
 
-    CommentController(Issues issues, CommentRepository comments, ProjectAccess access, CurrentUser user) {
+    CommentController(Issues issues, CommentRepository comments, ProjectAccess access, CurrentUser user,
+                      Mentions mentions, ApplicationEventPublisher events) {
         this.issues = issues;
         this.comments = comments;
         this.access = access;
         this.user = user;
+        this.mentions = mentions;
+        this.events = events;
     }
 
     record CommentView(UUID id, String author, String body, Instant createdAt, Instant updatedAt, boolean edited,
@@ -90,8 +100,10 @@ class CommentController {
         if (invalid.isPresent()) {
             return Problems.badRequest(invalid.get());
         }
+        Instant now = Instant.now();
         CommentEntity comment = comments.saveAndFlush(new CommentEntity(issue.get().id(), user.username(),
-                request.body().strip(), Instant.now()));
+                request.body().strip(), now));
+        publish(comment, issue.get(), now, false);
         return ResponseEntity.status(HttpStatus.CREATED).body(view(comment, permissions));
     }
 
@@ -114,12 +126,14 @@ class CommentController {
         if (request.version() == null || request.version() != comment.version()) {
             return Problems.changedMeanwhile();
         }
-        comment.edit(request.body().strip(), Instant.now());
+        Instant now = Instant.now();
+        comment.edit(request.body().strip(), now);
         try {
             comments.saveAndFlush(comment);
         } catch (ObjectOptimisticLockingFailureException e) {
             return Problems.changedMeanwhile();
         }
+        publish(comment, found.get().issue(), now, true);
         return ResponseEntity.ok(view(comment, found.get().permissions()));
     }
 
@@ -137,7 +151,20 @@ class CommentController {
         return ResponseEntity.noContent().build();
     }
 
-    private record Found(CommentEntity comment, Set<String> permissions) {
+    private record Found(CommentEntity comment, IssueRef issue, Set<String> permissions) {
+    }
+
+    /** Keeps the mentions of the comment and tells the other modules, with the people it newly mentions. */
+    private void publish(CommentEntity comment, IssueRef issue, Instant now, boolean edited) {
+        List<String> mentioned = mentions.save(comment, issue.projectId(), now);
+        events.publishEvent(new CommentPosted(comment.id(), issue.id(), issue.projectId(), issue.key(), user.username(),
+                now, edited, mentioned, excerpt(comment.body())));
+    }
+
+    /** The beginning of the text on one line, for the messages. */
+    static String excerpt(String body) {
+        String line = body.replaceAll("\\s+", " ").strip();
+        return line.length() <= EXCERPT ? line : line.substring(0, EXCERPT - 1).strip() + "…";
     }
 
     /** The comment of that issue, seen by the user; another issue's comment is not found. */
@@ -147,7 +174,7 @@ class CommentController {
             if (!permissions.contains("odt.issue.browse")) {
                 return Optional.empty();
             }
-            return comments.findById(id).filter(c -> c.issueId().equals(issue.id())).map(c -> new Found(c, permissions));
+            return comments.findById(id).filter(c -> c.issueId().equals(issue.id())).map(c -> new Found(c, issue, permissions));
         });
     }
 

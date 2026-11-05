@@ -6,7 +6,7 @@ Quadrava and authz-library, and the ADRs say where.
 
 ## Status
 
-**1 November 2026 — phase F1 done; F2 with E1 Projects, E2 Issues, E3 Workflow and E4 Collaboration (first slices): gate M1 covered.**
+**5 November 2026 — phase F1 done; F2 with E1 Projects, E2 Issues, E3 Workflow and E4 Collaboration (comments, mentions, messages): gate M1 covered.**
 
 - Repository github.com/sramaccini/open-devtrack, branch `main`: licence MPL-2.0 with CLA, contribution rules and
   project rules as Quadrava (ADR-05). Decisions D1–D9 and ADR-10 accepted, in `docs/`.
@@ -44,9 +44,13 @@ Quadrava and authz-library, and the ADRs say where.
   edited on `project-detail`. With it gate M1 is covered: create, edit, transition and comment an issue, with
   permissions and changelog. The admin of the tenant (`odt.project.admin`, role `ODT_ADMIN`) is admin of every
   project.
-- F2 E4 (first slice): comments (module `collaboration`) and the changelog of the issues (module `audit`), both from
+- F2 E4: comments (module `collaboration`) and the changelog of the issues (module `audit`), both from
   the events of `issue` after the commit (Event Publication Registry of Spring Modulith on PostgreSQL); tabs Comments
   and History on `issue-detail`. The values in the history are shown as stored (`task`, `medium`), not translated.
+  Mentions and messages (ADR-13, accepted 5 November 2026): `@username` of a member in a comment, picked in the
+  `comments` thread of Quadrava; messages for mentions, assignments, comments and status changes in the bell of the
+  runtime (module `notification`, polled every 60 s, kept 90 days). Their language follows `Accept-Language`. Editing
+  and deleting a comment stay in the table under the thread until Quadrava request Q8.
 
 ## Requests to the dependencies
 
@@ -73,6 +77,6 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F2 (per the plan): the rest of E4 (mentions; attachments after an ADR on where the files are kept); workflows by
+1. F2 (per the plan): the rest of E4 (attachments, after an ADR on where the files are kept; the comment actions of Q8 when released); workflows by
    issue type and editing statuses and transitions when a project needs them (ADR-10).
 2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

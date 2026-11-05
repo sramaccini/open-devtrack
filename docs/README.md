@@ -18,7 +18,7 @@ The decisions D1–D9 of the project plan, all accepted by the maintainer on 31 
 | [10](adr-10-workflows.md) | Workflows and their CEL guards (E3) | Workflow per project from a built-in default, guards in CEL with cel-java, transitions allowed as an API | Accepted |
 | [11](adr-11-custom-fields.md) | Custom fields of the issues (E2) | JSONB values checked against definitions per project, `required_if` in CEL, in the forms with `fieldsFrom` of Quadrava 0.2.1 | Accepted |
 | [12](adr-12-no-protected-environments.md) | No protected environments in the registry | Every version publishable everywhere by default; the review is the one of the code; `tools/publish-ui.mjs` removed | Accepted |
-| [13](adr-13-mentions-and-messages.md) | Mentions and messages for the user (E4) | `@username` of members found in the text of comments; messages in `notification` for mentions, assignments, comments and status changes of watched issues, behind the bell of Quadrava 0.7.0 | Proposed |
+| [13](adr-13-mentions-and-messages.md) | Mentions and messages for the user (E4) | `@username` of members found in the text of comments; messages in `notification` for mentions, assignments, comments and status changes of watched issues, behind the bell of Quadrava 0.7.0 | Accepted |
 
 ## Requests to the dependencies
 
@@ -33,6 +33,7 @@ Found while writing the ADRs; each is built in its own repository, optional for 
 | Q6 | Quadrava | Form fields from a data source (`fieldsFrom`, like `columnsFrom` of the `kanban`), for the custom fields of a project in `issue-new` and `issue-detail` (ADR-11; released in 0.2.0, adopted with 0.2.1) | F2 |
 | Q7 | Quadrava | `quadrava publish` to a protected environment: request the review as author and approve as reviewer, with two tokens, for projects without Studio (declined: contract 0.7 of Quadrava 0.5.0 makes protected environments optional; ADR-12) | F5 |
 | Q8 | Quadrava | Actions on one comment of the `comments` component (edit and delete, with a condition each, as `rowActions` of a table), so the thread replaces the table of comments (ADR-13) | F2 |
+| Q9 | Quadrava | The data of a screen data source in the expressions outside a form (or `form` in the tabs next to it), so `postIf` of the `comments` thread can test `_perm.comment` of the issue; meanwhile the box is shown to every member and the back end refuses viewers (ADR-13) | F2 |
 | A1 | authz-library | Extension point for permissions that depend on a resource (ADR-07; until then `_perm` on rows and forms) | F2 |
 | A2 | authz-library | A configurable schema for the RBAC tables (today they go into `public`, next to the `odt_*` schemas of the modules) | F1 |
 | A3 | authz-library | Problem titles and details in English (today Italian, for example «Troppi tentativi di accesso») | F5 |
