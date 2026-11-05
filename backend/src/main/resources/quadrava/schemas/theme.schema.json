@@ -32,13 +32,13 @@
     "brand": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Logo and name of the application at the top left of the side bar. If absent, the Quadrava logo. Images are relative addresses (images/logo.svg, served next to the application), https:// or data:image/…;base64 (svg, png, jpeg, gif, webp, up to about 75 kB): any other address is not shown.",
+      "description": "Logo and name of the application: at the top left of the side bar and in the browser tab (title and icons). If absent, the Quadrava logo, title and icons. Images are relative addresses (images/logo.svg, served next to the application), https:// or data:image/…;base64 (svg, png, jpeg, gif, webp, up to about 75 kB): any other address is not shown.",
       "properties": {
         "name": {
           "type": "string",
           "minLength": 1,
           "maxLength": 60,
-          "description": "Name of the application: the accessible name of the logo, and the text next to it with showName or when there is no logo."
+          "description": "Name of the application: the title of the browser tab, the accessible name of the logo, and the text next to it with showName or when there is no logo."
         },
         "logo": {
           "type": "string",
@@ -60,6 +60,35 @@
           "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
           "description": "Square image for the collapsed side bar; without it the collapsed bar shows the logo, reduced.",
           "contentMediaType": "image/*"
+        },
+        "icons": {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "description": "Icons of the browser tab, in place of the Quadrava ones. With icons, a kind that is not given is left out rather than taken from Quadrava.",
+          "properties": {
+            "svg": {
+              "type": "string",
+              "maxLength": 100000,
+              "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
+              "description": "Icon in SVG (any size), used by most browsers.",
+              "contentMediaType": "image/*"
+            },
+            "png32": {
+              "type": "string",
+              "maxLength": 100000,
+              "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
+              "description": "Icon in PNG, 32 x 32 px, for browsers without SVG icons.",
+              "contentMediaType": "image/*"
+            },
+            "appleTouch": {
+              "type": "string",
+              "maxLength": 100000,
+              "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
+              "description": "Icon in PNG, 180 x 180 px, for the home screen of iOS and iPadOS.",
+              "contentMediaType": "image/*"
+            }
+          }
         },
         "showName": {
           "type": "boolean",

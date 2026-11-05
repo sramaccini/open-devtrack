@@ -26,8 +26,8 @@ Found while writing the ADRs; each is built in its own repository, optional for 
 | # | Where | What | Needed by |
 | --- | --- | --- | --- |
 | Q2 | Quadrava | Release 0.2.0 with the CLI `quadrava validate` and `publish` (ADR-01, ADR-03; released, the CLI adopted with 0.2.1) | Start of F1 |
-| Q3 | Quadrava | Favicon and page title of the runtime image set by the application (today the icons of the image are mounted over, and the tab reads «Quadrava») | F5 |
-| Q4 | Quadrava | Shell texts of the runtime (`app.theme`, `app.language`, errors) built in, as with the examples, instead of required in the catalogue of every project | F5 |
+| Q3 | Quadrava | Favicon and page title of the runtime image set by the application (released in 0.6.0: `brand.name` and `brand.icons` of the theme, adopted with 0.6.0) | F5 |
+| Q4 | Quadrava | Shell texts of the runtime (`app.theme`, `app.language`, errors) built in, as with the examples, instead of required in the catalogue of every project (released in 0.6.0, adopted with 0.6.0) | F5 |
 | Q5 | Quadrava | A field for a free list of short texts (tags), for the labels of the issues: `multiselect` only takes fixed `options` (the API has the labels, the screens do not show them yet) | F2 |
 | Q6 | Quadrava | Form fields from a data source (`fieldsFrom`, like `columnsFrom` of the `kanban`), for the custom fields of a project in `issue-new` and `issue-detail` (ADR-11; released in 0.2.0, adopted with 0.2.1) | F2 |
 | Q7 | Quadrava | `quadrava publish` to a protected environment: request the review as author and approve as reviewer, with two tokens, for projects without Studio (declined: contract 0.7 of Quadrava 0.5.0 makes protected environments optional; ADR-12) | F5 |

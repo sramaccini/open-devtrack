@@ -8,6 +8,11 @@
     "logo": "odt-brand/odt-logo-horizontal.svg",
     "logoOnDark": "odt-brand/odt-logo-horizontal-dark.svg",
     "icon": "odt-brand/odt-mark-dark.svg",
+    "icons": {
+      "svg": "odt-brand/odt-favicon.svg",
+      "png32": "odt-brand-png/favicon-32.png",
+      "appleTouch": "odt-brand-png/apple-touch-icon.png"
+    },
     "height": 32
   },
   "tokens": {
