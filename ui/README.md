@@ -1,7 +1,7 @@
 # OpenDevTrack screens
 
 The front end of OpenDevTrack is this Quadrava project: screens, navigation, themes and translations, as JSON documents
-validated by the schemas of the pinned Quadrava version (0.6.0, ADR-01). No Angular code: the runtime image of Quadrava
+validated by the schemas of the pinned Quadrava version (0.7.0, ADR-01). No Angular code: the runtime image of Quadrava
 loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 | Path | Registry kind | What |
@@ -30,14 +30,14 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 ## Publishing
 
-The Quadrava CLI (`@sramaccini/quadrava-cli@0.6.0`, the version of the runtime) is on GitHub Packages: the `.npmrc`
+The Quadrava CLI (`@sramaccini/quadrava-cli@0.7.0`, the version of the runtime) is on GitHub Packages: the `.npmrc`
 of the repository maps `@sramaccini` there, and npm needs a token with `read:packages` for `npm.pkg.github.com` in
 the user config (`~/.npmrc`; in CI, `NODE_AUTH_TOKEN`). From the root of the repository, with a Keycloak access token
 of the client `opendevtrack-tools` in `QUADRAVA_TOKEN`:
 
 ```bash
-npx --yes @sramaccini/quadrava-cli@0.6.0 validate ui
-npx --yes @sramaccini/quadrava-cli@0.6.0 publish ui --registry http://localhost:28080 --app opendevtrack --env development
+npx --yes @sramaccini/quadrava-cli@0.7.0 validate ui
+npx --yes @sramaccini/quadrava-cli@0.7.0 publish ui --registry http://localhost:28080 --app opendevtrack --env development
 ```
 
 The same command publishes to `testing` and `production`: the registry has no protected environments (ADR-12), the

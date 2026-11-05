@@ -1128,6 +1128,7 @@
             "tree",
             "calendar",
             "chart",
+            "squareChart",
             "dataTable",
             "serverDataTable",
             "input",
@@ -1940,6 +1941,27 @@
                 ],
                 "description": "Format of the values of the right axis (as format if absent)."
               }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "type": { "const": "squareChart" } },
+            "required": ["type"]
+          },
+          "then": {
+            "type": "object",
+            "required": ["source", "categoryField", "valueField"],
+            "properties": {
+              "source": { "type": "string", "description": "Data source with one row per category." },
+              "categoryField": { "type": "string", "description": "Field with the category shown along the horizontal axis." },
+              "categoryFormat": { "enum": ["text", "date", "month"], "description": "How to show the category: text, date (YYYY-MM-DD) or month (YYYY-MM)." },
+              "valueField": { "type": "string", "description": "Numeric field whose value determines the height of each square column." },
+              "format": { "enum": ["number", "currency", "percent"], "description": "Format of the values (number if absent)." },
+              "currency": { "type": "string", "pattern": "^[A-Z]{3}$", "description": "ISO 4217 code for currency values (EUR if absent)." },
+              "decimals": { "type": "integer", "minimum": 0, "maximum": 6, "description": "Decimals shown with format number (up to 2 if absent)." },
+              "height": { "type": "integer", "minimum": 120, "maximum": 600, "description": "Height in pixels (220 if absent)." },
+              "caption": { "type": "string", "description": "Accessible name and caption of the chart." }
             }
           }
         },

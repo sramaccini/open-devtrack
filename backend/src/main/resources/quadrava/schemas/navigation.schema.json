@@ -49,6 +49,57 @@
           "description": "How often, in seconds, the counters are read again (60 if absent)."
         }
       }
+    },
+    "notifications": {
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false,
+      "description": "Messages for the user, behind a bell in the top bar with the number of unread ones: a GET that returns a list of { id, title, text, date, read, screen, params } (id and title required; date in ISO 8601; screen and params open a screen of the application). Read at once, at intervals and, with live, when its event stream says they changed.",
+      "properties": {
+        "url": {
+          "type": "string",
+          "pattern": "^/[^/\\s][^\\s]*$",
+          "description": "Relative path of the service that lists the messages (for example /api/notifications)."
+        },
+        "readUrl": {
+          "type": "string",
+          "pattern": "^/[^/\\s][^\\s]*$",
+          "description": "Relative path of a POST that marks messages as read, with the body { \"ids\": [ … ] }. Without it the messages are shown but cannot be marked as read."
+        },
+        "live": {
+          "type": "object",
+          "required": [
+            "url"
+          ],
+          "additionalProperties": false,
+          "description": "Push updates: the runtime listens to this event stream (Server-Sent Events) and reads the messages again when one of its events arrives, also after a reconnection. The events only say that something changed. Without the platform service for event streams the messages are read at intervals only.",
+          "properties": {
+            "url": {
+              "type": "string",
+              "pattern": "^/(?!/)[A-Za-z0-9\\-._~/%]*$",
+              "description": "Path of the event stream on the same origin, for example /api/events/tasks; no expressions, query or host."
+            },
+            "events": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+              },
+              "description": "Names of the events (the event field of the stream) that read the messages again; the events without a name if absent."
+            }
+          }
+        },
+        "refreshSeconds": {
+          "type": "integer",
+          "minimum": 15,
+          "maximum": 3600,
+          "description": "How often, in seconds, the messages are read again (60 if absent)."
+        }
+      }
     }
   },
   "$defs": {

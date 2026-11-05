@@ -19,7 +19,7 @@ concurrency:
 env:
   PACKAGES_TOKEN: ${{ secrets.AUTHZ_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
   # The CLI of the Quadrava release in use (as in e2e/authz/run.sh).
-  QUADRAVA_CLI: '@sramaccini/quadrava-cli@0.6.0'
+  QUADRAVA_CLI: '@sramaccini/quadrava-cli@0.7.0'
 
 jobs:
   ui:
