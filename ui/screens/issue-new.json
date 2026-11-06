@@ -10,6 +10,9 @@
     "assignees": {
       "ref": "issues/assignees"
     },
+    "labels": {
+      "ref": "issues/labels"
+    },
     "newFields": {
       "ref": "issues/newFields"
     }
@@ -70,6 +73,17 @@
             "labelField": "username",
             "minChars": 0
           }
+        },
+        {
+          "name": "labels",
+          "type": "tags",
+          "label": "{{ t('issues.labels', 'Labels') }}",
+          "maxItems": 20,
+          "suggest": {
+            "source": "labels",
+            "valueField": "name"
+          },
+          "tooltip": "{{ t('issues.labels_help', 'Lower case letters, digits, dots, dashes or underscores; Enter or a comma adds one') }}"
         },
         {
           "name": "description",

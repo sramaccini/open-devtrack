@@ -143,6 +143,28 @@ class IssueApiTest {
     }
 
     @Test
+    void theLabelsUsedAreSuggested() throws Exception {
+        createFirst();
+        mvc.perform(as(post("/api/projects/ODT/issues"), luisa).content("{\"summary\":\"Board\",\"labels\":[\"ui\",\"backlog\"]}"))
+                .andExpect(status().isCreated());
+        mvc.perform(as(get("/api/projects/ODT/issues"), paola))
+                .andExpect(jsonPath("$[0].labels[0]").value("ui"))
+                .andExpect(jsonPath("$[1].labels[0]").value("auth"));
+        // Each label once, in order; q is a prefix, in any case.
+        mvc.perform(as(get("/api/projects/ODT/labels"), paola))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$[0].name").value("auth"))
+                .andExpect(jsonPath("$[1].name").value("backlog"))
+                .andExpect(jsonPath("$[2].name").value("ui"));
+        mvc.perform(as(get("/api/projects/ODT/labels").param("q", "B"), paola))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].name").value("backlog"));
+        mvc.perform(as(get("/api/projects/ODT/labels").param("q", "%"), paola)).andExpect(jsonPath("$.length()").value(0));
+        mvc.perform(as(get("/api/projects/ODT/labels"), ugo)).andExpect(status().isNotFound());
+    }
+
+    @Test
     void anotherTenantDoesNotSeeTheIssues() throws Exception {
         createFirst();
         mvc.perform(as(get("/api/issues/ODT-1"), ugo)).andExpect(status().isNotFound());

@@ -7,6 +7,7 @@ package com.logicwarez.opendevtrack.issue;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueRequest;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueRow;
+import com.logicwarez.opendevtrack.issue.IssueApi.LabelRow;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueView;
 import com.logicwarez.opendevtrack.issue.IssueApi.TransitionRequest;
 import com.logicwarez.opendevtrack.issue.IssueApi.TransitionView;
@@ -71,6 +72,7 @@ class IssueController {
 
     private static final Pattern LABEL = Pattern.compile("^[a-z0-9][a-z0-9._-]{0,49}$");
     private static final int MAX_LABELS = 20;
+    private static final int MAX_SUGGESTED = 20;
     private static final int MAX_DESCRIPTION = 32_000;
     private static final int MAX_LIST = 500;
     private static final String NOT_FOUND = "Issue not found";
@@ -115,9 +117,26 @@ class IssueController {
         String text = q == null || q.isBlank() ? null : "%" + q.strip().toLowerCase(Locale.ROOT) + "%";
         List<IssueRow> rows = issues.search(project.get().id(), blankToNull(status), who, text, Limit.of(MAX_LIST)).stream()
                 .map(i -> new IssueRow(key(project.get(), i), i.number(), i.type().value(), i.summary(), i.status(),
-                        i.priority().value(), i.assignee(), i.updatedAt()))
+                        i.priority().value(), i.assignee(), i.labels(), i.updatedAt()))
                 .toList();
         return ResponseEntity.ok(rows);
+    }
+
+    /**
+     * The labels already used in the issues of the project that start with {@code q} (all without it), in alphabetical
+     * order, at most 20: the suggestions of the labels field.
+     */
+    @GetMapping("/api/projects/{key}/labels")
+    ResponseEntity<?> labels(@PathVariable String key, @RequestParam(required = false) String q) {
+        Optional<ProjectRef> project = projects.find(key);
+        if (project.isEmpty()) {
+            return Problems.notFound("Project not found");
+        }
+        if (!permissions(project.get()).contains("odt.issue.browse")) {
+            return Problems.forbidden(NOT_A_MEMBER);
+        }
+        String prefix = q == null ? "" : q.strip().toLowerCase(Locale.ROOT);
+        return ResponseEntity.ok(issues.labels(project.get().id(), prefix, MAX_SUGGESTED).stream().map(LabelRow::new).toList());
     }
 
     @PostMapping("/api/projects/{key}/issues")

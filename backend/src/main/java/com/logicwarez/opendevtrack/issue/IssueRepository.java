@@ -35,4 +35,11 @@ interface IssueRepository extends JpaRepository<IssueEntity, UUID> {
     List<IssueEntity> candidates(UUID projectId, UUID except, Long number, String text, Limit limit);
 
     List<IssueEntity> findByIdIn(List<UUID> ids);
+
+    /** The labels used in a project that start with {@code prefix} (lower case, empty for all), in order. */
+    @Query(value = """
+            SELECT DISTINCT l FROM odt_issue.issue i, unnest(i.labels) AS l
+            WHERE i.project_id = :projectId AND starts_with(l, :prefix)
+            ORDER BY l LIMIT :max""", nativeQuery = true)
+    List<String> labels(UUID projectId, String prefix, int max);
 }

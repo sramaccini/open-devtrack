@@ -78,13 +78,9 @@
   "values.status.todo": "To do",
   "values.status.in_progress": "In progress",
   "values.status.done": "Done",
-  "issues.comment": "Comment",
-  "issues.comment_actions": "Edit or delete a comment",
   "issues.comments": "Comments",
   "issues.author": "Author",
   "issues.when": "When",
-  "issues.edit": "Edit",
-  "issues.edit_comment": "Edit comment",
   "issues.delete_comment_confirm": "Delete this comment?",
   "issues.history": "History",
   "issues.field": "Field",
@@ -174,5 +170,7 @@
   "issues.attachment_by": "Added by",
   "issues.attachment_at": "When",
   "issues.remove_attachment_confirm": "Remove {name}?",
-  "issues.attachment_download": "Download"
+  "issues.attachment_download": "Download",
+  "issues.labels": "Labels",
+  "issues.labels_help": "Lower case letters, digits, dots, dashes or underscores; Enter or a comma adds one"
 }

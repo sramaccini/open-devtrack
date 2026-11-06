@@ -510,9 +510,10 @@
             "file",
             "repeater",
             "richtext",
-            "password"
+            "password",
+            "tags"
           ],
-          "description": "Field type. textarea: multi-line text (`rows`); datetime: date and time YYYY-MM-DDTHH:mm (local time); radio: choice among `options`; switch: on/off toggle; multiselect: list of values from `options`. lookup: value chosen among the rows of a data source searched while typing (`lookup`). file: a file chosen by the user (`accept`, `maxSizeKb`, `upload`). repeater: list of rows, each with the fields of `fields` (`minRows`, `maxRows`, `addLabel`). richtext: formatted text written with a toolbar (bold, italic, headings, lists, quotes, links); the value is restricted Markdown, never HTML (`rows` for the height). password: masked text with a button that shows it; with newPassword a strength meter (`minStrength`)."
+          "description": "Field type. textarea: multi-line text (`rows`); datetime: date and time YYYY-MM-DDTHH:mm (local time); radio: choice among `options`; switch: on/off toggle; multiselect: list of values from `options`. lookup: value chosen among the rows of a data source searched while typing (`lookup`). file: a file chosen by the user (`accept`, `maxSizeKb`, `upload`). repeater: list of rows, each with the fields of `fields` (`minRows`, `maxRows`, `addLabel`). richtext: formatted text written with a toolbar (bold, italic, headings, lists, quotes, links); the value is restricted Markdown, never HTML (`rows` for the height). password: masked text with a button that shows it; with newPassword a strength meter (`minStrength`). tags: a free list of short texts (the labels of an issue), written with Enter or a comma; `options` and `suggest` only suggest (`minItems`, `maxItems`)."
         },
         "label": {
           "type": "string"
@@ -644,13 +645,13 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 100,
-          "description": "For multiselect: minimum number of choices (an empty choice is left to required)."
+          "description": "For multiselect and tags: minimum number of choices or tags (an empty list is left to required)."
         },
         "maxItems": {
           "type": "integer",
           "minimum": 1,
           "maximum": 100,
-          "description": "For multiselect: maximum number of choices."
+          "description": "For multiselect and tags: maximum number of choices or tags."
         },
         "transform": {
           "type": "array",
@@ -795,7 +796,7 @@
             "source"
           ],
           "additionalProperties": false,
-          "description": "For type text: suggestions from a GET data source while typing; the value stays free text (for example a query). The data source sees `search` (the whole text) and `word` (the word at the cursor, delimited by spaces, brackets and commas), for example \"params\": { \"q\": \"{{ search }}\", \"word\": \"{{ word }}\" }; choosing a suggestion replaces that word.",
+          "description": "For type text and tags: suggestions from a GET data source while typing; the value stays free text (for example a query). For tags the data source sees the text typed in search and word, and a suggestion is added as a tag. The data source sees `search` (the whole text) and `word` (the word at the cursor, delimited by spaces, brackets and commas), for example \"params\": { \"q\": \"{{ search }}\", \"word\": \"{{ word }}\" }; choosing a suggestion replaces that word.",
           "properties": {
             "source": {
               "type": "string",
@@ -1117,7 +1118,8 @@
               "type": {
                 "not": {
                   "enum": [
-                    "multiselect"
+                    "multiselect",
+                    "tags"
                   ]
                 }
               }
@@ -1138,7 +1140,10 @@
             "properties": {
               "type": {
                 "not": {
-                  "const": "text"
+                  "enum": [
+                    "text",
+                    "tags"
+                  ]
                 }
               }
             },
@@ -1553,7 +1558,7 @@
                   },
                   "optionsField": {
                     "type": "string",
-                    "description": "Field of the row with the options of select, multiselect and radio: a list of values, or of {value, label} (options if absent)."
+                    "description": "Field of the row with the options of select, multiselect, radio and tags: a list of values, or of {value, label} (options if absent)."
                   },
                   "requiredField": {
                     "type": "string",
@@ -2921,6 +2926,26 @@
               "postIf": {
                 "$ref": "#/$defs/expression",
                 "description": "Condition for showing the box for writing, for example {{ can('tasks.comments.create') }}; an error counts as false. Always shown with onPost if absent."
+              },
+              "onEdit": {
+                "$ref": "#/$defs/steps",
+                "description": "Steps that save a changed comment: they see row (the comment as it came), text and mentions, as onPost. Each comment gets an Edit button (with editIf) that turns it into a box with its text; the box closes when the steps succeed, so they usually end with a refresh of source."
+              },
+              "editIf": {
+                "$ref": "#/$defs/expression",
+                "description": "Condition for the Edit button of each comment, with the comment in row, for example {{ row._perm.update }}; an error counts as false. Always shown with onEdit if absent."
+              },
+              "onDelete": {
+                "$ref": "#/$defs/steps",
+                "description": "Steps that delete a comment, with the comment in row; they usually start with a confirm step and end with a refresh of source. Each comment gets a Delete button (with deleteIf)."
+              },
+              "deleteIf": {
+                "$ref": "#/$defs/expression",
+                "description": "Condition for the Delete button of each comment, with the comment in row, for example {{ row._perm.delete }}; an error counts as false. Always shown with onDelete if absent."
+              },
+              "editedField": {
+                "type": "string",
+                "description": "Field of the row that says the comment was changed (a date or true): when it has a value, edited is shown next to the date. Nothing is shown if absent."
               },
               "mentions": {
                 "type": "object",

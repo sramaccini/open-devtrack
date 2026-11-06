@@ -14,18 +14,18 @@ Quadrava and authz-library, and the ADRs say where.
   (`ModularityTests`: `verify()` and the module documentation). The `odt.*` permission catalogue is a repeatable
   Flyway migration of the RBAC schema (ADR-07); the dev profile adds tenants, users and the UI author/approver roles.
 - Module `uiregistry` (ADR-03): `contracts/registry.yaml` 0.7.0, adapted from the Quadrava reference registry
-  (commit 9fa1916, contract 0.6.0), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.9.0 in the classpath.
+  (commit 9fa1916, contract 0.6.0), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.10.0 in the classpath.
   The browser uses the session; tools use Keycloak access tokens of `opendevtrack-tools` on `/registry/**`
   (`platform/BearerTokenSecurity.java`, temporary until A4).
 - `ui/`: the Quadrava project, with the main navigation, home and projects placeholder screens, themes `odt-light` and
-  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.9.0 checks it (`quadrava validate`) and publishes it
+  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.10.0 checks it (`quadrava validate`) and publishes it
   (`quadrava publish`) to any environment: no environment is protected (ADR-12).
 - End-to-end check (`docs/check-authz-end-to-end.md`): Quadrava kits bff 13/13 with and without a session, authz 11/11,
-  registry 24/24 (`--protected-env none`), tenant switch kept across logins, `ui/` served by the runtime 0.9.0 from the
+  registry 24/24 (`--protected-env none`), tenant switch kept across logins, `ui/` served by the runtime 0.10.0 from the
   registry. Quadrava 0.5.0 adopted on 4 November 2026 (from 0.2.1: same schemas, registry contract 0.7), 0.6.0 on 5
   November (tab title and icons from the theme, shell texts built in: Q3 and Q4), 0.7.0 on 5 November (theme and
   language in the settings dialog of the user menu; the message bell of ADR-22), 0.8.0 on 6 November (`data.<name>` in the expressions: Q9), 0.9.0 on 6 November (links from the rows, Q10;
-  request size of the runtime image, Q11).
+  request size of the runtime image, Q11), 0.10.0 on 6 November (comment actions, Q8; tags field, Q5).
 - CI (`.github/workflows/ci.yml`), green on its first run: `quadrava validate` of `ui/` and the back end tests, then the e2e with the
   kits. It reads authz-library and the Quadrava CLI from GitHub Packages with the secret `AUTHZ_PACKAGES_TOKEN` (or the workflow token if the packages grant this repository access).
 - F2 E1 Projects: modules `project` (projects of the tenant, issue numbering), `access` (members and project roles
@@ -33,7 +33,8 @@ Quadrava and authz-library, and the ADRs say where.
   `project-list`, `project-new`, `project-detail` with members. Project permissions reach the screens as `_perm`
   until A1 (ADR-07). `ProjectApiTest` covers two tenants and users without the permissions.
 - F2 E2 Issues (first slice): module `issue` with type, priority, summary, Markdown description, assignee, labels and
-  numbering per project; screens `issue-list`, `issue-new`, `issue-detail`. Labels are in the API only (request Q5);
+  numbering per project; screens `issue-list`, `issue-new`, `issue-detail`. Labels as a `tags` field with the labels of the
+  project as suggestions (Quadrava 0.10.0, Q5);
   the status changes through the workflow (E3). Links between issues (`blocks`, `relates`, `duplicates`, read from
   both ends, also across projects of the tenant) with a Links tab on `issue-detail`. Watchers: the reporter and the
   assignee from the start, anyone who sees the issue watches it or stops, developers add members; a Watchers tab. Who
@@ -51,8 +52,8 @@ Quadrava and authz-library, and the ADRs say where.
   Mentions and messages (ADR-13, accepted 5 November 2026): `@username` of a member in a comment, picked in the
   `comments` thread of Quadrava; messages for mentions, assignments, comments and status changes in the bell of the
   runtime (module `notification`, polled every 60 s, kept 90 days). Their language follows `Accept-Language`. The box
-  for writing shows when `data.issue._perm.comment` (Q9, Quadrava 0.8.0). Editing and deleting a comment stay in the
-  table under the thread until Quadrava request Q8.
+  for writing shows when `data.issue._perm.comment` (Q9, Quadrava 0.8.0); editing and deleting a comment
+  happen in the thread (Q8, Quadrava 0.10.0).
   Attachments (ADR-14, accepted 6 November 2026): one `AttachmentStore` with the plugins `database` (default),
   `filesystem` and `s3` (AWS SDK v2, any S3-compatible server; tests on S3Mock), metadata in PostgreSQL, bytes
   always through the back end, an Attachments tab on `issue-detail` that downloads from the name of a file (Q10)
@@ -83,6 +84,6 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F2 (per the plan): Quadrava request Q8 when released (comment actions); workflows by
+1. F2 (per the plan): workflows by
    issue type and editing statuses and transitions when a project needs them (ADR-10).
 2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

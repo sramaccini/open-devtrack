@@ -18,9 +18,9 @@ root="$(cd "$here/../.." && pwd)"
 work="$here/.work"
 
 # The conformance kits of Quadrava, downloaded file by file from the tag of the pinned release (ADR-01).
-QUADRAVA_KITS="${QUADRAVA_KITS:-https://raw.githubusercontent.com/sramaccini/quadrava/v0.9.0/frontend/tools}"
+QUADRAVA_KITS="${QUADRAVA_KITS:-https://raw.githubusercontent.com/sramaccini/quadrava/v0.10.0/frontend/tools}"
 # The CLI of the same release, which checks and publishes ui/.
-QUADRAVA_CLI="${QUADRAVA_CLI:-@sramaccini/quadrava-cli@0.9.0}"
+QUADRAVA_CLI="${QUADRAVA_CLI:-@sramaccini/quadrava-cli@0.10.0}"
 
 DB_PORT="${DB_PORT:-25432}"
 REDIS_PORT="${REDIS_PORT:-26379}"

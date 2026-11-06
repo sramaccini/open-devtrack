@@ -43,7 +43,7 @@ development tenants and users and the session cookie over http.
 
 ## Registry of the screen definitions (`uiregistry`)
 
-Implements `contracts/registry.yaml` 0.7.0 of Quadrava 0.9.0, adapted from its reference registry (0.6.0). Versions and publications
+Implements `contracts/registry.yaml` 0.7.0 of Quadrava 0.10.0, adapted from its reference registry (0.6.0). Versions and publications
 are in the schema `odt_uiregistry` (Flyway, `db/odt/uiregistry`). Documents are validated against the schemas of the
 pinned Quadrava version in `src/main/resources/quadrava/schemas`, refreshed with `tools/sync-quadrava-schemas.sh
 <version>`. The browser reaches it with the session; tools (`quadrava publish`, the registry kit) with a Keycloak
@@ -74,7 +74,8 @@ Issues of a project (`odt_issue`), keyed by the project and their number (`ODT-4
 (restricted Markdown), priority, assignee (a member), reporter, labels. Only the members of the project see them;
 developers create and edit them, admins delete them; edits carry the version read and get 412 if it changed. The status
 changes only through the transitions of the workflow of the project (below). `GET /api/projects/{key}/issues` takes `status`,
-`assignee` (`me` for the user) and `q` (text of the summary). Each change is published as an event
+`assignee` (`me` for the user) and `q` (text of the summary); `GET /api/projects/{key}/labels?q=` gives the labels
+already used in the project that start with `q`, for the suggestions of the labels field. Each change is published as an event
 (`IssueEvents`); other modules find an issue by its key through `Issues`.
 
 ## Links (`issue`)

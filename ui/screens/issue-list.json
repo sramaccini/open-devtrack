@@ -101,6 +101,10 @@
           "sortable": true
         },
         {
+          "field": "labels",
+          "label": "{{ t('issues.labels', 'Labels') }}"
+        },
+        {
           "field": "status",
           "label": "{{ t('issues.status', 'Status') }}",
           "format": "badge",

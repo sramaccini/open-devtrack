@@ -78,13 +78,9 @@
   "values.status.todo": "Da fare",
   "values.status.in_progress": "In corso",
   "values.status.done": "Fatta",
-  "issues.comment": "Commento",
-  "issues.comment_actions": "Modifica o elimina un commento",
   "issues.comments": "Commenti",
   "issues.author": "Autore",
   "issues.when": "Quando",
-  "issues.edit": "Modifica",
-  "issues.edit_comment": "Modifica il commento",
   "issues.delete_comment_confirm": "Eliminare questo commento?",
   "issues.history": "Cronologia",
   "issues.field": "Campo",
@@ -174,5 +170,7 @@
   "issues.attachment_by": "Aggiunto da",
   "issues.attachment_at": "Quando",
   "issues.remove_attachment_confirm": "Rimuovere {name}?",
-  "issues.attachment_download": "Scarica"
+  "issues.attachment_download": "Scarica",
+  "issues.labels": "Etichette",
+  "issues.labels_help": "Lettere minuscole, cifre, punti, trattini o trattini bassi; Invio o una virgola ne aggiunge una"
 }

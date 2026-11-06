@@ -17,7 +17,11 @@ final class IssueApi {
 
     /** A row of the issue list. */
     record IssueRow(String key, long number, String type, String summary, String status, String priority,
-                    String assignee, Instant updatedAt) {
+                    String assignee, List<String> labels, Instant updatedAt) {
+    }
+
+    /** A label already used in a project, for the suggestions of the tags field of Quadrava (request Q5). */
+    record LabelRow(String name) {
     }
 
     record IssueView(String key, String project, long number, String type, String summary, String description,

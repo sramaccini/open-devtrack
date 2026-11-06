@@ -38,6 +38,14 @@
         "q": "{{search}}"
       }
     },
+    "labels": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/labels",
+      "params": {
+        "q": "{{ search }}"
+      }
+    },
     "comments": {
       "type": "rest",
       "method": "GET",
