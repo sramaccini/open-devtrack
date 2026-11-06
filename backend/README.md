@@ -43,7 +43,7 @@ development tenants and users and the session cookie over http.
 
 ## Registry of the screen definitions (`uiregistry`)
 
-Implements `contracts/registry.yaml` 0.7.0 of Quadrava 0.8.0, adapted from its reference registry (0.6.0). Versions and publications
+Implements `contracts/registry.yaml` 0.7.0 of Quadrava 0.9.0, adapted from its reference registry (0.6.0). Versions and publications
 are in the schema `odt_uiregistry` (Flyway, `db/odt/uiregistry`). Documents are validated against the schemas of the
 pinned Quadrava version in `src/main/resources/quadrava/schemas`, refreshed with `tools/sync-quadrava-schemas.sh
 <version>`. The browser reaches it with the session; tools (`quadrava publish`, the registry kit) with a Keycloak
@@ -165,5 +165,5 @@ and the back end refuses to start if attachments are kept in another store: chan
 (`Content-Disposition: attachment`, `nosniff`); `DELETE …/attachments/{id}` is for the uploader or an admin of the
 project. At most `odt.attachments.max-size` per file (25 MB) and 100 per issue; each one added or removed is in the
 changelog (`attachments`). The bytes are removed after the commit of their metadata, with their issue too, and a sweep
-(`odt.attachments.sweep-cron`, 3:45 every night) removes the bytes older than a day that no attachment names. Through
-the Quadrava runtime image a request is at most 1 MB until Quadrava request Q11.
+(`odt.attachments.sweep-cron`, 3:45 every night) removes the bytes older than a day that no attachment names.
+The Quadrava runtime image forwards requests up to its `QUADRAVA_MAX_BODY_SIZE` (100m by default).

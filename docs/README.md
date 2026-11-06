@@ -35,8 +35,8 @@ Found while writing the ADRs; each is built in its own repository, optional for 
 | Q7 | Quadrava | `quadrava publish` to a protected environment: request the review as author and approve as reviewer, with two tokens, for projects without Studio (declined: contract 0.7 of Quadrava 0.5.0 makes protected environments optional; ADR-12) | F5 |
 | Q8 | Quadrava | Actions on one comment of the `comments` component (edit and delete, with a condition each, as `rowActions` of a table), so the thread replaces the table of comments (ADR-13) | F2 |
 | Q9 | Quadrava | The data of a screen data source in the expressions outside a form (or `form` in the tabs next to it), so `postIf` of the `comments` thread can test `_perm.comment` of the issue; released in Quadrava 0.8.0 (`data.<name>`, its ADR-23) and adopted (ADR-13) | F2 |
-| Q10 | Quadrava | A table column or row action that opens a relative path of the application (as `href` of `link`), to download an attachment (ADR-14) | F2 |
-| Q11 | Quadrava | A setting of the runtime image for the size of a request forwarded to the BFF (`client_max_body_size` of nginx, 1 MB today), so the 100 MB of the `file` field reach the back end (ADR-14) | F2 |
+| Q10 | Quadrava | A table column or row action that opens a relative path of the application (as `href` of `link`), to download an attachment (ADR-14; released in Quadrava 0.9.0, `href`, its ADR-24, and adopted) | F2 |
+| Q11 | Quadrava | A setting of the runtime image for the size of a request forwarded to the BFF (`client_max_body_size` of nginx, 1 MB today), so the 100 MB of the `file` field reach the back end (ADR-14; released in Quadrava 0.9.0, `QUADRAVA_MAX_BODY_SIZE`, and adopted) | F2 |
 | A1 | authz-library | Extension point for permissions that depend on a resource (ADR-07; until then `_perm` on rows and forms) | F2 |
 | A2 | authz-library | A configurable schema for the RBAC tables (today they go into `public`, next to the `odt_*` schemas of the modules) | F1 |
 | A3 | authz-library | Problem titles and details in English (today Italian, for example «Troppi tentativi di accesso») | F5 |

@@ -168,10 +168,11 @@
   "values.transition.reopen": "Reopen",
   "issues.attachments": "Attachments",
   "issues.attach_file": "Attach a file",
-  "issues.attachment_limit": "Up to 1 MB per file",
+  "issues.attachment_limit": "Up to 25 MB per file",
   "issues.attachment_name": "File",
   "issues.attachment_size": "Size (bytes)",
   "issues.attachment_by": "Added by",
   "issues.attachment_at": "When",
-  "issues.remove_attachment_confirm": "Remove {name}?"
+  "issues.remove_attachment_confirm": "Remove {name}?",
+  "issues.attachment_download": "Download"
 }

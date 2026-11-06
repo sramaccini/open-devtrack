@@ -709,7 +709,7 @@
                 "type": "file",
                 "label": "{{ t('issues.attach_file', 'Attach a file') }}",
                 "upload": "uploadAttachment",
-                "maxSizeKb": 1024
+                "maxSizeKb": 25600
               },
               "onChange": [
                 {
@@ -724,7 +724,7 @@
               "id": "attachment-limit-note",
               "type": "text",
               "visibleIf": "{{ data.issue._perm.attach }}",
-              "text": "{{ t('issues.attachment_limit', 'Up to 1 MB per file') }}"
+              "text": "{{ t('issues.attachment_limit', 'Up to 25 MB per file') }}"
             },
             {
               "id": "attachment-table",
@@ -733,7 +733,9 @@
               "columns": [
                 {
                   "field": "filename",
-                  "label": "{{ t('issues.attachment_name', 'File') }}"
+                  "label": "{{ t('issues.attachment_name', 'File') }}",
+                  "href": "/api/issues/{{ params.issue }}/attachments/{{ row.id }}/content",
+                  "tooltip": "{{ t('issues.attachment_download', 'Download') }}"
                 },
                 {
                   "field": "size",
