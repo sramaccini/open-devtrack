@@ -20,6 +20,7 @@ The decisions D1–D9 of the project plan, all accepted by the maintainer on 31 
 | [12](adr-12-no-protected-environments.md) | No protected environments in the registry | Every version publishable everywhere by default; the review is the one of the code; `tools/publish-ui.mjs` removed | Accepted |
 | [13](adr-13-mentions-and-messages.md) | Mentions and messages for the user (E4) | `@username` of members found in the text of comments; messages in `notification` for mentions, assignments, comments and status changes of watched issues, behind the bell of Quadrava 0.7.0 | Accepted |
 | [14](adr-14-attachment-storage.md) | Attachments and where their files are kept (E4) | One `AttachmentStore` with three plugins: database (default), filesystem, S3-compatible object storage; bytes always through the back end | Accepted |
+| [15](adr-15-boards-backlog-sprints.md) | Boards, backlog and sprints (F3) | One rank per project in fractional indexing; sprints planned, active and completed (one active); boards of workflow statuses with WIP limits and swimlanes; the backlog as a `kanban` of sprints | Proposed |
 
 ## Requests to the dependencies
 
