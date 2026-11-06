@@ -39,6 +39,18 @@
     },
     "saveField": {
       "ref": "projects/saveField"
+    },
+    "boards": {
+      "ref": "boards/ofProject"
+    },
+    "createBoard": {
+      "ref": "boards/create"
+    },
+    "saveBoard": {
+      "ref": "boards/save"
+    },
+    "removeBoard": {
+      "ref": "boards/remove"
     }
   },
   "components": [
@@ -288,6 +300,77 @@
           ]
         },
         {
+          "id": "btn-add-board",
+          "label": "{{ t('agile.new_board', 'New board') }}",
+          "visibleIf": "{{form._perm.edit}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('agile.new_board', 'New board') }}",
+                "submitLabel": "{{ t('projects.add', 'Add') }}",
+                "initial": {
+                  "kind": "kanban",
+                  "lane": "none"
+                },
+                "fields": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "{{ t('agile.board_name', 'Board') }}",
+                    "required": true,
+                    "maxLength": 100
+                  },
+                  {
+                    "name": "kind",
+                    "type": "select",
+                    "label": "{{ t('agile.kind', 'Kind') }}",
+                    "options": [
+                      "kanban",
+                      "scrum"
+                    ],
+                    "optionKey": "values.board_kind",
+                    "required": true,
+                    "tooltip": "{{ t('agile.kind_help', 'Scrum: the issues of the active sprint; kanban: every issue') }}"
+                  },
+                  {
+                    "name": "lane",
+                    "type": "select",
+                    "label": "{{ t('agile.lanes', 'Lanes by') }}",
+                    "options": [
+                      "none",
+                      "assignee",
+                      "priority",
+                      "type"
+                    ],
+                    "optionKey": "values.board_lane",
+                    "required": true
+                  },
+                  {
+                    "name": "columns",
+                    "type": "textarea",
+                    "label": "{{ t('agile.columns', 'Columns') }}",
+                    "rows": 5,
+                    "tooltip": "{{ t('agile.columns_help', 'One per line, Name: status, status | limit, for example Doing: in_progress | 3; empty for one column per status') }}"
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "createBoard",
+                    "onError": [
+                      {
+                        "toast": "{{ t('agile.board_invalid', 'Check the columns: each holds statuses of the workflow, each status in one column') }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "boards"
+            }
+          ]
+        },
+        {
           "id": "btn-issues",
           "label": "{{ t('issues.title', 'Issues') }}",
           "onClick": [
@@ -296,6 +379,183 @@
               "params": {
                 "key": "{{form.key}}"
               }
+            }
+          ]
+        },
+        {
+          "id": "btn-backlog",
+          "label": "{{ t('agile.backlog', 'Backlog') }}",
+          "onClick": [
+            {
+              "navigate": "backlog",
+              "params": {
+                "key": "{{form.key}}"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "boards-title",
+      "type": "text",
+      "style": "heading",
+      "text": "{{ t('agile.boards', 'Boards') }}"
+    },
+    {
+      "id": "board-table",
+      "type": "table",
+      "source": "boards",
+      "columns": [
+        {
+          "field": "name",
+          "label": "{{ t('agile.board_name', 'Board') }}"
+        },
+        {
+          "field": "kind",
+          "label": "{{ t('agile.kind', 'Kind') }}",
+          "valueKey": "values.board_kind"
+        },
+        {
+          "field": "lane",
+          "label": "{{ t('agile.lanes', 'Lanes by') }}",
+          "valueKey": "values.board_lane"
+        },
+        {
+          "field": "columns",
+          "label": "{{ t('agile.columns', 'Columns') }}"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-open-board",
+          "label": "{{ t('agile.open', 'Open') }}",
+          "onClick": [
+            {
+              "navigate": "board",
+              "params": {
+                "board": "{{row.id}}"
+              }
+            }
+          ]
+        },
+        {
+          "id": "btn-edit-board",
+          "label": "{{ t('projects.edit_field', 'Edit') }}",
+          "visibleIf": "{{row._perm.edit}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('agile.edit_board', 'Edit the board') }}",
+                "submitLabel": "{{ t('common.save', 'Save') }}",
+                "initial": {
+                  "name": "{{row.name}}",
+                  "kind": "{{row.kind}}",
+                  "lane": "{{row.lane}}",
+                  "columns": "{{row.columns}}",
+                  "version": "{{row.version}}"
+                },
+                "fields": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "{{ t('agile.board_name', 'Board') }}",
+                    "required": true,
+                    "maxLength": 100
+                  },
+                  {
+                    "name": "kind",
+                    "type": "select",
+                    "label": "{{ t('agile.kind', 'Kind') }}",
+                    "options": [
+                      "kanban",
+                      "scrum"
+                    ],
+                    "optionKey": "values.board_kind",
+                    "required": true
+                  },
+                  {
+                    "name": "lane",
+                    "type": "select",
+                    "label": "{{ t('agile.lanes', 'Lanes by') }}",
+                    "options": [
+                      "none",
+                      "assignee",
+                      "priority",
+                      "type"
+                    ],
+                    "optionKey": "values.board_lane",
+                    "required": true
+                  },
+                  {
+                    "name": "columns",
+                    "type": "textarea",
+                    "label": "{{ t('agile.columns', 'Columns') }}",
+                    "rows": 5,
+                    "tooltip": "{{ t('agile.columns_help', 'One per line, Name: status, status | limit, for example Doing: in_progress | 3; empty for one column per status') }}"
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "saveBoard",
+                    "args": {
+                      "id": "{{row.id}}"
+                    },
+                    "onError": [
+                      {
+                        "if": "{{error.status == 412}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "toast": "{{ t('agile.board_invalid', 'Check the columns: each holds statuses of the workflow, each status in one column') }}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "boards"
+            }
+          ]
+        },
+        {
+          "id": "btn-remove-board",
+          "label": "{{ t('projects.remove', 'Remove') }}",
+          "visibleIf": "{{row._perm.edit}}",
+          "onClick": [
+            {
+              "confirm": "{{ t('agile.remove_board_confirm', 'Remove the board {name}? The issues stay.', {'name': row.name}) }}"
+            },
+            {
+              "call": "removeBoard",
+              "args": {
+                "id": "{{row.id}}"
+              },
+              "onError": [
+                {
+                  "if": "{{error.status == 409}}",
+                  "then": [
+                    {
+                      "toast": "{{ t('agile.last_board', 'A project keeps at least one board') }}"
+                    }
+                  ],
+                  "else": [
+                    {
+                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "refresh": "boards"
             }
           ]
         }

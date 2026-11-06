@@ -6,7 +6,7 @@ Quadrava and authz-library, and the ADRs say where.
 
 ## Status
 
-**6 November 2026 — phase F1 done; F2 with E1 Projects, E2 Issues, E3 Workflow and E4 Collaboration (comments, mentions, messages, attachments): gate M1 covered.**
+**6 November 2026 — phases F1 and F2 done (gate M1 covered); F3 boards, backlog and sprints built (ADR-15).**
 
 - Repository github.com/sramaccini/open-devtrack, branch `main`: licence MPL-2.0 with CLA, contribution rules and
   project rules as Quadrava (ADR-05). Decisions D1–D9 and ADR-10 accepted, in `docs/`.
@@ -58,6 +58,12 @@ Quadrava and authz-library, and the ADRs say where.
   `filesystem` and `s3` (AWS SDK v2, any S3-compatible server; tests on S3Mock), metadata in PostgreSQL, bytes
   always through the back end, an Attachments tab on `issue-detail` that downloads from the name of a file (Q10)
   and uploads up to 25 MB through the runtime image (Q11, Quadrava 0.9.0).
+- F3 (ADR-15, accepted 6 November 2026): module `agile` with one order per project (fractional indexes in base 62),
+  sprints (planned, one active, completed, with what each held for the reports of F4), story points, and boards whose
+  columns are statuses of the workflow, with WIP limits and lanes by assignee, priority or type. A move to another
+  column runs a transition, guards included. Screens `board`, `backlog` and `board-list` on the `kanban` of Quadrava
+  0.10.0; boards on `project-detail`, points on `issue-detail`. Open with Quadrava: Q12 (a card opens its issue;
+  translated badges).
 
 ## Requests to the dependencies
 
@@ -84,6 +90,6 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F2 (per the plan): workflows by
-   issue type and editing statuses and transitions when a project needs them (ADR-10).
-2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.
+1. F4 (per the plan): reports on the sprints (burndown, velocity) from `odt_agile.sprint_issue` and the sprint events.
+2. Workflows by issue type and editing statuses and transitions when a project needs them (ADR-10).
+3. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

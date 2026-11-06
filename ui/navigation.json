@@ -32,6 +32,12 @@
           "label": "{{ t('nav.all_projects', 'All projects') }}",
           "icon": "list",
           "screen": "project-list"
+        },
+        {
+          "id": "boards",
+          "label": "{{ t('nav.boards', 'Boards') }}",
+          "icon": "sections",
+          "screen": "board-list"
         }
       ]
     }

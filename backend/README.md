@@ -168,3 +168,25 @@ project. At most `odt.attachments.max-size` per file (25 MB) and 100 per issue; 
 changelog (`attachments`). The bytes are removed after the commit of their metadata, with their issue too, and a sweep
 (`odt.attachments.sweep-cron`, 3:45 every night) removes the bytes older than a day that no attachment names.
 The Quadrava runtime image forwards requests up to its `QUADRAVA_MAX_BODY_SIZE` (100m by default).
+
+## Boards, backlog and sprints (`agile`)
+
+The plan of the issues (ADR-15), in `odt_agile`. Each issue has a place in the one order of its project
+(`issue_plan.rank`, a fractional index in base 62: a move writes only the issue moved), an optional sprint and optional
+story points; a new issue goes to the bottom, from `IssueCreated` in the transaction that creates it.
+
+- Boards: `GET /api/boards` (those of the projects of the user), `GET|POST /api/projects/{key}/boards`,
+  `GET|PUT|DELETE /api/boards/{id}`; `GET /api/boards/{id}/columns` and `…/cards` for the `kanban` of Quadrava, and
+  `POST /api/boards/{id}/cards/{issueKey}/move` with `column`, `beforeId`, `afterId`. A move to another column runs the
+  first transition of the workflow to a status of that column that can run now (409 when none can); a move between two
+  cards changes the order (`odt.issue.edit`). A scrum board shows the active sprint, a kanban board every issue but
+  those done for more than 14 days. A new project gets a kanban board without columns of its own: one per status of the
+  workflow. Boards are managed with `odt.project.edit` (admin); a project keeps one.
+- Backlog: `GET /api/projects/{key}/backlog/columns` (the sprints not completed, the active one first, then
+  `backlog`) and `…/backlog/cards` (their issues and those not done in no sprint), `POST …/backlog/cards/{issueKey}/move`.
+- Sprints: `GET|POST /api/projects/{key}/sprints`, `PUT|DELETE /api/sprints/{id}` (delete only when planned),
+  `POST /api/sprints/{id}/start` (one active per project; two weeks from today unless the dates are given) and
+  `…/complete` with `moveTo` `backlog`, `next` or the id of a planned sprint for the issues not done. Managed with
+  `odt.sprint.manage` (developer, admin). What a sprint held from its start is in `sprint_issue`, with the outcome of
+  each issue (`done`, `carried`, `removed`), and `SprintStarted`, `SprintCompleted` are published for the reports.
+- Story points: `GET|PUT /api/issues/{key}/plan` (`points` from 0 to 999, `odt.issue.edit`).

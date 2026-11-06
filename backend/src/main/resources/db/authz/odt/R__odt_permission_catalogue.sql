@@ -22,6 +22,7 @@ INSERT INTO app_permission (permission_code, description) VALUES
     ('odt.issue.comment', 'Comment on the issues of a project'),
     ('odt.issue.attach', 'Attach files to the issues of a project'),
     ('odt.issue.delete', 'Delete issues of a project'),
+    ('odt.sprint.manage', 'Create, start and complete the sprints of a project and plan issues into them'),
     ('odt.project.edit', 'Edit the details of a project'),
     ('odt.member.manage', 'Add and remove the members of a project and change their roles')
 ON CONFLICT (permission_code) DO NOTHING;

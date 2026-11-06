@@ -1,0 +1,124 @@
+{
+  "schemaVersion": "1.0",
+  "datasources": "boards",
+  "description": "Boards, backlog and sprints of the projects (module agile, ADR-15).",
+  "sources": {
+    "mine": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/boards"
+    },
+    "ofProject": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/boards"
+    },
+    "create": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{params.key}}/boards",
+      "body": "{{form}}"
+    },
+    "save": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/boards/{{id}}",
+      "body": "{{form}}"
+    },
+    "remove": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/boards/{{id}}"
+    },
+    "get": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/boards/{{params.board}}"
+    },
+    "columns": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/boards/{{params.board}}/columns"
+    },
+    "cards": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/boards/{{params.board}}/cards"
+    },
+    "move": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/boards/{{params.board}}/cards/{{key}}/move",
+      "body": {
+        "column": "{{to}}",
+        "beforeId": "{{beforeId}}",
+        "afterId": "{{afterId}}"
+      }
+    },
+    "backlogColumns": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/backlog/columns"
+    },
+    "backlogCards": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/backlog/cards"
+    },
+    "backlogMove": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{params.key}}/backlog/cards/{{key}}/move",
+      "body": {
+        "column": "{{to}}",
+        "beforeId": "{{beforeId}}",
+        "afterId": "{{afterId}}"
+      }
+    },
+    "sprints": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/sprints"
+    },
+    "createSprint": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{params.key}}/sprints",
+      "body": "{{form}}"
+    },
+    "saveSprint": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/sprints/{{id}}",
+      "body": "{{form}}"
+    },
+    "startSprint": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/sprints/{{id}}/start",
+      "body": "{{form}}"
+    },
+    "completeSprint": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/sprints/{{id}}/complete",
+      "body": "{{form}}"
+    },
+    "removeSprint": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/sprints/{{id}}"
+    },
+    "plan": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/issues/{{params.issue}}/plan"
+    },
+    "savePlan": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/issues/{{params.issue}}/plan",
+      "body": "{{form}}"
+    }
+  }
+}

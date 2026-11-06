@@ -41,6 +41,12 @@
     "removeComment": {
       "ref": "issues/removeComment"
     },
+    "plan": {
+      "ref": "boards/plan"
+    },
+    "savePlan": {
+      "ref": "boards/savePlan"
+    },
     "attachments": {
       "ref": "issues/attachments"
     },
@@ -499,6 +505,67 @@
           }
         }
       }
+    },
+    {
+      "id": "plan-title",
+      "type": "text",
+      "style": "heading",
+      "text": "{{ t('agile.planning', 'Planning') }}"
+    },
+    {
+      "id": "plan-form",
+      "type": "form",
+      "source": "plan",
+      "columns": 3,
+      "fields": [
+        {
+          "name": "points",
+          "type": "number",
+          "label": "{{ t('agile.points', 'Story points') }}",
+          "readOnlyIf": "{{!form._perm.edit}}",
+          "tooltip": "{{ t('agile.points_help', 'From 0 to 999; empty when not estimated') }}"
+        },
+        {
+          "name": "sprint",
+          "type": "text",
+          "label": "{{ t('agile.sprint', 'Sprint') }}",
+          "readOnlyIf": "{{true}}",
+          "tooltip": "{{ t('agile.sprint_help', 'Planned from the backlog of the project; empty for the backlog') }}"
+        }
+      ],
+      "actions": [
+        {
+          "id": "btn-save-plan",
+          "label": "{{ t('common.save', 'Save') }}",
+          "visibleIf": "{{form._perm.edit}}",
+          "onClick": [
+            {
+              "call": "savePlan",
+              "onError": [
+                {
+                  "if": "{{error.status == 400}}",
+                  "then": [
+                    {
+                      "toast": "{{ t('agile.points_invalid', 'The story points are from 0 to 999') }}"
+                    }
+                  ],
+                  "else": [
+                    {
+                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "refresh": "plan"
+            },
+            {
+              "toast": "{{ t('common.saved', 'Saved') }}"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "workflow-title",

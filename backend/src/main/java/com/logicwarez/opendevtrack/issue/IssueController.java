@@ -333,7 +333,7 @@ class IssueController {
     }
 
     /** The issue as the guards see it ({@code issue.assignee}, {@code issue.custom.customer}…). */
-    private static Map<String, Object> guardInput(Found found) {
+    static Map<String, Object> guardInput(Found found) {
         IssueEntity i = found.issue();
         return conditionInput(found.project(), key(found.project(), i), Fields.of(i), i.status(), i.reporter());
     }
@@ -367,6 +367,11 @@ class IssueController {
     }
 
     private Map<String, Object> userInput() {
+        return userInput(user);
+    }
+
+    /** The user as the conditions see it ({@code user.username}, {@code user.roles}). */
+    static Map<String, Object> userInput(CurrentUser user) {
         return Map.of("username", user.username(), "roles", List.copyOf(user.session().roles()));
     }
 
@@ -491,7 +496,7 @@ class IssueController {
         return text == null || text.isBlank() ? null : text.strip();
     }
 
-    private static String key(ProjectRef project, IssueEntity issue) {
+    static String key(ProjectRef project, IssueEntity issue) {
         return project.key() + "-" + issue.number();
     }
 

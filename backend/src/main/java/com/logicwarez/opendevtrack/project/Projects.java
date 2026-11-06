@@ -5,6 +5,7 @@
 package com.logicwarez.opendevtrack.project;
 
 import com.logicwarez.opendevtrack.platform.CurrentUser;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,11 @@ public class Projects {
     /** The project with this identifier in the tenant of the session; empty also when it belongs to another tenant. */
     public Optional<ProjectRef> get(UUID id) {
         return projects.findById(id).map(ProjectEntity::toRef).filter(p -> p.tenantId().equals(user.tenantId()));
+    }
+
+    /** The projects of the tenant of the session, in the order of their keys. */
+    public List<ProjectRef> all() {
+        return projects.findByTenantIdOrderByKey(user.tenantId()).stream().map(ProjectEntity::toRef).toList();
     }
 
     /** Reserves the next issue number of the project (ODT-1, ODT-2…), inside the transaction of the caller. */

@@ -73,3 +73,12 @@ forwards requests up to `QUADRAVA_MAX_BODY_SIZE` (100m by default, 26m in `e2e/a
 The title of the tab is `brand.name` of the active theme and its icons are `brand.icons` (`svg`, `png32`,
 `appleTouch`), the files of `brand/` served next to the runtime: `odt-brand/` (SVG) and `odt-brand-png/` (PNG), as
 `e2e/authz/compose.yaml` mounts them. Until the theme is loaded the tab reads «Quadrava».
+
+## Boards and backlog
+
+`board` is the generic screen of ADR-06 (params `board`): the `kanban` of Quadrava with the columns and the cards of
+the back end (`columnsFrom`), one component for each kind of lanes (`laneField` and `lanes` are not expressions), shown
+by `data.board.lane`. `backlog` (params `key`) is a `kanban` whose columns are the sprints not completed and the
+backlog, with the sprints in a table below (new, start, complete, edit, remove). `board-list` (Projects › Boards) lists
+the boards of the projects of the user; `project-detail` manages those of a project and `issue-detail` sets the story
+points. A card does not open its issue yet, and its badges show the stored values: request Q12.

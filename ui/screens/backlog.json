@@ -1,0 +1,502 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "backlog",
+  "title": "{{ t('agile.backlog', 'Backlog') }}",
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "project": {
+      "ref": "projects/get"
+    },
+    "sprints": {
+      "ref": "boards/sprints"
+    },
+    "createSprint": {
+      "ref": "boards/createSprint"
+    },
+    "saveSprint": {
+      "ref": "boards/saveSprint"
+    },
+    "startSprint": {
+      "ref": "boards/startSprint"
+    },
+    "completeSprint": {
+      "ref": "boards/completeSprint"
+    },
+    "removeSprint": {
+      "ref": "boards/removeSprint"
+    },
+    "columns": {
+      "ref": "boards/backlogColumns"
+    },
+    "cards": {
+      "ref": "boards/backlogCards"
+    },
+    "move": {
+      "ref": "boards/backlogMove"
+    }
+  },
+  "components": [
+    {
+      "id": "project-summary",
+      "type": "form",
+      "source": "project",
+      "columns": 3,
+      "fields": [
+        {
+          "name": "key",
+          "type": "text",
+          "label": "{{ t('projects.key', 'Key') }}",
+          "readOnlyIf": "{{true}}"
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "label": "{{ t('projects.name', 'Name') }}",
+          "readOnlyIf": "{{true}}"
+        },
+        {
+          "name": "role",
+          "type": "select",
+          "label": "{{ t('projects.my_role', 'My role') }}",
+          "options": [
+            "viewer",
+            "developer",
+            "admin"
+          ],
+          "optionKey": "values.role",
+          "readOnlyIf": "{{true}}"
+        }
+      ],
+      "actions": [
+        {
+          "id": "btn-new-sprint",
+          "label": "{{ t('agile.new_sprint', 'New sprint') }}",
+          "visibleIf": "{{form._perm.manageSprints}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('agile.new_sprint', 'New sprint') }}",
+                "submitLabel": "{{ t('projects.add', 'Add') }}",
+                "fields": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "{{ t('agile.sprint_name', 'Name') }}",
+                    "maxLength": 100,
+                    "tooltip": "{{ t('agile.sprint_name_help', 'Empty for the next number: ODT Sprint 3') }}"
+                  },
+                  {
+                    "name": "goal",
+                    "type": "textarea",
+                    "label": "{{ t('agile.goal', 'Goal') }}",
+                    "rows": 2,
+                    "maxLength": 1000
+                  },
+                  {
+                    "name": "startsOn",
+                    "type": "date",
+                    "label": "{{ t('agile.starts_on', 'Starts on') }}"
+                  },
+                  {
+                    "name": "endsOn",
+                    "type": "date",
+                    "label": "{{ t('agile.ends_on', 'Ends on') }}"
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "createSprint",
+                    "onError": [
+                      {
+                        "if": "{{error.status == 400}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('agile.sprint_invalid', 'Check the name and the dates: a sprint ends on or after the day it starts') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "if": "{{error.status == 409}}",
+                            "then": [
+                              {
+                                "toast": "{{ t('agile.too_many_sprints', 'A project has at most 9 sprints not completed') }}"
+                              }
+                            ],
+                            "else": [
+                              {
+                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "sprints"
+            },
+            {
+              "refresh": "columns"
+            }
+          ]
+        },
+        {
+          "id": "btn-issues",
+          "label": "{{ t('issues.title', 'Issues') }}",
+          "onClick": [
+            {
+              "navigate": "issue-list",
+              "params": {
+                "key": "{{form.key}}"
+              }
+            }
+          ]
+        },
+        {
+          "id": "btn-project",
+          "label": "{{ t('issues.project_settings', 'Project and members') }}",
+          "onClick": [
+            {
+              "navigate": "project-detail",
+              "params": {
+                "key": "{{form.key}}"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "backlog-help",
+      "type": "alert",
+      "text": "{{ t('agile.backlog_help', 'Drag an issue onto a sprint to plan it, or up and down to change its place in the order of the project.') }}"
+    },
+    {
+      "id": "backlog-kanban",
+      "type": "kanban",
+      "source": "cards",
+      "columnField": "column",
+      "titleField": "summary",
+      "descriptionField": "key",
+      "keyField": "key",
+      "avatarField": "assignee",
+      "badges": [
+        {
+          "field": "type"
+        },
+        {
+          "field": "status"
+        }
+      ],
+      "footerFields": [
+        {
+          "field": "points",
+          "label": "{{ t('agile.points_short', 'Points') }}"
+        }
+      ],
+      "columnsFrom": {
+        "source": "columns",
+        "valueField": "value",
+        "labelField": "label",
+        "toneField": "tone"
+      },
+      "reorder": true,
+      "moveIf": "{{ row._perm.move }}",
+      "onMove": [
+        {
+          "call": "move",
+          "args": {
+            "key": "{{row.key}}",
+            "to": "{{to}}",
+            "beforeId": "{{beforeId}}",
+            "afterId": "{{afterId}}"
+          },
+          "onError": [
+            {
+              "toast": "{{ t('agile.move_failed', 'The card could not be moved') }}"
+            },
+            {
+              "refresh": "cards"
+            }
+          ]
+        },
+        {
+          "refresh": "cards"
+        },
+        {
+          "refresh": "sprints"
+        }
+      ]
+    },
+    {
+      "id": "sprints-title",
+      "type": "text",
+      "style": "heading",
+      "text": "{{ t('agile.sprints', 'Sprints') }}"
+    },
+    {
+      "id": "sprint-table",
+      "type": "table",
+      "source": "sprints",
+      "columns": [
+        {
+          "field": "name",
+          "label": "{{ t('agile.sprint_name', 'Name') }}"
+        },
+        {
+          "field": "state",
+          "label": "{{ t('agile.state', 'State') }}",
+          "format": "badge",
+          "badges": {
+            "active": "primary",
+            "completed": "success"
+          },
+          "valueKey": "values.sprint_state"
+        },
+        {
+          "field": "startsOn",
+          "label": "{{ t('agile.starts_on', 'Starts on') }}",
+          "format": "date"
+        },
+        {
+          "field": "endsOn",
+          "label": "{{ t('agile.ends_on', 'Ends on') }}",
+          "format": "date"
+        },
+        {
+          "field": "issues",
+          "label": "{{ t('agile.issues', 'Issues') }}"
+        },
+        {
+          "field": "points",
+          "label": "{{ t('agile.points_short', 'Points') }}"
+        },
+        {
+          "field": "goal",
+          "label": "{{ t('agile.goal', 'Goal') }}"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-start-sprint",
+          "label": "{{ t('agile.start', 'Start') }}",
+          "visibleIf": "{{row._perm.start}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('agile.start_sprint', 'Start the sprint') }}",
+                "submitLabel": "{{ t('agile.start', 'Start') }}",
+                "initial": {
+                  "startsOn": "{{row.startsOn}}",
+                  "endsOn": "{{row.endsOn}}"
+                },
+                "fields": [
+                  {
+                    "name": "startsOn",
+                    "type": "date",
+                    "label": "{{ t('agile.starts_on', 'Starts on') }}",
+                    "tooltip": "{{ t('agile.starts_on_help', 'Empty for today') }}"
+                  },
+                  {
+                    "name": "endsOn",
+                    "type": "date",
+                    "label": "{{ t('agile.ends_on', 'Ends on') }}",
+                    "tooltip": "{{ t('agile.ends_on_help', 'Empty for two weeks after the start') }}"
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "startSprint",
+                    "args": {
+                      "id": "{{row.id}}"
+                    },
+                    "onError": [
+                      {
+                        "if": "{{error.status == 409}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('agile.already_active', 'Another sprint is active: complete it first') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "toast": "{{ t('agile.sprint_invalid', 'Check the name and the dates: a sprint ends on or after the day it starts') }}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "sprints"
+            },
+            {
+              "refresh": "columns"
+            }
+          ]
+        },
+        {
+          "id": "btn-complete-sprint",
+          "label": "{{ t('agile.complete', 'Complete') }}",
+          "visibleIf": "{{row._perm.complete}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('agile.complete_sprint', 'Complete the sprint') }}",
+                "submitLabel": "{{ t('agile.complete', 'Complete') }}",
+                "initial": {
+                  "moveTo": "backlog"
+                },
+                "fields": [
+                  {
+                    "name": "moveTo",
+                    "type": "select",
+                    "label": "{{ t('agile.move_to', 'Issues not done go to') }}",
+                    "options": [
+                      "backlog",
+                      "next"
+                    ],
+                    "optionKey": "values.move_to",
+                    "required": true
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "completeSprint",
+                    "args": {
+                      "id": "{{row.id}}"
+                    },
+                    "onError": [
+                      {
+                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "sprints"
+            },
+            {
+              "refresh": "columns"
+            },
+            {
+              "refresh": "cards"
+            }
+          ]
+        },
+        {
+          "id": "btn-edit-sprint",
+          "label": "{{ t('projects.edit_field', 'Edit') }}",
+          "visibleIf": "{{row._perm.edit}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('agile.edit_sprint', 'Edit the sprint') }}",
+                "submitLabel": "{{ t('common.save', 'Save') }}",
+                "initial": {
+                  "name": "{{row.name}}",
+                  "goal": "{{row.goal}}",
+                  "startsOn": "{{row.startsOn}}",
+                  "endsOn": "{{row.endsOn}}",
+                  "version": "{{row.version}}"
+                },
+                "fields": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "{{ t('agile.sprint_name', 'Name') }}",
+                    "required": true,
+                    "maxLength": 100
+                  },
+                  {
+                    "name": "goal",
+                    "type": "textarea",
+                    "label": "{{ t('agile.goal', 'Goal') }}",
+                    "rows": 2,
+                    "maxLength": 1000
+                  },
+                  {
+                    "name": "startsOn",
+                    "type": "date",
+                    "label": "{{ t('agile.starts_on', 'Starts on') }}"
+                  },
+                  {
+                    "name": "endsOn",
+                    "type": "date",
+                    "label": "{{ t('agile.ends_on', 'Ends on') }}"
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "saveSprint",
+                    "args": {
+                      "id": "{{row.id}}"
+                    },
+                    "onError": [
+                      {
+                        "if": "{{error.status == 412}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "toast": "{{ t('agile.sprint_invalid', 'Check the name and the dates: a sprint ends on or after the day it starts') }}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "sprints"
+            },
+            {
+              "refresh": "columns"
+            }
+          ]
+        },
+        {
+          "id": "btn-remove-sprint",
+          "label": "{{ t('projects.remove', 'Remove') }}",
+          "visibleIf": "{{row._perm.delete}}",
+          "onClick": [
+            {
+              "confirm": "{{ t('agile.remove_sprint_confirm', 'Remove {name}? Its issues go back to the backlog.', {'name': row.name}) }}"
+            },
+            {
+              "call": "removeSprint",
+              "args": {
+                "id": "{{row.id}}"
+              },
+              "onError": [
+                {
+                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                }
+              ]
+            },
+            {
+              "refresh": "sprints"
+            },
+            {
+              "refresh": "columns"
+            },
+            {
+              "refresh": "cards"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

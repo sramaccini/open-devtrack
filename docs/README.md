@@ -20,7 +20,7 @@ The decisions D1–D9 of the project plan, all accepted by the maintainer on 31 
 | [12](adr-12-no-protected-environments.md) | No protected environments in the registry | Every version publishable everywhere by default; the review is the one of the code; `tools/publish-ui.mjs` removed | Accepted |
 | [13](adr-13-mentions-and-messages.md) | Mentions and messages for the user (E4) | `@username` of members found in the text of comments; messages in `notification` for mentions, assignments, comments and status changes of watched issues, behind the bell of Quadrava 0.7.0 | Accepted |
 | [14](adr-14-attachment-storage.md) | Attachments and where their files are kept (E4) | One `AttachmentStore` with three plugins: database (default), filesystem, S3-compatible object storage; bytes always through the back end | Accepted |
-| [15](adr-15-boards-backlog-sprints.md) | Boards, backlog and sprints (F3) | One rank per project in fractional indexing; sprints planned, active and completed (one active); boards of workflow statuses with WIP limits and swimlanes; the backlog as a `kanban` of sprints | Proposed |
+| [15](adr-15-boards-backlog-sprints.md) | Boards, backlog and sprints (F3) | One rank per project in fractional indexing; sprints planned, active and completed (one active); boards of workflow statuses with WIP limits and swimlanes; the backlog as a `kanban` of sprints | Accepted |
 
 ## Requests to the dependencies
 
@@ -38,6 +38,7 @@ Found while writing the ADRs; each is built in its own repository, optional for 
 | Q9 | Quadrava | The data of a screen data source in the expressions outside a form (or `form` in the tabs next to it), so `postIf` of the `comments` thread can test `_perm.comment` of the issue; released in Quadrava 0.8.0 (`data.<name>`, its ADR-23) and adopted (ADR-13) | F2 |
 | Q10 | Quadrava | A table column or row action that opens a relative path of the application (as `href` of `link`), to download an attachment (ADR-14; released in Quadrava 0.9.0, `href`, its ADR-24, and adopted) | F2 |
 | Q11 | Quadrava | A setting of the runtime image for the size of a request forwarded to the BFF (`client_max_body_size` of nginx, 1 MB today), so the 100 MB of the `file` field reach the back end (ADR-14; released in Quadrava 0.9.0, `QUADRAVA_MAX_BODY_SIZE`, and adopted) | F2 |
+| Q12 | Quadrava | On a card of the `kanban`: open a screen with the row (as `onClick` or `screen` and `params`), and a catalogue key for the values of `badges` (as `valueKey` of a column), so a board opens its issues and shows `Bug`, `High` in the language of the user; if it fits, `laneField` and `lanes` as expressions, for one board component instead of four (ADR-15; asked 6 November 2026) | F3 |
 | A1 | authz-library | Extension point for permissions that depend on a resource (ADR-07; until then `_perm` on rows and forms) | F2 |
 | A2 | authz-library | A configurable schema for the RBAC tables (today they go into `public`, next to the `odt_*` schemas of the modules) | F1 |
 | A3 | authz-library | Problem titles and details in English (today Italian, for example «Troppi tentativi di accesso») | F5 |

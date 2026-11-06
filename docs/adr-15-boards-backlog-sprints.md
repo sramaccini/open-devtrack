@@ -1,6 +1,6 @@
 # ADR-15: Boards, backlog and sprints
 
-Status: Proposed (6 November 2026) — F3
+Status: Accepted (6 November 2026; decided by the maintainer) — F3
 
 ## Context
 
@@ -32,8 +32,9 @@ CEL guards; only a transition changes the status of an issue.
 3. **Boards.** `odt_agile.board (id, project_id, name, kind, lane)` with `board_column (board_id, position, name,
    statuses, wip_limit)`: a column holds one or more statuses of the workflow. `kind` is `scrum` (the issues of the
    active sprint) or `kanban` (every issue of the project, without those `done` for more than 14 days); `lane` is
-   `none`, `assignee`, `priority` or `type`. Each project gets a board `kanban` with one column per status when it is
-   created, and admins of the project add, change and remove boards. A move to another column runs a transition of
+   `none`, `assignee`, `priority` or `type`. Each project gets a board `kanban` when it is created, without columns of its
+   own: such a board has one column per status of the workflow and follows it as it changes. The admins of the project
+   add, change and remove boards; the columns are written one per line, `Name: status, status | limit`. A move to another column runs a transition of
    the workflow to a status of that column: the first allowed in the order of the workflow; none allowed answers 409
    and the card goes back. The guards of ADR-10 decide, as on `issue-detail`.
 4. **The API of ADR-06.** `GET /api/boards/{id}/columns` (`value`, `label`, `limit`) and `GET /api/boards/{id}/cards`
@@ -70,4 +71,7 @@ CEL guards; only a transition changes the status of an issue.
   transitions of a move; it publishes events for the sprints (started, completed) for the reports of F4.
 - `ui/`: screens `board` and `backlog`, the boards on `project-detail`, points on `issue-detail`; items in the
   navigation.
-- No request to Quadrava: the `kanban` of 0.10.0 covers columns from data, order, swimlanes and WIP limits.
+- The `kanban` of Quadrava 0.10.0 covers columns from data, order, swimlanes and WIP limits. Found in the build: a card
+  cannot open its issue, and the badges show the stored values (`bug`, `high`) without a catalogue key; requested as
+  Q12. A moved card takes its place just after the card above it in the one order of the project (or just before the
+  one below, at the top of a column), so a board and the backlog never disagree.

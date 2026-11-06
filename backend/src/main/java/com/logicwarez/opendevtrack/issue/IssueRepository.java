@@ -36,6 +36,8 @@ interface IssueRepository extends JpaRepository<IssueEntity, UUID> {
 
     List<IssueEntity> findByIdIn(List<UUID> ids);
 
+    List<IssueEntity> findByProjectIdOrderByNumber(UUID projectId, Limit limit);
+
     /** The labels used in a project that start with {@code prefix} (lower case, empty for all), in order. */
     @Query(value = """
             SELECT DISTINCT l FROM odt_issue.issue i, unnest(i.labels) AS l

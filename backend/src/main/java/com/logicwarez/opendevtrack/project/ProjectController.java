@@ -231,7 +231,8 @@ class ProjectController {
         Map<String, Boolean> perm = Map.of(
                 "edit", permissions.contains("odt.project.edit"),
                 "manageMembers", permissions.contains("odt.member.manage"),
-                "createIssue", permissions.contains("odt.issue.create"));
+                "createIssue", permissions.contains("odt.issue.create"),
+                "manageSprints", permissions.contains("odt.sprint.manage"));
         return new ProjectView(p.id(), p.key(), p.name(), p.description(), p.lead(), role.map(ProjectRole::value).orElse(null),
                 p.createdAt(), p.version(), perm);
     }

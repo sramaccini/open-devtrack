@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "board-list",
+  "title": "{{ t('agile.boards', 'Boards') }}",
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "boards": {
+      "ref": "boards/mine"
+    }
+  },
+  "components": [
+    {
+      "id": "board-table",
+      "type": "table",
+      "source": "boards",
+      "columns": [
+        {
+          "field": "name",
+          "label": "{{ t('agile.board_name', 'Board') }}"
+        },
+        {
+          "field": "project",
+          "label": "{{ t('projects.key', 'Key') }}"
+        },
+        {
+          "field": "projectName",
+          "label": "{{ t('agile.project', 'Project') }}"
+        },
+        {
+          "field": "kind",
+          "label": "{{ t('agile.kind', 'Kind') }}",
+          "valueKey": "values.board_kind"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-open-board",
+          "label": "{{ t('agile.open', 'Open') }}",
+          "onClick": [
+            {
+              "navigate": "board",
+              "params": {
+                "board": "{{row.id}}"
+              }
+            }
+          ]
+        },
+        {
+          "id": "btn-open-backlog",
+          "label": "{{ t('agile.backlog', 'Backlog') }}",
+          "onClick": [
+            {
+              "navigate": "backlog",
+              "params": {
+                "key": "{{row.project}}"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

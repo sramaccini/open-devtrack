@@ -58,6 +58,18 @@
           ]
         },
         {
+          "id": "btn-backlog",
+          "label": "{{ t('agile.backlog', 'Backlog') }}",
+          "onClick": [
+            {
+              "navigate": "backlog",
+              "params": {
+                "key": "{{form.key}}"
+              }
+            }
+          ]
+        },
+        {
           "id": "btn-project",
           "label": "{{ t('issues.project_settings', 'Project and members') }}",
           "onClick": [
