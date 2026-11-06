@@ -34,6 +34,15 @@
     "removeComment": {
       "ref": "issues/removeComment"
     },
+    "attachments": {
+      "ref": "issues/attachments"
+    },
+    "uploadAttachment": {
+      "ref": "issues/uploadAttachment"
+    },
+    "removeAttachment": {
+      "ref": "issues/removeAttachment"
+    },
     "history": {
       "ref": "issues/history"
     },
@@ -680,6 +689,93 @@
                     },
                     {
                       "refresh": "comments"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tab-attachments",
+          "label": "{{ t('issues.attachments', 'Attachments') }}",
+          "components": [
+            {
+              "id": "attachment-upload",
+              "type": "input",
+              "visibleIf": "{{ data.issue._perm.attach }}",
+              "field": {
+                "name": "attachment",
+                "type": "file",
+                "label": "{{ t('issues.attach_file', 'Attach a file') }}",
+                "upload": "uploadAttachment",
+                "maxSizeKb": 1024
+              },
+              "onChange": [
+                {
+                  "refresh": "attachments"
+                },
+                {
+                  "refresh": "history"
+                }
+              ]
+            },
+            {
+              "id": "attachment-limit-note",
+              "type": "text",
+              "visibleIf": "{{ data.issue._perm.attach }}",
+              "text": "{{ t('issues.attachment_limit', 'Up to 1 MB per file') }}"
+            },
+            {
+              "id": "attachment-table",
+              "type": "table",
+              "source": "attachments",
+              "columns": [
+                {
+                  "field": "filename",
+                  "label": "{{ t('issues.attachment_name', 'File') }}"
+                },
+                {
+                  "field": "size",
+                  "label": "{{ t('issues.attachment_size', 'Size (bytes)') }}",
+                  "format": "number",
+                  "decimals": 0
+                },
+                {
+                  "field": "uploadedBy",
+                  "label": "{{ t('issues.attachment_by', 'Added by') }}"
+                },
+                {
+                  "field": "uploadedAt",
+                  "label": "{{ t('issues.attachment_at', 'When') }}",
+                  "format": "datetime"
+                }
+              ],
+              "rowActions": [
+                {
+                  "id": "btn-remove-attachment",
+                  "label": "{{ t('issues.remove_link', 'Remove') }}",
+                  "visibleIf": "{{row._perm.delete}}",
+                  "onClick": [
+                    {
+                      "confirm": "{{ t('issues.remove_attachment_confirm', 'Remove {name}?', {'name': row.filename}) }}"
+                    },
+                    {
+                      "call": "removeAttachment",
+                      "args": {
+                        "id": "{{row.id}}"
+                      },
+                      "onError": [
+                        {
+                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                        }
+                      ]
+                    },
+                    {
+                      "refresh": "attachments"
+                    },
+                    {
+                      "refresh": "history"
                     }
                   ]
                 }

@@ -481,7 +481,8 @@ class IssueController {
                 "edit", permissions.contains("odt.issue.edit"),
                 "delete", permissions.contains("odt.issue.delete"),
                 "transition", permissions.contains("odt.issue.transition"),
-                "comment", permissions.contains("odt.issue.comment"));
+                "comment", permissions.contains("odt.issue.comment"),
+                "attach", permissions.contains("odt.issue.attach"));
         return new IssueView(key(project, i), project.key(), i.number(), i.type().value(), i.summary(), i.description(),
                 i.status(), i.priority().value(), i.assignee(), i.reporter(), i.labels(), i.custom(), i.createdAt(), i.updatedAt(),
                 i.version(), watchers.existsByIssueIdAndUsername(i.id(), user.username()), perm);

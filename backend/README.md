@@ -146,3 +146,24 @@ user still sees, with title and text in the language of `Accept-Language` (Engli
 `notification/messages*.properties`) and the screen `issue-detail` to open; `POST /api/notifications/read` with `ids`
 (1 to 200) marks them read. The messages of a deleted issue go with it, the others are deleted after 90 days
 (`odt.notification.retention-cron`, at 3:30 every night).
+
+## Attachments (`collaboration`)
+
+Files attached to an issue (ADR-14). The metadata are in `odt_collaboration.attachment`; the bytes are in the store
+chosen by `odt.attachments.store` (`ODT_ATTACHMENTS_STORE`), one of three plugins of `collaboration.storage`:
+
+| Store | Settings | Where the bytes are |
+| --- | --- | --- |
+| `database` (default) | none | `odt_collaboration.attachment_content`, in the transaction of the metadata |
+| `filesystem` | `odt.attachments.filesystem.root` | `<root>/<project id>/<attachment id>`, written under `<root>/.tmp` then moved |
+| `s3` | `odt.attachments.s3.bucket`, `prefix`, `endpoint`, `region`, `path-style`, `access-key`, `secret-key` | objects `<prefix><project id>/<attachment id>` on AWS S3 or any S3-compatible server |
+
+The name given by the user never reaches a path or an object name. At start the store must write and read a probe,
+and the back end refuses to start if attachments are kept in another store: changing the store is a migration.
+`GET /api/issues/{key}/attachments` lists them for whoever sees the issue; `POST` (multipart, part `file`) needs
+`odt.issue.attach` (developer, admin); `GET …/attachments/{id}/content` downloads one, always as a download
+(`Content-Disposition: attachment`, `nosniff`); `DELETE …/attachments/{id}` is for the uploader or an admin of the
+project. At most `odt.attachments.max-size` per file (25 MB) and 100 per issue; each one added or removed is in the
+changelog (`attachments`). The bytes are removed after the commit of their metadata, with their issue too, and a sweep
+(`odt.attachments.sweep-cron`, 3:45 every night) removes the bytes older than a day that no attachment names. Through
+the Quadrava runtime image a request is at most 1 MB until Quadrava request Q11.

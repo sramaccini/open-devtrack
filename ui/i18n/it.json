@@ -165,5 +165,13 @@
   "projects.condition_invalid": "La condizione non è un'espressione CEL valida",
   "values.transition.start": "Inizia",
   "values.transition.finish": "Completa",
-  "values.transition.reopen": "Riapri"
+  "values.transition.reopen": "Riapri",
+  "issues.attachments": "Allegati",
+  "issues.attach_file": "Allega un file",
+  "issues.attachment_limit": "Fino a 1 MB per file",
+  "issues.attachment_name": "File",
+  "issues.attachment_size": "Dimensione (byte)",
+  "issues.attachment_by": "Aggiunto da",
+  "issues.attachment_at": "Quando",
+  "issues.remove_attachment_confirm": "Rimuovere {name}?"
 }

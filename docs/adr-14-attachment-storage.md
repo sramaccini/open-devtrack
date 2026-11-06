@@ -1,6 +1,6 @@
 # ADR-14: Attachments and where their files are kept
 
-Status: Proposed (6 November 2026) — F2 E4
+Status: Accepted (6 November 2026; decided by the maintainer) — F2 E4
 
 ## Context
 
@@ -27,7 +27,7 @@ its default of 1 MB: a larger upload through the runtime is refused with 413 bef
    bytes.
 2. **Three plugins**, each in a package of its own with its own configuration, and one chosen by
    `odt.attachments.store`:
-   - `database` (default): the bytes in `odt_collaboration.attachment_content (attachment_id, content bytea)`, in the
+   - `database` (default): the bytes in `odt_collaboration.attachment_content (key, content bytea, created_at)`, in the
      transaction of the metadata. Nothing to install; it fits the backups that already cover the database.
    - `filesystem`: files under `odt.attachments.filesystem.root`, written to a temporary file and then moved into
      place, so a half-written file is never read. For a disk or a shared volume.
@@ -81,8 +81,8 @@ its default of 1 MB: a larger upload through the runtime is refused with 413 bef
 
 - A migration in `collaboration` (metadata and `attachment_content`) and the permission `odt.issue.attach` in the
   catalogue (ADR-07) and in the project roles developer and admin.
-- Dependency on the S3 client of the AWS SDK for Java v2; the tests run the three plugins, S3 on MinIO with
-  Testcontainers.
+- Dependency on the S3 client of the AWS SDK for Java v2, with the HTTP client of the JDK; the tests run the three
+  plugins, S3 on S3Mock (`adobe/s3mock`) with Testcontainers, since MinIO no longer publishes public images.
 - `spring.servlet.multipart` limits aligned with `odt.attachments.max-size`; an installation behind another proxy
   raises its request limit too.
 - Request **Q11** to Quadrava: a setting of the runtime image for the size of a request forwarded to the BFF

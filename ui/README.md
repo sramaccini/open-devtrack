@@ -9,7 +9,7 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 | `project.json` | (not published) | Identifier `opendevtrack`, languages and themes; the runtime gets them from its configuration |
 | `navigation.json` | `navigation/main` | Areas and items of the side bar, with the permission each one requires |
 | `screens/*.json` | `screen/<id>` | One screen per file |
-| `datasources/*.json` | `datasources/<id>` | Data sources shared by screens: `projects` (with members, workflow and custom field definitions), `users`, `issues` (with transitions, comments, history and custom fields) |
+| `datasources/*.json` | `datasources/<id>` | Data sources shared by screens: `projects` (with members, workflow and custom field definitions), `users`, `issues` (with transitions, comments, attachments, history and custom fields) |
 | `themes/*.json` | `theme/<id>` | `odt-light` (the default) and `odt-dark`, with the palette of [brand/](../brand/README.md) |
 | `i18n/<lang>.json` | `messages/<lang>` | English and Italian texts, key → text; labels use `t('key', 'English default')` |
 
@@ -53,6 +53,13 @@ The Comments tab of `issue-detail` is the `comments` thread of Quadrava: Markdow
 those who may comment (`postIf` on `data.issue._perm.comment`, the answer the issue form loads; Quadrava 0.8.0, Q9). Editing and deleting a comment stay in the table under it until
 Quadrava request Q8. The bell of the shell reads `/api/notifications` (`notifications` in `navigation.json`, every
 60 seconds) and opens the issue of a message.
+
+## Attachments
+
+The Attachments tab of `issue-detail` uploads a file at once with a `file` field (`issues/uploadAttachment`, shown
+when `data.issue._perm.attach`) and lists the attachments, with remove for whoever may. Two limits wait for Quadrava:
+a row cannot download its file (request Q10; the API does), and the runtime image passes at most 1 MB per request
+(request Q11), so the field allows 1 MB.
 
 ## Brand in the browser tab
 

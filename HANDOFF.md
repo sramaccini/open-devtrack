@@ -6,7 +6,7 @@ Quadrava and authz-library, and the ADRs say where.
 
 ## Status
 
-**5 November 2026 — phase F1 done; F2 with E1 Projects, E2 Issues, E3 Workflow and E4 Collaboration (comments, mentions, messages): gate M1 covered.**
+**6 November 2026 — phase F1 done; F2 with E1 Projects, E2 Issues, E3 Workflow and E4 Collaboration (comments, mentions, messages, attachments): gate M1 covered.**
 
 - Repository github.com/sramaccini/open-devtrack, branch `main`: licence MPL-2.0 with CLA, contribution rules and
   project rules as Quadrava (ADR-05). Decisions D1–D9 and ADR-10 accepted, in `docs/`.
@@ -52,6 +52,10 @@ Quadrava and authz-library, and the ADRs say where.
   runtime (module `notification`, polled every 60 s, kept 90 days). Their language follows `Accept-Language`. The box
   for writing shows when `data.issue._perm.comment` (Q9, Quadrava 0.8.0). Editing and deleting a comment stay in the
   table under the thread until Quadrava request Q8.
+  Attachments (ADR-14, accepted 6 November 2026): one `AttachmentStore` with the plugins `database` (default),
+  `filesystem` and `s3` (AWS SDK v2, any S3-compatible server; tests on S3Mock), metadata in PostgreSQL, bytes
+  always through the back end, an Attachments tab on `issue-detail`. Downloading from a row waits for Quadrava Q10,
+  uploads over 1 MB through the runtime image for Q11.
 
 ## Requests to the dependencies
 
@@ -78,6 +82,6 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F2 (per the plan): the rest of E4 (attachments, after an ADR on where the files are kept; the comment actions of Q8 when released); workflows by
+1. F2 (per the plan): the Quadrava requests Q8, Q10 and Q11 when released (comment actions, download from a row, request size); workflows by
    issue type and editing statuses and transitions when a project needs them (ADR-10).
 2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

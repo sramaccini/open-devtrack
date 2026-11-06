@@ -19,6 +19,11 @@ server:
 spring:
   application:
     name: opendevtrack
+  servlet:
+    multipart:
+      # One file per request, up to odt.attachments.max-size; the request carries a little more than the file
+      max-file-size: ${odt.attachments.max-size}
+      max-request-size: ${ODT_ATTACHMENTS_MAX_REQUEST_SIZE:26MB}
   mvc:
     async:
       # Event streams (live data sources of Quadrava): no time limit
@@ -99,6 +104,20 @@ odt:
     bearer:
       # Clients whose access tokens may call /registry/** (BearerTokenSecurity, temporary until request A4)
       clients: opendevtrack-tools
+  attachments:
+    # Where the bytes of the attachments are kept (ADR-14): database (default), filesystem or s3. Changing it on an
+    # installation that has attachments is a migration: the back end does not start.
+    store: ${ODT_ATTACHMENTS_STORE:database}
+    max-size: ${ODT_ATTACHMENTS_MAX_SIZE:25MB}
+    # filesystem:
+    #   root: /var/lib/opendevtrack/attachments
+    # s3:
+    #   bucket: opendevtrack
+    #   prefix: attachments/
+    #   endpoint: http://minio:9000    # absent for AWS S3
+    #   region: us-east-1
+    #   path-style: true               # MinIO and most S3-compatible servers
+    #   access-key / secret-key: from ODT_ATTACHMENTS_S3_ACCESS_KEY and ODT_ATTACHMENTS_S3_SECRET_KEY, or the AWS chain
   uiregistry:
     # Environments where only versions approved by someone other than their author are published: none (ADR-12, the
     # review is the one of the code). An installation that wants it lists them:
