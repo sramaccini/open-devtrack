@@ -12,7 +12,8 @@
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {
-      "const": "1.0"
+      "const": "1.0",
+      "description": "Version of the format."
     },
     "navigation": {
       "$ref": "#/$defs/id",
@@ -24,6 +25,7 @@
     },
     "areas": {
       "type": "array",
+      "description": "Areas of the application, in order: each one is a part of the menu with its own groups and items. An area without visible items does not appear.",
       "minItems": 1,
       "items": {
         "$ref": "#/$defs/area"
@@ -135,22 +137,28 @@
       "additionalProperties": false,
       "properties": {
         "id": {
-          "$ref": "#/$defs/id"
+          "$ref": "#/$defs/id",
+          "description": "Identifier of the area in kebab-case: the first part of the address of its screens. It does not change once published."
         },
         "label": {
-          "$ref": "#/$defs/label"
+          "$ref": "#/$defs/label",
+          "description": "Text of the area in the menu: plain text or an expression such as {{ t('nav.orders', 'Orders') }}."
         },
         "icon": {
-          "$ref": "#/$defs/icon"
+          "$ref": "#/$defs/icon",
+          "description": "Name of an icon of the built-in set (for example file-plus, search, package). An unknown name shows no icon."
         },
         "requires": {
-          "$ref": "#/$defs/permission"
+          "$ref": "#/$defs/permission",
+          "description": "Permission (domain.resource.action) the user needs to see the area. The menu is only a convenience: the screen and the back end check permissions again."
         },
         "visibleIf": {
-          "$ref": "#/$defs/expression"
+          "$ref": "#/$defs/expression",
+          "description": "Condition for showing the area, for example {{ settings.ordersEnabled }}; an error hides it. Always shown if absent."
         },
         "items": {
           "type": "array",
+          "description": "Groups and items of the area, in order.",
           "minItems": 1,
           "items": {
             "$ref": "#/$defs/item1"
@@ -168,13 +176,16 @@
       "additionalProperties": false,
       "properties": {
         "id": {
-          "$ref": "#/$defs/id"
+          "$ref": "#/$defs/id",
+          "description": "Identifier of the item in kebab-case."
         },
         "label": {
-          "$ref": "#/$defs/label"
+          "$ref": "#/$defs/label",
+          "description": "Text of the item in the menu: plain text or an expression such as {{ t('nav.orders', 'Orders') }}."
         },
         "icon": {
-          "$ref": "#/$defs/icon"
+          "$ref": "#/$defs/icon",
+          "description": "Name of an icon of the built-in set (for example file-plus, search, package). An unknown name shows no icon."
         },
         "screen": {
           "$ref": "#/$defs/id",
@@ -198,10 +209,12 @@
           "description": "Static parameters passed to the screen (they become `params` in expressions)."
         },
         "requires": {
-          "$ref": "#/$defs/permission"
+          "$ref": "#/$defs/permission",
+          "description": "Permission (domain.resource.action) the user needs to see the item. The menu is only a convenience: the screen and the back end check permissions again."
         },
         "visibleIf": {
-          "$ref": "#/$defs/expression"
+          "$ref": "#/$defs/expression",
+          "description": "Condition for showing the item, for example {{ settings.ordersEnabled }}; an error hides it. Always shown if absent."
         }
       }
     },
@@ -218,22 +231,28 @@
       "additionalProperties": false,
       "properties": {
         "id": {
-          "$ref": "#/$defs/id"
+          "$ref": "#/$defs/id",
+          "description": "Identifier of the group in kebab-case."
         },
         "label": {
-          "$ref": "#/$defs/label"
+          "$ref": "#/$defs/label",
+          "description": "Text of the group in the menu: plain text or an expression such as {{ t('nav.orders', 'Orders') }}."
         },
         "icon": {
-          "$ref": "#/$defs/icon"
+          "$ref": "#/$defs/icon",
+          "description": "Name of an icon of the built-in set (for example file-plus, search, package). An unknown name shows no icon."
         },
         "requires": {
-          "$ref": "#/$defs/permission"
+          "$ref": "#/$defs/permission",
+          "description": "Permission (domain.resource.action) the user needs to see the group. The menu is only a convenience: the screen and the back end check permissions again."
         },
         "visibleIf": {
-          "$ref": "#/$defs/expression"
+          "$ref": "#/$defs/expression",
+          "description": "Condition for showing the group, for example {{ settings.ordersEnabled }}; an error hides it. Always shown if absent."
         },
         "children": {
           "type": "array",
+          "description": "Items inside the group, in order. A group without visible items disappears.",
           "minItems": 1,
           "items": {
             "$ref": "#/$defs/group3"
@@ -261,22 +280,28 @@
       "additionalProperties": false,
       "properties": {
         "id": {
-          "$ref": "#/$defs/id"
+          "$ref": "#/$defs/id",
+          "description": "Identifier of the group in kebab-case."
         },
         "label": {
-          "$ref": "#/$defs/label"
+          "$ref": "#/$defs/label",
+          "description": "Text of the group in the menu: plain text or an expression such as {{ t('nav.orders', 'Orders') }}."
         },
         "icon": {
-          "$ref": "#/$defs/icon"
+          "$ref": "#/$defs/icon",
+          "description": "Name of an icon of the built-in set (for example file-plus, search, package). An unknown name shows no icon."
         },
         "requires": {
-          "$ref": "#/$defs/permission"
+          "$ref": "#/$defs/permission",
+          "description": "Permission (domain.resource.action) the user needs to see the group. The menu is only a convenience: the screen and the back end check permissions again."
         },
         "visibleIf": {
-          "$ref": "#/$defs/expression"
+          "$ref": "#/$defs/expression",
+          "description": "Condition for showing the group, for example {{ settings.ordersEnabled }}; an error hides it. Always shown if absent."
         },
         "children": {
           "type": "array",
+          "description": "Items and groups inside the group, in order (a second level of groups at most).",
           "minItems": 1,
           "items": {
             "$ref": "#/$defs/item2"
