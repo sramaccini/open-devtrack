@@ -561,6 +561,7 @@
               "textField": "body",
               "authorField": "author",
               "dateField": "createdAt",
+              "postIf": "{{ data.issue._perm.comment }}",
               "mentions": {
                 "source": "assignees",
                 "valueField": "username",
