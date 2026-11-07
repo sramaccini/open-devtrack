@@ -76,14 +76,17 @@ Quadrava and authz-library, and the ADRs say where.
   reports of a project (indicators, burndown, velocity, cumulative flow, created vs resolved) and the personal counts
   from the search. Screens `dashboard` (the first screen, in place of `home`) and `project-dashboard`. The axis of the
   charts leaves out the day labels that do not fit (Q14, Quadrava 0.12.0). The sprint of the burndown is chosen on
-  the screen (a lookup of `…/reports/sprints?q=`, the active or the last one when empty). Not done: «Overdue» and
-  «In review by me» (no due date nor reviewer, ADR-17 point 5).
+  the screen (a lookup of `…/reports/sprints?q=`, the active or the last one when empty). «Overdue» and «In review
+  by me» come with ADR-19 (below).
 - F4 E9 (ADR-18, accepted 7 November 2026): preferences per user and kind (in the application; email off, at once or
   in the daily digest), an outbox in `odt_notification.message` sent by `MailOutbox` over SMTP (Spring Mail; retries,
   `SKIP LOCKED`), plain-text mails in the last language the user used. Screen `notification-settings` as the
   «Notifications» section of the settings dialog (Q13, Quadrava 0.12.0), which the footer of the mails opens with
   `/?settings=notification-settings` (Q15, Quadrava 0.12.1). The e2e environment has Mailpit (mails at http://localhost:28025) and checks that a
   mention is mailed. The address is read from authz-library without a session (temporary, with A5).
+- F4, ADR-19 (accepted 7 November 2026): an issue has an optional due date (`dueOn`) and reviewer (a member, not the
+  assignee, who then watches it); ODQL `due` and `reviewer`; «Overdue» and «In review by me» on `dashboard`; the
+  badge «Overdue» in `issue-list` and `search`; the message `review_requested` with its preference.
 
 ## Requests to the dependencies
 
@@ -110,7 +113,5 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F4: ADR-19 (due date and reviewer, for «Overdue» and «In review by me») is proposed, waiting for the decision of
-   the maintainer; built once accepted.
-2. Workflows by issue type and editing statuses and transitions when a project needs them (ADR-10).
-3. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.
+1. Workflows by issue type and editing statuses and transitions when a project needs them (ADR-10).
+2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

@@ -61,6 +61,12 @@ The labels of an issue are a `tags` field in `issue-new` and `issue-detail` (Qua
 already used in the project as suggestions (`issues/labels`); the back end keeps them in lower case and refuses
 spaces. `issue-list` shows them in a column.
 
+## Due date and reviewer
+
+`issue-new` and `issue-detail` have «Reviewer» (a lookup of the members, as «Assignee») and «Due date» (a `date` field)
+(ADR-19). `issue-list` and the results of `search` show «Due» and, past it and not done, a badge «Overdue» from the
+field `overdue` of the rows: the `badges` of a Quadrava column colour by value, so the back end gives the value.
+
 ## Attachments
 
 The Attachments tab of `issue-detail` uploads a file at once with a `file` field (`issues/uploadAttachment`, shown
@@ -95,7 +101,8 @@ one). The field checks the query on the back end as one types and says where it 
 
 ## Dashboards
 
-`dashboard` (Home › Dashboard, the first screen) is the personal dashboard of ADR-17: four indicators, the user's open
+`dashboard` (Home › Dashboard, the first screen) is the personal dashboard of ADR-17: six indicators («Overdue» and «In review by me» from
+ADR-19), the user's open
 issues (`serverDataTable` on the search) and their filters marked «On my dashboard» with what each finds.
 `project-dashboard` (params `key`, from the «Dashboard» button of `project-detail`): indicators, burndown, velocity,
 cumulative flow and created vs resolved, on the `stats` and `chart` of Quadrava. The days are ISO dates with

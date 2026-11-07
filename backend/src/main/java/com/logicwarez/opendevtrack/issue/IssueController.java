@@ -23,7 +23,11 @@ import com.logicwarez.opendevtrack.project.ProjectRef;
 import com.logicwarez.opendevtrack.project.Projects;
 import com.logicwarez.opendevtrack.workflow.Workflows;
 import com.logicwarez.opendevtrack.workflow.Workflows.Decision;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -35,6 +39,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Limit;
 import org.springframework.http.HttpStatus;
@@ -61,7 +66,7 @@ import org.springframework.web.bind.annotation.RestController;
  *   transition is true (module workflow, ADR-10);</li>
  *   <li>{@code odt.issue.delete} (admin): delete them.</li>
  * </ul>
- * The status changes only through the transitions; the reporter and the assignee watch the issue
+ * The status changes only through the transitions; the reporter, the assignee and the reviewer watch the issue
  * ({@link WatcherController}). An issue of a project of another tenant answers 404, as one that does not exist
  * (ADR-09). Every change is published as an event of {@link IssueEvents}.
  */
@@ -87,10 +92,12 @@ class IssueController {
     private final Workflows workflows;
     private final WatcherRepository watchers;
     private final CustomFields customFields;
+    private final Clock clock;
 
     IssueController(IssueRepository issues, Issues finder, Projects projects, ProjectAccess access, CurrentUser user,
                     ApplicationEventPublisher events, Workflows workflows, WatcherRepository watchers,
-                    CustomFields customFields) {
+                    CustomFields customFields, @Value("${odt.reporting.zone:UTC}") String zone) {
+        this.clock = Clock.system(ZoneId.of(zone));
         this.workflows = workflows;
         this.customFields = customFields;
         this.watchers = watchers;
@@ -115,9 +122,13 @@ class IssueController {
         }
         String who = "me".equals(assignee) ? user.username() : blankToNull(assignee);
         String text = q == null || q.isBlank() ? null : "%" + q.strip().toLowerCase(Locale.ROOT) + "%";
+        Map<String, String> categories = new HashMap<>();
+        workflows.statuses(project.get().id()).forEach(s -> categories.put(s.code(), s.category()));
+        LocalDate today = LocalDate.now(clock);
         List<IssueRow> rows = issues.search(project.get().id(), blankToNull(status), who, text, Limit.of(MAX_LIST)).stream()
                 .map(i -> new IssueRow(key(project.get(), i), i.number(), i.type().value(), i.summary(), i.status(),
-                        i.priority().value(), i.assignee(), i.labels(), i.updatedAt()))
+                        i.priority().value(), i.assignee(), i.dueOn(),
+                        overdue(i.dueOn(), categories.get(i.status()), today) ? "overdue" : null, i.labels(), i.updatedAt()))
                 .toList();
         return ResponseEntity.ok(rows);
     }
@@ -167,6 +178,7 @@ class IssueController {
         issues.saveAndFlush(issue);
         watchers.watch(issue.id(), issue.reporter(), now);
         watchAssignee(issue, now);
+        watchReviewer(issue, now);
         events.publishEvent(new IssueCreated(issue.id(), project.get().id(), key(project.get(), issue), user.username(), now,
                 Fields.of(issue).changesFrom(Fields.EMPTY)));
         return ResponseEntity.status(HttpStatus.CREATED).body(view(project.get(), issue, permissions));
@@ -224,6 +236,9 @@ class IssueController {
         }
         if (changes.stream().anyMatch(c -> c.field().equals("assignee"))) {
             watchAssignee(issue, now);
+        }
+        if (changes.stream().anyMatch(c -> c.field().equals("reviewer"))) {
+            watchReviewer(issue, now);
         }
         events.publishEvent(new IssueChanged(issue.id(), project.id(), key(project, issue), user.username(), now, changes));
         return ResponseEntity.ok(view(project, issue, permissions));
@@ -332,6 +347,18 @@ class IssueController {
         }
     }
 
+    /** Whoever is asked to review an issue watches it, as the assignee does (ADR-19). */
+    private void watchReviewer(IssueEntity issue, Instant now) {
+        if (issue.reviewer() != null) {
+            watchers.watch(issue.id(), issue.reviewer(), now);
+        }
+    }
+
+    /** Past its due date and not done (ADR-19): the day is in the zone of the reports. */
+    static boolean overdue(LocalDate dueOn, String category, LocalDate today) {
+        return dueOn != null && dueOn.isBefore(today) && !"done".equals(category);
+    }
+
     /** The issue as the guards see it ({@code issue.assignee}, {@code issue.custom.customer}…). */
     static Map<String, Object> guardInput(Found found) {
         IssueEntity i = found.issue();
@@ -351,6 +378,8 @@ class IssueController {
         issue.put("priority", f.priority() == null ? null : f.priority().value());
         issue.put("assignee", f.assignee());
         issue.put("reporter", reporter);
+        issue.put("dueOn", f.dueOn() == null ? null : f.dueOn().toString());
+        issue.put("reviewer", f.reviewer());
         issue.put("labels", f.labels() == null ? List.of() : f.labels());
         issue.put("custom", f.custom());
         return issue;
@@ -385,17 +414,17 @@ class IssueController {
 
     /** The fields of a request, checked; type and priority default to task and medium. */
     private record Fields(IssueType type, String summary, String description, Priority priority, String assignee,
-                          List<String> labels, Map<String, Object> custom) {
+                          LocalDate dueOn, String reviewer, List<String> labels, Map<String, Object> custom) {
 
         void applyTo(IssueEntity issue, Instant now) {
-            issue.edit(type, summary, description, priority, assignee, labels, custom, now);
+            issue.edit(type, summary, description, priority, assignee, dueOn, reviewer, labels, custom, now);
         }
 
-        static final Fields EMPTY = new Fields(null, null, null, null, null, List.of(), Map.of());
+        static final Fields EMPTY = new Fields(null, null, null, null, null, null, null, List.of(), Map.of());
 
         static Fields of(IssueEntity issue) {
             return new Fields(issue.type(), issue.summary(), issue.description(), issue.priority(), issue.assignee(),
-                    issue.labels(), issue.custom());
+                    issue.dueOn(), issue.reviewer(), issue.labels(), issue.custom());
         }
 
         /** The fields that differ from {@code before}, in the order of the form. */
@@ -406,6 +435,9 @@ class IssueController {
             change(changes, "priority", before.priority == null ? null : before.priority.value(),
                     priority == null ? null : priority.value());
             change(changes, "assignee", before.assignee, assignee);
+            change(changes, "reviewer", before.reviewer, reviewer);
+            change(changes, "due", before.dueOn == null ? null : before.dueOn.toString(),
+                    dueOn == null ? null : dueOn.toString());
             change(changes, "labels", text(before.labels), text(labels));
             change(changes, "description", before.description, description);
             Set<String> keys = new TreeSet<>(before.custom.keySet());
@@ -461,6 +493,19 @@ class IssueController {
         if (assignee != null && access.role(project.id(), assignee).isEmpty()) {
             throw new InvalidField("The assignee must be a member of the project");
         }
+        String reviewer = blankToNull(request.reviewer());
+        if (reviewer != null && access.role(project.id(), reviewer).isEmpty()) {
+            throw new InvalidField("The reviewer must be a member of the project");
+        }
+        if (reviewer != null && reviewer.equals(assignee)) {
+            throw new InvalidField("The reviewer cannot be the assignee");
+        }
+        LocalDate dueOn;
+        try {
+            dueOn = blankToNull(request.dueOn()) == null ? null : LocalDate.parse(request.dueOn().strip());
+        } catch (DateTimeParseException e) {
+            throw new InvalidField("The due date is a day as YYYY-MM-DD");
+        }
         Map<String, Object> custom = before.custom();
         if (request.custom() != null) {
             CustomFields.Checked checked = customFields.check(project.id(), request.custom(), before.custom());
@@ -470,7 +515,7 @@ class IssueController {
             custom = checked.values();
         }
         return new Fields(type, request.summary().strip(), blankToNull(request.description()), priority, assignee,
-                labels(request.labels()), custom);
+                dueOn, reviewer, labels(request.labels()), custom);
     }
 
     /** Labels in lower case, without repetitions, in the order given. */
@@ -508,7 +553,7 @@ class IssueController {
                 "comment", permissions.contains("odt.issue.comment"),
                 "attach", permissions.contains("odt.issue.attach"));
         return new IssueView(key(project, i), project.key(), i.number(), i.type().value(), i.summary(), i.description(),
-                i.status(), i.priority().value(), i.assignee(), i.reporter(), i.labels(), i.custom(), i.createdAt(), i.updatedAt(),
-                i.version(), watchers.existsByIssueIdAndUsername(i.id(), user.username()), perm);
+                i.status(), i.priority().value(), i.assignee(), i.reporter(), i.dueOn(), i.reviewer(), i.labels(), i.custom(),
+                i.createdAt(), i.updatedAt(), i.version(), watchers.existsByIssueIdAndUsername(i.id(), user.username()), perm);
     }
 }

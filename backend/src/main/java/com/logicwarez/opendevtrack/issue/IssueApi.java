@@ -6,6 +6,7 @@ package com.logicwarez.opendevtrack.issue;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -15,9 +16,9 @@ final class IssueApi {
     private IssueApi() {
     }
 
-    /** A row of the issue list. */
+    /** A row of the issue list; {@code overdue} when past its due date and not done (ADR-19). */
     record IssueRow(String key, long number, String type, String summary, String status, String priority,
-                    String assignee, List<String> labels, Instant updatedAt) {
+                    String assignee, LocalDate dueOn, String overdue, List<String> labels, Instant updatedAt) {
     }
 
     /** A label already used in a project, for the suggestions of the tags field of Quadrava (request Q5). */
@@ -25,8 +26,8 @@ final class IssueApi {
     }
 
     record IssueView(String key, String project, long number, String type, String summary, String description,
-                     String status, String priority, String assignee, String reporter, List<String> labels,
-                     Map<String, Object> custom, Instant createdAt, Instant updatedAt, long version, boolean watching,
+                     String status, String priority, String assignee, String reporter, LocalDate dueOn,
+                     String reviewer, List<String> labels, Map<String, Object> custom, Instant createdAt, Instant updatedAt, long version, boolean watching,
                      @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
@@ -39,6 +40,6 @@ final class IssueApi {
 
     /** Fields of a new issue or of a change; {@code version} only for a change. */
     record IssueRequest(String type, String summary, String description, String priority, String assignee,
-                        List<String> labels, Map<String, Object> custom, Long version) {
+                        String dueOn, String reviewer, List<String> labels, Map<String, Object> custom, Long version) {
     }
 }

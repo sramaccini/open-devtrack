@@ -35,7 +35,7 @@ class MessageTexts {
             case MENTIONED, COMMENTED -> m.params().get("excerpt");
             case TRANSITIONED -> texts.getMessage("message.transitioned.text",
                     new Object[] {status(m.params().get("from"), locale), to}, locale);
-            case ASSIGNED -> null;
+            case ASSIGNED, REVIEW_REQUESTED -> null;
         };
         return new Text(title, text);
     }

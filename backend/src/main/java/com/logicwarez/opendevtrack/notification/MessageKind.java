@@ -8,10 +8,20 @@ import java.util.Locale;
 
 /** What a message tells (ADR-13), from the most to the least direct: a user gets one message per change. */
 enum MessageKind {
-    MENTIONED, ASSIGNED, COMMENTED, TRANSITIONED;
+    MENTIONED, ASSIGNED, REVIEW_REQUESTED, COMMENTED, TRANSITIONED;
 
     String value() {
         return name().toLowerCase(Locale.ROOT);
+    }
+
+    /** The value without underscores ({@code reviewRequested}), for the names of the fields of a form. */
+    String key() {
+        String[] words = value().split("_");
+        StringBuilder key = new StringBuilder(words[0]);
+        for (int i = 1; i < words.length; i++) {
+            key.append(Character.toUpperCase(words[i].charAt(0))).append(words[i].substring(1));
+        }
+        return key.toString();
     }
 
     static MessageKind parse(String value) {

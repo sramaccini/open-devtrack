@@ -1,6 +1,6 @@
 # ADR-19: Due date and reviewer of an issue
 
-Status: Proposed (7 November 2026) — F4, epic E8 (the indicators left out by ADR-17)
+Status: Accepted (7 November 2026; decided by the maintainer) — F4, epic E8 (the indicators left out by ADR-17)
 
 ## Context
 
@@ -33,7 +33,7 @@ What there is today:
      project can ask for them with a CEL guard (`issue.reviewer != null` on a transition to its review status).
 2. **ODQL** gains the fields `due` (a date, with the operators and the relative dates of the other dates: `due <
    today`, `due <= 7d`, `due IS EMPTY`) and `reviewer` (a user, with `currentUser()`, as `assignee`); `ORDER BY due`.
-   `issue_doc` gains `due_on` and `reviewer`, filled by its listeners and by a reindex at the migration. Relative
+   `issue_doc` gains `due_on` and `reviewer`, filled by its listeners (no issue had them before). Relative
    dates already go both ways (`7d` as well as `-7d`), so «due within a week» is `due <= 7d`.
 3. **The two indicators**, counted in `GET /api/me/summary` and shown on `dashboard` (a `stats` of Quadrava, with no
    link: the same queries are a saved filter away), with these queries:
@@ -43,9 +43,9 @@ What there is today:
      `in_progress` category gets exactly its issues waiting for review. Narrower meanings stay a saved filter away.
 4. **A message to the reviewer.** `notification` gains the kind `review_requested`, written when the reviewer is set
    or changed (as `assigned` for the assignee), with its preference (ADR-18: in the application and, by default,
-   email at once). The reviewer is not made a watcher, as the assignee is not: whoever wants the changes
-   that follow watches the issue (ADR-13). No reminders of due dates in this step: the digest of ADR-18 could list
-   the issues due tomorrow later, as a change of its own.
+   email at once). The reviewer watches the issue from then on, as the assignee already does (`IssueController`;
+   the first version of this ADR said otherwise, corrected when built). No reminders of due dates in this step: the
+   digest of ADR-18 could list the issues due tomorrow later, as a change of its own.
 5. **The screens.** `issue-detail` and the new issue dialog get «Due date» and «Reviewer» (a lookup of the members,
    as «Assignee»); `issue-list` and the `search` results get a «Due» column and, for the issues past it and not
    done, a badge «Overdue» in the danger tone (a field `overdue` of the rows: the `badges` of a Quadrava column
@@ -66,11 +66,12 @@ What there is today:
 
 ## Consequences
 
-- `issue`: migration `V20` (two columns, an index on `(project_id, due_on)`), entity, API, validation, events; tests
+- `issue`: migration `V20` (two columns, indexes on `(project_id, due_on)` and `reviewer`), entity, API, validation, events; tests
   for the member check, the reviewer not being the assignee, and the changelog.
-- `search`: `issue_doc` columns and reindex, the fields `due` and `reviewer` in the compiler and in the suggestions,
+- `search`: `issue_doc` columns (migration `V21`; no issue had them, so no reindex), the fields `due` and `reviewer` in the compiler and in the suggestions,
   parser and compiler tests.
-- `notification`: kind `review_requested` with its texts and preference.
+- `notification`: kind `review_requested` with its texts and preference (`reviewRequestedApp`/`…Email` in the form:
+  the names of Quadrava fields have no underscore); migration `V22` widens the checks of the kinds.
 - `search`: two more counts in `/api/me/summary`; `dashboard` with six indicators.
 - `ui/`: fields and columns above, i18n keys in both catalogues.
 - ADR-17 point 5 is closed by this ADR once built.

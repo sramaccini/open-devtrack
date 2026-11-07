@@ -125,6 +125,10 @@ class OdqlTest {
         assertThat(sql("created >= -7d")).contains("\"created_at\" >= timestamp with time zone '2026-10-31 00:00:00+00:00'");
         assertThat(sql("updated = 2026-11-01")).contains("'2026-11-01 00:00:00+00:00'", "'2026-11-02 00:00:00+00:00'");
         assertThat(sql("resolved <= today")).contains("\"resolved_at\" < timestamp with time zone '2026-11-08 00:00:00+00:00'");
+        assertThat(sql("due < today")).contains("\"due_on\" < date '2026-11-07'");
+        assertThat(sql("due <= 7d")).contains("\"due_on\" <= date '2026-11-14'");
+        assertThat(sql("due IS EMPTY")).contains("\"due_on\" is null");
+        assertThat(sql("reviewer = currentUser()")).contains("\"reviewer\" =");
         assertThat(sql("sprint IN openSprints()")).contains(ACTIVE.toString(), PLANNED.toString()).doesNotContain(DONE.toString());
         assertThat(sql("sprint = \"sprint 1\"")).contains(DONE.toString());
         assertThat(sql("sprint IS EMPTY")).contains("\"sprint_id\" is null");

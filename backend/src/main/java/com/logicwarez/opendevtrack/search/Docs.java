@@ -8,6 +8,7 @@ import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.name;
 import static org.jooq.impl.DSL.table;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.jooq.Field;
@@ -36,6 +37,8 @@ final class Docs {
     static final Field<Short> PRIORITY_ORDER = field(name("priority_order"), SQLDataType.SMALLINT);
     static final Field<String> ASSIGNEE = field(name("assignee"), SQLDataType.VARCHAR);
     static final Field<String> REPORTER = field(name("reporter"), SQLDataType.VARCHAR);
+    static final Field<String> REVIEWER = field(name("reviewer"), SQLDataType.VARCHAR);
+    static final Field<LocalDate> DUE_ON = field(name("due_on"), SQLDataType.LOCALDATE);
     static final Field<String[]> LABELS = field(name("labels"), SQLDataType.CLOB.array());
     static final Field<String> SUMMARY = field(name("summary"), SQLDataType.VARCHAR);
     static final Field<JSONB> CUSTOM = field(name("custom"), SQLDataType.JSONB);

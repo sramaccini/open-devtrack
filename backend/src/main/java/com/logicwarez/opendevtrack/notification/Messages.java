@@ -49,6 +49,7 @@ class Messages {
     void on(IssueCreated event) {
         Recipients to = new Recipients(event.by());
         changed(event.fields(), "assignee").ifPresent(a -> to.add(a.to(), MessageKind.ASSIGNED, Map.of()));
+        changed(event.fields(), "reviewer").ifPresent(r -> to.add(r.to(), MessageKind.REVIEW_REQUESTED, Map.of()));
         save(to, event.projectId(), event.key(), event.at());
     }
 
@@ -56,6 +57,7 @@ class Messages {
     void on(IssueChanged event) {
         Recipients to = new Recipients(event.by());
         changed(event.changes(), "assignee").ifPresent(a -> to.add(a.to(), MessageKind.ASSIGNED, Map.of()));
+        changed(event.changes(), "reviewer").ifPresent(r -> to.add(r.to(), MessageKind.REVIEW_REQUESTED, Map.of()));
         changed(event.changes(), "status").ifPresent(s -> {
             Map<String, String> params = values("from", s.from(), "to", s.to());
             watchers.of(event.issueId()).forEach(w -> to.add(w, MessageKind.TRANSITIONED, params));

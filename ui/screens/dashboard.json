@@ -30,6 +30,23 @@
           "caption": "{{ t('dashboard.open', 'open') }}"
         },
         {
+          "id": "kpi-overdue",
+          "label": "{{ t('dashboard.overdue', 'Overdue') }}",
+          "field": "overdue",
+          "format": "number",
+          "decimals": 0,
+          "tone": "danger",
+          "tooltip": "{{ t('dashboard.overdue_help', 'Your open issues past their due date') }}"
+        },
+        {
+          "id": "kpi-reviewing",
+          "label": "{{ t('dashboard.reviewing', 'In review by me') }}",
+          "field": "reviewing",
+          "format": "number",
+          "decimals": 0,
+          "tooltip": "{{ t('dashboard.reviewing_help', 'Issues in progress you are the reviewer of') }}"
+        },
+        {
           "id": "kpi-reported",
           "label": "{{ t('dashboard.reported', 'Reported by me') }}",
           "field": "reported",

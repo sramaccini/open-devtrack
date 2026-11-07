@@ -5,6 +5,7 @@
 package com.logicwarez.opendevtrack.issue;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -15,6 +16,6 @@ import java.util.UUID;
  */
 public record IssueDocument(UUID id, String tenantId, UUID projectId, String projectKey, String key, long number,
                             String type, String summary, String description, String status, String priority,
-                            int priorityOrder, String assignee, String reporter, List<String> labels,
-                            Map<String, Object> custom, Instant createdAt, Instant updatedAt) {
+                            int priorityOrder, String assignee, String reporter, LocalDate dueOn, String reviewer,
+                            List<String> labels, Map<String, Object> custom, Instant createdAt, Instant updatedAt) {
 }

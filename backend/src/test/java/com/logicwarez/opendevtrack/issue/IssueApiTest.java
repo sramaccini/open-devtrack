@@ -4,6 +4,7 @@
  */
 package com.logicwarez.opendevtrack.issue;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -18,6 +19,8 @@ import com.logicwarez.authz.session.SessionContext;
 import com.logicwarez.opendevtrack.TestInfrastructure;
 import jakarta.servlet.Filter;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -203,5 +206,40 @@ class IssueApiTest {
                 .andExpect(status().isPreconditionFailed());
         mvc.perform(as(put("/api/issues/ODT-1"), mario).content("{\"summary\":\"No version\"}"))
                 .andExpect(status().isPreconditionFailed());
+    }
+    @Test
+    void aDueDateAndAReviewer() throws Exception {
+        String yesterday = LocalDate.now(ZoneOffset.UTC).minusDays(1).toString();
+        mvc.perform(as(post("/api/projects/ODT/issues"), luisa).content("""
+                        {"summary":"Release notes","assignee":"luisa","reviewer":"mario","dueOn":"%s"}""".formatted(yesterday)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.dueOn").value(yesterday))
+                .andExpect(jsonPath("$.reviewer").value("mario"));
+        // The reviewer watches the issue, as the assignee does; the list marks it past its due date.
+        TestInfrastructure.awaitListeners(jdbc);
+        assertThat(jdbc.queryForList("SELECT username FROM odt_issue.watcher ORDER BY username", String.class))
+                .containsExactly("luisa", "mario");
+        mvc.perform(as(get("/api/projects/ODT/issues"), paola))
+                .andExpect(jsonPath("$[0].dueOn").value(yesterday))
+                .andExpect(jsonPath("$[0].overdue").value("overdue"));
+        // A member, not the assignee; a day as YYYY-MM-DD.
+        mvc.perform(as(put("/api/issues/ODT-1"), luisa).content("{\"summary\":\"R\",\"reviewer\":\"ugo\",\"version\":0}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(as(put("/api/issues/ODT-1"), luisa)
+                        .content("{\"summary\":\"R\",\"assignee\":\"luisa\",\"reviewer\":\"luisa\",\"version\":0}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("The reviewer cannot be the assignee"));
+        mvc.perform(as(put("/api/issues/ODT-1"), luisa).content("{\"summary\":\"R\",\"dueOn\":\"tomorrow\",\"version\":0}"))
+                .andExpect(status().isBadRequest());
+        // Cleared: no longer overdue, and the changes are in the history.
+        mvc.perform(as(put("/api/issues/ODT-1"), luisa).content("""
+                        {"summary":"Release notes","assignee":"luisa","reviewer":"paola","version":0}"""))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dueOn").doesNotExist());
+        mvc.perform(as(get("/api/projects/ODT/issues"), paola))
+                .andExpect(jsonPath("$[0].overdue").doesNotExist());
+        TestInfrastructure.awaitListeners(jdbc);
+        assertThat(jdbc.queryForList("SELECT field FROM odt_audit.issue_change WHERE new_value IS NULL OR field = 'reviewer'"
+                + " ORDER BY field", String.class)).contains("due", "reviewer");
     }
 }

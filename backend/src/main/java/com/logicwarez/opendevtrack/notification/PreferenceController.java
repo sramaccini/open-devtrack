@@ -53,8 +53,8 @@ class PreferenceController {
     Map<String, Object> get() {
         Map<String, Object> channels = new LinkedHashMap<>();
         preferences.of(user.tenantId(), user.username()).values().forEach(p -> {
-            channels.put(p.kind().value() + "App", p.inApp());
-            channels.put(p.kind().value() + "Email", p.email());
+            channels.put(p.kind().key() + "App", p.inApp());
+            channels.put(p.kind().key() + "Email", p.email());
         });
         Map<String, Object> view = new LinkedHashMap<>();
         view.put("email", user.session().email());
@@ -73,8 +73,8 @@ class PreferenceController {
         List<Map<String, Object>> fields = new ArrayList<>();
         for (MessageKind kind : MessageKind.values()) {
             String label = texts.preference(kind.value(), locale);
-            fields.add(Map.of("key", kind.value() + "App", "label", texts.preference("app", locale, label), "type", "switch"));
-            fields.add(Map.of("key", kind.value() + "Email", "label", texts.preference("email", locale, label),
+            fields.add(Map.of("key", kind.key() + "App", "label", texts.preference("app", locale, label), "type", "switch"));
+            fields.add(Map.of("key", kind.key() + "Email", "label", texts.preference("email", locale, label),
                     "type", "select", "options", options, "required", true));
         }
         return fields;
@@ -88,8 +88,8 @@ class PreferenceController {
         Map<MessageKind, Preference> current = preferences.of(user.tenantId(), user.username());
         List<Preference> changed = new ArrayList<>();
         for (MessageKind kind : MessageKind.values()) {
-            Object app = channels.get(kind.value() + "App");
-            Object email = channels.get(kind.value() + "Email");
+            Object app = channels.get(kind.key() + "App");
+            Object email = channels.get(kind.key() + "Email");
             if (app != null && !(app instanceof Boolean)) {
                 return Problems.badRequest("In the application is true or false");
             }

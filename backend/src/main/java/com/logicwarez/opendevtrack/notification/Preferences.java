@@ -47,9 +47,10 @@ class Preferences {
     /** One kind: in the application or not, and email {@code off}, {@code instant} or {@code daily}. */
     record Preference(MessageKind kind, boolean inApp, String email) {
 
-        /** Mentions and assignments at once, comments and status changes in the digest. */
+        /** Mentions, assignments and reviews asked at once, comments and status changes in the digest. */
         static Preference defaults(MessageKind kind) {
-            return new Preference(kind, true, kind == MessageKind.MENTIONED || kind == MessageKind.ASSIGNED ? INSTANT : DAILY);
+            return new Preference(kind, true, kind == MessageKind.MENTIONED || kind == MessageKind.ASSIGNED
+                    || kind == MessageKind.REVIEW_REQUESTED ? INSTANT : DAILY);
         }
     }
 

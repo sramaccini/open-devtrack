@@ -201,6 +201,26 @@
           "groupable": true
         },
         {
+          "field": "reviewer",
+          "label": "{{ t('issues.reviewer', 'Reviewer') }}",
+          "sortable": true
+        },
+        {
+          "field": "due",
+          "label": "{{ t('issues.due', 'Due') }}",
+          "format": "date",
+          "sortable": true
+        },
+        {
+          "field": "overdue",
+          "label": "{{ t('issues.overdue_column', 'Late') }}",
+          "format": "badge",
+          "badges": {
+            "overdue": "danger"
+          },
+          "valueKey": "values.overdue"
+        },
+        {
           "field": "points",
           "label": "{{ t('agile.points_short', 'Points') }}",
           "sortable": true,

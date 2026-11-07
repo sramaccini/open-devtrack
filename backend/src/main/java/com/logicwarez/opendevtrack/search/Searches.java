@@ -7,6 +7,7 @@ package com.logicwarez.opendevtrack.search;
 import static com.logicwarez.opendevtrack.search.Docs.ASSIGNEE;
 import static com.logicwarez.opendevtrack.search.Docs.CATEGORY;
 import static com.logicwarez.opendevtrack.search.Docs.CREATED_AT;
+import static com.logicwarez.opendevtrack.search.Docs.DUE_ON;
 import static com.logicwarez.opendevtrack.search.Docs.DOC;
 import static com.logicwarez.opendevtrack.search.Docs.ISSUE_ID;
 import static com.logicwarez.opendevtrack.search.Docs.ISSUE_KEY;
@@ -17,6 +18,7 @@ import static com.logicwarez.opendevtrack.search.Docs.PRIORITY_ORDER;
 import static com.logicwarez.opendevtrack.search.Docs.PROJECT_ID;
 import static com.logicwarez.opendevtrack.search.Docs.PROJECT_KEY;
 import static com.logicwarez.opendevtrack.search.Docs.REPORTER;
+import static com.logicwarez.opendevtrack.search.Docs.REVIEWER;
 import static com.logicwarez.opendevtrack.search.Docs.STATUS;
 import static com.logicwarez.opendevtrack.search.Docs.SUMMARY;
 import static com.logicwarez.opendevtrack.search.Docs.TENANT_ID;
@@ -71,7 +73,8 @@ class Searches {
             Map.entry("key", ISSUE_KEY), Map.entry("project", PROJECT_KEY), Map.entry("type", TYPE),
             Map.entry("status", STATUS), Map.entry("category", CATEGORY), Map.entry("priority", PRIORITY),
             Map.entry("assignee", ASSIGNEE), Map.entry("reporter", REPORTER), Map.entry("summary", SUMMARY),
-            Map.entry("updated", UPDATED_AT), Map.entry("created", CREATED_AT), Map.entry("points", POINTS));
+            Map.entry("reviewer", REVIEWER), Map.entry("due", DUE_ON), Map.entry("updated", UPDATED_AT),
+            Map.entry("created", CREATED_AT), Map.entry("points", POINTS));
 
     static final Set<String> GROUPS = Set.of("project", "type", "status", "category", "priority", "assignee");
 
@@ -188,10 +191,11 @@ class Searches {
         int total = sql.fetchCount(DOC, where);
         List<SortField<?>> order = new ArrayList<>(sort(request.sort(), compiled.order()));
         order.add(ISSUE_ID.asc());
-        List<Map<String, Object>> items = sql.select(ISSUE_KEY, PROJECT_KEY, TYPE, STATUS, PRIORITY, ASSIGNEE, REPORTER,
-                        SUMMARY, UPDATED_AT, CREATED_AT, POINTS)
+        LocalDate today = today();
+        List<Map<String, Object>> items = sql.select(ISSUE_KEY, PROJECT_KEY, TYPE, STATUS, CATEGORY, PRIORITY, ASSIGNEE,
+                        REVIEWER, REPORTER, SUMMARY, DUE_ON, UPDATED_AT, CREATED_AT, POINTS)
                 .from(DOC).where(where).orderBy(order).limit(size).offset(page * size).fetch()
-                .map(Searches::row);
+                .map(r -> row(r, today));
         return Map.of("items", items, "total", total);
     }
 
@@ -267,7 +271,7 @@ class Searches {
         return column;
     }
 
-    private static Map<String, Object> row(Record r) {
+    private static Map<String, Object> row(Record r, LocalDate today) {
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("key", r.get(ISSUE_KEY));
         row.put("project", r.get(PROJECT_KEY));
@@ -275,8 +279,13 @@ class Searches {
         row.put("status", r.get(STATUS));
         row.put("priority", r.get(PRIORITY));
         row.put("assignee", r.get(ASSIGNEE));
+        row.put("reviewer", r.get(REVIEWER));
         row.put("reporter", r.get(REPORTER));
         row.put("summary", r.get(SUMMARY));
+        LocalDate due = r.get(DUE_ON);
+        row.put("due", due);
+        // Past its due date and not done (ADR-19): a value for the badges of the column, which colour by value.
+        row.put("overdue", due != null && due.isBefore(today) && !"done".equals(r.get(CATEGORY)) ? "overdue" : null);
         row.put("updated", r.get(UPDATED_AT));
         row.put("created", r.get(CREATED_AT));
         row.put("points", r.get(POINTS));

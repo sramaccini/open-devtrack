@@ -62,6 +62,9 @@ class SearchApiTest {
     @Autowired
     JdbcTemplate jdbc;
 
+    @Autowired
+    Searches searches;
+
     MockMvc mvc;
 
     private static SessionAuthentication session(String username, String tenant, List<String> permissions) {
@@ -192,6 +195,36 @@ class SearchApiTest {
 
         mvc.perform(as(delete("/api/issues/ODT-2"), mario)).andExpect(status().isNoContent());
         await(() -> docs() == 4);
+    }
+
+    @Test
+    void dueDatesAndReviewersAreSearched() throws Exception {
+        String yesterday = searches.today().minusDays(1).toString();
+        int version = JsonPath.read(mvc.perform(as(get("/api/issues/ODT-1"), mario)).andReturn().getResponse()
+                .getContentAsString(), "$.version");
+        mvc.perform(as(put("/api/issues/ODT-1"), mario).content("""
+                        {"summary":"Login fails","type":"bug","priority":"highest","assignee":"luisa","reviewer":"mario",
+                         "dueOn":"%s","labels":["backend"],"version":%d}""".formatted(yesterday, version)))
+                .andExpect(status().isOk());
+        await(() -> jdbc.queryForObject("SELECT reviewer IS NOT NULL FROM odt_search.issue_doc WHERE tenant_id = 'ALPHA'"
+                + " AND issue_key = 'ODT-1'", Boolean.class));
+        assertThat(keys(mario, "reviewer = currentUser()")).containsExactly("ODT-1");
+        assertThat(keys(mario, "due < today")).containsExactly("ODT-1");
+        assertThat(keys(mario, "due IS EMPTY ORDER BY key")).containsExactly("ODT-2", "ODT-3", "WEB-1");
+        mvc.perform(as(post("/api/search"), mario).content("{\"query\":\"key = ODT-1\"}"))
+                .andExpect(jsonPath("$.items[0].due").value(yesterday))
+                .andExpect(jsonPath("$.items[0].reviewer").value("mario"))
+                .andExpect(jsonPath("$.items[0].overdue").value("overdue"));
+        // The personal dashboard: overdue for the assignee; in review for the reviewer once the work has started.
+        mvc.perform(as(get("/api/me/summary"), luisa)).andExpect(jsonPath("$.overdue").value(1));
+        mvc.perform(as(get("/api/me/summary"), mario)).andExpect(jsonPath("$.reviewing").value(0));
+        version = JsonPath.read(mvc.perform(as(get("/api/issues/ODT-1"), mario)).andReturn().getResponse()
+                .getContentAsString(), "$.version");
+        mvc.perform(as(post("/api/issues/ODT-1/transitions"), mario).content("{\"transition\":\"start\",\"version\":"
+                + version + "}")).andExpect(status().isOk());
+        await(() -> jdbc.queryForObject("SELECT category FROM odt_search.issue_doc WHERE tenant_id = 'ALPHA'"
+                + " AND issue_key = 'ODT-1'", String.class).equals("in_progress"));
+        mvc.perform(as(get("/api/me/summary"), mario)).andExpect(jsonPath("$.reviewing").value(1));
     }
 
     @Test

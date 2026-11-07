@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,10 @@ class IssueEntity {
     private String assignee;
     private String reporter;
 
+    /** The day the issue should be done, and who reviews it (ADR-19); both optional. */
+    private LocalDate dueOn;
+    private String reviewer;
+
     @JdbcTypeCode(SqlTypes.ARRAY)
     private List<String> labels;
 
@@ -72,13 +77,15 @@ class IssueEntity {
         this.updatedAt = createdAt;
     }
 
-    void edit(IssueType type, String summary, String description, Priority priority, String assignee, List<String> labels,
-              Map<String, Object> custom, Instant now) {
+    void edit(IssueType type, String summary, String description, Priority priority, String assignee, LocalDate dueOn,
+              String reviewer, List<String> labels, Map<String, Object> custom, Instant now) {
         this.type = type;
         this.summary = summary;
         this.description = description;
         this.priority = priority;
         this.assignee = assignee;
+        this.dueOn = dueOn;
+        this.reviewer = reviewer;
         this.labels = labels;
         this.custom = new HashMap<>(custom);
         this.updatedAt = now;
@@ -128,6 +135,14 @@ class IssueEntity {
 
     String reporter() {
         return reporter;
+    }
+
+    LocalDate dueOn() {
+        return dueOn;
+    }
+
+    String reviewer() {
+        return reviewer;
     }
 
     Map<String, Object> custom() {

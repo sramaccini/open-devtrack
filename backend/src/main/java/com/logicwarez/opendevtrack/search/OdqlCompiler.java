@@ -5,6 +5,7 @@
 package com.logicwarez.opendevtrack.search;
 
 import static com.logicwarez.opendevtrack.search.Docs.ASSIGNEE;
+import static com.logicwarez.opendevtrack.search.Docs.DUE_ON;
 import static com.logicwarez.opendevtrack.search.Docs.CATEGORY;
 import static com.logicwarez.opendevtrack.search.Docs.CREATED_AT;
 import static com.logicwarez.opendevtrack.search.Docs.CUSTOM;
@@ -16,6 +17,7 @@ import static com.logicwarez.opendevtrack.search.Docs.PRIORITY_ORDER;
 import static com.logicwarez.opendevtrack.search.Docs.PROJECT_KEY;
 import static com.logicwarez.opendevtrack.search.Docs.RANK;
 import static com.logicwarez.opendevtrack.search.Docs.REPORTER;
+import static com.logicwarez.opendevtrack.search.Docs.REVIEWER;
 import static com.logicwarez.opendevtrack.search.Docs.RESOLVED_AT;
 import static com.logicwarez.opendevtrack.search.Docs.SPRINT_ID;
 import static com.logicwarez.opendevtrack.search.Docs.STATUS;
@@ -71,7 +73,8 @@ final class OdqlCompiler {
 
     /** The fields of the language, in the order the suggestions show them. */
     static final List<String> FIELDS = List.of("project", "key", "type", "status", "category", "priority", "assignee",
-            "reporter", "labels", "summary", "text", "created", "updated", "resolved", "sprint", "points", "rank");
+            "reviewer", "reporter", "labels", "summary", "text", "created", "updated", "resolved", "due", "sprint", "points",
+            "rank");
 
     static final List<String> TYPES = List.of("task", "bug", "story", "epic");
     static final List<String> PRIORITIES = List.of("lowest", "low", "medium", "high", "highest");
@@ -141,6 +144,7 @@ final class OdqlCompiler {
             case "status" -> text(c, STATUS, this::status);
             case "priority" -> priority(c);
             case "assignee" -> text(c, ASSIGNEE, v -> v);
+            case "reviewer" -> text(c, REVIEWER, v -> v);
             case "reporter" -> text(c, REPORTER, v -> v);
             case "labels" -> labels(c);
             case "summary" -> summary(c);
@@ -148,6 +152,7 @@ final class OdqlCompiler {
             case "created" -> date(c, CREATED_AT);
             case "updated" -> date(c, UPDATED_AT);
             case "resolved" -> date(c, RESOLVED_AT);
+            case "due" -> day(c, DUE_ON);
             case "sprint" -> sprint(c);
             case "points" -> number(c, POINTS);
             case "rank" -> throw error(c.at(), "rank can only be used in ORDER BY", null);
@@ -248,6 +253,29 @@ final class OdqlCompiler {
             case "<=" -> field.lt(end);
             case ">" -> field.ge(end);
             case ">=" -> field.ge(start);
+            default -> throw notAllowed(c, "= != < <= > >= IS EMPTY");
+        };
+    }
+
+    /** A day without a time ({@code due}, ADR-19): the same values and operators as the other dates. */
+    private Condition day(Clause c, Field<LocalDate> field) {
+        if (c.op().equals("empty")) {
+            return field.isNull();
+        }
+        if (c.op().equals("notempty")) {
+            return field.isNotNull();
+        }
+        if (c.op().equals("in") || c.op().equals("notin") || c.op().contains("~")) {
+            throw notAllowed(c, "= != < <= > >= IS EMPTY");
+        }
+        LocalDate day = day(c.values().getFirst());
+        return switch (c.op()) {
+            case "=" -> field.eq(day);
+            case "!=" -> field.ne(day);
+            case "<" -> field.lt(day);
+            case "<=" -> field.le(day);
+            case ">" -> field.gt(day);
+            case ">=" -> field.ge(day);
             default -> throw notAllowed(c, "= != < <= > >= IS EMPTY");
         };
     }
@@ -363,16 +391,18 @@ final class OdqlCompiler {
             case "category" -> CATEGORY;
             case "priority" -> PRIORITY_ORDER;
             case "assignee" -> ASSIGNEE;
+            case "reviewer" -> REVIEWER;
             case "reporter" -> REPORTER;
             case "summary" -> SUMMARY;
             case "created" -> CREATED_AT;
             case "updated" -> UPDATED_AT;
             case "resolved" -> RESOLVED_AT;
+            case "due" -> DUE_ON;
             case "points" -> POINTS;
             case "rank" -> RANK;
             default -> throw error(o.at(), "Cannot order by '" + o.field() + "'",
-                    "project key type status category priority assignee reporter summary created updated resolved "
-                            + "points rank");
+                    "project key type status category priority assignee reviewer reporter summary created updated "
+                            + "resolved due points rank");
         };
     }
 

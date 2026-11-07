@@ -154,6 +154,7 @@ class Words {
             case "category" -> "category != done";
             case "priority" -> "priority >= high";
             case "assignee" -> "assignee = currentUser()";
+            case "reviewer" -> "reviewer = currentUser()";
             case "reporter" -> "reporter = currentUser()";
             case "labels" -> "labels = backend";
             case "summary" -> "summary ~ checkout";
@@ -161,6 +162,7 @@ class Words {
             case "created" -> "created >= -14d";
             case "updated" -> "updated >= -7d";
             case "resolved" -> "resolved >= 2026-11-01";
+            case "due" -> "due < today";
             case "sprint" -> "sprint IN openSprints()";
             case "points" -> "points >= 5";
             case "rank" -> "ORDER BY rank";
@@ -180,7 +182,7 @@ class Words {
             case "priority" -> values.addAll(OdqlCompiler.PRIORITIES);
             case "category" -> values.addAll(OdqlCompiler.CATEGORIES);
             case "status" -> visible.forEach(p -> workflows.statuses(p.id()).forEach(s -> values.add(s.code())));
-            case "assignee", "reporter" -> {
+            case "assignee", "reviewer", "reporter" -> {
                 values.add("currentUser()");
                 users.search(word == null ? "" : word, 10).stream().map(TenantUser::username).forEach(values::add);
             }
@@ -196,6 +198,7 @@ class Words {
                 searches.context(visible).sprints().forEach(s -> values.add(s.name()));
             }
             case "created", "updated", "resolved" -> values.addAll(List.of("today", "-7d", "-14d", "-30d"));
+            case "due" -> values.addAll(List.of("today", "7d", "14d", "-7d"));
             default -> {
                 // key, summary, text, points: free values.
             }

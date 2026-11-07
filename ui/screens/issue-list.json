@@ -154,6 +154,21 @@
           "label": "{{ t('issues.assignee', 'Assignee') }}"
         },
         {
+          "field": "dueOn",
+          "label": "{{ t('issues.due', 'Due') }}",
+          "format": "date",
+          "sortable": true
+        },
+        {
+          "field": "overdue",
+          "label": "{{ t('issues.overdue_column', 'Late') }}",
+          "format": "badge",
+          "badges": {
+            "overdue": "danger"
+          },
+          "valueKey": "values.overdue"
+        },
+        {
           "field": "updatedAt",
           "label": "{{ t('issues.updated', 'Updated') }}",
           "format": "datetime",

@@ -24,7 +24,7 @@ The decisions D1–D9 of the project plan, all accepted by the maintainer on 31 
 | [16](adr-16-search-odql.md) | Search, ODQL and saved filters (E7) | A small query language parsed by hand and compiled to SQL with jOOQ, over a read model of `search` with full-text; saved and shared filters; measured on one million issues | Accepted |
 | [17](adr-17-dashboards-reports.md) | Dashboards and reports (E8) | Read models of `reporting` fed by events and closed each night; burndown, velocity, cumulative flow by status category, created vs resolved, cycle time; a personal and a project dashboard with a fixed layout | Accepted |
 | [18](adr-18-email-notifications.md) | Email, preferences and digests (E9) | Preferences per user and kind; an outbox sent by a job, instant or in a daily digest; plain text mails over SMTP, off without a mail host | Accepted |
-| [19](adr-19-due-date-and-reviewer.md) | Due date and reviewer of an issue (E8) | Two standard fields `due_on` and `reviewer`, in ODQL as `due` and `reviewer`; «Overdue» and «In review by me» on the dashboard; a message `review_requested` | Proposed |
+| [19](adr-19-due-date-and-reviewer.md) | Due date and reviewer of an issue (E8) | Two standard fields `due_on` and `reviewer`, in ODQL as `due` and `reviewer`; «Overdue» and «In review by me» on the dashboard; a message `review_requested` | Accepted |
 
 ## Requests to the dependencies
 

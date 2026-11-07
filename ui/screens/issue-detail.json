@@ -176,6 +176,26 @@
           }
         },
         {
+          "name": "reviewer",
+          "type": "lookup",
+          "label": "{{ t('issues.reviewer', 'Reviewer') }}",
+          "tooltip": "{{ t('issues.reviewer_help', 'A member of the project other than the assignee') }}",
+          "lookup": {
+            "source": "assignees",
+            "valueField": "username",
+            "labelField": "username",
+            "minChars": 0
+          },
+          "readOnlyIf": "{{!form._perm.edit}}"
+        },
+        {
+          "name": "dueOn",
+          "type": "date",
+          "label": "{{ t('issues.due_on', 'Due date') }}",
+          "tooltip": "{{ t('issues.due_on_help', 'The day it should be done; past it, and not done, the issue is overdue') }}",
+          "readOnlyIf": "{{!form._perm.edit}}"
+        },
+        {
           "name": "labels",
           "type": "tags",
           "label": "{{ t('issues.labels', 'Labels') }}",

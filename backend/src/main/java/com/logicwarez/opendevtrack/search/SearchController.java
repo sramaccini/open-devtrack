@@ -116,7 +116,10 @@ class SearchController {
 
     static final int MAX_DASHBOARD_FILTERS = 10;
 
-    /** Open issues assigned to and reported by the user, open critical bugs, issues resolved since Monday. */
+    /**
+     * Open issues assigned to and reported by the user, open critical bugs, issues resolved since Monday; the user's
+     * open issues past their due date and the issues in progress they review (ADR-19).
+     */
     @GetMapping("/api/me/summary")
     Map<String, Object> mine() {
         List<ProjectRef> visible = searches.visible();
@@ -126,6 +129,8 @@ class SearchController {
         summary.put("reported", searches.found("reporter = currentUser() AND category != done", visible));
         summary.put("critical", searches.found("type = bug AND priority = highest AND category != done", visible));
         summary.put("resolved", searches.found("resolved >= " + monday, visible));
+        summary.put("overdue", searches.found("assignee = currentUser() AND due < today AND category != done", visible));
+        summary.put("reviewing", searches.found("reviewer = currentUser() AND category = in_progress", visible));
         return summary;
     }
 

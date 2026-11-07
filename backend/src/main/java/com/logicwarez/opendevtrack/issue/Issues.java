@@ -82,7 +82,7 @@ public class Issues {
         return issues.findById(issueId).flatMap(i -> projects.byId(i.projectId()).map(p -> new IssueDocument(i.id(),
                 i.tenantId(), p.id(), p.key(), IssueController.key(p, i), i.number(), i.type().value(), i.summary(),
                 i.description(), i.status(), i.priority().value(), i.priority().ordinal() + 1, i.assignee(), i.reporter(),
-                List.copyOf(i.labels()), new HashMap<>(i.custom()), i.createdAt(), i.updatedAt())));
+                i.dueOn(), i.reviewer(), List.copyOf(i.labels()), new HashMap<>(i.custom()), i.createdAt(), i.updatedAt())));
     }
 
     /** The identifiers of every issue of the project, in the order of their numbers: to rebuild an index. */

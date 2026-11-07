@@ -71,11 +71,14 @@ tenant for the pickers (`GET /api/users`, temporary until A5).
 ## Issues (`issue`)
 
 Issues of a project (`odt_issue`), keyed by the project and their number (`ODT-42`): type, summary, description
-(restricted Markdown), priority, assignee (a member), reporter, labels. Only the members of the project see them;
+(restricted Markdown), priority, assignee (a member), reporter, labels, due date (`dueOn`, a day) and reviewer (a
+member other than the assignee; ADR-19). The reporter, the assignee and the reviewer watch the issue. Only the members
+of the project see them;
 developers create and edit them, admins delete them; edits carry the version read and get 412 if it changed. The status
 changes only through the transitions of the workflow of the project (below). `GET /api/projects/{key}/issues` takes `status`,
 `assignee` (`me` for the user) and `q` (text of the summary); `GET /api/projects/{key}/labels?q=` gives the labels
-already used in the project that start with `q`, for the suggestions of the labels field. Each change is published as an event
+already used in the project that start with `q`, for the suggestions of the labels field. The rows of the list carry
+`dueOn` and `overdue` (`"overdue"` when past the due date, in `odt.reporting.zone`, and not done). Each change is published as an event
 (`IssueEvents`); other modules find an issue by its key through `Issues`.
 
 ## Links (`issue`)
@@ -141,7 +144,7 @@ Each comment posted or edited publishes `CommentPosted` with the mentions, the a
 
 The bell of the runtime (`notifications` in `navigation.json`) reads the messages of the user (`odt_notification`,
 ADR-13), written after the commit from the events: `mentioned` to the people mentioned, `assigned` to a new assignee,
-`commented` and `transitioned` to the watchers. Nobody is told of what they did, and each user gets one message per
+`review_requested` to a new reviewer (ADR-19), `commented` and `transitioned` to the watchers. Nobody is told of what they did, and each user gets one message per
 event, the most direct one. `GET /api/notifications` gives the last 50 of the projects of the session tenant that the
 user still sees, with title and text in the language of `Accept-Language` (English and Italian,
 `notification/messages*.properties`) and the screen `issue-detail` to open; `POST /api/notifications/read` with `ids`
@@ -151,8 +154,8 @@ user still sees, with title and text in the language of `Accept-Language` (Engli
 ### Email and preferences (ADR-18)
 
 Each user chooses, per kind, whether a message shows in the application and whether it is mailed: off, at once
-(`instant`) or in the daily digest (`daily`); without a choice mentions and assignments are mailed at once, comments
-and status changes in the digest (`odt_notification.preference`). `GET /api/notifications/preferences` gives the
+(`instant`) or in the daily digest (`daily`); without a choice mentions, assignments and reviews asked are mailed at
+once, comments and status changes in the digest (`odt_notification.preference`). `GET /api/notifications/preferences` gives the
 address of the session (from the identity provider, read only), whether mail is on and the channels;
 `.../preferences/fields` the rows of the form in the language of the request; `PUT /api/notifications/preferences` with
 `channels` saves them. A kind with neither channel writes no message; one by email only is kept out of the bell.
@@ -224,9 +227,10 @@ as `jsonb`, a `tsvector` of summary, description and labels folded by `unaccent`
 from `IssueCreated`, `IssueChanged`, `IssuePlanned` and `IssueDeleted`, reading through the public APIs of those
 modules; `POST /api/search/reindex` (admin of the tenant) rebuilds the rows of the tenant.
 
-- Query: fields `project`, `key`, `type`, `status`, `category`, `priority`, `assignee`, `reporter`, `labels`,
-  `summary`, `text`, `created`, `updated`, `resolved`, `sprint`, `points`, `custom.<key>`; operators `=`, `!=`, `<`,
-  `<=`, `>`, `>=`, `~`, `!~`, `IN`, `NOT IN`, `IS EMPTY`, `IS NOT EMPTY`; `AND`, `OR`, `NOT`, parentheses and
+- Query: fields `project`, `key`, `type`, `status`, `category`, `priority`, `assignee`, `reviewer`, `reporter`,
+  `labels`, `summary`, `text`, `created`, `updated`, `resolved`, `due` (a day), `sprint`, `points`, `custom.<key>`;
+  operators `=`, `!=`, `<`, `<=`, `>`, `>=`, `~`, `!~`, `IN`, `NOT IN`, `IS EMPTY`, `IS NOT EMPTY`; `AND`, `OR`, `NOT`,
+  parentheses and
   `ORDER BY` (also `rank`). Functions `currentUser()` and `openSprints()`; dates as `2026-11-01`, `today` or `-7d`,
   `-2w`, `-1m`, `-1y` in the zone `odt.reporting.zone` (UTC by default). Status names are accepted in English and
   Italian as well as their ids. Hand-written parser and compiler to jOOQ conditions: values are always bound.
@@ -257,8 +261,9 @@ from the changelog of `audit` and the last 30 days of each project rebuilt from 
 
 - `GET /api/projects/{key}/reports/summary` (open, in progress, resolved in 30 days, median cycle time in days, the
   active sprint), `…/sprints?q=` (those started, the most recent first; `q` filters by name, for the lookup of the
-  screen), `…/burndown?sprint=` (the active sprint, else the last one: points left and the ideal line), `…/velocity` (the last 6 completed sprints), `…/flow` and `…/created-resolved` (the last 30 days). For the
-  members of the project; days are ISO dates, shown short on the axis by the chart (Q14).
+  screen), `…/burndown?sprint=` (the active sprint, else the last one: points left and the ideal line), `…/velocity`
+  (the last 6 completed sprints), `…/flow` and `…/created-resolved` (the last 30 days). For the members of the project; days are ISO dates, shown short on the axis by the chart (Q14).
 - `GET /api/me/summary` and `GET /api/me/filters` (in `search`, as counts of ODQL queries on its index): open issues
-  assigned to and reported by the user, open critical bugs, issues resolved since Monday; the user's filters marked for
+  assigned to and reported by the user, open critical bugs, issues resolved since Monday, the user's open issues past
+  their due date (`overdue`) and the issues in progress they review (`reviewing`, ADR-19); the user's filters marked for
   the dashboard (at most 10) with how many issues each finds.

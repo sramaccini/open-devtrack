@@ -182,6 +182,15 @@ class NotificationApiTest {
                 .andExpect(jsonPath("$[0].title").value("mario ha spostato ODT-1 in In corso"))
                 .andExpect(jsonPath("$[0].text").value("Da Da fare a In corso"));
         mvc.perform(as(get("/api/notifications"), mario)).andExpect(jsonPath("$.length()").value(0));
+
+        // Asked to review (ADR-19): the reviewer is told, and watches the issue from now on.
+        mvc.perform(as(put("/api/issues/ODT-1"), mario).content("""
+                        {"type":"bug","summary":"Login fails","priority":"medium","assignee":"paola","reviewer":"luisa",
+                         "version":2}"""))
+                .andExpect(status().isOk());
+        await(this::messages, 4);
+        mvc.perform(as(get("/api/notifications"), luisa))
+                .andExpect(jsonPath("$[0].title").value("mario asked you to review ODT-1"));
     }
 
     @Test
