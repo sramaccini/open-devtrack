@@ -1,7 +1,7 @@
 # OpenDevTrack screens
 
 The front end of OpenDevTrack is this Quadrava project: screens, navigation, themes and translations, as JSON documents
-validated by the schemas of the pinned Quadrava version (0.12.0, ADR-01). No Angular code: the runtime image of Quadrava
+validated by the schemas of the pinned Quadrava version (0.12.1, ADR-01). No Angular code: the runtime image of Quadrava
 loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 | Path | Registry kind | What |
@@ -30,14 +30,14 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 ## Publishing
 
-The Quadrava CLI (`@sramaccini/quadrava-cli@0.12.0`, the version of the runtime) is on GitHub Packages: the `.npmrc`
+The Quadrava CLI (`@sramaccini/quadrava-cli@0.12.1`, the version of the runtime) is on GitHub Packages: the `.npmrc`
 of the repository maps `@sramaccini` there, and npm needs a token with `read:packages` for `npm.pkg.github.com` in
 the user config (`~/.npmrc`; in CI, `NODE_AUTH_TOKEN`). From the root of the repository, with a Keycloak access token
 of the client `opendevtrack-tools` in `QUADRAVA_TOKEN`:
 
 ```bash
-npx --yes @sramaccini/quadrava-cli@0.12.0 validate ui
-npx --yes @sramaccini/quadrava-cli@0.12.0 publish ui --registry http://localhost:28080 --app opendevtrack --env development
+npx --yes @sramaccini/quadrava-cli@0.12.1 validate ui
+npx --yes @sramaccini/quadrava-cli@0.12.1 publish ui --registry http://localhost:28080 --app opendevtrack --env development
 ```
 
 The same command publishes to `testing` and `production`: the registry has no protected environments (ADR-12), the
@@ -106,4 +106,5 @@ cumulative flow and created vs resolved, on the `stats` and `chart` of Quadrava.
 the user menu; Q13, Quadrava 0.12.0), the form of ADR-18: the address of the mails, read only, and for each kind a
 switch (in the application) and a choice (by email: off, at once, in the daily summary), whose rows come from the back
 end (`fieldsFrom` into `channels`). When the installation has no mail server it says so. The screen has no title: the
-tab names it.
+tab names it. `/?settings=notification-settings` opens the dialog on it (Q15, Quadrava 0.12.1), the link in the footer
+of the mails; the query parameter `settings` belongs to the shell, so no screen takes one with that name.

@@ -14,18 +14,18 @@ Quadrava and authz-library, and the ADRs say where.
   (`ModularityTests`: `verify()` and the module documentation). The `odt.*` permission catalogue is a repeatable
   Flyway migration of the RBAC schema (ADR-07); the dev profile adds tenants, users and the UI author/approver roles.
 - Module `uiregistry` (ADR-03): `contracts/registry.yaml` 0.7.0, adapted from the Quadrava reference registry
-  (commit 9fa1916, contract 0.6.0), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.12.0 in the classpath.
+  (commit 9fa1916, contract 0.6.0), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.12.1 in the classpath.
   The browser uses the session; tools use Keycloak access tokens of `opendevtrack-tools` on `/registry/**`
   (`platform/BearerTokenSecurity.java`, temporary until A4).
 - `ui/`: the Quadrava project, with the main navigation, home and projects placeholder screens, themes `odt-light` and
-  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.12.0 checks it (`quadrava validate`) and publishes it
+  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.12.1 checks it (`quadrava validate`) and publishes it
   (`quadrava publish`) to any environment: no environment is protected (ADR-12).
 - End-to-end check (`docs/check-authz-end-to-end.md`): Quadrava kits bff 13/13 with and without a session, authz 11/11,
-  registry 24/24 (`--protected-env none`), tenant switch kept across logins, `ui/` served by the runtime 0.12.0 from the
+  registry 24/24 (`--protected-env none`), tenant switch kept across logins, `ui/` served by the runtime 0.12.1 from the
   registry. Quadrava 0.5.0 adopted on 4 November 2026 (from 0.2.1: same schemas, registry contract 0.7), 0.6.0 on 5
   November (tab title and icons from the theme, shell texts built in: Q3 and Q4), 0.7.0 on 5 November (theme and
   language in the settings dialog of the user menu; the message bell of ADR-22), 0.8.0 on 6 November (`data.<name>` in the expressions: Q9), 0.9.0 on 6 November (links from the rows, Q10;
-  request size of the runtime image, Q11), 0.10.0 on 6 November (comment actions, Q8; tags field, Q5), 0.11.0 on 6 November (the side menu runs the full height of the page; «lowcode» renamed «lc», which OpenDevTrack did not use), 0.11.1 on 7 November (Q12 on the kanban; the collapse button of the side menu back on its edge), 0.12.0 on 7 November (application sections in the settings dialog, Q13; chart axis labels that fit, Q14; the CLI checks the navigation as the runtime does).
+  request size of the runtime image, Q11), 0.10.0 on 6 November (comment actions, Q8; tags field, Q5), 0.11.0 on 6 November (the side menu runs the full height of the page; «lowcode» renamed «lc», which OpenDevTrack did not use), 0.11.1 on 7 November (Q12 on the kanban; the collapse button of the side menu back on its edge), 0.12.0 on 7 November (application sections in the settings dialog, Q13; chart axis labels that fit, Q14; the CLI checks the navigation as the runtime does), 0.12.1 on 7 November (an address that opens the settings dialog on a section, Q15).
 - CI (`.github/workflows/ci.yml`), green on its first run: `quadrava validate` of `ui/` and the back end tests, then the e2e with the
   kits. It reads authz-library and the Quadrava CLI from GitHub Packages with the secret `AUTHZ_PACKAGES_TOKEN` (or the workflow token if the packages grant this repository access).
 - F2 E1 Projects: modules `project` (projects of the tenant, issue numbering), `access` (members and project roles
@@ -79,7 +79,8 @@ Quadrava and authz-library, and the ADRs say where.
 - F4 E9 (ADR-18, accepted 7 November 2026): preferences per user and kind (in the application; email off, at once or
   in the daily digest), an outbox in `odt_notification.message` sent by `MailOutbox` over SMTP (Spring Mail; retries,
   `SKIP LOCKED`), plain-text mails in the last language the user used. Screen `notification-settings` as the
-  «Notifications» section of the settings dialog (Q13, Quadrava 0.12.0). The e2e environment has Mailpit (mails at http://localhost:28025) and checks that a
+  «Notifications» section of the settings dialog (Q13, Quadrava 0.12.0), which the footer of the mails opens with
+  `/?settings=notification-settings` (Q15, Quadrava 0.12.1). The e2e environment has Mailpit (mails at http://localhost:28025) and checks that a
   mention is mailed. The address is read from authz-library without a session (temporary, with A5).
 
 ## Requests to the dependencies
@@ -107,7 +108,6 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F4: the board filter and the load test of ADR-16; the choice of the sprint of the burndown on the screen. When
-   Quadrava gives the settings dialog an address of its own (Q15), the mail footer links to it.
+1. F4: the board filter and the load test of ADR-16; the choice of the sprint of the burndown on the screen.
 2. Workflows by issue type and editing statuses and transitions when a project needs them (ADR-10).
 3. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

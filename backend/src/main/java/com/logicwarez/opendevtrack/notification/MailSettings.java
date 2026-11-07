@@ -58,8 +58,8 @@ class MailSettings {
         return publicUrl + "/projects/issue-detail?key=" + projectKey + "&issue=" + issueKey;
     }
 
-    /** The application, whose settings dialog has the notification settings (no address of its own, temporary). */
+    /** The notification settings: the application with its settings dialog open on their section (Quadrava 0.12.1). */
     String settingsUrl() {
-        return publicUrl + "/";
+        return publicUrl + "/?settings=notification-settings";
     }
 }

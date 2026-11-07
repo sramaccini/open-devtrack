@@ -43,7 +43,7 @@ development tenants and users and the session cookie over http.
 
 ## Registry of the screen definitions (`uiregistry`)
 
-Implements `contracts/registry.yaml` 0.7.0 of Quadrava 0.12.0, adapted from its reference registry (0.6.0). Versions and publications
+Implements `contracts/registry.yaml` 0.7.0 of Quadrava 0.12.1, adapted from its reference registry (0.6.0). Versions and publications
 are in the schema `odt_uiregistry` (Flyway, `db/odt/uiregistry`). Documents are validated against the schemas of the
 pinned Quadrava version in `src/main/resources/quadrava/schemas`, refreshed with `tools/sync-quadrava-schemas.sh
 <version>`. The browser reaches it with the session; tools (`quadrava publish`, the registry kit) with a Keycloak
