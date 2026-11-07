@@ -45,7 +45,7 @@ services:
   # The front of OpenDevTrack (ADR-01): the Quadrava runtime forwards the BFF paths to the back end on the host.
   # runtime-config.json: the screens of the Quadrava demo, with session, permissions and tenants from the back end.
   runtime:
-    image: ghcr.io/sramaccini/quadrava-runtime:0.11.0
+    image: ghcr.io/sramaccini/quadrava-runtime:0.11.1
     environment:
       QUADRAVA_BFF_URL: http://host.docker.internal:${APP_PORT:-28080}
       # The largest request forwarded to the BFF: a file of odt.attachments.max-size (25 MB) and its multipart frame

@@ -81,7 +81,6 @@
     {
       "id": "board-kanban",
       "type": "kanban",
-      "visibleIf": "{{ data.board.lane == \"none\" }}",
       "source": "cards",
       "columnField": "column",
       "titleField": "summary",
@@ -90,10 +89,12 @@
       "avatarField": "assignee",
       "badges": [
         {
-          "field": "type"
+          "field": "type",
+          "valueKey": "values.issue_type"
         },
         {
           "field": "priority",
+          "valueKey": "values.priority",
           "tones": {
             "highest": "danger",
             "high": "danger",
@@ -115,6 +116,8 @@
         "toneField": "tone",
         "limitField": "limit"
       },
+      "laneField": "{{ data.board != null && data.board.lane != 'none' ? data.board.lane : '' }}",
+      "lanes": "{{ data.board != null && data.board.lane == 'priority' ? [{'value': 'highest', 'label': t('values.priority.highest', 'Highest')}, {'value': 'high', 'label': t('values.priority.high', 'High')}, {'value': 'medium', 'label': t('values.priority.medium', 'Medium')}, {'value': 'low', 'label': t('values.priority.low', 'Low')}, {'value': 'lowest', 'label': t('values.priority.lowest', 'Lowest')}] : data.board != null && data.board.lane == 'type' ? [{'value': 'epic', 'label': t('values.issue_type.epic', 'Epic')}, {'value': 'story', 'label': t('values.issue_type.story', 'Story')}, {'value': 'task', 'label': t('values.issue_type.task', 'Task')}, {'value': 'bug', 'label': t('values.issue_type.bug', 'Bug')}] : [] }}",
       "reorder": true,
       "moveIf": "{{ row._perm.move }}",
       "onMove": [
@@ -148,264 +151,14 @@
         {
           "refresh": "cards"
         }
-      ]
-    },
-    {
-      "id": "board-kanban-assignee",
-      "type": "kanban",
-      "visibleIf": "{{ data.board.lane == \"assignee\" }}",
-      "source": "cards",
-      "columnField": "column",
-      "titleField": "summary",
-      "descriptionField": "key",
-      "keyField": "key",
-      "avatarField": "assignee",
-      "badges": [
+      ],
+      "onOpen": [
         {
-          "field": "type"
-        },
-        {
-          "field": "priority",
-          "tones": {
-            "highest": "danger",
-            "high": "danger",
-            "low": "neutral",
-            "lowest": "neutral"
+          "navigate": "issue-detail",
+          "params": {
+            "key": "{{data.board.project}}",
+            "issue": "{{row.key}}"
           }
-        }
-      ],
-      "footerFields": [
-        {
-          "field": "points",
-          "label": "{{ t('agile.points_short', 'Points') }}"
-        }
-      ],
-      "columnsFrom": {
-        "source": "columns",
-        "valueField": "value",
-        "labelField": "label",
-        "toneField": "tone",
-        "limitField": "limit"
-      },
-      "laneField": "assignee",
-      "reorder": true,
-      "moveIf": "{{ row._perm.move }}",
-      "onMove": [
-        {
-          "call": "move",
-          "args": {
-            "key": "{{row.key}}",
-            "to": "{{to}}",
-            "beforeId": "{{beforeId}}",
-            "afterId": "{{afterId}}"
-          },
-          "onError": [
-            {
-              "if": "{{error.status == 409}}",
-              "then": [
-                {
-                  "toast": "{{ t('agile.no_transition', 'No step of the workflow leads there now: check its conditions') }}"
-                }
-              ],
-              "else": [
-                {
-                  "toast": "{{ t('agile.move_failed', 'The card could not be moved') }}"
-                }
-              ]
-            },
-            {
-              "refresh": "cards"
-            }
-          ]
-        },
-        {
-          "refresh": "cards"
-        }
-      ]
-    },
-    {
-      "id": "board-kanban-priority",
-      "type": "kanban",
-      "visibleIf": "{{ data.board.lane == \"priority\" }}",
-      "source": "cards",
-      "columnField": "column",
-      "titleField": "summary",
-      "descriptionField": "key",
-      "keyField": "key",
-      "avatarField": "assignee",
-      "badges": [
-        {
-          "field": "type"
-        },
-        {
-          "field": "priority",
-          "tones": {
-            "highest": "danger",
-            "high": "danger",
-            "low": "neutral",
-            "lowest": "neutral"
-          }
-        }
-      ],
-      "footerFields": [
-        {
-          "field": "points",
-          "label": "{{ t('agile.points_short', 'Points') }}"
-        }
-      ],
-      "columnsFrom": {
-        "source": "columns",
-        "valueField": "value",
-        "labelField": "label",
-        "toneField": "tone",
-        "limitField": "limit"
-      },
-      "laneField": "priority",
-      "lanes": [
-        {
-          "value": "highest",
-          "label": "{{ t('values.priority.highest', 'Highest') }}"
-        },
-        {
-          "value": "high",
-          "label": "{{ t('values.priority.high', 'High') }}"
-        },
-        {
-          "value": "medium",
-          "label": "{{ t('values.priority.medium', 'Medium') }}"
-        },
-        {
-          "value": "low",
-          "label": "{{ t('values.priority.low', 'Low') }}"
-        },
-        {
-          "value": "lowest",
-          "label": "{{ t('values.priority.lowest', 'Lowest') }}"
-        }
-      ],
-      "reorder": true,
-      "moveIf": "{{ row._perm.move }}",
-      "onMove": [
-        {
-          "call": "move",
-          "args": {
-            "key": "{{row.key}}",
-            "to": "{{to}}",
-            "beforeId": "{{beforeId}}",
-            "afterId": "{{afterId}}"
-          },
-          "onError": [
-            {
-              "if": "{{error.status == 409}}",
-              "then": [
-                {
-                  "toast": "{{ t('agile.no_transition', 'No step of the workflow leads there now: check its conditions') }}"
-                }
-              ],
-              "else": [
-                {
-                  "toast": "{{ t('agile.move_failed', 'The card could not be moved') }}"
-                }
-              ]
-            },
-            {
-              "refresh": "cards"
-            }
-          ]
-        },
-        {
-          "refresh": "cards"
-        }
-      ]
-    },
-    {
-      "id": "board-kanban-type",
-      "type": "kanban",
-      "visibleIf": "{{ data.board.lane == \"type\" }}",
-      "source": "cards",
-      "columnField": "column",
-      "titleField": "summary",
-      "descriptionField": "key",
-      "keyField": "key",
-      "avatarField": "assignee",
-      "badges": [
-        {
-          "field": "type"
-        },
-        {
-          "field": "priority",
-          "tones": {
-            "highest": "danger",
-            "high": "danger",
-            "low": "neutral",
-            "lowest": "neutral"
-          }
-        }
-      ],
-      "footerFields": [
-        {
-          "field": "points",
-          "label": "{{ t('agile.points_short', 'Points') }}"
-        }
-      ],
-      "columnsFrom": {
-        "source": "columns",
-        "valueField": "value",
-        "labelField": "label",
-        "toneField": "tone",
-        "limitField": "limit"
-      },
-      "laneField": "type",
-      "lanes": [
-        {
-          "value": "epic",
-          "label": "{{ t('values.issue_type.epic', 'Epic') }}"
-        },
-        {
-          "value": "story",
-          "label": "{{ t('values.issue_type.story', 'Story') }}"
-        },
-        {
-          "value": "task",
-          "label": "{{ t('values.issue_type.task', 'Task') }}"
-        },
-        {
-          "value": "bug",
-          "label": "{{ t('values.issue_type.bug', 'Bug') }}"
-        }
-      ],
-      "reorder": true,
-      "moveIf": "{{ row._perm.move }}",
-      "onMove": [
-        {
-          "call": "move",
-          "args": {
-            "key": "{{row.key}}",
-            "to": "{{to}}",
-            "beforeId": "{{beforeId}}",
-            "afterId": "{{afterId}}"
-          },
-          "onError": [
-            {
-              "if": "{{error.status == 409}}",
-              "then": [
-                {
-                  "toast": "{{ t('agile.no_transition', 'No step of the workflow leads there now: check its conditions') }}"
-                }
-              ],
-              "else": [
-                {
-                  "toast": "{{ t('agile.move_failed', 'The card could not be moved') }}"
-                }
-              ]
-            },
-            {
-              "refresh": "cards"
-            }
-          ]
-        },
-        {
-          "refresh": "cards"
         }
       ]
     }

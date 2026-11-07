@@ -2731,6 +2731,10 @@
                         "$ref": "#/$defs/tone"
                       },
                       "description": "Colour of the label by value, for example {\"high\": \"danger\"}; values not listed are neutral."
+                    },
+                    "valueKey": {
+                      "type": "string",
+                      "description": "Prefix of the translation keys of the shown value (prefix.value), for example values.priority shows t('values.priority.high') instead of high; a missing key shows the value. The tones stay tied to the stored value."
                     }
                   }
                 },
@@ -2830,31 +2834,38 @@
               },
               "laneField": {
                 "type": "string",
-                "description": "Field of the row that decides the swimlane (for example the assignee): the board is divided into horizontal lanes that can be collapsed. A card moves only within its lane."
+                "description": "Field of the row that decides the swimlane (for example the assignee): the board is divided into horizontal lanes that can be collapsed. A card moves only within its lane. It can be an expression that returns the name of the field, for example {{ state.groupBy }}, so one board can be grouped in several ways; an empty text or null gives the board without lanes, an error a board with no cards."
               },
               "lanes": {
-                "type": "array",
-                "minItems": 1,
-                "maxItems": 30,
-                "items": {
-                  "type": "object",
-                  "required": [
-                    "value",
-                    "label"
-                  ],
-                  "additionalProperties": false,
-                  "properties": {
-                    "value": {
-                      "type": "string",
-                      "description": "Value of `laneField` for the cards of the lane."
-                    },
-                    "label": {
-                      "type": "string",
-                      "description": "Header of the lane (it can contain {{ }})."
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 30,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "value",
+                        "label"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "value": {
+                          "type": "string",
+                          "description": "Value of `laneField` for the cards of the lane."
+                        },
+                        "label": {
+                          "type": "string",
+                          "description": "Header of the lane (it can contain {{ }})."
+                        }
+                      }
                     }
+                  },
+                  {
+                    "$ref": "#/$defs/expression"
                   }
-                },
-                "description": "Lanes in order, with their headers; rows whose value is not a lane are not shown. Without it every value of `laneField` in the data is a lane, in order of appearance, and the cards without a value go to a last lane «No group»."
+                ],
+                "description": "Lanes in order, with their headers; rows whose value is not a lane are not shown. Without it every value of `laneField` in the data is a lane, in order of appearance, and the cards without a value go to a last lane «No group». It can be an expression that returns the list of {value, label} (labels shown as they are) or an empty list for the lanes from the data, for example {{ state.groupBy == 'priority' ? [...] : [] }}; an error shows no cards."
               },
               "reorder": {
                 "type": "boolean",
@@ -2871,6 +2882,14 @@
                   "$ref": "#/$defs/step"
                 },
                 "description": "Steps that move a card (usually call and refresh): they see the row in row, the starting column in from, the target one in to, and the keys (keyField) of the cards that will be before and after it in beforeId and afterId (null at the ends of the column)."
+              },
+              "onOpen": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/step"
+                },
+                "description": "Steps that open a card (usually navigate to its detail screen): they see the row in row. The title of the card becomes a button, so a card opens with a click on it or from the keyboard; dragging a card does not open it."
               }
             },
             "dependentRequired": {

@@ -73,5 +73,5 @@ CEL guards; only a transition changes the status of an issue.
   navigation.
 - The `kanban` of Quadrava 0.10.0 covers columns from data, order, swimlanes and WIP limits. Found in the build: a card
   cannot open its issue, and the badges show the stored values (`bug`, `high`) without a catalogue key; requested as
-  Q12. A moved card takes its place just after the card above it in the one order of the project (or just before the
+  Q12 (released in Quadrava 0.11.1 and adopted, with `laneField` and `lanes` as expressions). A moved card takes its place just after the card above it in the one order of the project (or just before the
   one below, at the top of a column), so a board and the backlog never disagree.

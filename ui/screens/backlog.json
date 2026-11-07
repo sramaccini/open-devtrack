@@ -185,10 +185,12 @@
       "avatarField": "assignee",
       "badges": [
         {
-          "field": "type"
+          "field": "type",
+          "valueKey": "values.issue_type"
         },
         {
-          "field": "status"
+          "field": "status",
+          "valueKey": "values.status"
         }
       ],
       "footerFields": [
@@ -228,6 +230,15 @@
         },
         {
           "refresh": "sprints"
+        }
+      ],
+      "onOpen": [
+        {
+          "navigate": "issue-detail",
+          "params": {
+            "key": "{{params.key}}",
+            "issue": "{{row.key}}"
+          }
         }
       ]
     },

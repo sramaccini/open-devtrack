@@ -1,7 +1,7 @@
 # OpenDevTrack screens
 
 The front end of OpenDevTrack is this Quadrava project: screens, navigation, themes and translations, as JSON documents
-validated by the schemas of the pinned Quadrava version (0.11.0, ADR-01). No Angular code: the runtime image of Quadrava
+validated by the schemas of the pinned Quadrava version (0.11.1, ADR-01). No Angular code: the runtime image of Quadrava
 loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 | Path | Registry kind | What |
@@ -30,14 +30,14 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 ## Publishing
 
-The Quadrava CLI (`@sramaccini/quadrava-cli@0.11.0`, the version of the runtime) is on GitHub Packages: the `.npmrc`
+The Quadrava CLI (`@sramaccini/quadrava-cli@0.11.1`, the version of the runtime) is on GitHub Packages: the `.npmrc`
 of the repository maps `@sramaccini` there, and npm needs a token with `read:packages` for `npm.pkg.github.com` in
 the user config (`~/.npmrc`; in CI, `NODE_AUTH_TOKEN`). From the root of the repository, with a Keycloak access token
 of the client `opendevtrack-tools` in `QUADRAVA_TOKEN`:
 
 ```bash
-npx --yes @sramaccini/quadrava-cli@0.11.0 validate ui
-npx --yes @sramaccini/quadrava-cli@0.11.0 publish ui --registry http://localhost:28080 --app opendevtrack --env development
+npx --yes @sramaccini/quadrava-cli@0.11.1 validate ui
+npx --yes @sramaccini/quadrava-cli@0.11.1 publish ui --registry http://localhost:28080 --app opendevtrack --env development
 ```
 
 The same command publishes to `testing` and `production`: the registry has no protected environments (ADR-12), the
@@ -77,8 +77,9 @@ The title of the tab is `brand.name` of the active theme and its icons are `bran
 ## Boards and backlog
 
 `board` is the generic screen of ADR-06 (params `board`): the `kanban` of Quadrava with the columns and the cards of
-the back end (`columnsFrom`), one component for each kind of lanes (`laneField` and `lanes` are not expressions), shown
-by `data.board.lane`. `backlog` (params `key`) is a `kanban` whose columns are the sprints not completed and the
+the back end (`columnsFrom`), one component whose lanes follow `data.board.lane`
+(`laneField` and `lanes` as expressions, Q12). `backlog` (params `key`) is a `kanban` whose columns are the sprints not completed and the
 backlog, with the sprints in a table below (new, start, complete, edit, remove). `board-list` (Projects › Boards) lists
 the boards of the projects of the user; `project-detail` manages those of a project and `issue-detail` sets the story
-points. A card does not open its issue yet, and its badges show the stored values: request Q12.
+points. A card opens its issue (`onOpen`) and its badges show the values in the language of the user (`valueKey`):
+both from Q12, Quadrava 0.11.1.
