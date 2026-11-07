@@ -78,8 +78,8 @@ word at the cursor, the service decides the words: catalogue § 2.7, made for a 
    `filter_odql`), applied to its cards through `search` (for example a board of one team: `labels = payments`).
 8. **Measured.** A load test, outside the normal build (JUnit tag `load`, Testcontainers), fills one million issues
    over 200 projects with `generate_series` and measures p95 of ten typical queries and of the suggestions. Its
-   results go in `docs/` for M3. If a target is missed, indexes first; moving `search` to OpenSearch only if measured
-   as necessary (plan, risks).
+   results go in `docs/` for M3 ([search-load.md](search-load.md): every p95 under 0.6 s). If a target is missed,
+   indexes first; moving `search` to OpenSearch only if measured as necessary (plan, risks).
 
 ## Alternatives considered
 

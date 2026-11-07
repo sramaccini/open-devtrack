@@ -30,6 +30,9 @@
         <spring-modulith.version>2.1.2</spring-modulith.version>
         <aws-sdk.version>2.46.7</aws-sdk.version>
         <json-schema-validator.version>1.5.9</json-schema-validator.version>
+        <!-- The load test of the search (ADR-16) is left out of the build; it runs on request:
+             mvn test -Dgroups=load -DexcludedGroups=none -->
+        <excludedGroups>load</excludedGroups>
     </properties>
 
     <dependencyManagement>

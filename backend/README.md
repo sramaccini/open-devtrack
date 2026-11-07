@@ -239,6 +239,10 @@ modules; `POST /api/search/reindex` (admin of the tenant) rebuilds the rows of t
 - Filters: `GET|POST /api/filters`, `PUT|DELETE /api/filters/{id}` (name, query, `shared`, `onDashboard`; changed only
   by their owner, `version` gives 412). A shared filter is seen by everyone in the tenant, and each one finds only the
   issues they may see. A filter's query is checked when it is saved.
+- Load test: `SearchLoadTest` (tag `load`, left out of the build) fills one million issues and measures p95 of ten
+  queries and of the suggestions; it runs on request with
+  `mvn -f backend/pom.xml test -Dgroups=load -DexcludedGroups=none -Dtest=SearchLoadTest -Dsurefire.failIfNoSpecifiedTests=false`
+  (results in [docs/search-load.md](../docs/search-load.md)).
 
 ## Reports and dashboards (`reporting`)
 

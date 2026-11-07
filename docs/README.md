@@ -54,3 +54,4 @@ Found while writing the ADRs; each is built in its own repository, optional for 
 ## Checks
 
 - [End-to-end check of authz-library](check-authz-end-to-end.md) (F0).
+- [Load test of the search](search-load.md) (F4, ADR-16 point 8, gate M3).

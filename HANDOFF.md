@@ -69,7 +69,8 @@ Quadrava and authz-library, and the ADRs say where.
   `agile`; full text with `unaccent` and a `simple` `tsvector`. Screen `search` with suggestions as one types,
   results in a `serverDataTable` (filters and groups by the back end) and saved filters, private or shared. The filter
   of a board (point 7) goes through `shared.IssueQueries`, implemented by `search`, so `agile` does not depend on
-  `search` (which depends on `agile`). Not built yet: the load test of point 8.
+  `search` (which depends on `agile`). The load test of point 8 (`SearchLoadTest`, tag `load`, outside CI) measures
+  every p95 under 0.6 s on one million issues ([docs/search-load.md](docs/search-load.md)).
 - F4 E8 (ADR-17, accepted 7 November 2026): module `reporting` with the read model `odt_reporting` (issue rows with
   their days, daily snapshots per project and active sprint, sprint results), written after the commit and each night;
   reports of a project (indicators, burndown, velocity, cumulative flow, created vs resolved) and the personal counts
@@ -108,6 +109,6 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F4: the load test of ADR-16; the choice of the sprint of the burndown on the screen.
+1. F4: the choice of the sprint of the burndown on the screen.
 2. Workflows by issue type and editing statuses and transitions when a project needs them (ADR-10).
 3. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.
