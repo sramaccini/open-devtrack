@@ -101,6 +101,7 @@ abstract class AttachmentTestBase {
     @BeforeEach
     void setUp() throws Exception {
         mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(security).build();
+        TestInfrastructure.awaitListeners(jdbc);
         jdbc.execute("TRUNCATE odt_project.project, odt_access.project_member, odt_issue.issue, odt_audit.issue_change, "
                 + "odt_collaboration.comment, odt_collaboration.attachment, odt_collaboration.attachment_content CASCADE");
         mvc.perform(as(post("/api/projects"), mario).contentType(MediaType.APPLICATION_JSON)

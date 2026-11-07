@@ -81,6 +81,7 @@ class SearchApiTest {
     @BeforeEach
     void setUp() throws Exception {
         mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(security).build();
+        TestInfrastructure.awaitListeners(jdbc);
         jdbc.execute("TRUNCATE odt_project.project, odt_access.project_member, odt_issue.issue, odt_agile.issue_plan, "
                 + "odt_agile.sprint, odt_agile.sprint_issue, odt_agile.board, odt_agile.board_column, "
                 + "odt_search.issue_doc, odt_search.filter CASCADE");

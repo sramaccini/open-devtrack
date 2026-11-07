@@ -80,6 +80,7 @@ class CustomFieldApiTest {
     @BeforeEach
     void setUp() throws Exception {
         mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(security).build();
+        TestInfrastructure.awaitListeners(jdbc);
         jdbc.execute("TRUNCATE odt_project.project, odt_access.project_member, odt_issue.issue, odt_issue.field_definition, "
                 + "odt_audit.issue_change CASCADE");
         mvc.perform(as(post("/api/projects"), mario).content("{\"key\":\"ODT\",\"name\":\"OpenDevTrack\"}"))

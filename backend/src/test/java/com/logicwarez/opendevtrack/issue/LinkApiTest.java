@@ -81,6 +81,7 @@ class LinkApiTest {
     @BeforeEach
     void setUp() throws Exception {
         mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(security).build();
+        TestInfrastructure.awaitListeners(jdbc);
         jdbc.execute("TRUNCATE odt_project.project, odt_access.project_member, odt_issue.issue, odt_audit.issue_change "
                 + "CASCADE");
         for (String project : List.of("ODT", "WEB")) {

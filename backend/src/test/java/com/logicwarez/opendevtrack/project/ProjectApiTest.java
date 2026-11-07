@@ -73,6 +73,7 @@ class ProjectApiTest {
     @BeforeEach
     void setUp() {
         mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(security).build();
+        TestInfrastructure.awaitListeners(jdbc);
         jdbc.execute("TRUNCATE odt_project.project, odt_access.project_member");
     }
 

@@ -73,6 +73,7 @@ class RegistryApiTest {
     @BeforeEach
     void setUp() {
         mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(security).build();
+        TestInfrastructure.awaitListeners(jdbc);
         jdbc.execute("TRUNCATE odt_uiregistry.document_version, odt_uiregistry.publication");
         given(toolTokens.decode(anyString())).willAnswer(call -> {
             String name = call.getArgument(0);

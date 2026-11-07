@@ -81,6 +81,7 @@ class AgileApiTest {
     @BeforeEach
     void setUp() throws Exception {
         mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(security).build();
+        TestInfrastructure.awaitListeners(jdbc);
         jdbc.execute("TRUNCATE odt_project.project, odt_access.project_member, odt_issue.issue, odt_agile.issue_plan, "
                 + "odt_agile.sprint, odt_agile.sprint_issue, odt_agile.board, odt_agile.board_column CASCADE");
         mvc.perform(as(post("/api/projects"), mario).content("{\"key\":\"ODT\",\"name\":\"OpenDevTrack\"}"))
@@ -144,6 +145,8 @@ class AgileApiTest {
         // To do → In progress: the transition start; between nothing, so the place stays.
         move(cards + "ODT-2/move", "1", null, null, luisa, 200);
         mvc.perform(as(get("/api/issues/ODT-2"), paola)).andExpect(jsonPath("$.status").value("in_progress"));
+        // The history is written after the commit, on another thread.
+        TestInfrastructure.awaitListeners(jdbc);
         mvc.perform(as(get("/api/issues/ODT-2/history"), paola)).andExpect(jsonPath("$[0].field").value("status"));
         // No transition goes from To do to Done.
         move(cards + "ODT-1/move", "2", null, null, luisa, 409);
