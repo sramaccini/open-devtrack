@@ -214,3 +214,22 @@ modules; `POST /api/search/reindex` (admin of the tenant) rebuilds the rows of t
 - Filters: `GET|POST /api/filters`, `PUT|DELETE /api/filters/{id}` (name, query, `shared`, `onDashboard`; changed only
   by their owner, `version` gives 412). A shared filter is seen by everyone in the tenant, and each one finds only the
   issues they may see. A filter's query is checked when it is saved.
+
+## Reports and dashboards (`reporting`)
+
+The read model of ADR-17 in `odt_reporting`, written after the commit from the events of `issue` and `agile`:
+`issue_state` (each issue with its category, points, sprint and the days it was created, started and resolved),
+`daily_snapshot` (each project, and its active sprint, per category and points left at the end of each day) and
+`sprint_result` (points committed at the start, done and carried at the completion, carried by `SprintStarted` and
+`SprintCompleted`). Each event rewrites the row of its issue and the snapshot of the day; a job writes the snapshot of
+every project each night (`odt.reporting.snapshot-cron`, `0 5 0 * * *` in the zone `odt.reporting.zone`), so a day
+with no event has its row. The migration fills the tables from the existing data, with the days of the status changes
+from the changelog of `audit` and the last 30 days of each project rebuilt from those days.
+
+- `GET /api/projects/{key}/reports/summary` (open, in progress, resolved in 30 days, median cycle time in days, the
+  active sprint), `…/sprints`, `…/burndown?sprint=` (the active sprint, else the last one: points left and the ideal
+  line), `…/velocity` (the last 6 completed sprints), `…/flow` and `…/created-resolved` (the last 30 days). For the
+  members of the project; days carry a short `label` for the charts (temporary, request Q14).
+- `GET /api/me/summary` and `GET /api/me/filters` (in `search`, as counts of ODQL queries on its index): open issues
+  assigned to and reported by the user, open critical bugs, issues resolved since Monday; the user's filters marked for
+  the dashboard (at most 10) with how many issues each finds.

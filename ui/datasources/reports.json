@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0",
+  "datasources": "reports",
+  "description": "Reports and dashboards (module reporting, ADR-17); the personal counts come from the search (ADR-16).",
+  "sources": {
+    "summary": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/reports/summary"
+    },
+    "burndown": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/reports/burndown"
+    },
+    "velocity": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/reports/velocity"
+    },
+    "flow": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/reports/flow"
+    },
+    "createdResolved": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/reports/created-resolved"
+    },
+    "mine": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/me/summary"
+    },
+    "myFilters": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/me/filters"
+    },
+    "myIssues": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/search",
+      "body": {
+        "query": "assignee = currentUser() AND category != done",
+        "page": "{{ request.page }}",
+        "size": "{{ request.size }}",
+        "sort": "{{ request.sort }}",
+        "filters": "{{ request.filters }}",
+        "groupBy": "{{ request.groupBy }}",
+        "groupPath": "{{ request.groupPath }}",
+        "distinct": "{{ request.distinct }}"
+      }
+    }
+  }
+}

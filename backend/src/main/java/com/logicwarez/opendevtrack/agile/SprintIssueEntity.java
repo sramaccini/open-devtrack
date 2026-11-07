@@ -50,6 +50,11 @@ class SprintIssueEntity {
         return issueId;
     }
 
+    /** The points of the issue when it came into the sprint. */
+    Integer points() {
+        return points;
+    }
+
     String outcome() {
         return outcome;
     }

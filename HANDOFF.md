@@ -6,7 +6,7 @@ Quadrava and authz-library, and the ADRs say where.
 
 ## Status
 
-**7 November 2026 — phases F1, F2 and F3 done; F4 under way: search, ODQL and saved filters built (ADR-16).**
+**7 November 2026 — phases F1, F2 and F3 done; F4 under way: search (ADR-16), dashboards and reports (ADR-17) built.**
 
 - Repository github.com/sramaccini/open-devtrack, branch `main`: licence MPL-2.0 with CLA, contribution rules and
   project rules as Quadrava (ADR-05). Decisions D1–D9 and ADR-10 accepted, in `docs/`.
@@ -70,6 +70,12 @@ Quadrava and authz-library, and the ADRs say where.
   results in a `serverDataTable` (filters and groups by the back end) and saved filters, private or shared. Not built
   yet: the filter of a board by an ODQL query (ADR-16 point 7), because `agile` would depend on `search`, which
   already depends on `agile` (a module cycle: it needs its own design), and the load test of point 8.
+- F4 E8 (ADR-17, accepted 7 November 2026): module `reporting` with the read model `odt_reporting` (issue rows with
+  their days, daily snapshots per project and active sprint, sprint results), written after the commit and each night;
+  reports of a project (indicators, burndown, velocity, cumulative flow, created vs resolved) and the personal counts
+  from the search. Screens `dashboard` (the first screen, in place of `home`) and `project-dashboard`. The axis of the
+  charts uses short day labels and full width until Q14. Not done: the choice of the sprint of the burndown on the screen
+  (the API takes it), «Overdue» and «In review by me» (no due date nor reviewer, ADR-17 point 5).
 
 ## Requests to the dependencies
 
@@ -96,7 +102,7 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F4: E8 dashboards and reports (ADR-17), then E9 email notifications (ADR-18; the settings of the user wait for Q13
-   in Quadrava). The board filter and the load test of ADR-16.
+1. F4: E9 email notifications (ADR-18; the settings of the user wait for Q13, on Quadrava main and not released yet).
+   The board filter and the load test of ADR-16; Q14 when Quadrava releases it.
 2. Workflows by issue type and editing statuses and transitions when a project needs them (ADR-10).
 3. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

@@ -11,7 +11,9 @@ import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.project.ProjectRef;
 import com.logicwarez.opendevtrack.project.Projects;
 import com.logicwarez.opendevtrack.search.Odql.OdqlException;
+import java.time.DayOfWeek;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +76,7 @@ class SearchController {
         }
     }
 
-    /** Whether a query is right, for the screen before it saves a filter: 204, or 400 with where it is wrong. */
+    /** Whether a query is right, for the field of the screen: the answer of a remote check of Quadrava. */
     @GetMapping("/api/search/check")
     Map<String, Object> check(@RequestParam(name = "q", defaultValue = "") String query) {
         // The answer of a remote check of Quadrava: the field shows validation.odql with the position and the reason.
@@ -108,6 +110,47 @@ class SearchController {
             }
         }
         return ResponseEntity.ok(Map.of("issues", count));
+    }
+
+    // The personal dashboard (ADR-17): counts of queries on the index, for the projects the user sees
+
+    static final int MAX_DASHBOARD_FILTERS = 10;
+
+    /** Open issues assigned to and reported by the user, open critical bugs, issues resolved since Monday. */
+    @GetMapping("/api/me/summary")
+    Map<String, Object> mine() {
+        List<ProjectRef> visible = searches.visible();
+        LocalDate monday = searches.today().with(DayOfWeek.MONDAY);
+        Map<String, Object> summary = new LinkedHashMap<>();
+        summary.put("assigned", searches.found("assignee = currentUser() AND category != done", visible));
+        summary.put("reported", searches.found("reporter = currentUser() AND category != done", visible));
+        summary.put("critical", searches.found("type = bug AND priority = highest AND category != done", visible));
+        summary.put("resolved", searches.found("resolved >= " + monday, visible));
+        return summary;
+    }
+
+    /**
+     * The filters of the user marked for the dashboard, with how many issues each finds now (null when its query no
+     * longer compiles, for example after a sprint was renamed).
+     */
+    @GetMapping("/api/me/filters")
+    List<Map<String, Object>> dashboardFilters() {
+        List<ProjectRef> visible = searches.visible();
+        return filters.visible(user.tenantId(), user.username()).stream()
+                .filter(f -> f.onDashboard() && f.owner().equals(user.username()))
+                .limit(MAX_DASHBOARD_FILTERS)
+                .map(f -> {
+                    Map<String, Object> view = view(f);
+                    Integer count;
+                    try {
+                        count = searches.found(f.query(), visible);
+                    } catch (OdqlException e) {
+                        count = null;
+                    }
+                    view.put("count", count);
+                    return view;
+                })
+                .toList();
     }
 
     // Saved filters

@@ -1,0 +1,179 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "dashboard",
+  "title": "{{ t('dashboard.title', 'Dashboard') }}",
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "mine": {
+      "ref": "reports/mine"
+    },
+    "myIssues": {
+      "ref": "reports/myIssues"
+    },
+    "myFilters": {
+      "ref": "reports/myFilters"
+    }
+  },
+  "components": [
+    {
+      "id": "my-numbers",
+      "type": "stats",
+      "source": "mine",
+      "items": [
+        {
+          "id": "kpi-assigned",
+          "label": "{{ t('dashboard.assigned', 'Assigned to me') }}",
+          "field": "assigned",
+          "format": "number",
+          "decimals": 0,
+          "tone": "primary",
+          "caption": "{{ t('dashboard.open', 'open') }}"
+        },
+        {
+          "id": "kpi-reported",
+          "label": "{{ t('dashboard.reported', 'Reported by me') }}",
+          "field": "reported",
+          "format": "number",
+          "decimals": 0,
+          "caption": "{{ t('dashboard.open', 'open') }}"
+        },
+        {
+          "id": "kpi-critical",
+          "label": "{{ t('dashboard.critical', 'Critical bugs') }}",
+          "field": "critical",
+          "format": "number",
+          "decimals": 0,
+          "tone": "danger",
+          "tooltip": "{{ t('dashboard.critical_help', 'Open bugs with the highest priority in your projects') }}"
+        },
+        {
+          "id": "kpi-resolved",
+          "label": "{{ t('dashboard.resolved', 'Resolved this week') }}",
+          "field": "resolved",
+          "format": "number",
+          "decimals": 0,
+          "tone": "success",
+          "tooltip": "{{ t('dashboard.resolved_help', 'Issues of your projects resolved since Monday') }}"
+        }
+      ]
+    },
+    {
+      "id": "my-issues-title",
+      "type": "text",
+      "style": "heading",
+      "text": "{{ t('dashboard.my_issues', 'My open issues') }}"
+    },
+    {
+      "id": "my-issues",
+      "type": "serverDataTable",
+      "source": "myIssues",
+      "pageSize": 10,
+      "columns": [
+        {
+          "field": "key",
+          "label": "{{ t('issues.key', 'Key') }}",
+          "sortable": true,
+          "onClick": [
+            {
+              "navigate": "issue-detail",
+              "params": {
+                "key": "{{row.project}}",
+                "issue": "{{row.key}}"
+              }
+            }
+          ]
+        },
+        {
+          "field": "project",
+          "label": "{{ t('agile.project', 'Project') }}",
+          "sortable": true,
+          "filter": "select"
+        },
+        {
+          "field": "type",
+          "label": "{{ t('issues.type', 'Type') }}",
+          "valueKey": "values.issue_type",
+          "sortable": true,
+          "filter": "select"
+        },
+        {
+          "field": "summary",
+          "label": "{{ t('issues.summary', 'Summary') }}",
+          "sortable": true,
+          "filter": "text"
+        },
+        {
+          "field": "status",
+          "label": "{{ t('issues.status', 'Status') }}",
+          "format": "badge",
+          "badges": {
+            "todo": "neutral",
+            "in_progress": "primary",
+            "done": "success"
+          },
+          "valueKey": "values.status",
+          "sortable": true,
+          "filter": "select"
+        },
+        {
+          "field": "priority",
+          "label": "{{ t('issues.priority', 'Priority') }}",
+          "format": "badge",
+          "badges": {
+            "high": "danger",
+            "highest": "danger"
+          },
+          "valueKey": "values.priority",
+          "sortable": true,
+          "filter": "select"
+        },
+        {
+          "field": "updated",
+          "label": "{{ t('issues.updated', 'Updated') }}",
+          "format": "datetime",
+          "sortable": true
+        }
+      ]
+    },
+    {
+      "id": "my-filters-title",
+      "type": "text",
+      "style": "heading",
+      "text": "{{ t('dashboard.my_filters', 'My filters') }}"
+    },
+    {
+      "id": "my-filters-help",
+      "type": "text",
+      "text": "{{ t('dashboard.my_filters_help', 'Your saved filters marked «On my dashboard» in Search, with the issues each one finds now.') }}"
+    },
+    {
+      "id": "my-filters",
+      "type": "table",
+      "source": "myFilters",
+      "columns": [
+        {
+          "field": "name",
+          "label": "{{ t('search.filter_name', 'Name') }}",
+          "onClick": [
+            {
+              "navigate": "search",
+              "params": {
+                "q": "{{row.query}}"
+              }
+            }
+          ]
+        },
+        {
+          "field": "query",
+          "label": "{{ t('search.query', 'Query') }}"
+        },
+        {
+          "field": "count",
+          "label": "{{ t('dashboard.issues', 'Issues') }}",
+          "format": "number",
+          "decimals": 0
+        }
+      ]
+    }
+  ]
+}

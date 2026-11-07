@@ -135,6 +135,18 @@ class Searches {
         return OdqlCompiler.compile(query, context(visible));
     }
 
+    /** How many issues the query finds in the projects the user sees; throws {@link Odql.OdqlException}. */
+    int found(String query, List<ProjectRef> visible) {
+        Compiled compiled = compile(query, visible);
+        return sql.fetchCount(DOC, TENANT_ID.eq(user.tenantId())
+                .and(PROJECT_ID.in(visible.stream().map(ProjectRef::id).toList())).and(compiled.where()));
+    }
+
+    /** Today in the zone of the instance. */
+    LocalDate today() {
+        return LocalDate.now(zone);
+    }
+
     /** What the table asked for: groups of the next level, rows of a page, or the values of a column. */
     Map<String, Object> run(Request request) {
         List<ProjectRef> visible = visible();

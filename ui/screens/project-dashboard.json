@@ -1,0 +1,197 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "project-dashboard",
+  "title": "{{ t('reports.title', 'Project dashboard') }}",
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "summary": {
+      "ref": "reports/summary"
+    },
+    "burndown": {
+      "ref": "reports/burndown"
+    },
+    "velocity": {
+      "ref": "reports/velocity"
+    },
+    "flow": {
+      "ref": "reports/flow"
+    },
+    "createdResolved": {
+      "ref": "reports/createdResolved"
+    }
+  },
+  "components": [
+    {
+      "id": "project-numbers",
+      "type": "stats",
+      "source": "summary",
+      "items": [
+        {
+          "id": "kpi-open",
+          "label": "{{ t('reports.open', 'Open') }}",
+          "field": "open",
+          "format": "number",
+          "decimals": 0,
+          "tone": "primary"
+        },
+        {
+          "id": "kpi-in-progress",
+          "label": "{{ t('reports.in_progress', 'In progress') }}",
+          "field": "inProgress",
+          "format": "number",
+          "decimals": 0
+        },
+        {
+          "id": "kpi-resolved",
+          "label": "{{ t('reports.resolved', 'Resolved') }}",
+          "field": "resolved",
+          "format": "number",
+          "decimals": 0,
+          "tone": "success",
+          "caption": "{{ t('reports.last_30_days', 'in the last 30 days') }}"
+        },
+        {
+          "id": "kpi-cycle-time",
+          "label": "{{ t('reports.cycle_time', 'Cycle time') }}",
+          "field": "cycleTime",
+          "format": "number",
+          "decimals": 1,
+          "caption": "{{ t('reports.cycle_time_caption', 'median days from start to done') }}",
+          "tooltip": "{{ t('reports.cycle_time_help', 'Of the issues resolved in the last 30 days that went through a status in progress') }}"
+        }
+      ]
+    },
+    {
+      "id": "sprint-name",
+      "type": "text",
+      "visibleIf": "{{ has(data.summary.sprint) && data.summary.sprint != null }}",
+      "text": "{{ t('reports.active_sprint', 'Active sprint: {name}', {'name': data.summary.sprint}) }}"
+    },
+    {
+      "id": "charts",
+      "type": "grid",
+      "columns": 2,
+      "components": [
+        {
+          "id": "section-burndown",
+          "type": "section",
+          "title": "{{ t('reports.burndown', 'Burndown') }}",
+          "components": [
+            {
+              "id": "chart-burndown",
+              "type": "chart",
+              "format": "number",
+              "kind": "line",
+              "source": "burndown",
+              "categoryField": "label",
+              "series": [
+                {
+                  "field": "remaining",
+                  "label": "{{ t('reports.remaining', 'Points left') }}"
+                },
+                {
+                  "field": "ideal",
+                  "label": "{{ t('reports.ideal', 'Ideal') }}",
+                  "tone": "neutral"
+                }
+              ],
+              "caption": "{{ t('reports.burndown_caption', 'Story points left in the active sprint, or in the last one, day by day') }}"
+            }
+          ]
+        },
+        {
+          "id": "section-velocity",
+          "type": "section",
+          "title": "{{ t('reports.velocity', 'Velocity') }}",
+          "components": [
+            {
+              "id": "chart-velocity",
+              "type": "chart",
+              "format": "number",
+              "kind": "bar",
+              "source": "velocity",
+              "categoryField": "sprint",
+              "series": [
+                {
+                  "field": "committed",
+                  "label": "{{ t('reports.committed', 'Committed') }}",
+                  "tone": "neutral"
+                },
+                {
+                  "field": "done",
+                  "label": "{{ t('reports.done_points', 'Done') }}",
+                  "tone": "success"
+                }
+              ],
+              "caption": "{{ t('reports.velocity_caption', 'Story points of the last six completed sprints') }}"
+            }
+          ]
+        },
+        {
+          "id": "section-flow",
+          "type": "section",
+          "span": 2,
+          "title": "{{ t('reports.flow', 'Cumulative flow') }}",
+          "components": [
+            {
+              "id": "chart-flow",
+              "type": "chart",
+              "format": "number",
+              "kind": "bar",
+              "stacked": true,
+              "source": "flow",
+              "categoryField": "label",
+              "series": [
+                {
+                  "field": "done",
+                  "label": "{{ t('reports.cat_done', 'Done') }}",
+                  "tone": "success"
+                },
+                {
+                  "field": "inProgress",
+                  "label": "{{ t('reports.cat_in_progress', 'In progress') }}",
+                  "tone": "primary"
+                },
+                {
+                  "field": "todo",
+                  "label": "{{ t('reports.cat_todo', 'To do') }}",
+                  "tone": "neutral"
+                }
+              ],
+              "caption": "{{ t('reports.flow_caption', 'Issues per status category, last 30 days') }}"
+            }
+          ]
+        },
+        {
+          "id": "section-created-resolved",
+          "type": "section",
+          "span": 2,
+          "title": "{{ t('reports.created_resolved', 'Created vs resolved') }}",
+          "components": [
+            {
+              "id": "chart-created-resolved",
+              "type": "chart",
+              "format": "number",
+              "kind": "bar",
+              "source": "createdResolved",
+              "categoryField": "label",
+              "series": [
+                {
+                  "field": "created",
+                  "label": "{{ t('reports.created', 'Created') }}",
+                  "tone": "primary"
+                },
+                {
+                  "field": "resolved",
+                  "label": "{{ t('reports.resolved', 'Resolved') }}",
+                  "tone": "success"
+                }
+              ],
+              "caption": "{{ t('reports.created_resolved_caption', 'Issues created and resolved per day, last 30 days') }}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

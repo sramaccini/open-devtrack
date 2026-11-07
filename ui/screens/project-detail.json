@@ -146,6 +146,18 @@
           ]
         },
         {
+          "id": "btn-dashboard",
+          "label": "{{ t('reports.open_dashboard', 'Dashboard') }}",
+          "onClick": [
+            {
+              "navigate": "project-dashboard",
+              "params": {
+                "key": "{{form.key}}"
+              }
+            }
+          ]
+        },
+        {
           "id": "btn-add-member",
           "label": "{{ t('projects.add_member', 'Add member') }}",
           "visibleIf": "{{form._perm.manageMembers}}",

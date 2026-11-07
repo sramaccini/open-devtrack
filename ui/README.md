@@ -91,3 +91,11 @@ and values as one types (`suggest` from `/api/search/words`), the results in a `
 and groups computed by the back end, and the saved filters below (use, edit, remove; save the current query as a new
 one). The field checks the query on the back end as one types and says where it is wrong; Enter runs it.
 `issue-list` opens the search on its project («Open in search»).
+
+## Dashboards
+
+`dashboard` (Home › Dashboard, the first screen) is the personal dashboard of ADR-17: four indicators, the user's open
+issues (`serverDataTable` on the search) and their filters marked «On my dashboard» with what each finds.
+`project-dashboard` (params `key`, from the «Dashboard» button of `project-detail`): indicators, burndown, velocity,
+cumulative flow and created vs resolved, on the `stats` and `chart` of Quadrava. The days on the axis are short labels
+and the 30-day charts take the full width until the chart leaves out the labels that do not fit (Q14).

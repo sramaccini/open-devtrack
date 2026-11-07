@@ -52,8 +52,11 @@ spring:
     # One schema and one folder per module (ADR-04), all under db/odt with one history table in odt: the version
     # numbers are global across the folders (V1 uiregistry, V2 access, V3 project, V4 issue, V5 the event
     # publications, …). The RBAC schema has its own Flyway and history, run by authz-rbac.
-    schemas: odt,odt_uiregistry,odt_access,odt_project,odt_issue,odt_audit,odt_collaboration,odt_workflow,odt_notification,odt_agile,odt_search
+    schemas: odt,odt_uiregistry,odt_access,odt_project,odt_issue,odt_audit,odt_collaboration,odt_workflow,odt_notification,odt_agile,odt_search,odt_reporting
     locations: classpath:db/odt
+    placeholders:
+      # The days of the reports (ADR-17), also in the migration that fills them from the existing data
+      reporting_zone: ${odt.reporting.zone}
   modulith:
     events:
       # Event Publication Registry in odt (table from V5): a listener that fails keeps its event, republished at the
@@ -118,6 +121,11 @@ odt:
     #   region: us-east-1
     #   path-style: true               # MinIO and most S3-compatible servers
     #   access-key / secret-key: from ODT_ATTACHMENTS_S3_ACCESS_KEY and ODT_ATTACHMENTS_S3_SECRET_KEY, or the AWS chain
+  reporting:
+    # Time zone of the days of search dates and reports (ADR-16, ADR-17); the snapshot of each project is written
+    # again every night, so a day with no change still has its row.
+    zone: ${ODT_REPORTING_ZONE:UTC}
+    snapshot-cron: "0 5 0 * * *"
   uiregistry:
     # Environments where only versions approved by someone other than their author are published: none (ADR-12, the
     # review is the one of the code). An installation that wants it lists them:

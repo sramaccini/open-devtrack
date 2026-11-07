@@ -13,6 +13,7 @@ import com.logicwarez.opendevtrack.agile.SprintEvents.SprintStarted;
 import com.logicwarez.opendevtrack.platform.Problems;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -168,10 +169,12 @@ class SprintController {
         Instant now = Instant.now();
         sprint.start(startsOn, endsOn, now);
         sprints.saveAndFlush(sprint);
+        int committed = 0;
         for (PlanEntity plan : planRepository.findBySprintId(sprint.id())) {
             history.save(new SprintIssueEntity(sprint.id(), plan.issueId(), plan.points(), now));
+            committed += plan.points() == null ? 0 : plan.points();
         }
-        events.publishEvent(new SprintStarted(sprint.id(), scope.projectId(), sprint.name(), startsOn, endsOn,
+        events.publishEvent(new SprintStarted(sprint.id(), scope.projectId(), sprint.name(), startsOn, endsOn, committed,
                 scopes.username(), now));
         return ResponseEntity.ok(row(scope, sprint, planRepository.findBySprintId(sprint.id())));
     }
@@ -212,25 +215,34 @@ class SprintController {
         Map<UUID, String> statusOf = cards.ranked(scope.project()).stream()
                 .collect(Collectors.toMap(p -> p.issue().id(), p -> p.issue().status()));
         Instant now = Instant.now();
+        List<PlanEntity> planned = planRepository.findBySprintId(sprint.id());
+        Map<UUID, Integer> pointsOf = new HashMap<>();
+        planned.forEach(p -> pointsOf.put(p.issueId(), p.points()));
         int finished = 0;
         int carried = 0;
+        int donePoints = 0;
+        int carriedPoints = 0;
         for (SprintIssueEntity held : history.findBySprintIdAndRemovedAtIsNull(sprint.id())) {
             boolean isDone = done.contains(statusOf.get(held.issueId()));
             held.out(isDone ? SprintIssueEntity.DONE : SprintIssueEntity.CARRIED, now);
+            Integer points = pointsOf.containsKey(held.issueId()) ? pointsOf.get(held.issueId()) : held.points();
             if (isDone) {
                 finished++;
+                donePoints += points == null ? 0 : points;
             } else {
                 carried++;
+                carriedPoints += points == null ? 0 : points;
             }
         }
-        for (PlanEntity plan : planRepository.findBySprintId(sprint.id())) {
+        for (PlanEntity plan : planned) {
             // The done ones leave the open sprints too: the sprint completed keeps them in its history.
             plan.sprint(done.contains(statusOf.get(plan.issueId())) || next == null ? null : next.id());
+            plans.planned(plan);
         }
         sprint.complete(now);
         sprints.saveAndFlush(sprint);
         events.publishEvent(new SprintCompleted(sprint.id(), scope.projectId(), sprint.name(), finished, carried,
-                scopes.username(), now));
+                donePoints, carriedPoints, scopes.username(), now));
         return ResponseEntity.ok(row(scope, sprint, List.of()));
     }
 
@@ -249,7 +261,10 @@ class SprintController {
         if (!sprint.is(SprintEntity.PLANNED)) {
             return Problems.conflict("Only a planned sprint is removed");
         }
-        planRepository.findBySprintId(sprint.id()).forEach(p -> p.sprint(null));
+        planRepository.findBySprintId(sprint.id()).forEach(p -> {
+            p.sprint(null);
+            plans.planned(p);
+        });
         planRepository.flush();
         sprints.delete(sprint);
         return ResponseEntity.noContent().build();

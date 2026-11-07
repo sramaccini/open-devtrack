@@ -14,11 +14,16 @@ public final class SprintEvents {
     private SprintEvents() {
     }
 
-    public record SprintStarted(UUID sprintId, UUID projectId, String name, LocalDate startsOn, LocalDate endsOn, String by,
-                                Instant at) {
+    /** {@code committedPoints}: the story points of the issues in the sprint when it starts (ADR-17). */
+    public record SprintStarted(UUID sprintId, UUID projectId, String name, LocalDate startsOn, LocalDate endsOn,
+                                int committedPoints, String by, Instant at) {
     }
 
-    /** {@code done}: the issues done in the sprint; {@code carried}: those that went to the backlog or to another sprint. */
-    public record SprintCompleted(UUID sprintId, UUID projectId, String name, int done, int carried, String by, Instant at) {
+    /**
+     * {@code done}: the issues done in the sprint; {@code carried}: those that went to the backlog or to another sprint;
+     * the points of each, as they are at the completion (ADR-17).
+     */
+    public record SprintCompleted(UUID sprintId, UUID projectId, String name, int done, int carried, int donePoints,
+                                  int carriedPoints, String by, Instant at) {
     }
 }

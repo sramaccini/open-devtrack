@@ -14,10 +14,10 @@
       "icon": "inbox",
       "items": [
         {
-          "id": "overview",
-          "label": "{{ t('nav.overview', 'Overview') }}",
+          "id": "dashboard",
+          "label": "{{ t('nav.dashboard', 'Dashboard') }}",
           "icon": "inbox",
-          "screen": "home"
+          "screen": "dashboard"
         }
       ]
     },
