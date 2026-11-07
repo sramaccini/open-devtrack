@@ -75,8 +75,9 @@ Quadrava and authz-library, and the ADRs say where.
   their days, daily snapshots per project and active sprint, sprint results), written after the commit and each night;
   reports of a project (indicators, burndown, velocity, cumulative flow, created vs resolved) and the personal counts
   from the search. Screens `dashboard` (the first screen, in place of `home`) and `project-dashboard`. The axis of the
-  charts leaves out the day labels that do not fit (Q14, Quadrava 0.12.0). Not done: the choice of the sprint of the burndown on the screen
-  (the API takes it), «Overdue» and «In review by me» (no due date nor reviewer, ADR-17 point 5).
+  charts leaves out the day labels that do not fit (Q14, Quadrava 0.12.0). The sprint of the burndown is chosen on
+  the screen (a lookup of `…/reports/sprints?q=`, the active or the last one when empty). Not done: «Overdue» and
+  «In review by me» (no due date nor reviewer, ADR-17 point 5).
 - F4 E9 (ADR-18, accepted 7 November 2026): preferences per user and kind (in the application; email off, at once or
   in the daily digest), an outbox in `odt_notification.message` sent by `MailOutbox` over SMTP (Spring Mail; retries,
   `SKIP LOCKED`), plain-text mails in the last language the user used. Screen `notification-settings` as the
@@ -109,6 +110,6 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F4: the choice of the sprint of the burndown on the screen.
+1. F4: «Overdue» and «In review by me» of the dashboard need a due date and a reviewer on the issue (an ADR first).
 2. Workflows by issue type and editing statuses and transitions when a project needs them (ADR-10).
 3. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

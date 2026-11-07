@@ -256,8 +256,8 @@ with no event has its row. The migration fills the tables from the existing data
 from the changelog of `audit` and the last 30 days of each project rebuilt from those days.
 
 - `GET /api/projects/{key}/reports/summary` (open, in progress, resolved in 30 days, median cycle time in days, the
-  active sprint), `…/sprints`, `…/burndown?sprint=` (the active sprint, else the last one: points left and the ideal
-  line), `…/velocity` (the last 6 completed sprints), `…/flow` and `…/created-resolved` (the last 30 days). For the
+  active sprint), `…/sprints?q=` (those started, the most recent first; `q` filters by name, for the lookup of the
+  screen), `…/burndown?sprint=` (the active sprint, else the last one: points left and the ideal line), `…/velocity` (the last 6 completed sprints), `…/flow` and `…/created-resolved` (the last 30 days). For the
   members of the project; days are ISO dates, shown short on the axis by the chart (Q14).
 - `GET /api/me/summary` and `GET /api/me/filters` (in `search`, as counts of ODQL queries on its index): open issues
   assigned to and reported by the user, open critical bugs, issues resolved since Monday; the user's filters marked for

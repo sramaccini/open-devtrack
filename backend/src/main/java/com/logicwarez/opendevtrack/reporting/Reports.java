@@ -77,10 +77,17 @@ class Reports {
         return summary;
     }
 
-    /** The sprints of the project that have started, the most recent first: for the choice of the burndown. */
-    List<Map<String, Object>> sprints(UUID projectId) {
+    /**
+     * The sprints of the project that have started, the most recent first: for the choice of the burndown. With
+     * {@code q}, only those whose name contains it, as the lookup of the screen asks while the user types.
+     */
+    List<Map<String, Object>> sprints(UUID projectId, String q) {
+        var where = Result.PROJECT_ID.eq(projectId);
+        if (q != null && !q.isBlank()) {
+            where = where.and(Result.NAME.containsIgnoreCase(q.strip()));
+        }
         return sql.select(Result.SPRINT_ID, Result.NAME, Result.STARTS_ON, Result.ENDS_ON, Result.COMPLETED_AT)
-                .from(Result.TABLE).where(Result.PROJECT_ID.eq(projectId))
+                .from(Result.TABLE).where(where)
                 .orderBy(Result.STARTS_ON.desc(), Result.NAME.desc())
                 .fetch(r -> {
                     Map<String, Object> row = new LinkedHashMap<>();

@@ -100,6 +100,8 @@ issues (`serverDataTable` on the search) and their filters marked «On my dashbo
 `project-dashboard` (params `key`, from the «Dashboard» button of `project-detail`): indicators, burndown, velocity,
 cumulative flow and created vs resolved, on the `stats` and `chart` of Quadrava. The days are ISO dates with
 `categoryFormat: "date"`: the chart leaves out the labels that do not fit and shortens them (Q14, Quadrava 0.12.0).
+The sprint of the burndown is a `lookup` in an `input` bound to `state.sprint`, passed as `sprint` to `reports/burndown`
+(which reloads when it changes); empty, the back end takes the active sprint, else the last one.
 
 ## Notification settings
 

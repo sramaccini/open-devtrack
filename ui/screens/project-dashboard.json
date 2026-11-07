@@ -7,8 +7,14 @@
     "summary": {
       "ref": "reports/summary"
     },
+    "sprints": {
+      "ref": "reports/sprints"
+    },
     "burndown": {
-      "ref": "reports/burndown"
+      "ref": "reports/burndown",
+      "params": {
+        "sprint": "{{ has(state.sprint) ? state.sprint : null }}"
+      }
     },
     "velocity": {
       "ref": "reports/velocity"
@@ -78,6 +84,23 @@
           "title": "{{ t('reports.burndown', 'Burndown') }}",
           "components": [
             {
+              "id": "burndown-sprint",
+              "type": "input",
+              "bind": "state.sprint",
+              "field": {
+                "name": "sprint",
+                "type": "lookup",
+                "label": "{{ t('reports.burndown_sprint', 'Sprint') }}",
+                "tooltip": "{{ t('reports.burndown_sprint_help', 'Empty: the active sprint, or the last one') }}",
+                "lookup": {
+                  "source": "sprints",
+                  "valueField": "id",
+                  "labelField": "name",
+                  "minChars": 0
+                }
+              }
+            },
+            {
               "id": "chart-burndown",
               "type": "chart",
               "format": "number",
@@ -96,7 +119,7 @@
                   "tone": "neutral"
                 }
               ],
-              "caption": "{{ t('reports.burndown_caption', 'Story points left in the active sprint, or in the last one, day by day') }}"
+              "caption": "{{ t('reports.burndown_caption', 'Story points left in the chosen sprint, else in the active or the last one, day by day') }}"
             }
           ]
         },

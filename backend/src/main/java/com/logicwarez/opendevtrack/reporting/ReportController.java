@@ -47,8 +47,8 @@ class ReportController {
     }
 
     @GetMapping("/api/projects/{key}/reports/sprints")
-    ResponseEntity<?> sprints(@PathVariable String key) {
-        return of(key, p -> reports.sprints(p.id()));
+    ResponseEntity<?> sprints(@PathVariable String key, @RequestParam(required = false) String q) {
+        return of(key, p -> reports.sprints(p.id(), q));
     }
 
     @GetMapping("/api/projects/{key}/reports/burndown")

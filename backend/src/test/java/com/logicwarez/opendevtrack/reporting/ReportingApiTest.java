@@ -204,6 +204,9 @@ class ReportingApiTest {
                 .isEqualTo(List.of(Map.of("sprint", "ODT Sprint 1", "committed", 8, "done", 5)));
         assertThat(read(luisa, reports + "burndown?sprint=" + sprint, "$[2].remaining")).isEqualTo(3);
         assertThat(read(luisa, reports + "sprints", "$[0].state")).isEqualTo("completed");
+        // The choice of the burndown: the sprints whose name has the words typed.
+        assertThat(read(luisa, reports + "sprints?q=sprint 1", "$[*].id")).isEqualTo(List.of(sprint));
+        assertThat(read(luisa, reports + "sprints?q=nothing", "$")).isEqualTo(List.of());
         // The issues not done left the sprint, in the read model too.
         await(() -> count("SELECT count(*) FROM odt_reporting.issue_state WHERE sprint_id IS NOT NULL") == 0);
 

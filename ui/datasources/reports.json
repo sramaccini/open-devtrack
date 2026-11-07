@@ -8,6 +8,14 @@
       "method": "GET",
       "url": "/api/projects/{{params.key}}/reports/summary"
     },
+    "sprints": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/reports/sprints",
+      "params": {
+        "q": "{{search}}"
+      }
+    },
     "burndown": {
       "type": "rest",
       "method": "GET",
