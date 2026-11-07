@@ -164,6 +164,7 @@ class BacklogController {
         PlanEntity plan = plans.plan(issue.get().id(), scope.get().projectId());
         plan.points(request.points());
         planRepository.save(plan);
+        plans.planned(plan);
         return ResponseEntity.ok(view(scope.get(), plan));
     }
 

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "1.0",
+  "datasources": "search",
+  "description": "Search with ODQL, its suggestions and the saved filters (module search, ADR-16).",
+  "sources": {
+    "search": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/search",
+      "body": {
+        "query": "{{ state.query }}",
+        "page": "{{ request.page }}",
+        "size": "{{ request.size }}",
+        "sort": "{{ request.sort }}",
+        "filters": "{{ request.filters }}",
+        "groupBy": "{{ request.groupBy }}",
+        "groupPath": "{{ request.groupPath }}",
+        "distinct": "{{ request.distinct }}"
+      }
+    },
+    "check": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/search/check",
+      "params": {
+        "q": "{{ value }}"
+      }
+    },
+    "words": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/search/words",
+      "params": {
+        "q": "{{ search }}",
+        "word": "{{ word }}"
+      }
+    },
+    "filters": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/filters"
+    },
+    "createFilter": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/filters",
+      "body": "{{form}}"
+    },
+    "saveFilter": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/filters/{{id}}",
+      "body": "{{form}}"
+    },
+    "removeFilter": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/filters/{{id}}"
+    }
+  }
+}

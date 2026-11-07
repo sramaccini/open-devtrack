@@ -38,6 +38,12 @@
           "label": "{{ t('nav.boards', 'Boards') }}",
           "icon": "sections",
           "screen": "board-list"
+        },
+        {
+          "id": "search",
+          "label": "{{ t('nav.search', 'Search') }}",
+          "icon": "search",
+          "screen": "search"
         }
       ]
     }

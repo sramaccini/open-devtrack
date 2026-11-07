@@ -43,7 +43,7 @@ word at the cursor, the service decides the words: catalogue § 2.7, made for a 
 2. **The index.** `search` keeps its own read model, fed by the events after the commit (as `audit` does):
    `odt_search.issue_doc (issue_id, project_id, key, number, type, status, category, priority, assignee, reporter,
    labels, summary, custom jsonb, created_at, updated_at, resolved_at, sprint_id, points, rank, tsv)`.
-   `tsv` is a generated column on summary, description and labels, configuration `simple` with `unaccent` (issues mix
+   `tsv` is the text vector of summary, description and labels, computed when the row is written, configuration `simple` with `unaccent` (issues mix
    Italian and English), with a GIN index; B-tree indexes on the common filters, GIN on `labels` and
    `custom`. The description is indexed, not stored.
    - `issue` already publishes `IssueCreated`, `IssueChanged` and `IssueDeleted` with the fields that change; `agile`
@@ -95,7 +95,7 @@ word at the cursor, the service decides the words: catalogue § 2.7, made for a 
 
 ## Consequences
 
-- Module `search`: migration `odt_search` (index, saved filters, the `unaccent` extension), listeners, parser and
+- Module `search`: migration `odt_search` (index, saved filters, the extensions `unaccent` and `pg_trgm`), listeners, parser and
   compiler, API, the dependency `org.jooq:jooq` (the version managed by Spring Boot).
 - `agile` publishes `IssuePlanned`; `workflow` exposes the category of a status; ADR-04 is amended on code generation.
 - Unit tests for the parser and the compiler (every operator, every error), API tests with two tenants and users

@@ -1,0 +1,373 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "search",
+  "title": "{{ t('search.title', 'Search') }}",
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "results": {
+      "ref": "search/search"
+    },
+    "check": {
+      "ref": "search/check"
+    },
+    "words": {
+      "ref": "search/words"
+    },
+    "filters": {
+      "ref": "search/filters"
+    },
+    "createFilter": {
+      "ref": "search/createFilter"
+    },
+    "saveFilter": {
+      "ref": "search/saveFilter"
+    },
+    "removeFilter": {
+      "ref": "search/removeFilter"
+    }
+  },
+  "components": [
+    {
+      "id": "search-help",
+      "type": "alert",
+      "kind": "info",
+      "format": "markdown",
+      "text": "{{ t('search.help', 'Write a query and press Enter. For example: `type = bug AND assignee = currentUser()`, `status IN (todo, in_progress) ORDER BY priority DESC`, `text ~ \"coupon\" AND created >= -14d`. The field suggests fields, operators and values as you type.') }}"
+    },
+    {
+      "id": "search-query",
+      "type": "input",
+      "bind": "state.query",
+      "default": "{{ has(params.q) ? params.q : '' }}",
+      "field": {
+        "name": "query",
+        "type": "text",
+        "label": "{{ t('search.query', 'Query') }}",
+        "maxLength": 2000,
+        "suggest": {
+          "source": "words",
+          "valueField": "insert",
+          "labelField": "label",
+          "descriptionField": "example",
+          "minChars": 0
+        },
+        "validation": [
+          {
+            "remote": "check"
+          }
+        ]
+      },
+      "onChange": [
+        {
+          "refresh": "results"
+        }
+      ]
+    },
+    {
+      "id": "btn-save-filter",
+      "type": "button",
+      "label": "{{ t('search.save_filter', 'Save as filter') }}",
+      "onClick": [
+        {
+          "dialog": {
+            "title": "{{ t('search.save_filter', 'Save as filter') }}",
+            "submitLabel": "{{ t('common.save', 'Save') }}",
+            "initial": {
+              "query": "{{ state.query }}",
+              "shared": false,
+              "onDashboard": false
+            },
+            "fields": [
+              {
+                "name": "name",
+                "type": "text",
+                "label": "{{ t('search.filter_name', 'Name') }}",
+                "required": true,
+                "maxLength": 100
+              },
+              {
+                "name": "query",
+                "type": "textarea",
+                "label": "{{ t('search.query', 'Query') }}",
+                "required": true,
+                "maxLength": 2000
+              },
+              {
+                "name": "shared",
+                "type": "switch",
+                "label": "{{ t('search.shared', 'Shared with everyone') }}",
+                "tooltip": "{{ t('search.shared_help', 'Everyone in the organisation sees the filter; each one finds only the issues they may see') }}"
+              },
+              {
+                "name": "onDashboard",
+                "type": "switch",
+                "label": "{{ t('search.on_dashboard', 'On my dashboard') }}"
+              }
+            ],
+            "onSubmit": [
+              {
+                "call": "createFilter",
+                "onError": [
+                  {
+                    "toast": "{{ t('search.wrong_query', 'The query is not right: check it in the field above') }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "toast": "{{ t('search.filter_saved', 'Filter saved') }}"
+        },
+        {
+          "refresh": "filters"
+        }
+      ]
+    },
+    {
+      "id": "search-results",
+      "type": "serverDataTable",
+      "source": "results",
+      "pageSize": 25,
+      "columns": [
+        {
+          "field": "key",
+          "label": "{{ t('issues.key', 'Key') }}",
+          "sortable": true,
+          "filter": "text",
+          "onClick": [
+            {
+              "navigate": "issue-detail",
+              "params": {
+                "key": "{{row.project}}",
+                "issue": "{{row.key}}"
+              }
+            }
+          ]
+        },
+        {
+          "field": "project",
+          "label": "{{ t('agile.project', 'Project') }}",
+          "sortable": true,
+          "filter": "select",
+          "groupable": true
+        },
+        {
+          "field": "type",
+          "label": "{{ t('issues.type', 'Type') }}",
+          "valueKey": "values.issue_type",
+          "sortable": true,
+          "filter": "select",
+          "groupable": true
+        },
+        {
+          "field": "summary",
+          "label": "{{ t('issues.summary', 'Summary') }}",
+          "sortable": true,
+          "filter": "text"
+        },
+        {
+          "field": "status",
+          "label": "{{ t('issues.status', 'Status') }}",
+          "format": "badge",
+          "badges": {
+            "todo": "neutral",
+            "in_progress": "primary",
+            "done": "success"
+          },
+          "valueKey": "values.status",
+          "sortable": true,
+          "filter": "select",
+          "groupable": true
+        },
+        {
+          "field": "priority",
+          "label": "{{ t('issues.priority', 'Priority') }}",
+          "format": "badge",
+          "badges": {
+            "high": "danger",
+            "highest": "danger"
+          },
+          "valueKey": "values.priority",
+          "sortable": true,
+          "filter": "select",
+          "groupable": true
+        },
+        {
+          "field": "assignee",
+          "label": "{{ t('issues.assignee', 'Assignee') }}",
+          "sortable": true,
+          "filter": "select",
+          "groupable": true
+        },
+        {
+          "field": "points",
+          "label": "{{ t('agile.points_short', 'Points') }}",
+          "sortable": true,
+          "filter": "number"
+        },
+        {
+          "field": "updated",
+          "label": "{{ t('issues.updated', 'Updated') }}",
+          "format": "datetime",
+          "sortable": true,
+          "filter": "date"
+        }
+      ]
+    },
+    {
+      "id": "filters-title",
+      "type": "text",
+      "style": "heading",
+      "text": "{{ t('search.filters', 'Saved filters') }}"
+    },
+    {
+      "id": "filter-table",
+      "type": "table",
+      "source": "filters",
+      "columns": [
+        {
+          "field": "name",
+          "label": "{{ t('search.filter_name', 'Name') }}",
+          "onClick": [
+            {
+              "set": {
+                "path": "state.query",
+                "value": "{{row.query}}"
+              }
+            },
+            {
+              "refresh": "results"
+            }
+          ]
+        },
+        {
+          "field": "query",
+          "label": "{{ t('search.query', 'Query') }}"
+        },
+        {
+          "field": "owner",
+          "label": "{{ t('search.owner', 'Owner') }}"
+        },
+        {
+          "field": "shared",
+          "label": "{{ t('search.shared_short', 'Shared') }}",
+          "format": "boolean"
+        },
+        {
+          "field": "onDashboard",
+          "label": "{{ t('search.on_dashboard_short', 'Dashboard') }}",
+          "format": "boolean"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-use-filter",
+          "label": "{{ t('search.use', 'Use') }}",
+          "onClick": [
+            {
+              "set": {
+                "path": "state.query",
+                "value": "{{row.query}}"
+              }
+            },
+            {
+              "refresh": "results"
+            }
+          ]
+        },
+        {
+          "id": "btn-edit-filter",
+          "label": "{{ t('common.edit', 'Edit') }}",
+          "visibleIf": "{{row._perm.edit}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('search.edit_filter', 'Edit the filter') }}",
+                "submitLabel": "{{ t('common.save', 'Save') }}",
+                "initial": {
+                  "name": "{{row.name}}",
+                  "query": "{{row.query}}",
+                  "shared": "{{row.shared}}",
+                  "onDashboard": "{{row.onDashboard}}",
+                  "version": "{{row.version}}"
+                },
+                "fields": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "{{ t('search.filter_name', 'Name') }}",
+                    "required": true,
+                    "maxLength": 100
+                  },
+                  {
+                    "name": "query",
+                    "type": "textarea",
+                    "label": "{{ t('search.query', 'Query') }}",
+                    "required": true,
+                    "maxLength": 2000
+                  },
+                  {
+                    "name": "shared",
+                    "type": "switch",
+                    "label": "{{ t('search.shared', 'Shared with everyone') }}"
+                  },
+                  {
+                    "name": "onDashboard",
+                    "type": "switch",
+                    "label": "{{ t('search.on_dashboard', 'On my dashboard') }}"
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "saveFilter",
+                    "args": {
+                      "id": "{{row.id}}"
+                    },
+                    "onError": [
+                      {
+                        "if": "{{error.status == 412}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "toast": "{{ t('search.wrong_query', 'The query is not right: check it in the field above') }}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "filters"
+            }
+          ]
+        },
+        {
+          "id": "btn-remove-filter",
+          "label": "{{ t('common.remove', 'Remove') }}",
+          "visibleIf": "{{row._perm.edit}}",
+          "onClick": [
+            {
+              "confirm": "{{ t('search.remove_filter', 'Remove the filter?') }}"
+            },
+            {
+              "call": "removeFilter",
+              "args": {
+                "id": "{{row.id}}"
+              }
+            },
+            {
+              "refresh": "filters"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

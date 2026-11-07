@@ -190,3 +190,27 @@ story points; a new issue goes to the bottom, from `IssueCreated` in the transac
   `odt.sprint.manage` (developer, admin). What a sprint held from its start is in `sprint_issue`, with the outcome of
   each issue (`done`, `carried`, `removed`), and `SprintStarted`, `SprintCompleted` are published for the reports.
 - Story points: `GET|PUT /api/issues/{key}/plan` (`points` from 0 to 999, `odt.issue.edit`).
+
+## Search and saved filters (`search`)
+
+ODQL, the query language of ADR-16, on a read model in `odt_search`. `issue_doc` holds one row per issue with what the
+search needs from `issue`, `workflow` and `agile` (status category, priority order, sprint, points, rank, custom fields
+as `jsonb`, a `tsvector` of summary, description and labels folded by `unaccent`). The row is rebuilt after the commit
+from `IssueCreated`, `IssueChanged`, `IssuePlanned` and `IssueDeleted`, reading through the public APIs of those
+modules; `POST /api/search/reindex` (admin of the tenant) rebuilds the rows of the tenant.
+
+- Query: fields `project`, `key`, `type`, `status`, `category`, `priority`, `assignee`, `reporter`, `labels`,
+  `summary`, `text`, `created`, `updated`, `resolved`, `sprint`, `points`, `custom.<key>`; operators `=`, `!=`, `<`,
+  `<=`, `>`, `>=`, `~`, `!~`, `IN`, `NOT IN`, `IS EMPTY`, `IS NOT EMPTY`; `AND`, `OR`, `NOT`, parentheses and
+  `ORDER BY` (also `rank`). Functions `currentUser()` and `openSprints()`; dates as `2026-11-01`, `today` or `-7d`,
+  `-2w`, `-1m`, `-1y` in the zone `odt.reporting.zone` (UTC by default). Status names are accepted in English and
+  Italian as well as their ids. Hand-written parser and compiler to jOOQ conditions: values are always bound.
+- `POST /api/search` takes the request of the `serverDataTable` of Quadrava (query, page, size up to 100, sort, column
+  filters, groups, distinct values) and answers in its shape; only the projects the user is a member of are searched
+  (all for the admin of the tenant). A wrong query is a 400 Problem with `position` (1-based) and `expected`.
+  `GET /api/search/check?q=` checks a query and answers as a remote check of Quadrava (`valid`, code `odql` with
+  `position` and `reason`: the reason is in English, like the titles of the Problems), `GET /api/search/words?q=&word=`
+  suggests the next word.
+- Filters: `GET|POST /api/filters`, `PUT|DELETE /api/filters/{id}` (name, query, `shared`, `onDashboard`; changed only
+  by their owner, `version` gives 412). A shared filter is seen by everyone in the tenant, and each one finds only the
+  issues they may see. A filter's query is checked when it is saved.

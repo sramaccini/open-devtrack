@@ -70,6 +70,18 @@
           ]
         },
         {
+          "id": "btn-open-in-search",
+          "label": "{{ t('issues.open_in_search', 'Open in search') }}",
+          "onClick": [
+            {
+              "navigate": "search",
+              "params": {
+                "q": "{{ 'project = ' + form.key }}"
+              }
+            }
+          ]
+        },
+        {
           "id": "btn-project",
           "label": "{{ t('issues.project_settings', 'Project and members') }}",
           "onClick": [

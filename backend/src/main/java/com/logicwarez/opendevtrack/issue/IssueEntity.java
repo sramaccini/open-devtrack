@@ -146,6 +146,10 @@ class IssueEntity {
         return updatedAt;
     }
 
+    String tenantId() {
+        return tenantId;
+    }
+
     long version() {
         return version;
     }

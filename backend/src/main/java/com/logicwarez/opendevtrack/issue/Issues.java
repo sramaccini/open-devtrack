@@ -13,9 +13,12 @@ import com.logicwarez.opendevtrack.project.Projects;
 import com.logicwarez.opendevtrack.workflow.Workflows;
 import com.logicwarez.opendevtrack.workflow.Workflows.Transition;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.context.ApplicationEventPublisher;
@@ -57,6 +60,22 @@ public class Issues {
     /** The issue with this key ({@code ODT-42}); empty also when its project belongs to another tenant. */
     public Optional<IssueRef> find(String issueKey) {
         return findEntity(issueKey).map(f -> new IssueRef(f.issue().id(), f.project().id(), issueKey));
+    }
+
+    /**
+     * The issue with every field, without the session: for the listeners of other modules, which run after the commit
+     * and check the tenant themselves. Empty when the issue or its project is gone.
+     */
+    public Optional<IssueDocument> document(UUID issueId) {
+        return issues.findById(issueId).flatMap(i -> projects.byId(i.projectId()).map(p -> new IssueDocument(i.id(),
+                i.tenantId(), p.id(), p.key(), IssueController.key(p, i), i.number(), i.type().value(), i.summary(),
+                i.description(), i.status(), i.priority().value(), i.priority().ordinal() + 1, i.assignee(), i.reporter(),
+                List.copyOf(i.labels()), new HashMap<>(i.custom()), i.createdAt(), i.updatedAt())));
+    }
+
+    /** The identifiers of every issue of the project, in the order of their numbers: to rebuild an index. */
+    public List<UUID> idsOf(UUID projectId) {
+        return issues.findIdsByProjectId(projectId);
     }
 
     /** The issues of the project, in the order of their numbers, at most {@link #MAX_PLANNED}. */

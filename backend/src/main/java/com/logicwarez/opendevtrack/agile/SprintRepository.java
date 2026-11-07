@@ -18,6 +18,8 @@ interface SprintRepository extends JpaRepository<SprintEntity, UUID> {
     /** Every sprint of the project, the newest first. */
     List<SprintEntity> findByProjectIdOrderByCreatedAtDescIdDesc(UUID projectId);
 
+    List<SprintEntity> findByProjectIdInOrderByCreatedAtDesc(Collection<UUID> projectIds);
+
     Optional<SprintEntity> findByProjectIdAndState(UUID projectId, String state);
 
     long countByProjectId(UUID projectId);

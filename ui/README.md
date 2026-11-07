@@ -83,3 +83,11 @@ backlog, with the sprints in a table below (new, start, complete, edit, remove).
 the boards of the projects of the user; `project-detail` manages those of a project and `issue-detail` sets the story
 points. A card opens its issue (`onOpen`) and its badges show the values in the language of the user (`valueKey`):
 both from Q12, Quadrava 0.11.1.
+
+## Search
+
+`search` (Projects › Search, params `q`) is the ODQL search of ADR-16: a text field that suggests fields, operators
+and values as one types (`suggest` from `/api/search/words`), the results in a `serverDataTable` with column filters
+and groups computed by the back end, and the saved filters below (use, edit, remove; save the current query as a new
+one). The field checks the query on the back end as one types and says where it is wrong; Enter runs it.
+`issue-list` opens the search on its project («Open in search»).

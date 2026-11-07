@@ -34,6 +34,11 @@ public class Projects {
         return projects.findById(id).map(ProjectEntity::toRef).filter(p -> p.tenantId().equals(user.tenantId()));
     }
 
+    /** The project with this identifier, whatever the tenant: for listeners, which run without a session. */
+    public Optional<ProjectRef> byId(UUID id) {
+        return projects.findById(id).map(ProjectEntity::toRef);
+    }
+
     /** The projects of the tenant of the session, in the order of their keys. */
     public List<ProjectRef> all() {
         return projects.findByTenantIdOrderByKey(user.tenantId()).stream().map(ProjectEntity::toRef).toList();

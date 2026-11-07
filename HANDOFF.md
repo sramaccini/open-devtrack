@@ -6,7 +6,7 @@ Quadrava and authz-library, and the ADRs say where.
 
 ## Status
 
-**6 November 2026 — phases F1 and F2 done (gate M1 covered); F3 boards, backlog and sprints built (ADR-15).**
+**7 November 2026 — phases F1, F2 and F3 done; F4 under way: search, ODQL and saved filters built (ADR-16).**
 
 - Repository github.com/sramaccini/open-devtrack, branch `main`: licence MPL-2.0 with CLA, contribution rules and
   project rules as Quadrava (ADR-05). Decisions D1–D9 and ADR-10 accepted, in `docs/`.
@@ -64,6 +64,12 @@ Quadrava and authz-library, and the ADRs say where.
   column runs a transition, guards included. Screens `board`, `backlog` and `board-list` on the `kanban` of Quadrava
   0.10.0; boards on `project-detail`, points on `issue-detail`. Q12 adopted with Quadrava 0.11.1: a card opens its
   issue, translated badges, one board component for every kind of lanes.
+- F4 E7 (ADR-16, accepted 7 November 2026): module `search` with ODQL (hand-written parser, compiled to jOOQ with
+  bound values) on the read model `odt_search.issue_doc`, rebuilt after the commit from the events of `issue` and
+  `agile`; full text with `unaccent` and a `simple` `tsvector`. Screen `search` with suggestions as one types,
+  results in a `serverDataTable` (filters and groups by the back end) and saved filters, private or shared. Not built
+  yet: the filter of a board by an ODQL query (ADR-16 point 7), because `agile` would depend on `search`, which
+  already depends on `agile` (a module cycle: it needs its own design), and the load test of point 8.
 
 ## Requests to the dependencies
 
@@ -90,6 +96,7 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F4 (per the plan): reports on the sprints (burndown, velocity) from `odt_agile.sprint_issue` and the sprint events.
+1. F4: E8 dashboards and reports (ADR-17), then E9 email notifications (ADR-18; the settings of the user wait for Q13
+   in Quadrava). The board filter and the load test of ADR-16.
 2. Workflows by issue type and editing statuses and transitions when a project needs them (ADR-10).
 3. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

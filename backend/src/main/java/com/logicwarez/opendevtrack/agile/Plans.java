@@ -4,6 +4,7 @@
  */
 package com.logicwarez.opendevtrack.agile;
 
+import com.logicwarez.opendevtrack.agile.PlanEvents.IssuePlanned;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueCreated;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueDeleted;
 import com.logicwarez.opendevtrack.project.ProjectCreated;
@@ -11,6 +12,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,8 +32,11 @@ class Plans {
     private final SprintRepository sprints;
     private final SprintIssueRepository history;
     private final BoardRepository boards;
+    private final ApplicationEventPublisher events;
 
-    Plans(PlanRepository plans, SprintRepository sprints, SprintIssueRepository history, BoardRepository boards) {
+    Plans(PlanRepository plans, SprintRepository sprints, SprintIssueRepository history, BoardRepository boards,
+          ApplicationEventPublisher events) {
+        this.events = events;
         this.plans = plans;
         this.sprints = sprints;
         this.history = history;
@@ -62,7 +67,9 @@ class Plans {
     PlanEntity plan(UUID issueId, UUID projectId) {
         return plans.findById(issueId).orElseGet(() -> {
             plans.lock(projectId);
-            return plans.save(new PlanEntity(issueId, projectId, Rank.after(plans.last(projectId).orElse(null))));
+            PlanEntity created = plans.save(new PlanEntity(issueId, projectId, Rank.after(plans.last(projectId).orElse(null))));
+            planned(created);
+            return created;
         });
     }
 
@@ -85,6 +92,7 @@ class Plans {
         }
         plan.rank(rank);
         plans.saveAndFlush(plan);
+        planned(plan);
     }
 
     /** Moves the issue into a sprint (none: the backlog), and keeps what the active sprint holds. */
@@ -102,6 +110,12 @@ class Plans {
         }
         plan.sprint(to);
         plans.save(plan);
+        planned(plan);
+    }
+
+    /** Tells the other modules that the plan of the issue changed (ADR-16). */
+    void planned(PlanEntity plan) {
+        events.publishEvent(new IssuePlanned(plan.issueId(), plan.projectId()));
     }
 
     /** The sprints not completed of the project: the active one first, then the planned ones, the oldest first. */
