@@ -40,6 +40,19 @@ class MessageTexts {
         return new Text(title, text);
     }
 
+    /**
+     * A text of the mails ({@code mail.*}): {0} the issue key, {1} its summary, {2} a link, {3} a number. Without
+     * arguments the text is taken as written (no MessageFormat, so an apostrophe stays).
+     */
+    String mail(String key, Locale locale, Object... args) {
+        return texts.getMessage("mail." + key, args.length == 0 ? null : args, locale);
+    }
+
+    /** A label of the notification settings ({@code preference.*}). */
+    String preference(String key, Locale locale, Object... args) {
+        return texts.getMessage("preference." + key, args.length == 0 ? null : args, locale);
+    }
+
     /** The label of a status of the built-in workflow, or its code. */
     private String status(String code, Locale locale) {
         if (code == null) {

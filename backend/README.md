@@ -148,6 +148,28 @@ user still sees, with title and text in the language of `Accept-Language` (Engli
 (1 to 200) marks them read. The messages of a deleted issue go with it, the others are deleted after 90 days
 (`odt.notification.retention-cron`, at 3:30 every night).
 
+### Email and preferences (ADR-18)
+
+Each user chooses, per kind, whether a message shows in the application and whether it is mailed: off, at once
+(`instant`) or in the daily digest (`daily`); without a choice mentions and assignments are mailed at once, comments
+and status changes in the digest (`odt_notification.preference`). `GET /api/notifications/preferences` gives the
+address of the session (from the identity provider, read only), whether mail is on and the channels;
+`.../preferences/fields` the rows of the form in the language of the request; `PUT /api/notifications/preferences` with
+`channels` saves them. A kind with neither channel writes no message; one by email only is kept out of the bell.
+
+The mails are an outbox in the messages (`email_due_at`, `emailed_at`, `email_attempts`): `MailOutbox` reads it every
+`odt.mail.outbox-delay` (1 minute), each instant message alone and the daily ones of a user in one digest at
+`odt.mail.digest-at` (07:00 in `odt.reporting.zone`), in plain text with the link to the issue under `odt.public-url`.
+A message read before its digest, or of a project the user has left, is not mailed. The rows of the mails are held
+with `FOR UPDATE SKIP LOCKED`, so two instances never send the same one; a mail that fails is tried again after a
+growing delay, five times, then given up and logged. The language is the last one the user used in the application.
+
+Email is on only when `spring.mail.host` is set (`SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`,
+`SPRING_MAIL_PASSWORD`; TLS through `spring.mail.properties`), with the sender `ODT_MAIL_FROM` and the address
+`ODT_PUBLIC_URL` (by default `FRONTEND_URL`). The health of the mail server is not part of `/actuator/health`: the
+outbox waits for it. The address of a user is read from the directory of authz-library without a session
+(`TenantUsers.find(tenant, user)`, with the admin scope of the system: temporary, as A5).
+
 ## Attachments (`collaboration`)
 
 Files attached to an issue (ADR-14). The metadata are in `odt_collaboration.attachment`; the bytes are in the store

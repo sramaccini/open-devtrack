@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 public class TenantUsers {
 
     private static final int PAGE = 200;
+    private static final String SYSTEM = "opendevtrack";
 
     private final RbacAdminService rbac;
     private final CurrentUser user;
@@ -57,9 +58,22 @@ public class TenantUsers {
                 .map(v -> new TenantUser(v.username(), v.email())).findFirst();
     }
 
+    /**
+     * The active user with this name in the tenant, for jobs that run without a session (the mails of ADR-18): the
+     * same read-only scope, under the name of the application, which authz-library uses only to guard changes.
+     */
+    public Optional<TenantUser> find(String tenantId, String username) {
+        return all(new AdminScope(SYSTEM, tenantId, Set.of(AdminScope.MANAGE))).stream()
+                .filter(v -> v.active() && v.username().equals(username))
+                .map(v -> new TenantUser(v.username(), v.email())).findFirst();
+    }
+
     private List<TenantUserView> all() {
-        String tenant = user.tenantId();
-        AdminScope reader = new AdminScope(user.username(), tenant, Set.of(AdminScope.MANAGE));
+        return all(new AdminScope(user.username(), user.tenantId(), Set.of(AdminScope.MANAGE)));
+    }
+
+    private List<TenantUserView> all(AdminScope reader) {
+        String tenant = reader.tenantId();
         List<TenantUserView> users = new ArrayList<>();
         for (int offset = 0; ; offset += PAGE) {
             List<TenantUserView> page = rbac.tenantUsers(reader, tenant, PAGE, offset);

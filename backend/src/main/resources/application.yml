@@ -126,6 +126,16 @@ odt:
     # again every night, so a day with no change still has its row.
     zone: ${ODT_REPORTING_ZONE:UTC}
     snapshot-cron: "0 5 0 * * *"
+  # The address of the application for the links of the mails (ADR-18)
+  public-url: ${ODT_PUBLIC_URL:${FRONTEND_URL:http://localhost:8090}}
+  mail:
+    # Email notifications (ADR-18) are on only when spring.mail.host is set (SPRING_MAIL_HOST, SPRING_MAIL_PORT,
+    # SPRING_MAIL_USERNAME, SPRING_MAIL_PASSWORD, and spring.mail.properties for TLS); without it nothing is mailed.
+    from: ${ODT_MAIL_FROM:OpenDevTrack <noreply@localhost>}
+    # The daily digest, at this time in the zone of odt.reporting.zone
+    digest-at: ${ODT_MAIL_DIGEST_AT:07:00}
+    # How often the outbox is read
+    outbox-delay: ${ODT_MAIL_OUTBOX_DELAY:PT1M}
   uiregistry:
     # Environments where only versions approved by someone other than their author are published: none (ADR-12, the
     # review is the one of the code). An installation that wants it lists them:
@@ -136,3 +146,7 @@ management:
     web:
       exposure:
         include: health,info
+  health:
+    mail:
+      # A mail server that does not answer does not make the instance unhealthy: the outbox tries again (ADR-18).
+      enabled: false

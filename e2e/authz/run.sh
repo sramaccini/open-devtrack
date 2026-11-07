@@ -27,7 +27,9 @@ REDIS_PORT="${REDIS_PORT:-26379}"
 KEYCLOAK_PORT="${KEYCLOAK_PORT:-28180}"
 APP_PORT="${APP_PORT:-28080}"
 FRONT_PORT="${FRONT_PORT:-28090}"
-export DB_PORT REDIS_PORT KEYCLOAK_PORT APP_PORT FRONT_PORT
+SMTP_PORT="${SMTP_PORT:-21025}"
+MAILPIT_PORT="${MAILPIT_PORT:-28025}"
+export DB_PORT REDIS_PORT KEYCLOAK_PORT APP_PORT FRONT_PORT SMTP_PORT MAILPIT_PORT
 
 front="http://localhost:$FRONT_PORT"
 compose=(docker compose -f "$here/compose.yaml" --env-file "$work/.env")
@@ -63,7 +65,7 @@ up() {
   done
 
   log "containers"
-  "${compose[@]}" up -d --wait postgres redis
+  "${compose[@]}" up -d --wait postgres redis mailpit
   "${compose[@]}" up -d keycloak
   wait_for "http://localhost:$KEYCLOAK_PORT/realms/opendevtrack/.well-known/openid-configuration" Keycloak
 
@@ -77,6 +79,7 @@ up() {
   DB_URL="jdbc:postgresql://localhost:$DB_PORT/opendevtrack" DB_USER=opendevtrack DB_PASSWORD="$DB_PASSWORD" \
   REDIS_PORT="$REDIS_PORT" IAM_CLIENT_SECRET="$BFF_CLIENT_SECRET" \
   IAM_ISSUER_URI="http://localhost:$KEYCLOAK_PORT/realms/opendevtrack" FRONTEND_URL="$front" PORT="$APP_PORT" \
+  SPRING_MAIL_HOST=localhost SPRING_MAIL_PORT="$SMTP_PORT" ODT_MAIL_OUTBOX_DELAY=PT5S \
     nohup "${JAVA_HOME:?set JAVA_HOME to a JDK 25}/bin/java" ${E2E_JAVA_OPTS:-} -jar "$jar" \
       --spring.profiles.active=dev > "$work/backend.log" 2>&1 &
   echo $! > "$work/backend.pid"
@@ -90,7 +93,7 @@ up() {
   # nginx resolves the BFF when it starts: the runtime comes last.
   "${compose[@]}" up -d runtime
   wait_for "$front/runtime-config.json" "The Quadrava runtime"
-  log "ready: $front (users mario.rossi and anna.bianchi, password DEV_USER_PASSWORD in .work/.env)"
+  log "ready: $front (users mario.rossi and anna.bianchi, password DEV_USER_PASSWORD in .work/.env; mails at http://localhost:$MAILPIT_PORT)"
 }
 
 # Sign in through the runtime as a browser does; prints the cookies of the session for the kits.
@@ -145,6 +148,29 @@ check() {
   log "Quadrava kit: registry contract (author mario.rossi, reviewer anna.bianchi, bearer tokens)"
   node "$kits/conformance-registry.mjs" --registry "http://localhost:$APP_PORT" --protected-env none \
     --token "$(token mario.rossi)" --reviewer-token "$(token anna.bianchi)" || failed=1
+
+  log "Email notifications: a mention is mailed at once (ADR-18)"
+  local key xsrf_m sent=""
+  key="M$(date +%s | tail -c 6 | tr 0-9 A-J)"
+  # The session of mario.rossi from the authorization kit: one login fewer, under the rate limit of the BFF.
+  xsrf_m="$(cookie_value mario.rossi XSRF-TOKEN)"
+  as_mario() {
+    curl -fs -o /dev/null -b "$work/mario.rossi.cookies" -H "Origin: $front" -H "X-XSRF-TOKEN: $xsrf_m" \
+      -H 'Content-Type: application/json' -d "$2" "$front$1"
+  }
+  as_mario /api/projects "{\"key\":\"$key\",\"name\":\"Mail check $key\"}" \
+    && as_mario "/api/projects/$key/members" '{"username":"anna.bianchi","role":"developer"}' \
+    && as_mario "/api/projects/$key/issues" '{"summary":"Mail check","type":"task"}' \
+    && as_mario "/api/issues/$key-1/comments" '{"body":"@anna.bianchi please have a look"}' \
+    || { echo "FAIL calls of the mail check"; failed=1; }
+  for _ in $(seq 1 30); do
+    sent="$(curl -fs "http://localhost:$MAILPIT_PORT/api/v1/search?query=subject:$key-1" \
+      | grep -o '"messages_count":[0-9]*' | cut -d: -f2)"
+    [ "${sent:-0}" -gt 0 ] && break
+    sleep 1
+  done
+  if [ "${sent:-0}" -gt 0 ]; then echo "ok   $key-1: mail to anna.bianchi in Mailpit"; else
+    echo "FAIL no mail for $key-1 in Mailpit"; failed=1; fi
 
   log "Tenants: the switch is kept for the next login (ADR-08)"
   login anna.bianchi > /dev/null

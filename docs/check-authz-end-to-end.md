@@ -10,7 +10,8 @@ browser / kits ──▶ quadrava-runtime 0.11.1 (:28090) ──/bff /authz /log
                                                                                     │ authz-bff, authz-session, authz-rbac 2.0.1
                          Keycloak 26.8.0 (:28180, realm opendevtrack) ◀── OIDC ─────┤
                          PostgreSQL 18.6 (:25432) ◀── RBAC schema + odt.* catalogue ┤
-                         Redis 8.2 (:26379) ◀── Spring Session (indexed) ───────────┘
+                         Redis 8.2 (:26379) ◀── Spring Session (indexed) ───────────┤
+                         Mailpit 1.27 (SMTP :21025, mails :28025) ◀── outbox ───────┘
 ```
 
 - `backend/`: the OpenDevTrack monolith as it is in F0, only the libraries and one `SecurityFilterChain`
@@ -43,6 +44,7 @@ Maven must reach the authz-library packages: see [backend/README.md](../backend/
 | Quadrava kit `conformance-bff`, session of `anna.bianchi` with two tenants | 13 of 13 (tenants, switch by POST only, CSRF, logout) |
 | Quadrava kit `conformance-registry`, bearer tokens of `mario.rossi` (author) and `anna.bianchi` (reviewer), from F1 | 24 of 24 with `--protected-env none` (validation, If-Match, four eyes, references; the four checks of a protected environment skipped, ADR-12) |
 | `ui/` published to the registry (`development`) and served by the runtime, from F1 | 7 documents; home and projects screens in both themes and languages |
+| A mention mailed at once through the outbox (ADR-18), from F4 | the mail of the new issue in Mailpit |
 | Tenant switch kept for the next login (ADR-08) | ACME → GLOBEX, then GLOBEX after a new login |
 | In the browser: login through the runtime, the user menu | «Spazio di lavoro» with both tenants, GLOBEX selected, 2 permissions |
 

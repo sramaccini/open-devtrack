@@ -76,6 +76,11 @@ Quadrava and authz-library, and the ADRs say where.
   from the search. Screens `dashboard` (the first screen, in place of `home`) and `project-dashboard`. The axis of the
   charts uses short day labels and full width until Q14. Not done: the choice of the sprint of the burndown on the screen
   (the API takes it), «Overdue» and «In review by me» (no due date nor reviewer, ADR-17 point 5).
+- F4 E9 (ADR-18, accepted 7 November 2026): preferences per user and kind (in the application; email off, at once or
+  in the daily digest), an outbox in `odt_notification.message` sent by `MailOutbox` over SMTP (Spring Mail; retries,
+  `SKIP LOCKED`), plain-text mails in the last language the user used. Screen `notification-settings` in the Home
+  area until Q13 is released. The e2e environment has Mailpit (mails at http://localhost:28025) and checks that a
+  mention is mailed. The address is read from authz-library without a session (temporary, with A5).
 
 ## Requests to the dependencies
 
@@ -102,7 +107,8 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F4: E9 email notifications (ADR-18; the settings of the user wait for Q13, on Quadrava main and not released yet).
-   The board filter and the load test of ADR-16; Q14 when Quadrava releases it.
+1. F4: when Quadrava releases Q13 and Q14, adopt them: the notification settings in the settings dialog, the days of
+   the charts as ISO dates with `categoryFormat: "date"` (no `MM-dd` label, half width). The board filter and the load
+   test of ADR-16.
 2. Workflows by issue type and editing statuses and transitions when a project needs them (ADR-10).
 3. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

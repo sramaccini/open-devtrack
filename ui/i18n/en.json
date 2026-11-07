@@ -291,5 +291,11 @@
   "reports.created_resolved_caption": "Issues created and resolved per day, last 30 days",
   "reports.open_dashboard": "Dashboard",
   "nav.dashboard": "Dashboard",
-  "reports.last_30_days": "in the last 30 days"
+  "reports.last_30_days": "in the last 30 days",
+  "nav.notification_settings": "Notification settings",
+  "notification_settings.title": "Notification settings",
+  "notification_settings.description": "How OpenDevTrack tells you about your work: in the application, by email at once, or in a daily summary.",
+  "notification_settings.mail_off": "This installation sends no email: only the choices in the application apply.",
+  "notification_settings.email": "Email address",
+  "notification_settings.saved": "Notification settings saved"
 }

@@ -42,9 +42,11 @@ class NotificationController {
     private final Projects projects;
     private final ProjectAccess access;
     private final CurrentUser user;
+    private final Preferences preferences;
 
     NotificationController(MessageRepository messages, MessageTexts texts, Projects projects, ProjectAccess access,
-                           CurrentUser user) {
+                           CurrentUser user, Preferences preferences) {
+        this.preferences = preferences;
         this.messages = messages;
         this.texts = texts;
         this.projects = projects;
@@ -60,10 +62,13 @@ class NotificationController {
     record ReadRequest(List<UUID> ids) {
     }
 
+    /** The messages of the bell; the language of the request is remembered for the mails of the user (ADR-18). */
     @GetMapping("/api/notifications")
+    @Transactional
     List<MessageView> list(Locale locale) {
+        preferences.remember(user.tenantId(), user.username(), locale);
         Map<UUID, Optional<ProjectRef>> visible = new HashMap<>();
-        return messages.findByRecipientOrderByCreatedAtDescIdDesc(user.username(), Limit.of(MAX_LIST)).stream()
+        return messages.findByRecipientAndShownTrueOrderByCreatedAtDescIdDesc(user.username(), Limit.of(MAX_LIST)).stream()
                 .filter(m -> visible.computeIfAbsent(m.projectId(), this::visibleProject).isPresent())
                 .map(m -> view(m, visible.get(m.projectId()).get(), locale))
                 .toList();

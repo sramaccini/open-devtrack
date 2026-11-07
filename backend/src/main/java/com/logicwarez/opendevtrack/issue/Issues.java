@@ -62,6 +62,18 @@ public class Issues {
         return findEntity(issueKey).map(f -> new IssueRef(f.issue().id(), f.project().id(), issueKey));
     }
 
+    /** The summary of the issue with this key in the project, without the session: for the mails (ADR-18). */
+    public Optional<String> summary(UUID projectId, String issueKey) {
+        int dash = issueKey.lastIndexOf('-');
+        long number;
+        try {
+            number = Long.parseLong(issueKey.substring(dash + 1));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
+        return issues.findByProjectIdAndNumber(projectId, number).map(IssueEntity::summary);
+    }
+
     /**
      * The issue with every field, without the session: for the listeners of other modules, which run after the commit
      * and check the tenant themselves. Empty when the issue or its project is gone.

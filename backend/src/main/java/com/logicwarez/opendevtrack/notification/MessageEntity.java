@@ -34,6 +34,11 @@ class MessageEntity {
 
     private Instant createdAt;
     private Instant readAt;
+    private boolean shown = true;
+    private String emailMode;
+    private Instant emailDueAt;
+    private Instant emailedAt;
+    private int emailAttempts;
 
     protected MessageEntity() {
     }
@@ -83,5 +88,39 @@ class MessageEntity {
 
     Instant readAt() {
         return readAt;
+    }
+
+    /** Not in the bell: the user turned the application off for the kind but wants the mail (ADR-18). */
+    void hide() {
+        shown = false;
+    }
+
+    /** In the outbox: {@code instant} alone, {@code daily} in the digest, from {@code due}. */
+    void mail(String mode, Instant due) {
+        emailMode = mode;
+        emailDueAt = due;
+    }
+
+    String emailMode() {
+        return emailMode;
+    }
+
+    int emailAttempts() {
+        return emailAttempts;
+    }
+
+    void emailed(Instant at) {
+        emailedAt = at;
+    }
+
+    /** Out of the outbox without a mail: read before its digest, or no longer for this user. */
+    void unmail() {
+        emailDueAt = null;
+    }
+
+    /** A failed send: again after a delay that grows with the attempts, or never after {@code max}. */
+    void failed(Instant now, int max) {
+        emailAttempts++;
+        emailDueAt = emailAttempts >= max ? null : now.plusSeconds(60L << emailAttempts);
     }
 }

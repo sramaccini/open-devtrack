@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "notification-settings",
+  "title": "{{ t('notification_settings.title', 'Notification settings') }}",
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "preferences": {
+      "ref": "notifications/preferences"
+    },
+    "preferenceFields": {
+      "ref": "notifications/preferenceFields"
+    },
+    "savePreferences": {
+      "ref": "notifications/savePreferences"
+    }
+  },
+  "components": [
+    {
+      "id": "preferences-intro",
+      "type": "text",
+      "text": "{{ t('notification_settings.description', 'How OpenDevTrack tells you about your work: in the application, by email at once, or in a daily summary.') }}"
+    },
+    {
+      "id": "preferences-no-mail",
+      "type": "alert",
+      "visibleIf": "{{ data.preferences.mailEnabled == false }}",
+      "text": "{{ t('notification_settings.mail_off', 'This installation sends no email: only the choices in the application apply.') }}"
+    },
+    {
+      "id": "preferences-form",
+      "type": "form",
+      "source": "preferences",
+      "columns": 2,
+      "fields": [
+        {
+          "name": "email",
+          "label": "{{ t('notification_settings.email', 'Email address') }}",
+          "type": "text",
+          "span": 2,
+          "readOnlyIf": "{{ true }}"
+        }
+      ],
+      "fieldsFrom": {
+        "source": "preferenceFields",
+        "into": "channels",
+        "nameField": "key"
+      },
+      "actions": [
+        {
+          "id": "btn-save-preferences",
+          "label": "{{ t('common.save', 'Save') }}",
+          "onClick": [
+            {
+              "call": "savePreferences",
+              "onError": {
+                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+              }
+            },
+            {
+              "toast": "{{ t('notification_settings.saved', 'Notification settings saved') }}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

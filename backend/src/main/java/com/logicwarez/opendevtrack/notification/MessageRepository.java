@@ -15,7 +15,17 @@ import org.springframework.data.jpa.repository.Query;
 
 interface MessageRepository extends JpaRepository<MessageEntity, UUID> {
 
-    List<MessageEntity> findByRecipientOrderByCreatedAtDescIdDesc(String recipient, Limit limit);
+    /** The messages of the bell: those the user wants in the application. */
+    List<MessageEntity> findByRecipientAndShownTrueOrderByCreatedAtDescIdDesc(String recipient, Limit limit);
+
+    /** The outbox: the messages due to be mailed, the oldest first. */
+    @Query("SELECT m FROM MessageEntity m WHERE m.emailedAt IS NULL AND m.emailDueAt <= :now ORDER BY m.createdAt, m.id")
+    List<MessageEntity> due(Instant now, Limit limit);
+
+    /** Of {@code ids}, those still to be mailed that no other sender holds, locked until the commit. */
+    @Query(value = "SELECT id FROM odt_notification.message WHERE id IN (:ids) AND emailed_at IS NULL"
+            + " AND email_due_at IS NOT NULL FOR UPDATE SKIP LOCKED", nativeQuery = true)
+    List<UUID> claim(Collection<UUID> ids);
 
     /** Marks read the messages of the recipient among {@code ids}, once: those already read keep their time. */
     @Modifying

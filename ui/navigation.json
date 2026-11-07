@@ -18,6 +18,12 @@
           "label": "{{ t('nav.dashboard', 'Dashboard') }}",
           "icon": "inbox",
           "screen": "dashboard"
+        },
+        {
+          "id": "notification-settings",
+          "label": "{{ t('nav.notification_settings', 'Notification settings') }}",
+          "icon": "settings",
+          "screen": "notification-settings"
         }
       ]
     },

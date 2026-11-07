@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0",
+  "datasources": "notifications",
+  "description": "The notification settings of the signed-in user (ADR-18): in the application and by email, per kind of message.",
+  "sources": {
+    "preferences": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/notifications/preferences"
+    },
+    "preferenceFields": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/notifications/preferences/fields"
+    },
+    "savePreferences": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/notifications/preferences",
+      "body": "{{form}}"
+    }
+  }
+}

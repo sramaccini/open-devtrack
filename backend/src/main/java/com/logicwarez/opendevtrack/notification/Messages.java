@@ -10,7 +10,11 @@ import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueCreated;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueDeleted;
 import com.logicwarez.opendevtrack.issue.Watchers;
+import com.logicwarez.opendevtrack.notification.Preferences.Preference;
+import com.logicwarez.opendevtrack.project.ProjectRef;
+import com.logicwarez.opendevtrack.project.Projects;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,10 +33,16 @@ class Messages {
 
     private final MessageRepository messages;
     private final Watchers watchers;
+    private final Projects projects;
+    private final Preferences preferences;
+    private final MailSettings mail;
 
-    Messages(MessageRepository messages, Watchers watchers) {
+    Messages(MessageRepository messages, Watchers watchers, Projects projects, Preferences preferences, MailSettings mail) {
         this.messages = messages;
         this.watchers = watchers;
+        this.projects = projects;
+        this.preferences = preferences;
+        this.mail = mail;
     }
 
     @ApplicationModuleListener
@@ -69,9 +79,32 @@ class Messages {
         messages.deleteByIssue(event.projectId(), event.key());
     }
 
+    /**
+     * One message per recipient, as their preferences say (ADR-18): none when they want it neither in the application
+     * nor by email; hidden from the bell when they want only the mail; in the outbox when email is on for the kind.
+     */
     private void save(Recipients to, UUID projectId, String issueKey, Instant at) {
-        messages.saveAll(to.byUser.entrySet().stream().map(e -> new MessageEntity(projectId, e.getKey(), e.getValue().kind(),
-                issueKey, to.actor, e.getValue().params(), at)).toList());
+        Optional<String> tenant = projects.byId(projectId).map(ProjectRef::tenantId);
+        if (tenant.isEmpty()) {
+            return;
+        }
+        List<MessageEntity> saved = new ArrayList<>();
+        to.byUser.forEach((username, message) -> {
+            Preference wanted = preferences.of(tenant.get(), username).get(message.kind());
+            String email = mail.enabled() ? wanted.email() : Preferences.OFF;
+            if (!wanted.inApp() && email.equals(Preferences.OFF)) {
+                return;
+            }
+            MessageEntity m = new MessageEntity(projectId, username, message.kind(), issueKey, to.actor, message.params(), at);
+            if (!wanted.inApp()) {
+                m.hide();
+            }
+            if (!email.equals(Preferences.OFF)) {
+                m.mail(email, mail.due(email, at));
+            }
+            saved.add(m);
+        });
+        messages.saveAll(saved);
     }
 
     private static Optional<FieldChange> changed(List<FieldChange> changes, String field) {

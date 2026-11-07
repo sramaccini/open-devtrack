@@ -99,3 +99,10 @@ issues (`serverDataTable` on the search) and their filters marked «On my dashbo
 `project-dashboard` (params `key`, from the «Dashboard» button of `project-detail`): indicators, burndown, velocity,
 cumulative flow and created vs resolved, on the `stats` and `chart` of Quadrava. The days on the axis are short labels
 and the 30-day charts take the full width until the chart leaves out the labels that do not fit (Q14).
+
+## Notification settings
+
+`notification-settings` (Home › Notification settings) is the form of ADR-18: the address of the mails, read only,
+and for each kind a switch (in the application) and a choice (by email: off, at once, in the daily summary), whose rows
+come from the back end (`fieldsFrom` into `channels`). When the installation has no mail server it says so. A screen
+in the navigation until Q13 is released: then it moves, as it is, into the settings dialog of the shell.

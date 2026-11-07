@@ -84,7 +84,7 @@ class NotificationApiTest {
     void setUp() throws Exception {
         mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(security).build();
         jdbc.execute("TRUNCATE odt_project.project, odt_access.project_member, odt_issue.issue, odt_audit.issue_change, "
-                + "odt_collaboration.comment, odt_notification.message CASCADE");
+                + "odt_collaboration.comment, odt_notification.message, odt_notification.preference CASCADE");
         mvc.perform(as(post("/api/projects"), mario).content("{\"key\":\"ODT\",\"name\":\"OpenDevTrack\"}"))
                 .andExpect(status().isCreated());
         mvc.perform(as(post("/api/projects/ODT/members"), mario).content("{\"username\":\"luisa\",\"role\":\"developer\"}"))
@@ -125,6 +125,9 @@ class NotificationApiTest {
         assertThat(mentions()).containsExactly("luisa", "mario", "paola");
         assertThat(watchers()).containsExactly("luisa", "mario", "paola");
         await(this::messages, 2);
+        // No mail server set (spring.mail.host): nothing is put in the outbox (ADR-18).
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM odt_notification.message WHERE email_due_at IS NOT NULL",
+                Integer.class)).isZero();
         mvc.perform(as(get("/api/notifications"), mario))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
