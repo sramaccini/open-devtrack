@@ -26,7 +26,8 @@ import org.hibernate.type.SqlTypes;
 /**
  * A board of a project (ADR-15): {@code scrum} shows the issues of the active sprint, {@code kanban} every issue; the
  * lanes are by {@code none}, {@code assignee}, {@code priority} or {@code type}. Without columns of its own it has one
- * column per status of the workflow, so it follows the workflow as it changes.
+ * column per status of the workflow, so it follows the workflow as it changes. An ODQL filter (ADR-16) keeps only the
+ * issues it finds.
  */
 @Entity
 @Table(schema = "odt_agile", name = "board")
@@ -43,6 +44,7 @@ class BoardEntity {
     private String name;
     private String kind;
     private String lane;
+    private String filter;
     private Instant createdAt;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -62,16 +64,18 @@ class BoardEntity {
     protected BoardEntity() {
     }
 
-    BoardEntity(UUID projectId, String name, String kind, String lane, List<BoardColumn> columns, Instant createdAt) {
+    BoardEntity(UUID projectId, String name, String kind, String lane, List<BoardColumn> columns, String filter,
+                Instant createdAt) {
         this.projectId = projectId;
         this.createdAt = createdAt;
-        edit(name, kind, lane, columns);
+        edit(name, kind, lane, columns, filter);
     }
 
-    void edit(String name, String kind, String lane, List<BoardColumn> columns) {
+    void edit(String name, String kind, String lane, List<BoardColumn> columns, String filter) {
         this.name = name;
         this.kind = kind;
         this.lane = lane;
+        this.filter = filter;
         this.columns.clear();
         this.columns.addAll(columns);
     }
@@ -94,6 +98,11 @@ class BoardEntity {
 
     String lane() {
         return lane;
+    }
+
+    /** The ODQL filter, or null. */
+    String filter() {
+        return filter;
     }
 
     List<BoardColumn> columns() {

@@ -43,6 +43,15 @@
           "visibleIf": "{{ form.kind == \"scrum\" }}",
           "readOnlyIf": "{{true}}",
           "tooltip": "{{ t('agile.active_sprint_help', 'A scrum board shows the issues of the active sprint') }}"
+        },
+        {
+          "name": "filter",
+          "type": "text",
+          "label": "{{ t('agile.board_filter', 'Filter') }}",
+          "span": 3,
+          "visibleIf": "{{ form.filter != null }}",
+          "readOnlyIf": "{{true}}",
+          "tooltip": "{{ t('agile.board_filter_shown', 'Only the issues this ODQL query finds are on the board') }}"
         }
       ],
       "actions": [

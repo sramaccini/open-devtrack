@@ -17,6 +17,9 @@ import com.logicwarez.opendevtrack.issue.IssueRef;
 import com.logicwarez.opendevtrack.issue.Issues;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.project.Projects;
+import com.logicwarez.opendevtrack.shared.IssueQueries;
+import com.logicwarez.opendevtrack.shared.IssueQueries.Matches;
+import com.logicwarez.opendevtrack.shared.IssueQueries.Wrong;
 import com.logicwarez.opendevtrack.workflow.Workflows;
 import java.time.Duration;
 import java.time.Instant;
@@ -31,6 +34,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -48,7 +52,9 @@ import org.springframework.web.bind.annotation.RestController;
  * columns and the cards of one. A card moved to another column runs the first transition of the workflow that leads
  * to a status of that column and can run now ({@code odt.issue.transition}, and the guard); moved within the column,
  * or between two cards, it changes place in the one order of the project ({@code odt.issue.edit}). The admins of the
- * project ({@code odt.project.edit}) add, change and remove boards; a project keeps at least one.
+ * project ({@code odt.project.edit}) add, change and remove boards; a project keeps at least one. The ODQL filter of a
+ * board (ADR-16) is run by the module {@code search} through {@link IssueQueries}, which {@code search} implements:
+ * {@code search} depends on {@code agile}, so {@code agile} never depends on it.
  */
 @RestController
 @Transactional(readOnly = true)
@@ -69,9 +75,10 @@ class BoardController {
     private final Plans plans;
     private final Issues issues;
     private final Texts texts;
+    private final IssueQueries queries;
 
     BoardController(BoardRepository boards, Scopes scopes, Projects projects, Workflows workflows, Cards cards, Plans plans,
-                    Issues issues, Texts texts) {
+                    Issues issues, Texts texts, IssueQueries queries) {
         this.boards = boards;
         this.scopes = scopes;
         this.projects = projects;
@@ -80,6 +87,7 @@ class BoardController {
         this.plans = plans;
         this.issues = issues;
         this.texts = texts;
+        this.queries = queries;
     }
 
     /** The boards of the projects the user is a member of, by project. */
@@ -125,7 +133,7 @@ class BoardController {
             return checked.problem();
         }
         BoardEntity board = boards.saveAndFlush(new BoardEntity(scope.get().projectId(), checked.name(), checked.kind(),
-                checked.lane(), checked.columns(), Instant.now()));
+                checked.lane(), checked.columns(), checked.filter(), Instant.now()));
         return ResponseEntity.status(HttpStatus.CREATED).body(row(scope.get(), board));
     }
 
@@ -148,7 +156,7 @@ class BoardController {
         if (request.version() == null || request.version() != board.version()) {
             return Problems.changedMeanwhile();
         }
-        board.edit(checked.name(), checked.kind(), checked.lane(), checked.columns());
+        board.edit(checked.name(), checked.kind(), checked.lane(), checked.columns(), checked.filter());
         try {
             boards.saveAndFlush(board);
         } catch (ObjectOptimisticLockingFailureException e) {
@@ -185,7 +193,7 @@ class BoardController {
         Optional<SprintEntity> sprint = b.kind().equals("scrum") ? plans.active(scope.projectId()) : Optional.empty();
         return ResponseEntity.ok(new BoardView(b.id().toString(), scope.project().key(), scope.project().name(), b.name(),
                 b.kind(), b.lane(), sprint.map(SprintEntity::name).orElse(null),
-                sprint.map(SprintEntity::endsOn).orElse(null),
+                sprint.map(SprintEntity::endsOn).orElse(null), b.filter(),
                 Map.of("edit", scope.can(Scopes.BOARDS), "move", canMove(scope))));
     }
 
@@ -208,7 +216,8 @@ class BoardController {
     /**
      * The cards, in the one order of the project: a scrum board those of the active sprint (none without one), a
      * kanban board every issue but those done for more than 14 days. With lanes by assignee, the cards come by assignee
-     * (the lanes of the kanban follow them), those of nobody last.
+     * (the lanes of the kanban follow them), those of nobody last. With a filter, only the issues it finds; a filter
+     * that is no longer right (409) says where.
      */
     @GetMapping("/api/boards/{id}/cards")
     ResponseEntity<?> cards(@PathVariable UUID id) {
@@ -231,6 +240,14 @@ class BoardController {
             Instant since = Instant.now().minus(DONE_SHOWN);
             shown = cards.ranked(scope.project()).stream()
                     .filter(p -> !done.contains(p.issue().status()) || p.issue().updatedAt().isAfter(since)).toList();
+        }
+        if (board.filter() != null) {
+            Matches matches = queries.keys(scope.projectId(), board.filter());
+            if (matches.wrong() != null) {
+                return at(Problems.conflict("The filter of the board is no longer right at position "
+                        + matches.wrong().position() + ": " + matches.wrong().reason()), matches.wrong());
+            }
+            shown = shown.stream().filter(p -> matches.keys().contains(p.issue().key())).toList();
         }
         Map<String, Boolean> perm = Map.of("move", canMove(scope));
         List<CardRow> rows = shown.stream().filter(p -> columnOf.containsKey(p.issue().status()))
@@ -349,15 +366,25 @@ class BoardController {
 
     private BoardRow row(Scope scope, BoardEntity b) {
         return new BoardRow(b.id().toString(), scope.project().key(), scope.project().name(), b.name(), b.kind(), b.lane(),
-                BoardColumns.format(b.columns()), b.version(), Map.of("edit", scope.can(Scopes.BOARDS)));
+                BoardColumns.format(b.columns()), b.filter(), b.version(), Map.of("edit", scope.can(Scopes.BOARDS)));
     }
 
-    private record Checked(String name, String kind, String lane, List<BoardColumn> columns,
+    private record Checked(String name, String kind, String lane, List<BoardColumn> columns, String filter,
                            ResponseEntity<?> problem) {
 
         static Checked invalid(String title) {
-            return new Checked(null, null, null, null, Problems.badRequest(title));
+            return invalid(Problems.badRequest(title));
         }
+
+        static Checked invalid(ResponseEntity<?> problem) {
+            return new Checked(null, null, null, null, null, problem);
+        }
+    }
+
+    /** A problem about a wrong filter that says where ({@code position}), as the search does. */
+    private static ResponseEntity<ProblemDetail> at(ResponseEntity<ProblemDetail> response, Wrong wrong) {
+        response.getBody().setProperty("position", wrong.position());
+        return response;
     }
 
     private Checked check(Scope scope, BoardRequest request) {
@@ -372,9 +399,18 @@ class BoardController {
         if (!BoardEntity.LANES.contains(lane)) {
             return Checked.invalid("The lanes are by one of " + String.join(", ", BoardEntity.LANES));
         }
+        String filter = request.filter() == null || request.filter().isBlank() ? null : request.filter().strip();
+        if (filter != null) {
+            Optional<Wrong> wrong = queries.check(filter);
+            if (wrong.isPresent()) {
+                return Checked.invalid(at(Problems.badRequest("The filter is not right at position "
+                        + wrong.get().position() + ": " + wrong.get().reason()), wrong.get()));
+            }
+        }
         List<String> statuses = workflows.statuses(scope.projectId()).stream().map(Workflows.Status::code).toList();
         try {
-            return new Checked(request.name().strip(), kind, lane, BoardColumns.parse(request.columns(), statuses), null);
+            return new Checked(request.name().strip(), kind, lane, BoardColumns.parse(request.columns(), statuses), filter,
+                    null);
         } catch (BoardColumns.Invalid e) {
             return Checked.invalid(e.getMessage());
         }

@@ -82,7 +82,8 @@ the back end (`columnsFrom`), one component whose lanes follow `data.board.lane`
 backlog, with the sprints in a table below (new, start, complete, edit, remove). `board-list` (Projects › Boards) lists
 the boards of the projects of the user; `project-detail` manages those of a project and `issue-detail` sets the story
 points. A card opens its issue (`onOpen`) and its badges show the values in the language of the user (`valueKey`):
-both from Q12, Quadrava 0.11.1.
+both from Q12, Quadrava 0.11.1. A board may have an ODQL filter (ADR-16), set in the dialogs of `project-detail`
+and checked as one types (`search/check`), shown above the board when it has one.
 
 ## Search
 

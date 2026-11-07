@@ -18,16 +18,19 @@ final class AgileApi {
 
     /** A board in the list of the boards of the user, or of a project; {@code columns} in the text of the dialog. */
     record BoardRow(String id, String project, String projectName, String name, String kind, String lane, String columns,
-                    long version, @JsonProperty("_perm") Map<String, Boolean> perm) {
+                    String filter, long version, @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
-    /** A board for its screen: the active sprint for a scrum board. */
+    /** A board for its screen: the active sprint for a scrum board, the ODQL filter of its cards. */
     record BoardView(String id, String project, String projectName, String name, String kind, String lane, String sprint,
-                     LocalDate sprintEndsOn, @JsonProperty("_perm") Map<String, Boolean> perm) {
+                     LocalDate sprintEndsOn, String filter, @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
-    /** {@code columns}: one per line, {@code Name: status, status | limit}; empty for one column per status. */
-    record BoardRequest(String name, String kind, String lane, String columns, Long version) {
+    /**
+     * {@code columns}: one per line, {@code Name: status, status | limit}; empty for one column per status.
+     * {@code filter}: an ODQL query, only the issues it finds are cards (ADR-16); empty for every issue.
+     */
+    record BoardRequest(String name, String kind, String lane, String columns, String filter, Long version) {
     }
 
     /** A column of the kanban of Quadrava ({@code columnsFrom}). */

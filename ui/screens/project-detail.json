@@ -51,6 +51,9 @@
     },
     "removeBoard": {
       "ref": "boards/remove"
+    },
+    "check": {
+      "ref": "search/check"
     }
   },
   "components": [
@@ -363,6 +366,18 @@
                     "label": "{{ t('agile.columns', 'Columns') }}",
                     "rows": 5,
                     "tooltip": "{{ t('agile.columns_help', 'One per line, Name: status, status | limit, for example Doing: in_progress | 3; empty for one column per status') }}"
+                  },
+                  {
+                    "name": "filter",
+                    "type": "textarea",
+                    "label": "{{ t('agile.board_filter', 'Filter') }}",
+                    "rows": 2,
+                    "tooltip": "{{ t('agile.board_filter_help', 'An ODQL query, for example labels = payments or assignee = currentUser(): only the issues it finds are cards; empty for every issue') }}",
+                    "validation": [
+                      {
+                        "remote": "check"
+                      }
+                    ]
                   }
                 ],
                 "onSubmit": [
@@ -434,6 +449,10 @@
           "valueKey": "values.board_lane"
         },
         {
+          "field": "filter",
+          "label": "{{ t('agile.board_filter', 'Filter') }}"
+        },
+        {
           "field": "columns",
           "label": "{{ t('agile.columns', 'Columns') }}"
         }
@@ -465,6 +484,7 @@
                   "kind": "{{row.kind}}",
                   "lane": "{{row.lane}}",
                   "columns": "{{row.columns}}",
+                  "filter": "{{ row.filter == null ? '' : row.filter }}",
                   "version": "{{row.version}}"
                 },
                 "fields": [
@@ -505,6 +525,18 @@
                     "label": "{{ t('agile.columns', 'Columns') }}",
                     "rows": 5,
                     "tooltip": "{{ t('agile.columns_help', 'One per line, Name: status, status | limit, for example Doing: in_progress | 3; empty for one column per status') }}"
+                  },
+                  {
+                    "name": "filter",
+                    "type": "textarea",
+                    "label": "{{ t('agile.board_filter', 'Filter') }}",
+                    "rows": 2,
+                    "tooltip": "{{ t('agile.board_filter_help', 'An ODQL query, for example labels = payments or assignee = currentUser(): only the issues it finds are cards; empty for every issue') }}",
+                    "validation": [
+                      {
+                        "remote": "check"
+                      }
+                    ]
                   }
                 ],
                 "onSubmit": [

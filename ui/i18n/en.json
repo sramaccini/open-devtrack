@@ -296,5 +296,8 @@
   "notification_settings.description": "How OpenDevTrack tells you about your work: in the application, by email at once, or in a daily summary.",
   "notification_settings.mail_off": "This installation sends no email: only the choices in the application apply.",
   "notification_settings.email": "Email address",
-  "notification_settings.saved": "Notification settings saved"
+  "notification_settings.saved": "Notification settings saved",
+  "agile.board_filter": "Filter",
+  "agile.board_filter_help": "An ODQL query, for example labels = payments or assignee = currentUser(): only the issues it finds are cards; empty for every issue",
+  "agile.board_filter_shown": "Only the issues this ODQL query finds are on the board"
 }

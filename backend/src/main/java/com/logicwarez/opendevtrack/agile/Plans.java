@@ -46,7 +46,7 @@ class Plans {
     /** A new project gets a kanban board with one column per status of its workflow. */
     @EventListener
     void on(ProjectCreated event) {
-        boards.save(new BoardEntity(event.projectId(), DEFAULT_BOARD, "kanban", "none", List.of(), event.at()));
+        boards.save(new BoardEntity(event.projectId(), DEFAULT_BOARD, "kanban", "none", List.of(), null, event.at()));
     }
 
     /** A new issue goes to the bottom of the order, in the backlog. */

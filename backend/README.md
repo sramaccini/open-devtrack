@@ -203,7 +203,10 @@ story points; a new issue goes to the bottom, from `IssueCreated` in the transac
   first transition of the workflow to a status of that column that can run now (409 when none can); a move between two
   cards changes the order (`odt.issue.edit`). A scrum board shows the active sprint, a kanban board every issue but
   those done for more than 14 days. A new project gets a kanban board without columns of its own: one per status of the
-  workflow. Boards are managed with `odt.project.edit` (admin); a project keeps one.
+  workflow. Boards are managed with `odt.project.edit` (admin); a project keeps one. A board may have an ODQL `filter`
+  (ADR-16 point 7, checked when saved, 400 with `position`): only the issues it finds are cards, for the user who
+  looks (`currentUser()`); a filter no longer right answers 409. `agile` asks `shared.IssueQueries`, which `search`
+  implements: `search` depends on `agile`, so the dependency goes the other way through the shared interface.
 - Backlog: `GET /api/projects/{key}/backlog/columns` (the sprints not completed, the active one first, then
   `backlog`) and `…/backlog/cards` (their issues and those not done in no sprint), `POST …/backlog/cards/{issueKey}/move`.
 - Sprints: `GET|POST /api/projects/{key}/sprints`, `PUT|DELETE /api/sprints/{id}` (delete only when planned),

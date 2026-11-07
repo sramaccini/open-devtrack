@@ -139,6 +139,37 @@ class AgileApiTest {
     }
 
     @Test
+    void aFilterKeepsTheIssuesItFinds() throws Exception {
+        // The filter runs on the index of the search, written after the commit.
+        TestInfrastructure.awaitListeners(jdbc);
+        mvc.perform(as(post("/api/projects/ODT/boards"), mario).content("{\"name\":\"Wrong\",\"filter\":\"status = \"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value(org.hamcrest.Matchers.startsWith("The filter is not right at position")))
+                .andExpect(jsonPath("$.position").isNumber());
+        String created = mvc.perform(as(post("/api/projects/ODT/boards"), mario).content("""
+                        {"name":"Two and four","filter":"summary ~ Two OR summary ~ Four"}"""))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.filter").value("summary ~ Two OR summary ~ Four"))
+                .andReturn().getResponse().getContentAsString();
+        String id = JsonPath.read(created, "$.id");
+        assertThat(keys("/api/boards/" + id + "/cards", paola)).containsExactly("ODT-2", "ODT-4");
+        mvc.perform(as(get("/api/boards/" + id), paola)).andExpect(jsonPath("$.filter").value("summary ~ Two OR summary ~ Four"));
+
+        // currentUser() is the user who looks at the board: luisa reported every issue, paola none.
+        mvc.perform(as(put("/api/boards/" + id), mario).content("""
+                        {"name":"Reported by me","filter":"reporter = currentUser()","version":0}"""))
+                .andExpect(status().isOk());
+        assertThat(keys("/api/boards/" + id + "/cards", luisa)).containsExactly("ODT-1", "ODT-2", "ODT-3", "ODT-4");
+        assertThat(keys("/api/boards/" + id + "/cards", paola)).isEmpty();
+
+        // An empty filter: every issue again.
+        mvc.perform(as(put("/api/boards/" + id), mario).content("{\"name\":\"All\",\"filter\":\" \",\"version\":1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.filter").doesNotExist());
+        assertThat(keys("/api/boards/" + id + "/cards", paola)).hasSize(4);
+    }
+
+    @Test
     void aMoveToAnotherColumnRunsATransition() throws Exception {
         String board = board();
         String cards = "/api/boards/" + board + "/cards/";
