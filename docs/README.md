@@ -21,6 +21,9 @@ The decisions D1–D9 of the project plan, all accepted by the maintainer on 31 
 | [13](adr-13-mentions-and-messages.md) | Mentions and messages for the user (E4) | `@username` of members found in the text of comments; messages in `notification` for mentions, assignments, comments and status changes of watched issues, behind the bell of Quadrava 0.7.0 | Accepted |
 | [14](adr-14-attachment-storage.md) | Attachments and where their files are kept (E4) | One `AttachmentStore` with three plugins: database (default), filesystem, S3-compatible object storage; bytes always through the back end | Accepted |
 | [15](adr-15-boards-backlog-sprints.md) | Boards, backlog and sprints (F3) | One rank per project in fractional indexing; sprints planned, active and completed (one active); boards of workflow statuses with WIP limits and swimlanes; the backlog as a `kanban` of sprints | Accepted |
+| [16](adr-16-search-odql.md) | Search, ODQL and saved filters (E7) | A small query language parsed by hand and compiled to SQL with jOOQ, over a read model of `search` with full-text; saved and shared filters; measured on one million issues | Proposed |
+| [17](adr-17-dashboards-reports.md) | Dashboards and reports (E8) | Read models of `reporting` fed by events and closed each night; burndown, velocity, cumulative flow by status category, created vs resolved, cycle time; a personal and a project dashboard with a fixed layout | Proposed |
+| [18](adr-18-email-notifications.md) | Email, preferences and digests (E9) | Preferences per user and kind; an outbox sent by a job, instant or in a daily digest; plain text mails over SMTP, off without a mail host | Proposed |
 
 ## Requests to the dependencies
 
