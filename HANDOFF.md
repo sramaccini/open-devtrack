@@ -110,6 +110,7 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F4: «Overdue» and «In review by me» of the dashboard need a due date and a reviewer on the issue (an ADR first).
+1. F4: ADR-19 (due date and reviewer, for «Overdue» and «In review by me») is proposed, waiting for the decision of
+   the maintainer; built once accepted.
 2. Workflows by issue type and editing statuses and transitions when a project needs them (ADR-10).
 3. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.
