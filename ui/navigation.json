@@ -7,6 +7,15 @@
     "readUrl": "/api/notifications/read",
     "refreshSeconds": 60
   },
+  "settings": [
+    {
+      "id": "notification-settings",
+      "label": "{{ t('nav.notification_settings', 'Notifications') }}",
+      "icon": "bell",
+      "screen": "notification-settings",
+      "requires": "odt.project.browse"
+    }
+  ],
   "areas": [
     {
       "id": "home",
@@ -18,12 +27,6 @@
           "label": "{{ t('nav.dashboard', 'Dashboard') }}",
           "icon": "inbox",
           "screen": "dashboard"
-        },
-        {
-          "id": "notification-settings",
-          "label": "{{ t('nav.notification_settings', 'Notification settings') }}",
-          "icon": "settings",
-          "screen": "notification-settings"
         }
       ]
     },

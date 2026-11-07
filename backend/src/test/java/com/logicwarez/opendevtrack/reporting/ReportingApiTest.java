@@ -131,10 +131,6 @@ class ReportingApiTest {
                 .content("{\"column\":\"" + column + "\",\"beforeId\":null,\"afterId\":null}")).andExpect(status().isOk());
     }
 
-    private String label() {
-        return today.toString().substring(5);
-    }
-
     private int count(String sql) {
         return jdbc.queryForObject(sql, Integer.class);
     }
@@ -195,9 +191,9 @@ class ReportingApiTest {
         // Cumulative flow and created vs resolved: 30 days, today last.
         assertThat((List<?>) read(luisa, reports + "flow", "$")).hasSize(30);
         assertThat(read(luisa, reports + "flow", "$[29]"))
-                .isEqualTo(Map.of("day", today.toString(), "label", label(), "todo", 2, "inProgress", 0, "done", 1));
+                .isEqualTo(Map.of("day", today.toString(), "todo", 2, "inProgress", 0, "done", 1));
         assertThat(read(luisa, reports + "created-resolved", "$[29]"))
-                .isEqualTo(Map.of("day", today.toString(), "label", label(), "created", 3, "resolved", 1));
+                .isEqualTo(Map.of("day", today.toString(), "created", 3, "resolved", 1));
 
         // Complete: velocity has the sprint; its burndown ends with the points carried.
         mvc.perform(as(post("/api/sprints/" + sprint + "/complete"), mario).content("{\"moveTo\":\"backlog\"}"))

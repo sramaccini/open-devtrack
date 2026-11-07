@@ -58,8 +58,8 @@ class MailSettings {
         return publicUrl + "/projects/issue-detail?key=" + projectKey + "&issue=" + issueKey;
     }
 
-    /** The screen of the notification settings. */
+    /** The application, whose settings dialog has the notification settings (no address of its own, temporary). */
     String settingsUrl() {
-        return publicUrl + "/home/notification-settings";
+        return publicUrl + "/";
     }
 }

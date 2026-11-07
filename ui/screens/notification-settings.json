@@ -1,7 +1,6 @@
 {
   "schemaVersion": "1.0",
   "screen": "notification-settings",
-  "title": "{{ t('notification_settings.title', 'Notification settings') }}",
   "requires": "odt.project.browse",
   "dataSources": {
     "preferences": {

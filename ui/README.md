@@ -1,7 +1,7 @@
 # OpenDevTrack screens
 
 The front end of OpenDevTrack is this Quadrava project: screens, navigation, themes and translations, as JSON documents
-validated by the schemas of the pinned Quadrava version (0.11.1, ADR-01). No Angular code: the runtime image of Quadrava
+validated by the schemas of the pinned Quadrava version (0.12.0, ADR-01). No Angular code: the runtime image of Quadrava
 loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 | Path | Registry kind | What |
@@ -30,14 +30,14 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 ## Publishing
 
-The Quadrava CLI (`@sramaccini/quadrava-cli@0.11.1`, the version of the runtime) is on GitHub Packages: the `.npmrc`
+The Quadrava CLI (`@sramaccini/quadrava-cli@0.12.0`, the version of the runtime) is on GitHub Packages: the `.npmrc`
 of the repository maps `@sramaccini` there, and npm needs a token with `read:packages` for `npm.pkg.github.com` in
 the user config (`~/.npmrc`; in CI, `NODE_AUTH_TOKEN`). From the root of the repository, with a Keycloak access token
 of the client `opendevtrack-tools` in `QUADRAVA_TOKEN`:
 
 ```bash
-npx --yes @sramaccini/quadrava-cli@0.11.1 validate ui
-npx --yes @sramaccini/quadrava-cli@0.11.1 publish ui --registry http://localhost:28080 --app opendevtrack --env development
+npx --yes @sramaccini/quadrava-cli@0.12.0 validate ui
+npx --yes @sramaccini/quadrava-cli@0.12.0 publish ui --registry http://localhost:28080 --app opendevtrack --env development
 ```
 
 The same command publishes to `testing` and `production`: the registry has no protected environments (ADR-12), the
@@ -97,12 +97,13 @@ one). The field checks the query on the back end as one types and says where it 
 `dashboard` (Home › Dashboard, the first screen) is the personal dashboard of ADR-17: four indicators, the user's open
 issues (`serverDataTable` on the search) and their filters marked «On my dashboard» with what each finds.
 `project-dashboard` (params `key`, from the «Dashboard» button of `project-detail`): indicators, burndown, velocity,
-cumulative flow and created vs resolved, on the `stats` and `chart` of Quadrava. The days on the axis are short labels
-and the 30-day charts take the full width until the chart leaves out the labels that do not fit (Q14).
+cumulative flow and created vs resolved, on the `stats` and `chart` of Quadrava. The days are ISO dates with
+`categoryFormat: "date"`: the chart leaves out the labels that do not fit and shortens them (Q14, Quadrava 0.12.0).
 
 ## Notification settings
 
-`notification-settings` (Home › Notification settings) is the form of ADR-18: the address of the mails, read only,
-and for each kind a switch (in the application) and a choice (by email: off, at once, in the daily summary), whose rows
-come from the back end (`fieldsFrom` into `channels`). When the installation has no mail server it says so. A screen
-in the navigation until Q13 is released: then it moves, as it is, into the settings dialog of the shell.
+`notification-settings` is the «Notifications» section of the settings dialog (`settings` in `navigation.json`, from
+the user menu; Q13, Quadrava 0.12.0), the form of ADR-18: the address of the mails, read only, and for each kind a
+switch (in the application) and a choice (by email: off, at once, in the daily summary), whose rows come from the back
+end (`fieldsFrom` into `channels`). When the installation has no mail server it says so. The screen has no title: the
+tab names it.

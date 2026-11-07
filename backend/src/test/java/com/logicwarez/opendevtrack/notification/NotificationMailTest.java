@@ -145,7 +145,7 @@ class NotificationMailTest {
                 .contains("luisa ti ha menzionato in ODT-1")
                 .contains("@mario look")
                 .contains("https://odt.example.org/projects/issue-detail?key=ODT&issue=ODT-1")
-                .contains("https://odt.example.org/home/notification-settings");
+                .contains("Impostazioni › Notifiche, dal menu utente di https://odt.example.org/\n");
         // Sent once: the message stays in the bell, its mail is done.
         assertThat(outbox.send(Instant.now().plusSeconds(3600))).isZero();
         mvc.perform(as(get("/api/notifications"), mario)).andExpect(jsonPath("$.length()").value(1));

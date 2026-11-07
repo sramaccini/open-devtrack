@@ -15,7 +15,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,12 +41,6 @@ class Reports {
 
     static final int DAYS = 30;
     static final int SPRINTS = 6;
-
-    /**
-     * A short label of the day for the axis of the charts: the chart of Quadrava 0.11 writes every category, and full
-     * dates of 30 days overlap. Temporary, until it leaves out the labels that do not fit (request Q14).
-     */
-    private static final DateTimeFormatter LABEL = DateTimeFormatter.ofPattern("MM-dd");
 
     private final DSLContext sql;
     private final ZoneId zone;
@@ -134,7 +127,6 @@ class Reports {
             }
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("day", day);
-            row.put("label", LABEL.format(day));
             row.put("remaining", day.isAfter(last) ? null : known);
             long passed = ChronoUnit.DAYS.between(start, day);
             row.put("ideal", day.isAfter(end) ? null
@@ -180,7 +172,6 @@ class Reports {
             }
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("day", day);
-            row.put("label", LABEL.format(day));
             row.put("todo", known == null ? 0 : known.get(Snapshot.TODO));
             row.put("inProgress", known == null ? 0 : known.get(Snapshot.IN_PROGRESS));
             row.put("done", known == null ? 0 : known.get(Snapshot.DONE));
@@ -204,7 +195,6 @@ class Reports {
         for (LocalDate day = first; !day.isAfter(today()); day = day.plusDays(1)) {
             Map<String, Object> row = new LinkedHashMap<>();
             row.put("day", day);
-            row.put("label", LABEL.format(day));
             row.put("created", created.getOrDefault(day, 0));
             row.put("resolved", resolved.getOrDefault(day, 0));
             days.add(row);

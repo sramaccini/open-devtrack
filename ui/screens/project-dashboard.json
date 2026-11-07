@@ -83,7 +83,8 @@
               "format": "number",
               "kind": "line",
               "source": "burndown",
-              "categoryField": "label",
+              "categoryField": "day",
+              "categoryFormat": "date",
               "series": [
                 {
                   "field": "remaining",
@@ -130,7 +131,6 @@
         {
           "id": "section-flow",
           "type": "section",
-          "span": 2,
           "title": "{{ t('reports.flow', 'Cumulative flow') }}",
           "components": [
             {
@@ -140,7 +140,8 @@
               "kind": "bar",
               "stacked": true,
               "source": "flow",
-              "categoryField": "label",
+              "categoryField": "day",
+              "categoryFormat": "date",
               "series": [
                 {
                   "field": "done",
@@ -165,7 +166,6 @@
         {
           "id": "section-created-resolved",
           "type": "section",
-          "span": 2,
           "title": "{{ t('reports.created_resolved', 'Created vs resolved') }}",
           "components": [
             {
@@ -174,7 +174,8 @@
               "format": "number",
               "kind": "bar",
               "source": "createdResolved",
-              "categoryField": "label",
+              "categoryField": "day",
+              "categoryFormat": "date",
               "series": [
                 {
                   "field": "created",

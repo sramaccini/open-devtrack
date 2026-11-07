@@ -102,6 +102,22 @@
           "description": "How often, in seconds, the messages are read again (60 if absent)."
         }
       }
+    },
+    "userMenu": {
+      "type": "array",
+      "description": "Items of the application in the user menu, before the built-in settings and sign-out: each one opens a screen with its parameters. Items the user may not see (requires, visibleIf) are left out.",
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/$defs/leaf"
+      }
+    },
+    "settings": {
+      "type": "array",
+      "description": "Sections of the application in the settings dialog, after the built-in «General» tab: each one is a tab that draws a screen of the application (for example a form read with a GET and saved with a PUT). Sections the user may not see (requires, visibleIf) are left out.",
+      "maxItems": 10,
+      "items": {
+        "$ref": "#/$defs/leaf"
+      }
     }
   },
   "$defs": {

@@ -43,7 +43,7 @@ development tenants and users and the session cookie over http.
 
 ## Registry of the screen definitions (`uiregistry`)
 
-Implements `contracts/registry.yaml` 0.7.0 of Quadrava 0.11.1, adapted from its reference registry (0.6.0). Versions and publications
+Implements `contracts/registry.yaml` 0.7.0 of Quadrava 0.12.0, adapted from its reference registry (0.6.0). Versions and publications
 are in the schema `odt_uiregistry` (Flyway, `db/odt/uiregistry`). Documents are validated against the schemas of the
 pinned Quadrava version in `src/main/resources/quadrava/schemas`, refreshed with `tools/sync-quadrava-schemas.sh
 <version>`. The browser reaches it with the session; tools (`quadrava publish`, the registry kit) with a Keycloak
@@ -251,7 +251,7 @@ from the changelog of `audit` and the last 30 days of each project rebuilt from 
 - `GET /api/projects/{key}/reports/summary` (open, in progress, resolved in 30 days, median cycle time in days, the
   active sprint), `…/sprints`, `…/burndown?sprint=` (the active sprint, else the last one: points left and the ideal
   line), `…/velocity` (the last 6 completed sprints), `…/flow` and `…/created-resolved` (the last 30 days). For the
-  members of the project; days carry a short `label` for the charts (temporary, request Q14).
+  members of the project; days are ISO dates, shown short on the axis by the chart (Q14).
 - `GET /api/me/summary` and `GET /api/me/filters` (in `search`, as counts of ODQL queries on its index): open issues
   assigned to and reported by the user, open critical bugs, issues resolved since Monday; the user's filters marked for
   the dashboard (at most 10) with how many issues each finds.
