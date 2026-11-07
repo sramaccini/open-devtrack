@@ -1,6 +1,6 @@
 # ADR-16: Search, ODQL and saved filters
 
-Status: Proposed (7 November 2026) — F4, epic E7
+Status: Accepted (7 November 2026; decided by the maintainer) — F4, epic E7
 
 ## Context
 

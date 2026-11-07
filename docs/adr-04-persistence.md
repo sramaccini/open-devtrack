@@ -1,6 +1,6 @@
 # ADR-04: Persistence for commands, search and reports
 
-Status: Accepted (31 October 2026) — decision D4 of the project plan
+Status: Accepted (31 October 2026) — decision D4 of the project plan; amended by ADR-16 (7 November 2026): jOOQ without generated classes
 
 ## Context
 
@@ -32,4 +32,5 @@ constrain the choice of the application.
 
 - Two ways to reach the database, with a clear line: the module tests check that search and reporting never write.
 - The code generation of jOOQ needs a database at build time (Testcontainers PostgreSQL), or the DDL parser of jOOQ
-  on the migrations: to settle in F1.
+  on the migrations: to settle in F1. Settled by ADR-16: neither; the tables of `search` and `reporting` are declared by
+  hand in their modules.

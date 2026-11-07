@@ -1,6 +1,6 @@
 # ADR-18: Email, preferences and digests
 
-Status: Proposed (7 November 2026) — F4, epic E9
+Status: Accepted (7 November 2026; decided by the maintainer) — F4, epic E9
 
 ## Context
 
@@ -35,8 +35,8 @@ of the request that reads it; a mail is written by a job, with no request.
 5. **Spring Mail**, configured with the usual `spring.mail.*`; without `spring.mail.host` the email channel is off:
    preferences are kept, nothing is sent, and the screen says that email is not configured. The development and e2e
    environments run Mailpit, so a mail can be looked at.
-6. **The screen.** «Notification settings», a screen from the user menu of Quadrava if it accepts an item, otherwise in
-   the navigation: one row per kind, with in-app on or off and email off, instant or daily, and the address the mails
+6. **The screen.** «Notification settings» belongs in the user menu and the settings dialog of Quadrava, which an
+   application cannot extend yet: requested as Q13 (7 November 2026). Until then a screen in the navigation: one row per kind, with in-app on or off and email off, instant or daily, and the address the mails
    go to (read only, from the identity provider). `GET/PUT /api/notifications/preferences`.
 
 ## Alternatives considered

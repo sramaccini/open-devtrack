@@ -1,6 +1,6 @@
 # ADR-17: Dashboards and reports
 
-Status: Proposed (7 November 2026) — F4, epic E8
+Status: Accepted (7 November 2026; decided by the maintainer) — F4, epic E8
 
 ## Context
 
