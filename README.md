@@ -17,16 +17,16 @@ What is missing in Quadrava or in authz-library is added there, with their own t
 
 ## Status
 
-Phase **F0** (start-up): the decisions to take before writing the back end are proposed as ADRs in [docs/](docs/README.md) and wait for approval. The first release, 1.0, is planned for 28 May 2027.
+Phases **F0–F3 done**: the back end, the `ui/` project and CI are in place, with projects, issues, workflow, comments, attachments, boards, backlog and sprints. Next is **F4**. The decisions are ADRs in [docs/](docs/README.md); [HANDOFF.md](HANDOFF.md) has the details and the next steps. The first release, 1.0, is planned for 28 May 2027.
 
-| Phase | Content |
-| --- | --- |
-| F0 | Decisions D1–D9, end-to-end check of authz-library, development environment |
-| F1 | Modulith skeleton, login with authz-library, CI, the `ui/` project with navigation and theme |
-| F2 | Projects, issues, workflow, comments and attachments |
-| F3 | Boards, backlog and sprints |
-| F4 | Search, dashboards, notifications |
-| F5 | Public API and webhooks, hardening, 1.0 |
+| Phase | Content | State |
+| --- | --- | --- |
+| F0 | Decisions D1–D9, end-to-end check of authz-library, development environment | Done |
+| F1 | Modulith skeleton, login with authz-library, CI, the `ui/` project with navigation and theme | Done |
+| F2 | Projects, issues, workflow, comments and attachments | Done (gate M1); also mentions and in-app messages (ADR-13) |
+| F3 | Boards, backlog and sprints | Done (ADR-15) |
+| F4 | Search, dashboards, notifications | Next |
+| F5 | Public API and webhooks, hardening, 1.0 | Planned |
 
 ## Documentation
 
