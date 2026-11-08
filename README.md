@@ -32,6 +32,7 @@ Phases **F0–F3 done**: the back end, the `ui/` project and CI are in place, wi
 
 - [docs/](docs/README.md): architecture decision records and checks.
 - [brand/](brand/README.md): logo, icons, colours and how to use them.
+- [stack/README.md](stack/README.md): the whole application in Docker with sample projects, to try it (`stack/stack.sh up`).
 - [backend/README.md](backend/README.md): building and running the back end.
 - [AGENTS.md](AGENTS.md): rules for working on the project.
 - [HANDOFF.md](HANDOFF.md): status and next steps.

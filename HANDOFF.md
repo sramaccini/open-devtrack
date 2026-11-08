@@ -108,6 +108,9 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
   authz-library build installed them. A clean machine or CI needs the token (backend/README.md).
 - Ports 8180 and 8090 are used by containers of other projects: the e2e environment uses 25432, 26379, 28080, 28090,
   28180.
+- `stack/stack.sh up` (stack/README.md): everything in Docker for trying and reviewing, with sample projects, on
+  18080, 18090, 18180, 18025; the back end image is built from `backend/` with the npm token of `~/.npmrc` as
+  the Maven credentials.
 - Commits only as `Simone Ramaccini <s.ramaccini@gmail.com>` (repository `git config`; the global one has another
   address), no trailers or tool attributions anywhere.
 

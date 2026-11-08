@@ -20,3 +20,4 @@ Thumbs.db
 
 # Generated files of the local environments
 e2e/**/.work/
+stack/.work/

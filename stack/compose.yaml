@@ -1,0 +1,122 @@
+# OpenDevTrack in Docker, for trying it and reviewing it (stack/README.md). Development only: HTTP, the profile dev of
+# the back end (development tenants and users), Keycloak with its embedded database. Started by stack.sh, which
+# generates the credentials into .work/.env (gitignored).
+name: opendevtrack
+
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: opendevtrack
+      POSTGRES_USER: opendevtrack
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?run stack.sh}
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "opendevtrack", "-d", "opendevtrack"]
+      interval: 2s
+      retries: 30
+
+  redis:
+    image: redis:8.2
+    command: ["redis-server", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      retries: 30
+
+  # A mail server that keeps what it gets (ADR-18): the mails of the back end at http://localhost:18025.
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - "${MAILPIT_PORT:-18025}:8025"
+
+  # The realm of the end-to-end check (users mario.rossi and anna.bianchi), imported when the container is created.
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.0
+    # The same port inside and outside: the issuer the browser sees is the one the back end checks.
+    command: ["start-dev", "--http-port=${KEYCLOAK_PORT:-18180}", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?run stack.sh}
+      KC_HEALTH_ENABLED: "true"
+      # Replaced in the placeholders of realm-opendevtrack.json
+      BFF_CLIENT_SECRET: ${BFF_CLIENT_SECRET:?run stack.sh}
+      DEV_USER_PASSWORD: ${DEV_USER_PASSWORD:?run stack.sh}
+      FRONT_URL: http://localhost:${FRONT_PORT:-18090}
+    volumes:
+      - ../e2e/authz/realm-opendevtrack.json:/opt/keycloak/data/import/realm-opendevtrack.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && printf 'GET /health/ready HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+      interval: 3s
+      retries: 60
+    networks:
+      default:
+        # The back end lives in the network of this container (below): the others reach it by this name.
+        aliases: [backend]
+    ports:
+      - "${KEYCLOAK_PORT:-18180}:${KEYCLOAK_PORT:-18180}"
+      # The back end, for the tools on the host (quadrava publish, the registry kit)
+      - "${APP_PORT:-18080}:8080"
+
+  # The back end shares the network of Keycloak, so that http://localhost:<KEYCLOAK_PORT> is Keycloak for it as for
+  # the browser: the issuer of the tokens and the address the back end reads it from are the same, with no proxy.
+  backend:
+    build:
+      context: ../backend
+      secrets: [maven-settings]
+    image: opendevtrack-backend:local
+    network_mode: service:keycloak
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      keycloak: { condition: service_healthy }
+    restart: on-failure
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_URL: jdbc:postgresql://postgres:5432/opendevtrack
+      DB_USER: opendevtrack
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: redis
+      IAM_ISSUER_URI: http://localhost:${KEYCLOAK_PORT:-18180}/realms/opendevtrack
+      IAM_CLIENT_SECRET: ${BFF_CLIENT_SECRET}
+      FRONTEND_URL: http://localhost:${FRONT_PORT:-18090}
+      SPRING_MAIL_HOST: mailpit
+      SPRING_MAIL_PORT: "1025"
+      ODT_MAIL_OUTBOX_DELAY: PT5S
+
+  # The front (ADR-01): the Quadrava runtime with the screens of ui/ from the registry of the back end.
+  runtime:
+    image: ghcr.io/sramaccini/quadrava-runtime:0.12.1
+    depends_on: [backend]
+    environment:
+      QUADRAVA_BFF_URL: http://backend:8080
+      # The largest request forwarded to the BFF: a file of odt.attachments.max-size (25 MB) and its multipart frame
+      QUADRAVA_MAX_BODY_SIZE: 26m
+    volumes:
+      - ../e2e/authz/runtime-config.json:/etc/quadrava/runtime-config.json:ro
+      - ../brand/svg:/usr/share/nginx/html/odt-brand:ro
+      - ../brand/png:/usr/share/nginx/html/odt-brand-png:ro
+    ports:
+      - "${FRONT_PORT:-18090}:8080"
+
+  # Publishes ui/ to the registry with the Quadrava CLI (stack.sh publish); not started by up.
+  publish:
+    image: node:24-alpine
+    profiles: [tools]
+    working_dir: /work
+    environment:
+      NODE_AUTH_TOKEN: ${PACKAGES_TOKEN:-}
+      QUADRAVA_TOKEN: ${QUADRAVA_TOKEN:-}
+    volumes:
+      - ../ui:/work/ui:ro
+      - ./.work/npmrc:/work/.npmrc:ro
+    command: ["npx", "--yes", "@sramaccini/quadrava-cli@0.12.1", "publish", "ui",
+              "--registry", "http://backend:8080", "--app", "opendevtrack", "--env", "development"]
+
+secrets:
+  maven-settings:
+    file: ./.work/maven-settings.xml
+
+volumes:
+  pgdata:
