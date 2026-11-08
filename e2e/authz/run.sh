@@ -83,6 +83,9 @@ up() {
     nohup "${JAVA_HOME:?set JAVA_HOME to a JDK 25}/bin/java" ${E2E_JAVA_OPTS:-} -jar "$jar" \
       --spring.profiles.active=dev > "$work/backend.log" 2>&1 &
   echo $! > "$work/backend.pid"
+  # On Windows (Git Bash) $! is the MSYS stub of nohup and the JVM a native child: keep the Windows pid of the stub,
+  # so that down stops the whole tree.
+  if [ -r "/proc/$!/winpid" ]; then cat "/proc/$!/winpid" > "$work/backend.winpid"; fi
   wait_for "http://localhost:$APP_PORT/actuator/health" "The back end"
 
   log "ui/ published to the registry (environment development, author mario.rossi)"
@@ -191,7 +194,11 @@ check() {
 }
 
 down() {
-  if [ -f "$work/backend.pid" ]; then kill "$(cat "$work/backend.pid")" 2>/dev/null || true; rm -f "$work/backend.pid"; fi
+  if [ -f "$work/backend.winpid" ] && command -v taskkill > /dev/null; then
+    taskkill //PID "$(cat "$work/backend.winpid")" //T //F > /dev/null 2>&1 || true
+  fi
+  if [ -f "$work/backend.pid" ]; then kill "$(cat "$work/backend.pid")" 2>/dev/null || true; fi
+  rm -f "$work/backend.pid" "$work/backend.winpid"
   "${compose[@]}" down -v
 }
 
