@@ -43,7 +43,7 @@ class DefaultWorkflow {
 
     @EventListener
     void on(ProjectCreated event) {
-        WorkflowEntity workflow = workflows.save(new WorkflowEntity(event.tenantId(), event.projectId(), NAME));
+        WorkflowEntity workflow = workflows.save(new WorkflowEntity(event.tenantId(), event.projectId(), NAME, true));
         for (int i = 0; i < STATUSES.size(); i++) {
             statuses.save(new StatusEntity(workflow.id(), STATUSES.get(i).get(0), STATUSES.get(i).get(1), i));
         }

@@ -4,21 +4,26 @@
  */
 package com.logicwarez.opendevtrack.shared;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 /**
  * The statuses of the issues for the module {@code workflow}, which the module {@code issue} depends on (ADR-20): when a
- * status is removed from the workflow of a project, its issues move to another one through this interface, which
- * {@code issue} implements, and so {@code workflow} never depends on {@code issue}.
+ * status is removed from a workflow, or a type of issue moves to another workflow, its issues move to another status
+ * through this interface, which {@code issue} implements, and so {@code workflow} never depends on {@code issue}.
  */
 public interface IssueStatuses {
 
-    /** How many issues of the project are in the status. */
-    long count(UUID projectId, String status);
+    /** The types of issue, as the API names them ({@code task}, {@code bug}…). */
+    List<String> types();
+
+    /** How many issues of the project, of one of the types, are in the status. */
+    long count(UUID projectId, Collection<String> types, String status);
 
     /**
-     * Moves every issue of the project in {@code from} to {@code to}, as a change of the user of the request (one
-     * change of the status per issue, in the history); returns how many moved.
+     * Moves every issue of the project, of one of the types, in {@code from} to {@code to}, as a change of the user of
+     * the request (one change of the status per issue, in the history); returns how many moved.
      */
-    int move(UUID projectId, String from, String to);
+    int move(UUID projectId, Collection<String> types, String from, String to);
 }

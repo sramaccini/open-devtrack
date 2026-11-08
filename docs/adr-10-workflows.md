@@ -1,6 +1,7 @@
 # ADR-10: Workflows and their CEL guards
 
-Status: Accepted (1 November 2026), with two simplifications of the proposal (below) — F2 E3
+Status: Accepted (1 November 2026), with two simplifications of the proposal (below) — F2 E3; one workflow per
+project replaced by workflows by issue type (ADR-20, B)
 
 ## Context
 

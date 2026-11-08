@@ -87,6 +87,10 @@ Quadrava and authz-library, and the ADRs say where.
 - F4, ADR-19 (accepted 7 November 2026): an issue has an optional due date (`dueOn`) and reviewer (a member, not the
   assignee, who then watches it); ODQL `due` and `reviewer`; «Overdue» and «In review by me» on `dashboard`; the
   badge «Overdue» in `issue-list` and `search`; the message `review_requested` with its preference.
+- ADR-20 (accepted 8 November 2026): an admin of the project edits statuses and transitions (A; removing a status moves
+  its issues), and a project has several workflows mapped by issue type, a default one for the rest (B; an issue that
+  changes workflow keeps its status or moves to the first one of the same category). Screens: the Workflows table of
+  `project-detail`, `workflow-detail`.
 
 ## Requests to the dependencies
 
@@ -116,5 +120,4 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. ADR-20: A (editing the workflow) built; next B (workflows by issue type).
-2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.
+1. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

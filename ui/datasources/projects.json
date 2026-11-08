@@ -47,61 +47,24 @@
       "method": "DELETE",
       "url": "/api/projects/{{params.key}}/members/{{username}}"
     },
-    "transitions": {
+    "workflows": {
       "type": "rest",
       "method": "GET",
-      "url": "/api/projects/{{params.key}}/workflow/transitions"
+      "url": "/api/projects/{{params.key}}/workflows"
     },
-    "changeTransition": {
-      "type": "rest",
-      "method": "PUT",
-      "url": "/api/projects/{{params.key}}/workflow/transitions/{{code}}",
-      "body": "{{form}}"
-    },
-    "addTransition": {
+    "addWorkflow": {
       "type": "rest",
       "method": "POST",
-      "url": "/api/projects/{{params.key}}/workflow/transitions",
+      "url": "/api/projects/{{params.key}}/workflows",
       "body": "{{form}}"
     },
-    "removeTransition": {
+    "removeWorkflow": {
       "type": "rest",
       "method": "DELETE",
-      "url": "/api/projects/{{params.key}}/workflow/transitions/{{code}}",
+      "url": "/api/projects/{{params.key}}/workflows/{{id}}",
       "params": {
         "version": "{{version}}"
       }
-    },
-    "statuses": {
-      "type": "rest",
-      "method": "GET",
-      "url": "/api/projects/{{params.key}}/workflow/statuses"
-    },
-    "statusOptions": {
-      "type": "rest",
-      "method": "GET",
-      "url": "/api/projects/{{params.key}}/workflow/statuses",
-      "params": {
-        "q": "{{search}}"
-      }
-    },
-    "addStatus": {
-      "type": "rest",
-      "method": "POST",
-      "url": "/api/projects/{{params.key}}/workflow/statuses",
-      "body": "{{form}}"
-    },
-    "changeStatus": {
-      "type": "rest",
-      "method": "PUT",
-      "url": "/api/projects/{{params.key}}/workflow/statuses/{{code}}",
-      "body": "{{form}}"
-    },
-    "removeStatus": {
-      "type": "rest",
-      "method": "POST",
-      "url": "/api/projects/{{params.key}}/workflow/statuses/{{code}}/remove",
-      "body": "{{form}}"
     },
     "fieldDefinitions": {
       "type": "rest",

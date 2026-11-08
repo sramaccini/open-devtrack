@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "1.0",
+  "datasources": "workflows",
+  "description": "One workflow of a project: its name, the issue types it serves, its statuses and transitions (module workflow, ADR-20).",
+  "sources": {
+    "get": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}"
+    },
+    "save": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}",
+      "body": "{{form}}"
+    },
+    "transitions": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}/transitions"
+    },
+    "changeTransition": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}/transitions/{{code}}",
+      "body": "{{form}}"
+    },
+    "addTransition": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}/transitions",
+      "body": "{{form}}"
+    },
+    "removeTransition": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}/transitions/{{code}}",
+      "params": {
+        "version": "{{version}}"
+      }
+    },
+    "statuses": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}/statuses"
+    },
+    "statusOptions": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}/statuses",
+      "params": {
+        "q": "{{search}}"
+      }
+    },
+    "addStatus": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}/statuses",
+      "body": "{{form}}"
+    },
+    "changeStatus": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}/statuses/{{code}}",
+      "body": "{{form}}"
+    },
+    "removeStatus": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}/statuses/{{code}}/remove",
+      "body": "{{form}}"
+    }
+  }
+}

@@ -24,6 +24,9 @@ class WorkflowEntity {
     private UUID projectId;
     private String name;
 
+    /** The workflow of the types that the scheme maps to no other one (ADR-20, B): one per project. */
+    private boolean isDefault;
+
     /** Changed at each edit of the statuses or transitions (ADR-20): 412 for a change made on an older copy. */
     @Version
     private long version;
@@ -33,15 +36,20 @@ class WorkflowEntity {
     protected WorkflowEntity() {
     }
 
-    WorkflowEntity(String tenantId, UUID projectId, String name) {
+    WorkflowEntity(String tenantId, UUID projectId, String name, boolean isDefault) {
         this.tenantId = tenantId;
         this.projectId = projectId;
         this.name = name;
+        this.isDefault = isDefault;
     }
 
     /** Marks the workflow changed, so that its version moves on with the change of a status or a transition. */
     void changed(Instant now) {
         this.updatedAt = now;
+    }
+
+    void rename(String name) {
+        this.name = name;
     }
 
     long version() {
@@ -50,5 +58,21 @@ class WorkflowEntity {
 
     UUID id() {
         return id;
+    }
+
+    String tenantId() {
+        return tenantId;
+    }
+
+    UUID projectId() {
+        return projectId;
+    }
+
+    String name() {
+        return name;
+    }
+
+    boolean isDefault() {
+        return isDefault;
     }
 }

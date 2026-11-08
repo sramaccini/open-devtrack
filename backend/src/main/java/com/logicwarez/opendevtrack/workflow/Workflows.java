@@ -5,7 +5,10 @@
 package com.logicwarez.opendevtrack.workflow;
 
 import com.logicwarez.opendevtrack.shared.Conditions;
+import com.logicwarez.opendevtrack.shared.IssueStatuses;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,10 +18,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The workflow of a project for the module issue (ADR-10): the status of a new issue, the transitions allowed from a
- * status, and whether one of them can run. The module issue keeps the status; here only the map of its fields is seen.
- * The project permissions given are those of the user ({@code odt.issue.transition} is needed for any transition), and
- * the guards see them through {@code can()}.
+ * The workflows of a project for the module issue (ADR-10, ADR-20 B): the status of a new issue, the transitions allowed
+ * from a status, and whether one of them can run, in the workflow of the type of the issue (the scheme of the project,
+ * else its default workflow). The module issue keeps the status; here only the map of its fields is seen. The project
+ * permissions given are those of the user ({@code odt.issue.transition} is needed for any transition), and the guards
+ * see them through {@code can()}.
  */
 @Service
 @Transactional(readOnly = true)
@@ -31,14 +35,19 @@ public class Workflows {
     static final String FALLBACK_STATUS = "todo";
 
     private final WorkflowRepository workflows;
+    private final SchemeRepository schemes;
     private final StatusRepository statuses;
     private final TransitionRepository transitions;
+    private final IssueStatuses issues;
     private final Conditions guards;
 
-    Workflows(WorkflowRepository workflows, StatusRepository statuses, TransitionRepository transitions, Conditions guards) {
+    Workflows(WorkflowRepository workflows, SchemeRepository schemes, StatusRepository statuses,
+              TransitionRepository transitions, IssueStatuses issues, Conditions guards) {
         this.workflows = workflows;
+        this.schemes = schemes;
         this.statuses = statuses;
         this.transitions = transitions;
+        this.issues = issues;
         this.guards = guards;
     }
 
@@ -55,35 +64,61 @@ public class Workflows {
         public enum Outcome { ALLOWED, UNKNOWN, NOT_FROM_HERE, NOT_PERMITTED, GUARD_FALSE }
     }
 
+    /**
+     * The statuses of every workflow of the project, once per code (a code has one category in a project), in the
+     * order of the default workflow and then of the others: for boards, queries and reports.
+     */
     public List<Status> statuses(UUID projectId) {
-        return workflow(projectId).map(w -> statuses.findByWorkflowIdOrderByPosition(w.id()).stream()
-                .map(s -> new Status(s.code(), s.category(), s.position())).toList()).orElse(List.of());
+        Map<String, Status> all = new LinkedHashMap<>();
+        for (WorkflowEntity w : workflows.findByProjectIdOrderByIsDefaultDescIdAsc(projectId)) {
+            for (StatusEntity s : statuses.findByWorkflowIdOrderByPosition(w.id())) {
+                all.putIfAbsent(s.code(), new Status(s.code(), s.category(), all.size()));
+            }
+        }
+        return List.copyOf(all.values());
     }
 
-    /** The first status of the workflow of the project. */
-    public String initialStatus(UUID projectId) {
-        List<Status> all = statuses(projectId);
+    /** The statuses of the workflow of the type in the project. */
+    public List<Status> statuses(UUID projectId, String type) {
+        return workflow(projectId, type).map(this::statuses).orElse(List.of());
+    }
+
+    /** The first status of the workflow of the type. */
+    public String initialStatus(UUID projectId, String type) {
+        List<Status> all = statuses(projectId, type);
         return all.isEmpty() ? FALLBACK_STATUS : all.getFirst().code();
     }
 
     /**
-     * The transitions that can run now from {@code status}: the user has {@link #TRANSITION} and the guard is true for
-     * the issue as it would be after the transition ({@code issue} without the status, which is added here).
+     * The status of an issue in {@code status} once it follows the workflow of {@code type} (ADR-20, B.5): the same
+     * when that workflow has it, else its first status of the same category, else its first status.
      */
-    public List<Transition> available(UUID projectId, String status, Map<String, ?> issue, Map<String, ?> user,
-                                      Set<String> permissions) {
+    public String statusFor(UUID projectId, String type, String status) {
+        String category = statuses(projectId).stream().filter(s -> s.code().equals(status)).map(Status::category)
+                .findFirst().orElse(null);
+        return statusIn(statuses(projectId, type), status, category);
+    }
+
+    /**
+     * The transitions that can run now from {@code status} in the workflow of the type: the user has
+     * {@link #TRANSITION} and the guard is true for the issue as it would be after the transition ({@code issue} without
+     * the status, which is added here).
+     */
+    public List<Transition> available(UUID projectId, String type, String status, Map<String, ?> issue,
+                                      Map<String, ?> user, Set<String> permissions) {
         if (!permissions.contains(TRANSITION)) {
             return List.of();
         }
-        return workflow(projectId).map(w -> transitions.findByWorkflowIdOrderByPosition(w.id()).stream()
+        return workflow(projectId, type).map(w -> transitions.findByWorkflowIdOrderByPosition(w.id()).stream()
                 .filter(t -> t.from(status) && guards.allows(t.guardCel(), after(issue, t), user, permissions))
                 .map(Workflows::transition).toList()).orElse(List.of());
     }
 
-    /** Whether the transition {@code code} can run now, and why not. */
-    public Decision decide(UUID projectId, String code, String status, Map<String, ?> issue, Map<String, ?> user,
-                           Set<String> permissions) {
-        Optional<TransitionEntity> found = workflow(projectId).flatMap(w -> transitions.findByWorkflowIdAndCode(w.id(), code));
+    /** Whether the transition {@code code} of the workflow of the type can run now, and why not. */
+    public Decision decide(UUID projectId, String type, String code, String status, Map<String, ?> issue,
+                           Map<String, ?> user, Set<String> permissions) {
+        Optional<TransitionEntity> found = workflow(projectId, type)
+                .flatMap(w -> transitions.findByWorkflowIdAndCode(w.id(), code));
         if (found.isEmpty()) {
             return new Decision(Decision.Outcome.UNKNOWN, null);
         }
@@ -101,8 +136,44 @@ public class Workflows {
         return new Decision(Decision.Outcome.ALLOWED, transition);
     }
 
+    /** The default workflow of the project. */
     Optional<WorkflowEntity> workflow(UUID projectId) {
-        return workflows.findByProjectId(projectId);
+        return workflows.findByProjectIdAndIsDefaultTrue(projectId);
+    }
+
+    /** The workflow that the scheme maps the type to, else the default. */
+    Optional<WorkflowEntity> workflow(UUID projectId, String type) {
+        return schemes.findByProjectIdAndIssueType(projectId, type).flatMap(s -> workflows.findById(s.workflowId()))
+                .or(() -> workflow(projectId));
+    }
+
+    /** The types whose issues follow the workflow: those mapped to it, or for the default those mapped to no other. */
+    List<String> types(WorkflowEntity w) {
+        Map<String, UUID> mapped = new HashMap<>();
+        schemes.findByProjectId(w.projectId()).forEach(s -> mapped.put(s.issueType(), s.workflowId()));
+        List<String> types = new ArrayList<>();
+        for (String type : issues.types()) {
+            UUID to = mapped.get(type);
+            if (w.id().equals(to) || (to == null && w.isDefault())) {
+                types.add(type);
+            }
+        }
+        return types;
+    }
+
+    List<Status> statuses(WorkflowEntity w) {
+        return statuses.findByWorkflowIdOrderByPosition(w.id()).stream()
+                .map(s -> new Status(s.code(), s.category(), s.position())).toList();
+    }
+
+    /** Where an issue in {@code status} (of {@code category}) goes among {@code target}, by the rule of B.5. */
+    static String statusIn(List<Status> target, String status, String category) {
+        if (target.isEmpty()) {
+            return status;
+        }
+        return target.stream().filter(s -> s.code().equals(status)).findFirst()
+                .or(() -> target.stream().filter(s -> s.category().equals(category)).findFirst())
+                .orElse(target.getFirst()).code();
     }
 
     private static Map<String, Object> after(Map<String, ?> issue, TransitionEntity t) {

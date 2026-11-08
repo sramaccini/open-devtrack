@@ -9,7 +9,7 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 | `project.json` | (not published) | Identifier `opendevtrack`, languages and themes; the runtime gets them from its configuration |
 | `navigation.json` | `navigation/main` | Areas and items of the side bar, with the permission each one requires |
 | `screens/*.json` | `screen/<id>` | One screen per file |
-| `datasources/*.json` | `datasources/<id>` | Data sources shared by screens: `projects` (with members, workflow and custom field definitions), `users`, `issues` (with transitions, comments, attachments, history and custom fields) |
+| `datasources/*.json` | `datasources/<id>` | Data sources shared by screens: `projects` (with members, the workflows and custom field definitions), `workflows` (one workflow, its statuses and transitions), `users`, `issues` (with transitions, comments, attachments, history and custom fields) |
 | `themes/*.json` | `theme/<id>` | `odt-light` (the default) and `odt-dark`, with the palette of [brand/](../brand/README.md) |
 | `i18n/<lang>.json` | `messages/<lang>` | English and Italian texts, key → text; labels use `t('key', 'English default')` |
 
@@ -82,9 +82,13 @@ The title of the tab is `brand.name` of the active theme and its icons are `bran
 
 ## Workflow
 
-The Workflow section of `project-detail` (ADR-20, A) has a table of the statuses (position, status, category, how many
-issues) and one of the transitions (from, to, condition), with New status and New transition among the buttons of the
-project and Edit and Remove on each row, for an admin of the project. Removing a status asks where its issues go (a
+The Workflows section of `project-detail` (ADR-20, B) lists the workflows of the project (name, default, the issue
+types each one serves, how many statuses and transitions), with New workflow among the buttons of the project (a copy
+of the default), Open and Remove (only a workflow that serves no type, not the default). `workflow-detail` (params
+`key`, `workflow`; data sources `workflows/*`) shows one: its name and the issue types it serves (read-only for the
+default, which serves the types no other workflow maps), saved together; then a table of the statuses (position,
+status, category, how many issues of its types) and one of the transitions (from, to, condition), with New status and
+New transition among the buttons and Edit and Remove on each row, for an admin of the project (ADR-20, A). Removing a status asks where its issues go (a
 lookup on the statuses). The rows carry the version of the workflow: a change made on an older copy answers 412 and
 the screen says so. Statuses and transitions outside the catalogues are shown by their code (`values.status.*`,
 `values.transition.*` translate only the built-in ones); categories are `values.category.*`.

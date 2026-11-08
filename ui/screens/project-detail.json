@@ -25,32 +25,14 @@
     "users": {
       "ref": "users/search"
     },
-    "transitions": {
-      "ref": "projects/transitions"
+    "workflows": {
+      "ref": "projects/workflows"
     },
-    "statuses": {
-      "ref": "projects/statuses"
+    "addWorkflow": {
+      "ref": "projects/addWorkflow"
     },
-    "statusOptions": {
-      "ref": "projects/statusOptions"
-    },
-    "addStatus": {
-      "ref": "projects/addStatus"
-    },
-    "changeStatus": {
-      "ref": "projects/changeStatus"
-    },
-    "removeStatus": {
-      "ref": "projects/removeStatus"
-    },
-    "addTransition": {
-      "ref": "projects/addTransition"
-    },
-    "changeTransition": {
-      "ref": "projects/changeTransition"
-    },
-    "removeTransition": {
-      "ref": "projects/removeTransition"
+    "removeWorkflow": {
+      "ref": "projects/removeWorkflow"
     },
     "fieldDefinitions": {
       "ref": "projects/fieldDefinitions"
@@ -336,72 +318,39 @@
           ]
         },
         {
-          "id": "btn-add-status",
-          "label": "{{ t('projects.add_status', 'New status') }}",
+          "id": "btn-add-workflow",
+          "label": "{{ t('projects.add_workflow', 'New workflow') }}",
           "visibleIf": "{{form._perm.edit}}",
           "onClick": [
             {
               "dialog": {
-                "title": "{{ t('projects.add_status', 'New status') }}",
-                "submitLabel": "{{ t('projects.add', 'Add') }}",
-                "initial": {
-                  "category": "in_progress"
-                },
+                "title": "{{ t('projects.add_workflow', 'New workflow') }}",
+                "submitLabel": "{{ t('common.add', 'Add') }}",
                 "fields": [
                   {
-                    "name": "code",
+                    "name": "name",
                     "type": "text",
-                    "label": "{{ t('projects.code', 'Code') }}",
+                    "label": "{{ t('projects.workflow_name', 'Name') }}",
                     "required": true,
-                    "pattern": "^[a-z][a-z0-9_]{0,49}$",
-                    "tooltip": "{{ t('projects.code_help', 'Lower-case letters, digits and _, from a letter; it does not change') }}"
-                  },
-                  {
-                    "name": "category",
-                    "type": "select",
-                    "label": "{{ t('projects.category', 'Category') }}",
-                    "required": true,
-                    "options": [
-                      "todo",
-                      "in_progress",
-                      "done"
-                    ],
-                    "optionKey": "values.category",
-                    "tooltip": "{{ t('projects.category_help', 'Groups the status on boards and reports') }}"
-                  },
-                  {
-                    "name": "position",
-                    "type": "number",
-                    "label": "{{ t('projects.position', 'Position') }}",
-                    "min": 1,
-                    "integer": true,
-                    "tooltip": "{{ t('projects.position_help', 'From 1: the first status is the one of new issues, in the category To do') }}"
+                    "maxLength": 100,
+                    "tooltip": "{{ t('projects.workflow_name_help', 'A copy of the default workflow, with this name') }}"
                   }
                 ],
                 "onSubmit": [
                   {
-                    "call": "addStatus",
+                    "call": "addWorkflow",
+                    "as": "created",
                     "onError": [
                       {
-                        "if": "{{error.status == 400}}",
+                        "if": "{{error.status == 409}}",
                         "then": [
                           {
-                            "toast": "{{ t('projects.status_invalid', 'Check the code, the category and the position: the first status is To do, each category keeps a status') }}"
+                            "toast": "{{ t('projects.workflow_exists', 'The project already has a workflow with this name') }}"
                           }
                         ],
                         "else": [
                           {
-                            "if": "{{error.status == 409}}",
-                            "then": [
-                              {
-                                "toast": "{{ t('projects.status_exists', 'The workflow already has a status with this code') }}"
-                              }
-                            ],
-                            "else": [
-                              {
-                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                              }
-                            ]
+                            "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
                           }
                         ]
                       }
@@ -411,98 +360,7 @@
               }
             },
             {
-              "refresh": "statuses"
-            },
-            {
-              "refresh": "transitions"
-            }
-          ]
-        },
-        {
-          "id": "btn-add-transition",
-          "label": "{{ t('projects.add_transition', 'New transition') }}",
-          "visibleIf": "{{form._perm.edit}}",
-          "onClick": [
-            {
-              "dialog": {
-                "title": "{{ t('projects.add_transition', 'New transition') }}",
-                "submitLabel": "{{ t('projects.add', 'Add') }}",
-                "fields": [
-                  {
-                    "name": "code",
-                    "type": "text",
-                    "label": "{{ t('projects.code', 'Code') }}",
-                    "required": true,
-                    "pattern": "^[a-z][a-z0-9_]{0,49}$",
-                    "tooltip": "{{ t('projects.code_help', 'Lower-case letters, digits and _, from a letter; it does not change') }}"
-                  },
-                  {
-                    "name": "from",
-                    "type": "lookup",
-                    "label": "{{ t('projects.from_status', 'From status') }}",
-                    "tooltip": "{{ t('projects.from_status_help', 'Empty: from every status') }}",
-                    "lookup": {
-                      "source": "statusOptions",
-                      "valueField": "code",
-                      "labelField": "code",
-                      "minChars": 0
-                    }
-                  },
-                  {
-                    "name": "to",
-                    "type": "lookup",
-                    "label": "{{ t('issues.to_status', 'To status') }}",
-                    "required": true,
-                    "lookup": {
-                      "source": "statusOptions",
-                      "valueField": "code",
-                      "labelField": "code",
-                      "minChars": 0
-                    }
-                  },
-                  {
-                    "name": "guard",
-                    "type": "textarea",
-                    "rows": 3,
-                    "maxLength": 1000,
-                    "label": "{{ t('projects.condition', 'Condition') }}",
-                    "tooltip": "{{ t('projects.condition_help', 'A CEL expression on issue and user, for example issue.assignee != null; empty for none') }}"
-                  }
-                ],
-                "onSubmit": [
-                  {
-                    "call": "addTransition",
-                    "onError": [
-                      {
-                        "if": "{{error.status == 400}}",
-                        "then": [
-                          {
-                            "toast": "{{ t('projects.transition_invalid', 'Check from, to and the condition: two different statuses, the condition in CEL') }}"
-                          }
-                        ],
-                        "else": [
-                          {
-                            "if": "{{error.status == 409}}",
-                            "then": [
-                              {
-                                "toast": "{{ t('projects.transition_exists', 'The workflow already has a transition with this code') }}"
-                              }
-                            ],
-                            "else": [
-                              {
-                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "refresh": "transitions"
+              "refresh": "workflows"
             }
           ]
         },
@@ -918,331 +776,66 @@
       "id": "workflow-title",
       "type": "text",
       "style": "heading",
-      "text": "{{ t('projects.workflow', 'Workflow') }}"
+      "text": "{{ t('projects.workflows', 'Workflows') }}"
     },
     {
-      "id": "statuses-title",
-      "type": "text",
-      "style": "body",
-      "text": "{{ t('projects.statuses', 'Statuses') }}"
-    },
-    {
-      "id": "status-table",
+      "id": "workflow-list",
       "type": "table",
-      "source": "statuses",
+      "source": "workflows",
       "columns": [
         {
-          "field": "position",
-          "label": "{{ t('projects.position', 'Position') }}"
+          "field": "name",
+          "label": "{{ t('projects.workflow_name', 'Name') }}"
         },
         {
-          "field": "code",
-          "label": "{{ t('issues.status', 'Status') }}",
-          "valueKey": "values.status"
+          "field": "default",
+          "label": "{{ t('projects.workflow_default', 'Default') }}",
+          "format": "badge",
+          "badges": {
+            "true": "primary"
+          },
+          "valueKey": "values.workflow_default"
         },
         {
-          "field": "category",
-          "label": "{{ t('projects.category', 'Category') }}",
-          "valueKey": "values.category"
+          "field": "types",
+          "label": "{{ t('projects.workflow_types', 'Issue types') }}",
+          "valueKey": "values.issue_type"
         },
         {
-          "field": "issues",
-          "label": "{{ t('projects.status_issues', 'Issues') }}"
+          "field": "statuses",
+          "label": "{{ t('projects.statuses', 'Statuses') }}"
+        },
+        {
+          "field": "transitions",
+          "label": "{{ t('projects.transitions', 'Transitions') }}"
         }
       ],
       "rowActions": [
         {
-          "id": "btn-edit-status",
-          "label": "{{ t('common.edit', 'Edit') }}",
-          "visibleIf": "{{row._perm.edit}}",
+          "id": "btn-open-workflow",
+          "label": "{{ t('agile.open', 'Open') }}",
           "onClick": [
             {
-              "dialog": {
-                "title": "{{ t('projects.edit_status', 'Edit status') }}",
-                "submitLabel": "{{ t('common.save', 'Save') }}",
-                "initial": {
-                  "category": "{{row.category}}",
-                  "position": "{{row.position}}",
-                  "version": "{{row.version}}"
-                },
-                "fields": [
-                  {
-                    "name": "category",
-                    "type": "select",
-                    "label": "{{ t('projects.category', 'Category') }}",
-                    "required": true,
-                    "options": [
-                      "todo",
-                      "in_progress",
-                      "done"
-                    ],
-                    "optionKey": "values.category",
-                    "tooltip": "{{ t('projects.category_help', 'Groups the status on boards and reports') }}"
-                  },
-                  {
-                    "name": "position",
-                    "type": "number",
-                    "label": "{{ t('projects.position', 'Position') }}",
-                    "min": 1,
-                    "integer": true,
-                    "tooltip": "{{ t('projects.position_help', 'From 1: the first status is the one of new issues, in the category To do') }}",
-                    "required": true
-                  }
-                ],
-                "onSubmit": [
-                  {
-                    "call": "changeStatus",
-                    "args": {
-                      "code": "{{row.code}}"
-                    },
-                    "onError": [
-                      {
-                        "if": "{{error.status == 412}}",
-                        "then": [
-                          {
-                            "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
-                          }
-                        ],
-                        "else": [
-                          {
-                            "if": "{{error.status == 400}}",
-                            "then": [
-                              {
-                                "toast": "{{ t('projects.status_invalid', 'Check the code, the category and the position: the first status is To do, each category keeps a status') }}"
-                              }
-                            ],
-                            "else": [
-                              {
-                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
+              "navigate": "workflow-detail",
+              "params": {
+                "key": "{{params.key}}",
+                "workflow": "{{row.id}}"
               }
-            },
-            {
-              "refresh": "statuses"
-            },
-            {
-              "refresh": "transitions"
             }
           ]
         },
         {
-          "id": "btn-remove-status",
+          "id": "btn-remove-workflow",
           "label": "{{ t('projects.remove', 'Remove') }}",
-          "visibleIf": "{{row._perm.edit}}",
+          "visibleIf": "{{row._perm.remove}}",
           "onClick": [
             {
-              "dialog": {
-                "title": "{{ t('projects.remove_status', 'Remove status') }}",
-                "submitLabel": "{{ t('projects.remove', 'Remove') }}",
-                "initial": {
-                  "version": "{{row.version}}"
-                },
-                "fields": [
-                  {
-                    "name": "moveTo",
-                    "type": "lookup",
-                    "label": "{{ t('projects.move_to', 'Move its issues to') }}",
-                    "tooltip": "{{ t('projects.move_to_help', 'The issues of the removed status go there; the transitions from or to it are removed too') }}",
-                    "required": true,
-                    "lookup": {
-                      "source": "statusOptions",
-                      "valueField": "code",
-                      "labelField": "code",
-                      "minChars": 0
-                    }
-                  }
-                ],
-                "onSubmit": [
-                  {
-                    "call": "removeStatus",
-                    "args": {
-                      "code": "{{row.code}}"
-                    },
-                    "onError": [
-                      {
-                        "if": "{{error.status == 412}}",
-                        "then": [
-                          {
-                            "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
-                          }
-                        ],
-                        "else": [
-                          {
-                            "if": "{{error.status == 400}}",
-                            "then": [
-                              {
-                                "toast": "{{ t('projects.status_invalid', 'Check the code, the category and the position: the first status is To do, each category keeps a status') }}"
-                              }
-                            ],
-                            "else": [
-                              {
-                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
+              "confirm": "{{ t('projects.remove_workflow_confirm', 'Remove the workflow {name}? It serves no issue type.', {'name': row.name}) }}"
             },
             {
-              "refresh": "statuses"
-            },
-            {
-              "refresh": "transitions"
-            },
-            {
-              "toast": "{{ t('projects.status_removed', 'Status removed, its issues moved') }}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "transitions-title",
-      "type": "text",
-      "style": "body",
-      "text": "{{ t('projects.transitions', 'Transitions') }}"
-    },
-    {
-      "id": "workflow-table",
-      "type": "table",
-      "source": "transitions",
-      "columns": [
-        {
-          "field": "code",
-          "label": "{{ t('issues.transition', 'Transition') }}",
-          "valueKey": "values.transition"
-        },
-        {
-          "field": "from",
-          "label": "{{ t('projects.from_status', 'From status') }}",
-          "valueKey": "values.status"
-        },
-        {
-          "field": "to",
-          "label": "{{ t('issues.to_status', 'To status') }}",
-          "valueKey": "values.status"
-        },
-        {
-          "field": "guard",
-          "label": "{{ t('projects.condition', 'Condition') }}"
-        }
-      ],
-      "rowActions": [
-        {
-          "id": "btn-edit-transition",
-          "label": "{{ t('common.edit', 'Edit') }}",
-          "visibleIf": "{{row._perm.edit}}",
-          "onClick": [
-            {
-              "dialog": {
-                "title": "{{ t('projects.edit_transition', 'Edit transition') }}",
-                "submitLabel": "{{ t('common.save', 'Save') }}",
-                "initial": {
-                  "from": "{{row.from}}",
-                  "to": "{{row.to}}",
-                  "guard": "{{row.guard}}",
-                  "version": "{{row.version}}"
-                },
-                "fields": [
-                  {
-                    "name": "from",
-                    "type": "lookup",
-                    "label": "{{ t('projects.from_status', 'From status') }}",
-                    "tooltip": "{{ t('projects.from_status_help', 'Empty: from every status') }}",
-                    "lookup": {
-                      "source": "statusOptions",
-                      "valueField": "code",
-                      "labelField": "code",
-                      "minChars": 0
-                    }
-                  },
-                  {
-                    "name": "to",
-                    "type": "lookup",
-                    "label": "{{ t('issues.to_status', 'To status') }}",
-                    "required": true,
-                    "lookup": {
-                      "source": "statusOptions",
-                      "valueField": "code",
-                      "labelField": "code",
-                      "minChars": 0
-                    }
-                  },
-                  {
-                    "name": "guard",
-                    "type": "textarea",
-                    "rows": 3,
-                    "maxLength": 1000,
-                    "label": "{{ t('projects.condition', 'Condition') }}",
-                    "tooltip": "{{ t('projects.condition_help', 'A CEL expression on issue and user, for example issue.assignee != null; empty for none') }}"
-                  }
-                ],
-                "onSubmit": [
-                  {
-                    "call": "changeTransition",
-                    "args": {
-                      "code": "{{row.code}}"
-                    },
-                    "onError": [
-                      {
-                        "if": "{{error.status == 412}}",
-                        "then": [
-                          {
-                            "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
-                          }
-                        ],
-                        "else": [
-                          {
-                            "if": "{{error.status == 400}}",
-                            "then": [
-                              {
-                                "toast": "{{ t('projects.transition_invalid', 'Check from, to and the condition: two different statuses, the condition in CEL') }}"
-                              }
-                            ],
-                            "else": [
-                              {
-                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "refresh": "statuses"
-            },
-            {
-              "refresh": "transitions"
-            }
-          ]
-        },
-        {
-          "id": "btn-remove-transition",
-          "label": "{{ t('projects.remove', 'Remove') }}",
-          "visibleIf": "{{row._perm.edit}}",
-          "onClick": [
-            {
-              "confirm": "{{ t('projects.remove_transition_confirm', 'Remove the transition {code}? The issues stay where they are.', {'code': row.code}) }}"
-            },
-            {
-              "call": "removeTransition",
+              "call": "removeWorkflow",
               "args": {
-                "code": "{{row.code}}",
+                "id": "{{row.id}}",
                 "version": "{{row.version}}"
               },
               "onError": [
@@ -1255,17 +848,14 @@
                   ],
                   "else": [
                     {
-                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                      "toast": "{{ t('projects.workflow_in_use', 'Only a workflow that serves no issue type is removed') }}"
                     }
                   ]
                 }
               ]
             },
             {
-              "refresh": "statuses"
-            },
-            {
-              "refresh": "transitions"
+              "refresh": "workflows"
             }
           ]
         }

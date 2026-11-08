@@ -122,7 +122,7 @@ public class Issues {
         if (!permissions.contains(Workflows.TRANSITION)) {
             return new Move(Move.Outcome.NOT_PERMITTED, issue.status());
         }
-        Optional<Transition> transition = workflows.available(project.id(), issue.status(),
+        Optional<Transition> transition = workflows.available(project.id(), issue.type().value(), issue.status(),
                 IssueController.guardInput(found.get()), IssueController.userInput(user), permissions).stream()
                 .filter(t -> statuses.contains(t.to())).findFirst();
         if (transition.isEmpty()) {

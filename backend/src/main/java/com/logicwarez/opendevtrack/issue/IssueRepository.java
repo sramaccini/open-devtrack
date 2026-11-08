@@ -4,6 +4,7 @@
  */
 package com.logicwarez.opendevtrack.issue;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,9 +39,9 @@ interface IssueRepository extends JpaRepository<IssueEntity, UUID> {
 
     List<IssueEntity> findByProjectIdOrderByNumber(UUID projectId, Limit limit);
 
-    List<IssueEntity> findByProjectIdAndStatus(UUID projectId, String status);
+    List<IssueEntity> findByProjectIdAndTypeInAndStatus(UUID projectId, Collection<IssueType> types, String status);
 
-    long countByProjectIdAndStatus(UUID projectId, String status);
+    long countByProjectIdAndTypeInAndStatus(UUID projectId, Collection<IssueType> types, String status);
 
     @Query("select i.id from IssueEntity i where i.projectId = :projectId order by i.number")
     List<UUID> findIdsByProjectId(UUID projectId);

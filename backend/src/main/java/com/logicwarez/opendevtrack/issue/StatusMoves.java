@@ -11,6 +11,7 @@ import com.logicwarez.opendevtrack.project.ProjectRef;
 import com.logicwarez.opendevtrack.project.Projects;
 import com.logicwarez.opendevtrack.shared.IssueStatuses;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.context.ApplicationEventPublisher;
@@ -18,8 +19,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The issues of a status removed from the workflow move to another one (ADR-20, A.3), in the transaction of the removal:
- * one {@link IssueChanged} of the status per issue, so the history, the search and the reports follow.
+ * The issues of a status removed from a workflow, or of a type that moves to another workflow, move to another status
+ * (ADR-20, A.3 and B.5), in the transaction of the change: one {@link IssueChanged} of the status per issue, so the
+ * history, the search and the reports follow.
  */
 @Component
 class StatusMoves implements IssueStatuses {
@@ -37,16 +39,24 @@ class StatusMoves implements IssueStatuses {
     }
 
     @Override
+    public List<String> types() {
+        return IssueType.names();
+    }
+
+    @Override
     @Transactional(readOnly = true)
-    public long count(UUID projectId, String status) {
-        return issues.countByProjectIdAndStatus(projectId, status);
+    public long count(UUID projectId, Collection<String> types, String status) {
+        return types.isEmpty() ? 0 : issues.countByProjectIdAndTypeInAndStatus(projectId, of(types), status);
     }
 
     @Override
     @Transactional
-    public int move(UUID projectId, String from, String to) {
+    public int move(UUID projectId, Collection<String> types, String from, String to) {
+        if (types.isEmpty() || from.equals(to)) {
+            return 0;
+        }
         ProjectRef project = projects.get(projectId).orElseThrow();
-        List<IssueEntity> found = issues.findByProjectIdAndStatus(projectId, from);
+        List<IssueEntity> found = issues.findByProjectIdAndTypeInAndStatus(projectId, of(types), from);
         Instant now = Instant.now();
         for (IssueEntity issue : found) {
             issue.moveTo(to, now);
@@ -56,5 +66,9 @@ class StatusMoves implements IssueStatuses {
         }
         issues.flush();
         return found.size();
+    }
+
+    private static List<IssueType> of(Collection<String> types) {
+        return types.stream().map(t -> IssueType.parse(t).orElseThrow()).toList();
     }
 }

@@ -134,6 +134,18 @@ per issue, by the admin, in the history, the search and the reports), and remove
 board with columns of its own shows a status in none of them in the first column of its category, else in the last
 (read when the columns are built, nothing written to the board).
 
+A project may have several workflows (ADR-20, B): the default one, copied when the project was created, and others
+that an admin adds as copies of it, `GET|POST /api/projects/{key}/workflows` (`name`), `GET|PUT|DELETE
+…/workflows/{id}` (`name`, `types`, `version`). The scheme (`odt_workflow.workflow_scheme`) maps an issue type to a
+workflow; a type it does not map follows the default, whose `types` are therefore read-only. The statuses and
+transitions of one workflow are under `…/workflows/{id}/statuses` and `…/workflows/{id}/transitions`, as above; the
+paths under `…/workflow/` are those of the default. A status code has the same category in every workflow of the
+project (400 otherwise), so `Workflows.statuses(projectId)` is their union, the default first, for boards, ODQL and
+reports. A new issue starts in the first status of the workflow of its type, and its transitions are those of that
+workflow. When the type of an issue changes, or a type is mapped to another workflow, an issue keeps its status if the
+new workflow has it, else moves to its first status of the same category (else to its first status), in the same
+change and in the history. A workflow is removed when it is not the default and serves no type (409 otherwise).
+
 ## Comments and changelog (`collaboration`, `audit`)
 
 Comments in restricted Markdown (`odt_collaboration`): whoever sees the issue reads them, `odt.issue.comment`

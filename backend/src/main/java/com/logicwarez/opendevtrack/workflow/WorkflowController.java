@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,21 +36,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The workflow of a project: its statuses and transitions for whoever sees the project, edited by an admin of the
- * project ({@code odt.project.edit}, ADR-20). Codes never change once created. The first status is in the category
- * {@code todo} and each category keeps at least one status; a status is removed by moving its issues to another one
- * (through {@link IssueStatuses}), with the transitions from or to it. Every change but an addition carries the
- * version of the workflow (412 when it changed meanwhile). A guard is checked when it is saved: a CEL error is a 400.
+ * The statuses and transitions of a workflow of a project, for whoever sees the project, edited by an admin of the
+ * project ({@code odt.project.edit}, ADR-20). The paths under {@code /workflows/{workflow}} name one workflow of the
+ * project; those under {@code /workflow} its default one. Codes never change once created, and a status code has the
+ * same category in every workflow of the project. The first status is in the category {@code todo} and each category
+ * keeps at least one status; a status is removed by moving the issues that follow the workflow to another one (through
+ * {@link IssueStatuses}), with the transitions from or to it. Every change but an addition carries the version of the
+ * workflow (412 when it changed meanwhile). A guard is checked when it is saved: a CEL error is a 400.
  */
 @RestController
 @Transactional(readOnly = true)
 @PreAuthorize("hasAuthority('odt.project.browse')")
 class WorkflowController {
 
-    private static final String NOT_FOUND = "Project not found";
-    private static final String NOT_ADMIN = "Only an admin of the project changes its workflow";
+    static final String NOT_FOUND = "Project not found";
+    static final String NO_WORKFLOW = "Workflow not found";
+    static final String NOT_ADMIN = "Only an admin of the project changes its workflows";
     private static final Pattern CODE = Pattern.compile("^[a-z][a-z0-9_]{0,49}$");
     private static final List<String> CATEGORIES = List.of("todo", "in_progress", "done");
+    private static final String DEFAULT = "/api/projects/{key}/workflow";
+    private static final String ONE = "/api/projects/{key}/workflows/{workflow}";
 
     private final Projects projects;
     private final Workflows workflows;
@@ -75,7 +81,9 @@ class WorkflowController {
         this.user = user;
     }
 
-    /** A status; the position counts from 1, {@code issues} is how many issues are in it now. */
+    /**
+     * A status; the position counts from 1, {@code issues} is how many issues that follow the workflow are in it now.
+     */
     record StatusView(String code, String category, int position, long issues, long version,
                       @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
@@ -99,42 +107,49 @@ class WorkflowController {
     record Removed(String code, String movedTo, int moved) {
     }
 
-    /** The project and its workflow, for an edit: or the answer that stops it. */
+    /** The project and the workflow, for an edit: or the answer that stops it. */
     private record Editing(ProjectRef project, WorkflowEntity workflow, ResponseEntity<?> problem) {
     }
 
     /** The statuses in their order; with {@code q}, those whose code holds it (the lookups of the screens). */
-    @GetMapping("/api/projects/{key}/workflow/statuses")
-    ResponseEntity<?> statuses(@PathVariable String key, @RequestParam(required = false) String q) {
+    @GetMapping({DEFAULT + "/statuses", ONE + "/statuses"})
+    ResponseEntity<?> statuses(@PathVariable String key, @PathVariable(required = false) UUID workflow,
+                               @RequestParam(required = false) String q) {
         Optional<ProjectRef> project = projects.find(key);
         if (project.isEmpty()) {
             return Problems.notFound(NOT_FOUND);
         }
+        Optional<WorkflowEntity> w = find(project.get(), workflow);
+        if (w.isEmpty()) {
+            return workflow == null ? ResponseEntity.ok(List.of()) : Problems.notFound(NO_WORKFLOW);
+        }
         boolean edit = canEdit(project.get());
-        return ResponseEntity.ok(workflows.workflow(project.get().id())
-                .map(w -> statuses.findByWorkflowIdOrderByPosition(w.id()).stream()
-                        .filter(s -> q == null || s.code().contains(q.strip().toLowerCase(Locale.ROOT)))
-                        .map(s -> view(project.get(), w, s, edit)).toList())
-                .orElse(List.of()));
+        List<String> types = workflows.types(w.get());
+        return ResponseEntity.ok(statuses.findByWorkflowIdOrderByPosition(w.get().id()).stream()
+                .filter(s -> q == null || s.code().contains(q.strip().toLowerCase(Locale.ROOT)))
+                .map(s -> view(project.get(), w.get(), types, s, edit)).toList());
     }
 
-    @GetMapping("/api/projects/{key}/workflow/transitions")
-    ResponseEntity<?> transitions(@PathVariable String key) {
+    @GetMapping({DEFAULT + "/transitions", ONE + "/transitions"})
+    ResponseEntity<?> transitions(@PathVariable String key, @PathVariable(required = false) UUID workflow) {
         Optional<ProjectRef> project = projects.find(key);
         if (project.isEmpty()) {
             return Problems.notFound(NOT_FOUND);
         }
+        Optional<WorkflowEntity> w = find(project.get(), workflow);
+        if (w.isEmpty()) {
+            return workflow == null ? ResponseEntity.ok(List.of()) : Problems.notFound(NO_WORKFLOW);
+        }
         boolean edit = canEdit(project.get());
-        return ResponseEntity.ok(workflows.workflow(project.get().id())
-                .map(w -> transitions.findByWorkflowIdOrderByPosition(w.id()).stream()
-                        .map(t -> view(w, t, edit)).toList())
-                .orElse(List.of()));
+        return ResponseEntity.ok(transitions.findByWorkflowIdOrderByPosition(w.get().id()).stream()
+                .map(t -> view(w.get(), t, edit)).toList());
     }
 
-    @PostMapping("/api/projects/{key}/workflow/statuses")
+    @PostMapping({DEFAULT + "/statuses", ONE + "/statuses"})
     @Transactional
-    ResponseEntity<?> addStatus(@PathVariable String key, @RequestBody StatusRequest request) {
-        Editing editing = editing(key, request.version(), false);
+    ResponseEntity<?> addStatus(@PathVariable String key, @PathVariable(required = false) UUID workflow,
+                                @RequestBody StatusRequest request) {
+        Editing editing = editing(key, workflow, request.version(), false);
         if (editing.problem() != null) {
             return editing.problem();
         }
@@ -150,6 +165,10 @@ class WorkflowController {
         if (all.stream().anyMatch(s -> s.code().equals(code))) {
             return Problems.conflict("The workflow already has a status with this code");
         }
+        Optional<String> elsewhere = elsewhere(w, code, request.category());
+        if (elsewhere.isPresent()) {
+            return Problems.badRequest(elsewhere.get());
+        }
         int at = request.position() == null ? all.size() + 1 : request.position();
         if (at < 1 || at > all.size() + 1) {
             return Problems.badRequest("The position is from 1 to " + (all.size() + 1));
@@ -162,14 +181,17 @@ class WorkflowController {
         }
         number(all);
         statuses.saveAll(all);
-        return saved(w, () -> ResponseEntity.status(HttpStatus.CREATED).body(view(editing.project(), w, status, true)));
+        List<String> types = workflows.types(w);
+        return saved(w, () -> ResponseEntity.status(HttpStatus.CREATED)
+                .body(view(editing.project(), w, types, status, true)));
     }
 
     /** The category or the position of a status; the code never changes. */
-    @PutMapping("/api/projects/{key}/workflow/statuses/{code}")
+    @PutMapping({DEFAULT + "/statuses/{code}", ONE + "/statuses/{code}"})
     @Transactional
-    ResponseEntity<?> changeStatus(@PathVariable String key, @PathVariable String code, @RequestBody StatusRequest request) {
-        Editing editing = editing(key, request.version(), true);
+    ResponseEntity<?> changeStatus(@PathVariable String key, @PathVariable(required = false) UUID workflow,
+                                   @PathVariable String code, @RequestBody StatusRequest request) {
+        Editing editing = editing(key, workflow, request.version(), true);
         if (editing.problem() != null) {
             return editing.problem();
         }
@@ -184,6 +206,10 @@ class WorkflowController {
         if (!CATEGORIES.contains(category)) {
             return Problems.badRequest("The category is one of todo, in_progress, done");
         }
+        Optional<String> elsewhere = elsewhere(w, code, category);
+        if (elsewhere.isPresent()) {
+            return Problems.badRequest(elsewhere.get());
+        }
         int at = request.position() == null ? all.indexOf(status) + 1 : request.position();
         if (at < 1 || at > all.size()) {
             return Problems.badRequest("The position is from 1 to " + all.size());
@@ -197,14 +223,16 @@ class WorkflowController {
         }
         number(all);
         statuses.saveAll(all);
-        return saved(w, () -> ResponseEntity.ok(view(editing.project(), w, status, true)));
+        List<String> types = workflows.types(w);
+        return saved(w, () -> ResponseEntity.ok(view(editing.project(), w, types, status, true)));
     }
 
-    /** Removes a status: its issues move to {@code moveTo}, the transitions from or to it go. */
-    @PostMapping("/api/projects/{key}/workflow/statuses/{code}/remove")
+    /** Removes a status: the issues that follow the workflow move to {@code moveTo}, the transitions from or to it go. */
+    @PostMapping({DEFAULT + "/statuses/{code}/remove", ONE + "/statuses/{code}/remove"})
     @Transactional
-    ResponseEntity<?> removeStatus(@PathVariable String key, @PathVariable String code, @RequestBody RemoveRequest request) {
-        Editing editing = editing(key, request.version(), true);
+    ResponseEntity<?> removeStatus(@PathVariable String key, @PathVariable(required = false) UUID workflow,
+                                   @PathVariable String code, @RequestBody RemoveRequest request) {
+        Editing editing = editing(key, workflow, request.version(), true);
         if (editing.problem() != null) {
             return editing.problem();
         }
@@ -223,7 +251,7 @@ class WorkflowController {
         if (wrong.isPresent()) {
             return Problems.badRequest(wrong.get());
         }
-        int moved = issues.move(editing.project().id(), code, moveTo);
+        int moved = issues.move(editing.project().id(), workflows.types(w), code, moveTo);
         transitions.deleteAll(transitions.findByWorkflowIdOrderByPosition(w.id()).stream()
                 .filter(t -> code.equals(t.fromStatus()) || code.equals(t.toStatus())).toList());
         statuses.delete(found.get());
@@ -233,10 +261,11 @@ class WorkflowController {
         return saved(w, () -> ResponseEntity.ok(new Removed(code, moveTo, moved)));
     }
 
-    @PostMapping("/api/projects/{key}/workflow/transitions")
+    @PostMapping({DEFAULT + "/transitions", ONE + "/transitions"})
     @Transactional
-    ResponseEntity<?> addTransition(@PathVariable String key, @RequestBody TransitionRequest request) {
-        Editing editing = editing(key, request.version(), false);
+    ResponseEntity<?> addTransition(@PathVariable String key, @PathVariable(required = false) UUID workflow,
+                                    @RequestBody TransitionRequest request) {
+        Editing editing = editing(key, workflow, request.version(), false);
         if (editing.problem() != null) {
             return editing.problem();
         }
@@ -260,11 +289,11 @@ class WorkflowController {
     }
 
     /** From, to and guard of a transition; the code never changes. */
-    @PutMapping("/api/projects/{key}/workflow/transitions/{code}")
+    @PutMapping({DEFAULT + "/transitions/{code}", ONE + "/transitions/{code}"})
     @Transactional
-    ResponseEntity<?> changeTransition(@PathVariable String key, @PathVariable String code,
-                                       @RequestBody TransitionRequest request) {
-        Editing editing = editing(key, request.version(), true);
+    ResponseEntity<?> changeTransition(@PathVariable String key, @PathVariable(required = false) UUID workflow,
+                                       @PathVariable String code, @RequestBody TransitionRequest request) {
+        Editing editing = editing(key, workflow, request.version(), true);
         if (editing.problem() != null) {
             return editing.problem();
         }
@@ -283,11 +312,11 @@ class WorkflowController {
         return saved(w, () -> ResponseEntity.ok(view(w, t, true)));
     }
 
-    @DeleteMapping("/api/projects/{key}/workflow/transitions/{code}")
+    @DeleteMapping({DEFAULT + "/transitions/{code}", ONE + "/transitions/{code}"})
     @Transactional
-    ResponseEntity<?> removeTransition(@PathVariable String key, @PathVariable String code,
-                                       @RequestParam(required = false) Long version) {
-        Editing editing = editing(key, version, true);
+    ResponseEntity<?> removeTransition(@PathVariable String key, @PathVariable(required = false) UUID workflow,
+                                       @PathVariable String code, @RequestParam(required = false) Long version) {
+        Editing editing = editing(key, workflow, version, true);
         if (editing.problem() != null) {
             return editing.problem();
         }
@@ -302,8 +331,14 @@ class WorkflowController {
         return saved(w, () -> ResponseEntity.noContent().build());
     }
 
-    /** The project, its workflow and the right to edit it; the version when the change needs it (or gives it). */
-    private Editing editing(String key, Long version, boolean versionNeeded) {
+    /** The workflow named by the path, of the project; the default one when the path names none. */
+    private Optional<WorkflowEntity> find(ProjectRef project, UUID workflow) {
+        return workflow == null ? workflows.workflow(project.id())
+                : workflowRepository.findByIdAndProjectId(workflow, project.id());
+    }
+
+    /** The project, the workflow and the right to edit it; the version when the change needs it (or gives it). */
+    private Editing editing(String key, UUID workflow, Long version, boolean versionNeeded) {
         Optional<ProjectRef> project = projects.find(key);
         if (project.isEmpty()) {
             return new Editing(null, null, Problems.notFound(NOT_FOUND));
@@ -311,14 +346,30 @@ class WorkflowController {
         if (!canEdit(project.get())) {
             return new Editing(null, null, Problems.forbidden(NOT_ADMIN));
         }
-        Optional<WorkflowEntity> w = workflows.workflow(project.get().id());
+        Optional<WorkflowEntity> w = find(project.get(), workflow);
         if (w.isEmpty()) {
-            return new Editing(null, null, Problems.notFound("The project has no workflow"));
+            return new Editing(null, null, Problems.notFound(workflow == null ? "The project has no workflow" : NO_WORKFLOW));
         }
         if ((versionNeeded && version == null) || (version != null && version != w.get().version())) {
             return new Editing(null, null, Problems.changedMeanwhile());
         }
         return new Editing(project.get(), w.get(), null);
+    }
+
+    /** A code means the same in every workflow of the project (ADR-20, B.3): another category elsewhere is wrong. */
+    private Optional<String> elsewhere(WorkflowEntity w, String code, String category) {
+        for (WorkflowEntity other : workflowRepository.findByProjectIdOrderByIsDefaultDescIdAsc(w.projectId())) {
+            if (other.id().equals(w.id())) {
+                continue;
+            }
+            Optional<StatusEntity> same = statuses.findByWorkflowIdOrderByPosition(other.id()).stream()
+                    .filter(s -> s.code().equals(code)).findFirst();
+            if (same.isPresent() && !same.get().category().equals(category)) {
+                return Optional.of("The status " + code + " is in the category " + same.get().category()
+                        + " in the workflow " + other.name() + ": a code means the same in every workflow of the project");
+            }
+        }
+        return Optional.empty();
     }
 
     /** From (empty for every status) and to are statuses of the workflow, not the same; the guard is CEL. */
@@ -380,14 +431,14 @@ class WorkflowController {
     }
 
     /** An answer that undoes the changes already made to the entities of the transaction. */
-    private static ResponseEntity<?> rollback(ResponseEntity<?> answer) {
+    static ResponseEntity<?> rollback(ResponseEntity<?> answer) {
         TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         return answer;
     }
 
-    private StatusView view(ProjectRef project, WorkflowEntity w, StatusEntity s, boolean edit) {
-        return new StatusView(s.code(), s.category(), s.position() + 1, issues.count(project.id(), s.code()), w.version(),
-                Map.of("edit", edit));
+    private StatusView view(ProjectRef project, WorkflowEntity w, List<String> types, StatusEntity s, boolean edit) {
+        return new StatusView(s.code(), s.category(), s.position() + 1, issues.count(project.id(), types, s.code()),
+                w.version(), Map.of("edit", edit));
     }
 
     private static TransitionView view(WorkflowEntity w, TransitionEntity t, boolean edit) {

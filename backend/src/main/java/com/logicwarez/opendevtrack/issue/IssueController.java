@@ -162,10 +162,11 @@ class IssueController {
             return Problems.forbidden("Only a developer or an admin of the project creates issues");
         }
         Fields fields;
+        String initial;
         try {
             fields = fields(project.get(), request, Fields.EMPTY);
-            checkRequired(project.get(), null, fields, workflows.initialStatus(project.get().id()), user.username(),
-                    permissions);
+            initial = workflows.initialStatus(project.get().id(), fields.type().value());
+            checkRequired(project.get(), null, fields, initial, user.username(), permissions);
         } catch (InvalidField e) {
             return Problems.badRequest(e.getMessage());
         } catch (InvalidCustom e) {
@@ -173,7 +174,7 @@ class IssueController {
         }
         Instant now = Instant.now();
         IssueEntity issue = new IssueEntity(user.tenantId(), project.get().id(), projects.nextIssueNumber(project.get().id()),
-                workflows.initialStatus(project.get().id()), user.username(), now);
+                initial, user.username(), now);
         fields.applyTo(issue, now);
         issues.saveAndFlush(issue);
         watchers.watch(issue.id(), issue.reporter(), now);
@@ -212,9 +213,13 @@ class IssueController {
             return Problems.forbidden("Only a developer or an admin of the project edits issues");
         }
         Fields fields;
+        String status;
         try {
             fields = fields(project, request, Fields.of(issue));
-            checkRequired(project, key(project, issue), fields, issue.status(), issue.reporter(), permissions);
+            // A new type may follow another workflow: the status moves there in the same change (ADR-20, B.5).
+            status = fields.type() == issue.type() ? issue.status()
+                    : workflows.statusFor(project.id(), fields.type().value(), issue.status());
+            checkRequired(project, key(project, issue), fields, status, issue.reporter(), permissions);
         } catch (InvalidField e) {
             return Problems.badRequest(e.getMessage());
         } catch (InvalidCustom e) {
@@ -223,12 +228,16 @@ class IssueController {
         if (request.version() == null || request.version() != issue.version()) {
             return Problems.changedMeanwhile();
         }
-        List<FieldChange> changes = fields.changesFrom(Fields.of(issue));
+        List<FieldChange> changes = new ArrayList<>(fields.changesFrom(Fields.of(issue)));
         if (changes.isEmpty()) {
             return ResponseEntity.ok(view(project, issue, permissions));
         }
         Instant now = Instant.now();
         fields.applyTo(issue, now);
+        if (!status.equals(issue.status())) {
+            changes.add(new FieldChange("status", issue.status(), status));
+            issue.moveTo(status, now);
+        }
         try {
             issues.saveAndFlush(issue);
         } catch (ObjectOptimisticLockingFailureException e) {
@@ -287,8 +296,9 @@ class IssueController {
             return Problems.forbidden(NOT_A_MEMBER);
         }
         IssueEntity issue = found.get().issue();
-        return ResponseEntity.ok(workflows.available(issue.projectId(), issue.status(), guardInput(found.get()), userInput(),
-                permissions).stream().map(t -> new TransitionView(t.code(), t.to(), issue.version())).toList());
+        return ResponseEntity.ok(workflows.available(issue.projectId(), issue.type().value(), issue.status(),
+                guardInput(found.get()), userInput(), permissions).stream()
+                .map(t -> new TransitionView(t.code(), t.to(), issue.version())).toList());
     }
 
     /** Runs a transition, from the version read with the issue: 409 when it cannot run now, 412 if the issue changed. */
@@ -305,8 +315,9 @@ class IssueController {
         if (!permissions.contains("odt.issue.browse")) {
             return Problems.forbidden(NOT_A_MEMBER);
         }
-        Decision decision = workflows.decide(issue.projectId(), request.transition() == null ? "" : request.transition(),
-                issue.status(), guardInput(found.get()), userInput(), permissions);
+        Decision decision = workflows.decide(issue.projectId(), issue.type().value(),
+                request.transition() == null ? "" : request.transition(), issue.status(), guardInput(found.get()),
+                userInput(), permissions);
         switch (decision.outcome()) {
             case UNKNOWN -> {
                 return Problems.badRequest("No transition with this name in the workflow of the project");
