@@ -87,7 +87,7 @@ services:
 
   # The front (ADR-01): the Quadrava runtime with the screens of ui/ from the registry of the back end.
   runtime:
-    image: ghcr.io/sramaccini/quadrava-runtime:0.12.1
+    image: ghcr.io/sramaccini/quadrava-runtime:0.13.0
     depends_on: [backend]
     environment:
       QUADRAVA_BFF_URL: http://backend:8080
@@ -111,7 +111,7 @@ services:
     volumes:
       - ../ui:/work/ui:ro
       - ./.work/npmrc:/work/.npmrc:ro
-    command: ["npx", "--yes", "@sramaccini/quadrava-cli@0.12.1", "publish", "ui",
+    command: ["npx", "--yes", "@sramaccini/quadrava-cli@0.13.0", "publish", "ui",
               "--registry", "http://backend:8080", "--app", "opendevtrack", "--env", "development"]
 
 secrets:

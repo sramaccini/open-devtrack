@@ -1,12 +1,12 @@
 # End-to-end check of authz-library (F0)
 
 Result on 31 October 2026: **all checks passed**. The OpenDevTrack back end, built on the authz-library 2.0.1
-libraries, talks to the Quadrava runtime 0.12.1 as the contracts of Quadrava ask, with the versions OpenDevTrack targets.
+libraries, talks to the Quadrava runtime 0.13.0 as the contracts of Quadrava ask, with the versions OpenDevTrack targets.
 
 ## What runs
 
 ```
-browser / kits ──▶ quadrava-runtime 0.12.1 (:28090) ──/bff /authz /logout /oauth2──▶ backend/ (:28080, profile dev)
+browser / kits ──▶ quadrava-runtime 0.13.0 (:28090) ──/bff /authz /logout /oauth2──▶ backend/ (:28080, profile dev)
                                                                                     │ authz-bff, authz-session, authz-rbac 2.0.1
                          Keycloak 26.8.0 (:28180, realm opendevtrack) ◀── OIDC ─────┤
                          PostgreSQL 18.6 (:25432) ◀── RBAC schema + odt.* catalogue ┤
@@ -48,7 +48,7 @@ Maven must reach the authz-library packages: see [backend/README.md](../backend/
 | Tenant switch kept for the next login (ADR-08) | ACME → GLOBEX, then GLOBEX after a new login |
 | In the browser: login through the runtime, the user menu | «Spazio di lavoro» with both tenants, GLOBEX selected, 2 permissions |
 
-The kits come from the Quadrava tag `v0.12.1`, the pinned release (downloaded file by file, not cloned); until 0.2.0
+The kits come from the Quadrava tag `v0.13.0`, the pinned release (downloaded file by file, not cloned); until 0.2.0
 they came from `main` at `9fa1916`, since the authorization kit with session cookies was not in `v0.1.0`.
 
 ## Found along the way

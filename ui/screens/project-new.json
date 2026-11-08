@@ -12,12 +12,13 @@
     {
       "id": "project-form",
       "type": "form",
-      "columns": 2,
+      "layout": "flow",
       "fields": [
         {
           "name": "key",
           "type": "text",
           "label": "{{ t('projects.key', 'Key') }}",
+          "width": "xs",
           "required": true,
           "transform": [
             "trim",
@@ -33,6 +34,7 @@
           "name": "name",
           "type": "text",
           "label": "{{ t('projects.name', 'Name') }}",
+          "width": "m",
           "required": true,
           "maxLength": 100
         },
@@ -40,8 +42,7 @@
           "name": "description",
           "type": "textarea",
           "label": "{{ t('projects.description', 'Description') }}",
-          "maxLength": 2000,
-          "span": 2
+          "maxLength": 2000
         }
       ],
       "actions": [

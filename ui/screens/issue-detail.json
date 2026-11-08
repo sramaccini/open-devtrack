@@ -97,19 +97,21 @@
     {
       "id": "issue-form",
       "type": "form",
+      "layout": "flow",
       "source": "issue",
-      "columns": 3,
       "fields": [
         {
           "name": "key",
           "type": "text",
           "label": "{{ t('issues.key', 'Key') }}",
+          "width": "xs",
           "readOnlyIf": "{{true}}"
         },
         {
           "name": "status",
           "type": "select",
           "label": "{{ t('issues.status', 'Status') }}",
+          "width": "s",
           "options": [
             "todo",
             "in_progress",
@@ -122,21 +124,23 @@
           "name": "reporter",
           "type": "text",
           "label": "{{ t('issues.reporter', 'Reporter') }}",
+          "width": "m",
           "readOnlyIf": "{{true}}"
         },
         {
           "name": "summary",
           "type": "text",
           "label": "{{ t('issues.summary', 'Summary') }}",
+          "width": "l",
           "required": true,
           "maxLength": 255,
-          "span": 3,
           "readOnlyIf": "{{!form._perm.edit}}"
         },
         {
           "name": "type",
           "type": "select",
           "label": "{{ t('issues.type', 'Type') }}",
+          "width": "s",
           "options": [
             "task",
             "bug",
@@ -151,6 +155,7 @@
           "name": "priority",
           "type": "select",
           "label": "{{ t('issues.priority', 'Priority') }}",
+          "width": "s",
           "options": [
             "lowest",
             "low",
@@ -166,6 +171,7 @@
           "name": "assignee",
           "type": "lookup",
           "label": "{{ t('issues.assignee', 'Assignee') }}",
+          "width": "m",
           "tooltip": "{{ t('issues.assignee_help', 'A member of the project') }}",
           "readOnlyIf": "{{!form._perm.edit}}",
           "lookup": {
@@ -179,6 +185,7 @@
           "name": "reviewer",
           "type": "lookup",
           "label": "{{ t('issues.reviewer', 'Reviewer') }}",
+          "width": "m",
           "tooltip": "{{ t('issues.reviewer_help', 'A member of the project other than the assignee') }}",
           "lookup": {
             "source": "assignees",
@@ -192,6 +199,7 @@
           "name": "dueOn",
           "type": "date",
           "label": "{{ t('issues.due_on', 'Due date') }}",
+          "width": "s",
           "tooltip": "{{ t('issues.due_on_help', 'The day it should be done; past it, and not done, the issue is overdue') }}",
           "readOnlyIf": "{{!form._perm.edit}}"
         },
@@ -205,14 +213,12 @@
             "valueField": "name"
           },
           "tooltip": "{{ t('issues.labels_help', 'Lower case letters, digits, dots, dashes or underscores; Enter or a comma adds one') }}",
-          "span": 3,
           "readOnlyIf": "{{!form._perm.edit}}"
         },
         {
           "name": "description",
           "type": "richtext",
           "label": "{{ t('issues.description', 'Description') }}",
-          "span": 3,
           "rows": 8,
           "readOnlyIf": "{{!form._perm.edit}}"
         }
@@ -482,17 +488,20 @@
           "text": {
             "name": "text",
             "type": "text",
+            "width": "l",
             "maxLength": 1000,
             "readOnlyIf": "{{!form._perm.edit}}"
           },
           "number": {
             "name": "number",
             "type": "number",
+            "width": "s",
             "readOnlyIf": "{{!form._perm.edit}}"
           },
           "date": {
             "name": "date",
             "type": "date",
+            "width": "s",
             "readOnlyIf": "{{!form._perm.edit}}"
           },
           "checkbox": {
@@ -503,6 +512,7 @@
           "select": {
             "name": "select",
             "type": "select",
+            "width": "m",
             "options": [],
             "readOnlyIf": "{{!form._perm.edit}}"
           },
@@ -515,6 +525,7 @@
           "user": {
             "name": "user",
             "type": "lookup",
+            "width": "m",
             "lookup": {
               "source": "assignees",
               "valueField": "username",
@@ -535,13 +546,14 @@
     {
       "id": "plan-form",
       "type": "form",
+      "layout": "flow",
       "source": "plan",
-      "columns": 3,
       "fields": [
         {
           "name": "points",
           "type": "number",
           "label": "{{ t('agile.points', 'Story points') }}",
+          "width": "xs",
           "readOnlyIf": "{{!form._perm.edit}}",
           "tooltip": "{{ t('agile.points_help', 'From 0 to 999; empty when not estimated') }}"
         },
@@ -549,6 +561,7 @@
           "name": "sprint",
           "type": "text",
           "label": "{{ t('agile.sprint', 'Sprint') }}",
+          "width": "m",
           "readOnlyIf": "{{true}}",
           "tooltip": "{{ t('agile.sprint_help', 'Planned from the backlog of the project; empty for the backlog') }}"
         }

@@ -1,7 +1,7 @@
 # OpenDevTrack screens
 
 The front end of OpenDevTrack is this Quadrava project: screens, navigation, themes and translations, as JSON documents
-validated by the schemas of the pinned Quadrava version (0.12.1, ADR-01). No Angular code: the runtime image of Quadrava
+validated by the schemas of the pinned Quadrava version (0.13.0, ADR-01). No Angular code: the runtime image of Quadrava
 loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 | Path | Registry kind | What |
@@ -24,20 +24,24 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 - **Texts**: every visible text goes through `t()` and has its key in both catalogues. The shell texts of the runtime
   (`app.*`) are built into it in English and Italian; the catalogues keep only `app.title` and the names of the
   themes (`app.theme.<id>`), and a shell key here would override the built-in text.
+- **Field widths** (Quadrava 0.13.0): forms use `layout: "flow"` and each field a `width` by what it holds: `xs`
+  short codes, keys and estimates; `s` dates, statuses, priorities, types; `m` names, users, choices; `l` titles and
+  free text of one line. Descriptions, labels and lists of choices have none and take a line of their own; so do the
+  templates of the custom fields (`fieldsFrom`), by type.
 - **Validation**: `quadrava validate ui` (the Quadrava CLI, in CI) checks the documents as the runtime reads them:
   schemas, references to data sources, CEL expressions, themes and catalogues. In the back end, `SchemaValidationTest`
   checks them with the validator of the registry and `UiCataloguesTest` that every `t('key')` is in both catalogues.
 
 ## Publishing
 
-The Quadrava CLI (`@sramaccini/quadrava-cli@0.12.1`, the version of the runtime) is on GitHub Packages: the `.npmrc`
+The Quadrava CLI (`@sramaccini/quadrava-cli@0.13.0`, the version of the runtime) is on GitHub Packages: the `.npmrc`
 of the repository maps `@sramaccini` there, and npm needs a token with `read:packages` for `npm.pkg.github.com` in
 the user config (`~/.npmrc`; in CI, `NODE_AUTH_TOKEN`). From the root of the repository, with a Keycloak access token
 of the client `opendevtrack-tools` in `QUADRAVA_TOKEN`:
 
 ```bash
-npx --yes @sramaccini/quadrava-cli@0.12.1 validate ui
-npx --yes @sramaccini/quadrava-cli@0.12.1 publish ui --registry http://localhost:28080 --app opendevtrack --env development
+npx --yes @sramaccini/quadrava-cli@0.13.0 validate ui
+npx --yes @sramaccini/quadrava-cli@0.13.0 publish ui --registry http://localhost:28080 --app opendevtrack --env development
 ```
 
 The same command publishes to `testing` and `production`: the registry has no protected environments (ADR-12), the

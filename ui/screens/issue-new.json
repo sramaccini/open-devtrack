@@ -21,7 +21,7 @@
     {
       "id": "issue-form",
       "type": "form",
-      "columns": 2,
+      "layout": "flow",
       "initial": {
         "type": "task",
         "priority": "medium"
@@ -31,14 +31,15 @@
           "name": "summary",
           "type": "text",
           "label": "{{ t('issues.summary', 'Summary') }}",
+          "width": "l",
           "required": true,
-          "maxLength": 255,
-          "span": 2
+          "maxLength": 255
         },
         {
           "name": "type",
           "type": "select",
           "label": "{{ t('issues.type', 'Type') }}",
+          "width": "s",
           "options": [
             "task",
             "bug",
@@ -52,6 +53,7 @@
           "name": "priority",
           "type": "select",
           "label": "{{ t('issues.priority', 'Priority') }}",
+          "width": "s",
           "options": [
             "lowest",
             "low",
@@ -66,6 +68,7 @@
           "name": "assignee",
           "type": "lookup",
           "label": "{{ t('issues.assignee', 'Assignee') }}",
+          "width": "m",
           "tooltip": "{{ t('issues.assignee_help', 'A member of the project') }}",
           "lookup": {
             "source": "assignees",
@@ -78,6 +81,7 @@
           "name": "reviewer",
           "type": "lookup",
           "label": "{{ t('issues.reviewer', 'Reviewer') }}",
+          "width": "m",
           "tooltip": "{{ t('issues.reviewer_help', 'A member of the project other than the assignee') }}",
           "lookup": {
             "source": "assignees",
@@ -90,6 +94,7 @@
           "name": "dueOn",
           "type": "date",
           "label": "{{ t('issues.due_on', 'Due date') }}",
+          "width": "s",
           "tooltip": "{{ t('issues.due_on_help', 'The day it should be done; past it, and not done, the issue is overdue') }}"
         },
         {
@@ -107,7 +112,6 @@
           "name": "description",
           "type": "richtext",
           "label": "{{ t('issues.description', 'Description') }}",
-          "span": 2,
           "rows": 8
         }
       ],
@@ -166,11 +170,13 @@
           "text": {
             "name": "text",
             "type": "text",
+            "width": "l",
             "maxLength": 1000
           },
           "user": {
             "name": "user",
             "type": "lookup",
+            "width": "m",
             "lookup": {
               "source": "assignees",
               "valueField": "username",

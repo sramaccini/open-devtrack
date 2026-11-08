@@ -42,13 +42,14 @@
     {
       "id": "workflow-form",
       "type": "form",
+      "layout": "flow",
       "source": "workflow",
-      "columns": 2,
       "fields": [
         {
           "name": "name",
           "type": "text",
           "label": "{{ t('projects.workflow_name', 'Name') }}",
+          "width": "m",
           "required": true,
           "maxLength": 100,
           "readOnlyIf": "{{!form._perm.edit}}"
@@ -71,7 +72,6 @@
             "epic"
           ],
           "optionKey": "values.issue_type",
-          "span": 2,
           "readOnlyIf": "{{!form._perm.types}}",
           "tooltip": "{{ t('projects.workflow_types_help', 'The issues of these types follow this workflow; a type taken from another workflow keeps its status, or moves to the first one of the same category') }}"
         }

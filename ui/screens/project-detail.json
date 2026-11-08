@@ -63,19 +63,21 @@
     {
       "id": "project-form",
       "type": "form",
+      "layout": "flow",
       "source": "project",
-      "columns": 2,
       "fields": [
         {
           "name": "key",
           "type": "text",
           "label": "{{ t('projects.key', 'Key') }}",
+          "width": "xs",
           "readOnlyIf": "{{true}}"
         },
         {
           "name": "name",
           "type": "text",
           "label": "{{ t('projects.name', 'Name') }}",
+          "width": "m",
           "required": true,
           "maxLength": 100,
           "readOnlyIf": "{{!form._perm.edit}}"
@@ -84,6 +86,7 @@
           "name": "lead",
           "type": "text",
           "label": "{{ t('projects.lead', 'Lead') }}",
+          "width": "m",
           "required": true,
           "readOnlyIf": "{{!form._perm.edit}}",
           "tooltip": "{{ t('projects.lead_help', 'A member of the project') }}"
@@ -92,6 +95,7 @@
           "name": "role",
           "type": "select",
           "label": "{{ t('projects.my_role', 'My role') }}",
+          "width": "s",
           "options": [
             "viewer",
             "developer",
@@ -105,7 +109,6 @@
           "type": "textarea",
           "label": "{{ t('projects.description', 'Description') }}",
           "maxLength": 2000,
-          "span": 2,
           "readOnlyIf": "{{!form._perm.edit}}"
         }
       ],

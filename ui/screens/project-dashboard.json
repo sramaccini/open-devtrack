@@ -91,6 +91,7 @@
                 "name": "sprint",
                 "type": "lookup",
                 "label": "{{ t('reports.burndown_sprint', 'Sprint') }}",
+                "width": "m",
                 "tooltip": "{{ t('reports.burndown_sprint_help', 'Empty: the active sprint, or the last one') }}",
                 "lookup": {
                   "source": "sprints",

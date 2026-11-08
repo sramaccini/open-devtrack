@@ -15,25 +15,28 @@
     {
       "id": "project-summary",
       "type": "form",
+      "layout": "flow",
       "source": "project",
-      "columns": 3,
       "fields": [
         {
           "name": "key",
           "type": "text",
           "label": "{{ t('projects.key', 'Key') }}",
+          "width": "xs",
           "readOnlyIf": "{{true}}"
         },
         {
           "name": "name",
           "type": "text",
           "label": "{{ t('projects.name', 'Name') }}",
+          "width": "l",
           "readOnlyIf": "{{true}}"
         },
         {
           "name": "role",
           "type": "select",
           "label": "{{ t('projects.my_role', 'My role') }}",
+          "width": "s",
           "options": [
             "viewer",
             "developer",

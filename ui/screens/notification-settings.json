@@ -28,14 +28,14 @@
     {
       "id": "preferences-form",
       "type": "form",
+      "layout": "flow",
       "source": "preferences",
-      "columns": 2,
       "fields": [
         {
           "name": "email",
           "label": "{{ t('notification_settings.email', 'Email address') }}",
+          "width": "m",
           "type": "text",
-          "span": 2,
           "readOnlyIf": "{{ true }}"
         }
       ],
