@@ -1,6 +1,7 @@
 # ADR-20: Editing workflows, and workflows by issue type
 
-Status: Proposed (8 November 2026) — after F4; the two pieces ADR-10 left for when a project needs them
+Status: Accepted (8 November 2026; decided by the maintainer) — after F4; the two pieces ADR-10 left for when a
+project needs them
 
 ## Context
 
@@ -81,8 +82,8 @@ Two steps, each its own change, A before B.
 ## Consequences
 
 - A: `workflow` API for statuses and transitions (create, update, delete), `version` on the workflow;
-  `shared.IssueStatuses` implemented by `issue`; `agile` places statuses without a column; screens and texts; tests for the rules of A.2–A.4
-  and the move of A.3.
+  `shared.IssueStatuses` implemented by `issue`; `agile` places statuses without a column; screens and texts; tests
+  for the rules of A.2–A.4 and the move of A.3.
 - B: migration (`is_default`, `workflow_scheme`, the unique constraint removed), `Workflows` calls with the type,
   `issue` on type changes, the screen `workflow-detail`; tests with two workflows in one project.
 - ADR-10's «one workflow per project» is replaced by B once built.
