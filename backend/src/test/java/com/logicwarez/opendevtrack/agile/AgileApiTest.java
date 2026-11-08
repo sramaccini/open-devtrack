@@ -185,7 +185,8 @@ class AgileApiTest {
         move(cards + "ODT-3/move", "1", null, null, paola, 403);
         move(cards + "ODT-3/move", "7", null, null, luisa, 400);
         // A guard decides as on the issue: start only with an assignee.
-        mvc.perform(as(put("/api/projects/ODT/workflow/transitions/start"), mario).content("{\"guard\":\"issue.assignee != null\"}"))
+        mvc.perform(as(put("/api/projects/ODT/workflow/transitions/start"), mario)
+                        .content("{\"from\":\"todo\",\"to\":\"in_progress\",\"guard\":\"issue.assignee != null\",\"version\":0}"))
                 .andExpect(status().isOk());
         move(cards + "ODT-3/move", "1", null, null, luisa, 409);
     }

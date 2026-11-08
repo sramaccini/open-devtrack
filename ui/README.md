@@ -80,6 +80,15 @@ The title of the tab is `brand.name` of the active theme and its icons are `bran
 `appleTouch`), the files of `brand/` served next to the runtime: `odt-brand/` (SVG) and `odt-brand-png/` (PNG), as
 `e2e/authz/compose.yaml` mounts them. Until the theme is loaded the tab reads «Quadrava».
 
+## Workflow
+
+The Workflow section of `project-detail` (ADR-20, A) has a table of the statuses (position, status, category, how many
+issues) and one of the transitions (from, to, condition), with New status and New transition among the buttons of the
+project and Edit and Remove on each row, for an admin of the project. Removing a status asks where its issues go (a
+lookup on the statuses). The rows carry the version of the workflow: a change made on an older copy answers 412 and
+the screen says so. Statuses and transitions outside the catalogues are shown by their code (`values.status.*`,
+`values.transition.*` translate only the built-in ones); categories are `values.category.*`.
+
 ## Boards and backlog
 
 `board` is the generic screen of ADR-06 (params `board`): the `kanban` of Quadrava with the columns and the cards of

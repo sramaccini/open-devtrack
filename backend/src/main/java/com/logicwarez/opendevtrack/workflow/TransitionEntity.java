@@ -36,6 +36,16 @@ class TransitionEntity {
         this.position = position;
     }
 
+    void change(String fromStatus, String toStatus, String guardCel) {
+        this.fromStatus = fromStatus;
+        this.toStatus = toStatus;
+        this.guardCel = guardCel;
+    }
+
+    void position(int position) {
+        this.position = position;
+    }
+
     void guard(String guardCel) {
         this.guardCel = guardCel;
     }

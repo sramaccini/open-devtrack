@@ -5,9 +5,11 @@
 package com.logicwarez.opendevtrack.agile;
 
 import com.logicwarez.opendevtrack.agile.BoardEntity.BoardColumn;
+import com.logicwarez.opendevtrack.workflow.Workflows.Status;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,7 +18,7 @@ import java.util.stream.Collectors;
 /**
  * The columns of a board as the dialog of the screens writes them: one per line, {@code Name: status, status | limit},
  * for example {@code Doing: in_progress, review | 3}. Each status of the workflow is in one column at most; a status in
- * none hides its issues from the board. An empty text: one column per status.
+ * none is shown in a column of its category ({@link #place}, ADR-20). An empty text: one column per status.
  */
 final class BoardColumns {
 
@@ -76,6 +78,40 @@ final class BoardColumns {
             throw new Invalid("At most " + MAX + " columns");
         }
         return columns;
+    }
+
+    /**
+     * The columns as the board shows them (ADR-20, A.5): statuses no longer in the workflow are left out, and a status
+     * of the workflow in no column goes to the first column holding a status of its category, else to the last column,
+     * so a new status never hides cards. Nothing is written to the board.
+     */
+    static List<BoardColumn> place(List<BoardColumn> own, List<Status> statuses) {
+        if (own.isEmpty()) {
+            return own;
+        }
+        Map<String, String> category = statuses.stream().collect(Collectors.toMap(Status::code, Status::category));
+        List<List<String>> in = new ArrayList<>();
+        for (BoardColumn column : own) {
+            in.add(new ArrayList<>(column.statuses().stream().filter(category::containsKey).toList()));
+        }
+        for (Status status : statuses) {
+            if (in.stream().anyMatch(c -> c.contains(status.code()))) {
+                continue;
+            }
+            int target = in.size() - 1;
+            for (int i = 0; i < in.size(); i++) {
+                if (in.get(i).stream().anyMatch(s -> category.get(s).equals(status.category()))) {
+                    target = i;
+                    break;
+                }
+            }
+            in.get(target).add(status.code());
+        }
+        List<BoardColumn> placed = new ArrayList<>();
+        for (int i = 0; i < own.size(); i++) {
+            placed.add(new BoardColumn(own.get(i).name(), in.get(i), own.get(i).wipLimit()));
+        }
+        return placed;
     }
 
     static String format(List<BoardColumn> columns) {

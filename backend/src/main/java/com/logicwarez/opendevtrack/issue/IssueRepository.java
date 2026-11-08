@@ -38,6 +38,10 @@ interface IssueRepository extends JpaRepository<IssueEntity, UUID> {
 
     List<IssueEntity> findByProjectIdOrderByNumber(UUID projectId, Limit limit);
 
+    List<IssueEntity> findByProjectIdAndStatus(UUID projectId, String status);
+
+    long countByProjectIdAndStatus(UUID projectId, String status);
+
     @Query("select i.id from IssueEntity i where i.projectId = :projectId order by i.number")
     List<UUID> findIdsByProjectId(UUID projectId);
 

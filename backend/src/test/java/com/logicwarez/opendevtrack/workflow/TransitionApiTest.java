@@ -141,15 +141,24 @@ class TransitionApiTest {
         return jdbc.queryForObject("SELECT count(*) FROM odt_audit.issue_change WHERE field = 'status'", Integer.class);
     }
 
+    /** The transition start or finish with its from and to, a guard, at the version of the workflow (ADR-20). */
+    private static String start(String guard, long version) {
+        return "{\"from\":\"todo\",\"to\":\"in_progress\",\"guard\":\"" + guard + "\",\"version\":" + version + "}";
+    }
+
+    private static String finish(String guard, long version) {
+        return "{\"from\":\"in_progress\",\"to\":\"done\",\"guard\":\"" + guard + "\",\"version\":" + version + "}";
+    }
+
     @Test
     void aGuardDecides() throws Exception {
         // Only an admin of the project changes the workflow; a guard that is not CEL is refused.
-        mvc.perform(as(put("/api/projects/ODT/workflow/transitions/start"), luisa).content("{\"guard\":\"true\"}"))
+        mvc.perform(as(put("/api/projects/ODT/workflow/transitions/start"), luisa).content(start("true", 0)))
                 .andExpect(status().isForbidden());
-        mvc.perform(as(put("/api/projects/ODT/workflow/transitions/start"), mario).content("{\"guard\":\"issue.assignee !=\"}"))
+        mvc.perform(as(put("/api/projects/ODT/workflow/transitions/start"), mario).content(start("issue.assignee !=", 0)))
                 .andExpect(status().isBadRequest());
         mvc.perform(as(put("/api/projects/ODT/workflow/transitions/start"), mario)
-                        .content("{\"guard\":\"issue.assignee != null && issue.status == 'in_progress'\"}"))
+                        .content(start("issue.assignee != null && issue.status == 'in_progress'", 0)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.guard").value("issue.assignee != null && issue.status == 'in_progress'"));
         // Without an assignee the transition is not offered and does not run.
@@ -160,12 +169,12 @@ class TransitionApiTest {
         mvc.perform(as(get("/api/issues/ODT-1/transitions"), luisa)).andExpect(jsonPath("$[0].code").value("start"));
         move(luisa, "start", 1, 200);
         // can() sees the project permissions of the user: only an admin reopens.
-        mvc.perform(as(put("/api/projects/ODT/workflow/transitions/finish"), mario).content("{\"guard\":\"can('odt.issue.delete')\"}"))
+        mvc.perform(as(put("/api/projects/ODT/workflow/transitions/finish"), mario).content(finish("can('odt.issue.delete')", 1)))
                 .andExpect(status().isOk());
         move(luisa, "finish", 2, 409);
         move(mario, "finish", 2, 200);
         // An empty guard removes it.
-        mvc.perform(as(put("/api/projects/ODT/workflow/transitions/finish"), mario).content("{\"guard\":\"\"}"))
+        mvc.perform(as(put("/api/projects/ODT/workflow/transitions/finish"), mario).content(finish("", 2)))
                 .andExpect(jsonPath("$.guard").doesNotExist());
     }
 

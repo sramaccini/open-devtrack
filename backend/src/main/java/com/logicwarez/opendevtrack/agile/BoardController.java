@@ -336,11 +336,14 @@ class BoardController {
         return find(id).filter(f -> f.scope().can(Scopes.BROWSE));
     }
 
-    /** The columns of the board; without its own, one per status of the workflow (the first ten). */
+    /**
+     * The columns of the board, with the statuses of the workflow placed (ADR-20); without its own, one per status of
+     * the workflow (the first ten).
+     */
     private List<BoardColumn> columns(Found found) {
         List<BoardColumn> own = found.board().columns();
         if (!own.isEmpty()) {
-            return own;
+            return BoardColumns.place(own, workflows.statuses(found.scope().projectId()));
         }
         return workflows.statuses(found.scope().projectId()).stream().limit(BoardColumns.MAX)
                 .map(s -> new BoardColumn(texts.status(s.code()), List.of(s.code()), null)).toList();

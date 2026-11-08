@@ -33,6 +33,14 @@ class StatusEntity {
         this.position = position;
     }
 
+    void category(String category) {
+        this.category = category;
+    }
+
+    void position(int position) {
+        this.position = position;
+    }
+
     String code() {
         return code;
     }

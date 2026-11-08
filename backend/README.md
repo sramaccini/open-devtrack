@@ -119,9 +119,20 @@ Each project gets a copy of the built-in workflow when it is created (`odt_workf
 `in_progress`, `done` and transitions `start`, `finish`, `reopen`. A transition may have a guard in CEL (cel-java),
 on `issue` (its fields after the transition, with `status`), `user` (`username`, `roles`) and `can(permission)` on
 the project permissions of the user: `issue.assignee != null`, `can('odt.issue.delete')`. A guard is checked when an
-admin of the project saves it (`PUT /api/projects/{key}/workflow/transitions/{code}`); one that fails to evaluate is
-false. `GET /api/issues/{key}/transitions` lists the transitions that can run now; `POST` with `transition` and
-`version` runs one (`odt.issue.transition`): 409 when it does not start from the status or its guard is false.
+admin of the project saves it (below); one that fails to evaluate is false. `GET /api/issues/{key}/transitions` lists
+the transitions that can run now; `POST` with `transition` and `version` runs one (`odt.issue.transition`): 409 when
+it does not start from the status or its guard is false.
+
+An admin of the project edits the workflow (ADR-20, A; `odt.project.edit`): `GET|POST
+/api/projects/{key}/workflow/statuses` (code, category, position from 1, last when empty), `PUT …/statuses/{code}`
+(category, position), `POST …/statuses/{code}/remove` (`moveTo`), `GET|POST …/workflow/transitions` (code, `from`
+empty for every status, `to`, `guard`), `PUT|DELETE …/transitions/{code}`. Codes never change. The first status is in
+the category `todo` and each category keeps a status (400 otherwise). Every change but an addition carries the
+`version` of the workflow, which the rows of statuses and transitions give (412 when it changed meanwhile). Removing a
+status moves its issues to `moveTo` through `shared.IssueStatuses`, which `issue` implements (one change of the status
+per issue, by the admin, in the history, the search and the reports), and removes the transitions from or to it. A
+board with columns of its own shows a status in none of them in the first column of its category, else in the last
+(read when the columns are built, nothing written to the board).
 
 ## Comments and changelog (`collaboration`, `audit`)
 
