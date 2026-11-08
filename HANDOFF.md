@@ -113,5 +113,5 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. Workflows by issue type and editing statuses and transitions when a project needs them (ADR-10).
+1. ADR-20 (editing workflows, then workflows by issue type) is proposed, waiting for the decision of the maintainer.
 2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

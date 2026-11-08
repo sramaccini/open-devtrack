@@ -25,6 +25,7 @@ The decisions D1–D9 of the project plan, all accepted by the maintainer on 31 
 | [17](adr-17-dashboards-reports.md) | Dashboards and reports (E8) | Read models of `reporting` fed by events and closed each night; burndown, velocity, cumulative flow by status category, created vs resolved, cycle time; a personal and a project dashboard with a fixed layout | Accepted |
 | [18](adr-18-email-notifications.md) | Email, preferences and digests (E9) | Preferences per user and kind; an outbox sent by a job, instant or in a daily digest; plain text mails over SMTP, off without a mail host | Accepted |
 | [19](adr-19-due-date-and-reviewer.md) | Due date and reviewer of an issue (E8) | Two standard fields `due_on` and `reviewer`, in ODQL as `due` and `reviewer`; «Overdue» and «In review by me» on the dashboard; a message `review_requested` | Accepted |
+| [20](adr-20-editing-workflows-and-schemes.md) | Editing workflows, and workflows by issue type (ADR-10) | Statuses and transitions edited by the project admin, removing a status moves its issues; then several workflows per project mapped by issue type, a default for the rest | Proposed |
 
 ## Requests to the dependencies
 
