@@ -27,6 +27,8 @@ The decisions D1–D9 of the project plan, all accepted by the maintainer on 31 
 | [19](adr-19-due-date-and-reviewer.md) | Due date and reviewer of an issue (E8) | Two standard fields `due_on` and `reviewer`, in ODQL as `due` and `reviewer`; «Overdue» and «In review by me» on the dashboard; a message `review_requested` | Accepted |
 | [20](adr-20-editing-workflows-and-schemes.md) | Editing workflows, and workflows by issue type (ADR-10) | Statuses and transitions edited by the project admin, removing a status moves its issues; then several workflows per project mapped by issue type, a default for the rest | Accepted |
 | [21](adr-21-public-api-and-webhooks.md) | Public REST API and outgoing webhooks (E11) | The `/api` of the screens as the public API, OpenAPI 3.1 by springdoc kept as a contract in `docs/openapi.json`; Keycloak tokens and service accounts (authz-library A4); webhooks per project from an outbox, signed as Standard Webhooks | Accepted |
+| [22](adr-22-administration.md) | Administration: users, groups, permission schemes, audit log (E10) | Screens over the admin API of authz-library for users, roles, tenants and sessions; groups and permission schemes for the project roles in `access`; an audit log of the configuration in `audit` | Proposed |
+| [23](adr-23-hardening.md) | Hardening for 1.0: ASVS level 2 and WCAG 2.2 AA | A requirement list, OSV-Scanner, CodeQL and a ZAP baseline in CI; webhook secrets encrypted; row-level security if the load test allows; axe-core on the main screens and a manual check per release | Proposed |
 
 ## Requests to the dependencies
 
