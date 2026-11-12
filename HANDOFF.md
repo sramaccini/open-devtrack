@@ -120,7 +120,7 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F5: ADR-21 (public API and webhooks) proposed, waiting for the maintainer; asked of authz-library: A4
+1. F5: ADR-21 (public API and webhooks) accepted, being built; asked of authz-library: A4
    with service accounts and the tenant header, A6. Quadrava: the patch release with the select fix (2c2e87c), so
    statuses outside the built-in ones show in `issue-detail`.
 2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

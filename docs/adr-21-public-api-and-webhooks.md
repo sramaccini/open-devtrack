@@ -1,6 +1,6 @@
 # ADR-21: Public REST API and outgoing webhooks
 
-Status: Proposed (12 November 2026) — F5, epic E11
+Status: Accepted (12 November 2026; decided by the maintainer) — F5, epic E11
 
 ## Context
 
