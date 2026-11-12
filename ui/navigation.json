@@ -55,6 +55,39 @@
           "screen": "search"
         }
       ]
+    },
+    {
+      "id": "admin",
+      "label": "{{ t('nav.admin', 'Administration') }}",
+      "icon": "settings",
+      "requires": "authz.rbac.manage",
+      "items": [
+        {
+          "id": "admin-users",
+          "label": "{{ t('nav.admin_users', 'Users') }}",
+          "icon": "user",
+          "screen": "admin-users"
+        },
+        {
+          "id": "admin-roles",
+          "label": "{{ t('nav.admin_roles', 'Global roles') }}",
+          "icon": "safety",
+          "screen": "admin-roles"
+        },
+        {
+          "id": "admin-tenants",
+          "label": "{{ t('nav.admin_tenants', 'Tenants') }}",
+          "icon": "sections",
+          "screen": "admin-tenants",
+          "requires": "authz.rbac.manageglobal"
+        },
+        {
+          "id": "admin-access-log",
+          "label": "{{ t('nav.admin_access_log', 'Access log') }}",
+          "icon": "receipt",
+          "screen": "admin-access-log"
+        }
+      ]
     }
   ]
 }

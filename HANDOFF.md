@@ -127,7 +127,9 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    access of authz-library 2.2.0, A4), the OpenAPI definition `docs/openapi.json` and `docs/api.md`. B: outgoing
    webhooks (module `integration`), signed as Standard Webhooks, from an outbox, with the screens `webhook-list` and
    `webhook-detail` (a screen of their own, not a section of `project-detail`: `ui/README.md`) and the receiver `echo`
-   of the stack. A1, A2 and A5 of authz-library 2.2.0 adopted. Next in F5: ADR-22 (administration, E10) and ADR-23
-   (hardening: ASVS L2, WCAG 2.2 AA), accepted 12 November 2026, being built; then the documentation, the public demo
+   of the stack. A1, A2 and A5 of authz-library 2.2.0 adopted. ADR-22 (administration, E10) and ADR-23
+   (hardening: ASVS L2, WCAG 2.2 AA) accepted 12 November 2026. ADR-22: the Administration area (users, roles,
+   tenants, access log over the admin API of authz-library) built; next the permission schemes, the groups and the
+   audit log of the configuration; then ADR-23; then the documentation, the public demo
    and 1.0.
 2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

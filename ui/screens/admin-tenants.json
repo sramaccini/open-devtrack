@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "admin-tenants",
+  "title": "{{ t('admin.tenants', 'Tenants') }}",
+  "requires": "authz.rbac.manageglobal",
+  "dataSources": {
+    "tenants": {
+      "ref": "admin/tenants"
+    },
+    "createTenant": {
+      "ref": "admin/createTenant"
+    }
+  },
+  "components": [
+    {
+      "id": "btn-add-tenant",
+      "type": "button",
+      "label": "{{ t('admin.add_tenant', 'New tenant') }}",
+      "onClick": [
+        {
+          "dialog": {
+            "title": "{{ t('admin.add_tenant', 'New tenant') }}",
+            "submitLabel": "{{ t('projects.add', 'Add') }}",
+            "fields": [
+              {
+                "name": "code",
+                "type": "text",
+                "label": "{{ t('admin.tenant_code', 'Code') }}",
+                "required": true,
+                "maxLength": 50,
+                "tooltip": "{{ t('admin.tenant_code_help', 'Letters, digits, - and _; it cannot change') }}"
+              },
+              {
+                "name": "description",
+                "type": "text",
+                "label": "{{ t('admin.description', 'Description') }}",
+                "maxLength": 255
+              }
+            ],
+            "onSubmit": [
+              {
+                "call": "createTenant",
+                "onError": [
+                  {
+                    "if": "{{error.status == 409}}",
+                    "then": [
+                      {
+                        "toast": "{{ t('admin.tenant_exists', 'A tenant with this code exists') }}"
+                      }
+                    ],
+                    "else": [
+                      {
+                        "toast": "{{ t('admin.tenant_invalid', 'Check the code: letters, digits, - and _') }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "refresh": "tenants"
+        }
+      ]
+    },
+    {
+      "id": "tenant-table",
+      "type": "table",
+      "source": "tenants",
+      "columns": [
+        {
+          "field": "code",
+          "label": "{{ t('admin.tenant_code', 'Code') }}"
+        },
+        {
+          "field": "description",
+          "label": "{{ t('admin.description', 'Description') }}"
+        }
+      ]
+    }
+  ]
+}

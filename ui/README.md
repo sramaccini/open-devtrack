@@ -149,3 +149,23 @@ ADR-21 puts the webhooks in a section of `project-detail`. They are a screen of 
 403 to whoever is not an admin of the project, and a data source of a screen loads for everybody who opens it: a
 member would see the table fail. The value `*` (every event) is shown as it is: a key of the catalogues cannot hold
 `*`, so `values.webhook_event.*` cannot exist, and the tooltip of the field explains it.
+
+## Administration
+
+The area `admin` (ADR-22), shown to whoever holds `authz.rbac.manage` in the tenant of the session, on
+`datasources/admin.json`, which calls the admin API of authz-library 2.2.0 (`/api/v1/admin`) as it is:
+
+- `admin-users`: the users of the tenant and their roles. «Add user» creates the user (user name, email) and gives
+  the roles; a user already known in another tenant answers 409, and the roles are given all the same. Row actions:
+  Roles (replaces the roles of the user in the tenant), «Sign out everywhere» (`DELETE /bff/admin/users/{u}/sessions`,
+  shown with `authz.session.revoke`), Turn off and Turn on (only for the global admin: authz-library changes a user
+  only with `authz.rbac.manageglobal`).
+- `admin-roles`: the global roles with their permissions; the global admin edits the description and the permissions
+  of those that are not system roles.
+- `admin-tenants` (`authz.rbac.manageglobal`): the tenants, and «New tenant».
+- `admin-access-log`: the last 200 entries of the log of authz-library, with the actions and kinds translated.
+
+Passwords and sign-in stay in Keycloak, and the users screen says so. ADR-22 asks for a link to the console of
+Keycloak for the tenant: there is no address of the console in the configuration of the front end, so the text names
+it without a link. The roles and permissions in the pickers are static lists (the options of Quadrava are strings):
+the role of global admin is offered to the admin of a tenant too, and authz-library refuses it with 403.

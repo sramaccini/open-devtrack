@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "1.0",
+  "datasources": "admin",
+  "description": "The administration of authz-library (ADR-22): users, roles and tenants, the audit of access, the sessions.",
+  "sources": {
+    "users": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/v1/admin/tenants/{{user.tenant}}/users",
+      "params": {
+        "limit": 500
+      }
+    },
+    "createUser": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/v1/admin/users",
+      "body": {
+        "username": "{{username}}",
+        "email": "{{email}}"
+      }
+    },
+    "assignRoles": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/v1/admin/tenants/{{user.tenant}}/users/{{username}}/roles",
+      "body": {
+        "roles": "{{roles}}"
+      }
+    },
+    "changeUser": {
+      "type": "rest",
+      "method": "PATCH",
+      "url": "/api/v1/admin/users/{{username}}",
+      "body": {
+        "active": "{{active}}"
+      }
+    },
+    "signOut": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/bff/admin/users/{{username}}/sessions"
+    },
+    "roles": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/v1/admin/roles"
+    },
+    "saveRole": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/v1/admin/roles/{{code}}",
+      "body": "{{form}}"
+    },
+    "tenants": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/v1/admin/tenants"
+    },
+    "createTenant": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/v1/admin/tenants",
+      "body": "{{form}}"
+    },
+    "audit": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/v1/admin/audit",
+      "params": {
+        "limit": 200
+      }
+    }
+  }
+}

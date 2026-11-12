@@ -36,7 +36,7 @@ stack/stack.sh down     # stop, keeping the data
 stack/stack.sh reset    # stop and delete the data; the next up starts empty and adds the samples again
 ```
 
-Then open http://localhost:18090 and sign in as `mario.rossi` (one tenant, ACME) or `anna.bianchi` (two tenants),
+Then open http://localhost:18090 and sign in as `mario.rossi` (one tenant, ACME, admin of its users) or `anna.bianchi` (two tenants, global admin in Globex: ADR-22),
 with the password `info` prints (`DEV_USER_PASSWORD` in `stack/.work/.env`, generated at the first `up`). The mails
 of the notifications are at http://localhost:18025. A webhook of a project (ADR-21) can post to the receiver `echo` of the stack,
 `http://echo:8080/<any path>`, which prints each request with its headers: `stack.sh hooks`. The back end allows that

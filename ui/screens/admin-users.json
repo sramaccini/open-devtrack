@@ -1,0 +1,307 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "admin-users",
+  "title": "{{ t('admin.users', 'Users') }}",
+  "requires": "authz.rbac.manage",
+  "dataSources": {
+    "users": {
+      "ref": "admin/users"
+    },
+    "createUser": {
+      "ref": "admin/createUser"
+    },
+    "assignRoles": {
+      "ref": "admin/assignRoles"
+    },
+    "changeUser": {
+      "ref": "admin/changeUser"
+    },
+    "signOut": {
+      "ref": "admin/signOut"
+    }
+  },
+  "components": [
+    {
+      "id": "users-help",
+      "type": "text",
+      "text": "{{ t('admin.users_help', 'The users of this tenant and their roles. Passwords and sign-in are managed in the identity provider (Keycloak): a user is added there first, then here.') }}"
+    },
+    {
+      "id": "btn-add-user",
+      "type": "button",
+      "label": "{{ t('admin.add_user', 'Add user') }}",
+      "onClick": [
+        {
+          "dialog": {
+            "title": "{{ t('admin.add_user', 'Add user') }}",
+            "submitLabel": "{{ t('projects.add', 'Add') }}",
+            "initial": {
+              "roles": [
+                "ODT_MEMBER"
+              ]
+            },
+            "fields": [
+              {
+                "name": "username",
+                "type": "text",
+                "label": "{{ t('admin.username', 'User name') }}",
+                "required": true,
+                "maxLength": 150,
+                "tooltip": "{{ t('admin.username_help', 'As in the identity provider') }}"
+              },
+              {
+                "name": "email",
+                "type": "text",
+                "label": "{{ t('admin.email', 'Email') }}",
+                "maxLength": 255
+              },
+              {
+                "name": "roles",
+                "type": "multiselect",
+                "label": "{{ t('admin.roles', 'Roles') }}",
+                "options": [
+                  "ODT_MEMBER",
+                  "ODT_PROJECT_CREATOR",
+                  "ODT_ADMIN",
+                  "ODT_UI_AUTHOR",
+                  "ODT_UI_APPROVER",
+                  "TENANT_ADMIN",
+                  "GLOBAL_ADMIN"
+                ],
+                "optionKey": "values.global_role",
+                "tooltip": "{{ t('admin.roles_help', 'The roles in this tenant. Project roles are given in each project.') }}",
+                "required": true
+              }
+            ],
+            "onSubmit": [
+              {
+                "set": {
+                  "path": "state.adding",
+                  "value": "{{form}}"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "call": "createUser",
+          "args": {
+            "username": "{{state.adding.username}}",
+            "email": "{{state.adding.email}}"
+          },
+          "onError": [
+            {
+              "if": "{{error.status == 409}}",
+              "then": [
+                {
+                  "call": "assignRoles",
+                  "args": {
+                    "username": "{{state.adding.username}}",
+                    "roles": "{{state.adding.roles}}"
+                  },
+                  "onError": [
+                    {
+                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                    }
+                  ]
+                },
+                {
+                  "toast": "{{ t('admin.user_added', 'User added') }}"
+                },
+                {
+                  "refresh": "users"
+                }
+              ],
+              "else": [
+                {
+                  "toast": "{{ t('admin.user_invalid', 'Check the user name and the email') }}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "call": "assignRoles",
+          "args": {
+            "username": "{{state.adding.username}}",
+            "roles": "{{state.adding.roles}}"
+          },
+          "onError": [
+            {
+              "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+            }
+          ]
+        },
+        {
+          "toast": "{{ t('admin.user_added', 'User added') }}"
+        },
+        {
+          "refresh": "users"
+        }
+      ]
+    },
+    {
+      "id": "user-table",
+      "type": "table",
+      "source": "users",
+      "columns": [
+        {
+          "field": "username",
+          "label": "{{ t('admin.username', 'User name') }}"
+        },
+        {
+          "field": "email",
+          "label": "{{ t('admin.email', 'Email') }}"
+        },
+        {
+          "field": "active",
+          "label": "{{ t('admin.active', 'Active') }}",
+          "format": "badge",
+          "valueKey": "values.user_active",
+          "badges": {
+            "true": "success",
+            "false": "danger"
+          }
+        },
+        {
+          "field": "roles",
+          "label": "{{ t('admin.roles', 'Roles') }}",
+          "valueKey": "values.global_role"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-user-roles",
+          "label": "{{ t('admin.roles', 'Roles') }}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('admin.roles_of', 'Roles of {name}', {'name': row.username}) }}",
+                "submitLabel": "{{ t('common.save', 'Save') }}",
+                "initial": {
+                  "roles": "{{row.roles}}"
+                },
+                "fields": [
+                  {
+                    "name": "roles",
+                    "type": "multiselect",
+                    "label": "{{ t('admin.roles', 'Roles') }}",
+                    "options": [
+                      "ODT_MEMBER",
+                      "ODT_PROJECT_CREATOR",
+                      "ODT_ADMIN",
+                      "ODT_UI_AUTHOR",
+                      "ODT_UI_APPROVER",
+                      "TENANT_ADMIN",
+                      "GLOBAL_ADMIN"
+                    ],
+                    "optionKey": "values.global_role",
+                    "tooltip": "{{ t('admin.roles_help', 'The roles in this tenant. Project roles are given in each project.') }}"
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "assignRoles",
+                    "args": {
+                      "username": "{{row.username}}",
+                      "roles": "{{form.roles}}"
+                    },
+                    "onError": [
+                      {
+                        "if": "{{error.status == 403}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('admin.role_global', 'Only the global admin gives the role of global admin') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "users"
+            }
+          ]
+        },
+        {
+          "id": "btn-sign-out",
+          "label": "{{ t('admin.sign_out', 'Sign out everywhere') }}",
+          "visibleIf": "{{ can('authz.session.revoke') }}",
+          "onClick": [
+            {
+              "confirm": "{{ t('admin.sign_out_confirm', 'End every session of {name} in this tenant? They sign in again.', {'name': row.username}) }}"
+            },
+            {
+              "call": "signOut",
+              "args": {
+                "username": "{{row.username}}"
+              },
+              "onError": [
+                {
+                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                }
+              ]
+            },
+            {
+              "toast": "{{ t('admin.signed_out', 'Sessions ended') }}"
+            }
+          ]
+        },
+        {
+          "id": "btn-turn-off",
+          "label": "{{ t('admin.turn_off', 'Turn off') }}",
+          "visibleIf": "{{ can('authz.rbac.manageglobal') && row.active }}",
+          "onClick": [
+            {
+              "confirm": "{{ t('admin.turn_off_confirm', 'Turn off {name}? They can no longer sign in to any tenant.', {'name': row.username}) }}"
+            },
+            {
+              "call": "changeUser",
+              "args": {
+                "username": "{{row.username}}",
+                "active": false
+              },
+              "onError": [
+                {
+                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                }
+              ]
+            },
+            {
+              "refresh": "users"
+            }
+          ]
+        },
+        {
+          "id": "btn-turn-on",
+          "label": "{{ t('admin.turn_on', 'Turn on') }}",
+          "visibleIf": "{{ can('authz.rbac.manageglobal') && !row.active }}",
+          "onClick": [
+            {
+              "call": "changeUser",
+              "args": {
+                "username": "{{row.username}}",
+                "active": true
+              },
+              "onError": [
+                {
+                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                }
+              ]
+            },
+            {
+              "refresh": "users"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

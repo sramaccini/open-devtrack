@@ -1,0 +1,120 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "admin-roles",
+  "title": "{{ t('admin.global_roles', 'Global roles') }}",
+  "requires": "authz.rbac.manage",
+  "dataSources": {
+    "roles": {
+      "ref": "admin/roles"
+    },
+    "saveRole": {
+      "ref": "admin/saveRole"
+    }
+  },
+  "components": [
+    {
+      "id": "roles-help",
+      "type": "text",
+      "text": "{{ t('admin.global_roles_help', 'What each role gives in a tenant. The roles of the system cannot change; the others are changed by the global admin.') }}"
+    },
+    {
+      "id": "role-table",
+      "type": "table",
+      "source": "roles",
+      "columns": [
+        {
+          "field": "code",
+          "label": "{{ t('admin.role', 'Role') }}",
+          "valueKey": "values.global_role"
+        },
+        {
+          "field": "description",
+          "label": "{{ t('admin.description', 'Description') }}"
+        },
+        {
+          "field": "system",
+          "label": "{{ t('admin.system', 'System') }}",
+          "format": "badge",
+          "valueKey": "values.yes_no",
+          "badges": {
+            "true": "neutral",
+            "false": "primary"
+          }
+        },
+        {
+          "field": "permissions",
+          "label": "{{ t('admin.permissions', 'Permissions') }}"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-edit-role",
+          "label": "{{ t('projects.edit_field', 'Edit') }}",
+          "visibleIf": "{{ can('authz.rbac.manageglobal') && !row.system }}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('admin.edit_role', 'Edit {name}', {'name': row.code}) }}",
+                "submitLabel": "{{ t('common.save', 'Save') }}",
+                "initial": {
+                  "description": "{{row.description}}",
+                  "permissions": "{{row.permissions}}",
+                  "version": "{{row.version}}"
+                },
+                "fields": [
+                  {
+                    "name": "description",
+                    "type": "text",
+                    "label": "{{ t('admin.description', 'Description') }}",
+                    "maxLength": 255
+                  },
+                  {
+                    "name": "permissions",
+                    "type": "multiselect",
+                    "label": "{{ t('admin.permissions', 'Permissions') }}",
+                    "options": [
+                      "odt.project.browse",
+                      "odt.project.create",
+                      "odt.project.admin",
+                      "odt.user.browse",
+                      "odt.uidefinition.publish",
+                      "odt.uidefinition.approve",
+                      "authz.rbac.manage",
+                      "authz.session.revoke"
+                    ]
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "saveRole",
+                    "args": {
+                      "code": "{{row.code}}"
+                    },
+                    "onError": [
+                      {
+                        "if": "{{error.status == 409}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "roles"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

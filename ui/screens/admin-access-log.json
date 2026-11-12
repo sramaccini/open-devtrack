@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "admin-access-log",
+  "title": "{{ t('admin.access_log', 'Access log') }}",
+  "requires": "authz.rbac.manage",
+  "dataSources": {
+    "audit": {
+      "ref": "admin/audit"
+    }
+  },
+  "components": [
+    {
+      "id": "access-log-help",
+      "type": "text",
+      "text": "{{ t('admin.access_log_help', 'The last 200 changes to users, roles and tenants, the most recent first.') }}"
+    },
+    {
+      "id": "access-log-table",
+      "type": "table",
+      "source": "audit",
+      "columns": [
+        {
+          "field": "occurred_at",
+          "label": "{{ t('admin.when', 'When') }}",
+          "format": "datetime"
+        },
+        {
+          "field": "actor",
+          "label": "{{ t('admin.actor', 'By') }}"
+        },
+        {
+          "field": "action",
+          "label": "{{ t('admin.action', 'Action') }}",
+          "valueKey": "values.admin_action"
+        },
+        {
+          "field": "target_type",
+          "label": "{{ t('admin.target_type', 'On') }}",
+          "valueKey": "values.target_type"
+        },
+        {
+          "field": "target",
+          "label": "{{ t('admin.target', 'Target') }}"
+        },
+        {
+          "field": "tenant_id",
+          "label": "{{ t('admin.tenant', 'Tenant') }}"
+        }
+      ]
+    }
+  ]
+}
