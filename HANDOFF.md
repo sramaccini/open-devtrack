@@ -128,6 +128,6 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    webhooks (module `integration`), signed as Standard Webhooks, from an outbox, with the screens `webhook-list` and
    `webhook-detail` (a screen of their own, not a section of `project-detail`: `ui/README.md`) and the receiver `echo`
    of the stack. A1, A2 and A5 of authz-library 2.2.0 adopted. Next in F5: ADR-22 (administration, E10) and ADR-23
-   (hardening: ASVS L2, WCAG 2.2 AA), proposed, waiting for the maintainer; then the documentation, the public demo
+   (hardening: ASVS L2, WCAG 2.2 AA), accepted 12 November 2026, being built; then the documentation, the public demo
    and 1.0.
 2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

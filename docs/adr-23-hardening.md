@@ -1,6 +1,6 @@
 # ADR-23: Hardening for 1.0: ASVS level 2 and WCAG 2.2 AA
 
-Status: Proposed (12 November 2026) — F5
+Status: Accepted (12 November 2026; decided by the maintainer) — F5
 
 ## Context
 

@@ -1,6 +1,6 @@
 # ADR-22: Administration: users, groups, permission schemes, audit log
 
-Status: Proposed (12 November 2026) — F5, epic E10
+Status: Accepted (12 November 2026; decided by the maintainer) — F5, epic E10
 
 ## Context
 

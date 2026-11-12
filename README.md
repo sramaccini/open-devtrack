@@ -26,7 +26,7 @@ Phases **F0–F4 done**: the back end, the `ui/` project and CI are in place, wi
 | F2 | Projects, issues, workflow, comments and attachments | Done (gate M1); also mentions and in-app messages (ADR-13) |
 | F3 | Boards, backlog and sprints | Done (ADR-15) |
 | F4 | Search, dashboards, notifications | Done (gate M3: search load test) |
-| F5 | Public API and webhooks, hardening, 1.0 | Under way: public API and webhooks built (ADR-21) |
+| F5 | Public API and webhooks, hardening, 1.0 | Under way: public API and webhooks built (ADR-21); administration (ADR-22) and hardening (ADR-23) accepted |
 
 ## Documentation
 
