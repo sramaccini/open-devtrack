@@ -83,6 +83,13 @@
           "requires": "authz.rbac.manageglobal"
         },
         {
+          "id": "admin-groups",
+          "label": "{{ t('nav.admin_groups', 'Groups') }}",
+          "icon": "inbox",
+          "screen": "admin-groups",
+          "requires": "odt.project.admin"
+        },
+        {
           "id": "admin-permission-schemes",
           "label": "{{ t('nav.admin_schemes', 'Permission schemes') }}",
           "icon": "check-circle",

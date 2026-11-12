@@ -1,0 +1,218 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "admin-groups",
+  "title": "{{ t('admin.groups', 'Groups') }}",
+  "requires": "odt.project.admin",
+  "dataSources": {
+    "groups": {
+      "ref": "admin/groups"
+    },
+    "addGroup": {
+      "ref": "admin/addGroup"
+    },
+    "saveGroup": {
+      "ref": "admin/saveGroup"
+    },
+    "removeGroup": {
+      "ref": "admin/removeGroup"
+    }
+  },
+  "components": [
+    {
+      "id": "groups-help",
+      "type": "text",
+      "text": "{{ t('admin.groups_help', 'A group gives its members a role in the projects it is added to; the highest role of each user counts. Mentions and assignments stay per user.') }}"
+    },
+    {
+      "id": "btn-add-group",
+      "type": "button",
+      "label": "{{ t('admin.add_group', 'New group') }}",
+      "onClick": [
+        {
+          "dialog": {
+            "title": "{{ t('admin.add_group', 'New group') }}",
+            "submitLabel": "{{ t('projects.add', 'Add') }}",
+            "fields": [
+              {
+                "name": "name",
+                "type": "text",
+                "label": "{{ t('admin.name', 'Name') }}",
+                "required": true,
+                "maxLength": 100
+              },
+              {
+                "name": "description",
+                "type": "text",
+                "label": "{{ t('admin.description', 'Description') }}",
+                "maxLength": 500
+              }
+            ],
+            "onSubmit": [
+              {
+                "call": "addGroup",
+                "onError": [
+                  {
+                    "if": "{{error.status == 409}}",
+                    "then": [
+                      {
+                        "toast": "{{ t('admin.group_exists', 'A group with this name exists') }}"
+                      }
+                    ],
+                    "else": [
+                      {
+                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "refresh": "groups"
+        }
+      ]
+    },
+    {
+      "id": "group-table",
+      "type": "table",
+      "source": "groups",
+      "columns": [
+        {
+          "field": "name",
+          "label": "{{ t('admin.name', 'Name') }}"
+        },
+        {
+          "field": "description",
+          "label": "{{ t('admin.description', 'Description') }}"
+        },
+        {
+          "field": "members",
+          "label": "{{ t('admin.group_members', 'Members') }}"
+        },
+        {
+          "field": "projects",
+          "label": "{{ t('admin.group_projects', 'Projects') }}"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-open-group",
+          "label": "{{ t('admin.open', 'Open') }}",
+          "onClick": [
+            {
+              "navigate": "admin-group-detail",
+              "params": {
+                "id": "{{row.id}}"
+              }
+            }
+          ]
+        },
+        {
+          "id": "btn-edit-group",
+          "label": "{{ t('projects.edit_field', 'Edit') }}",
+          "visibleIf": "{{row._perm.edit}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('admin.edit_group', 'Edit {name}', {'name': row.name}) }}",
+                "submitLabel": "{{ t('common.save', 'Save') }}",
+                "initial": {
+                  "name": "{{row.name}}",
+                  "description": "{{row.description}}",
+                  "version": "{{row.version}}"
+                },
+                "fields": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "{{ t('admin.name', 'Name') }}",
+                    "required": true,
+                    "maxLength": 100
+                  },
+                  {
+                    "name": "description",
+                    "type": "text",
+                    "label": "{{ t('admin.description', 'Description') }}",
+                    "maxLength": 500
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "saveGroup",
+                    "args": {
+                      "id": "{{row.id}}"
+                    },
+                    "onError": [
+                      {
+                        "if": "{{error.status == 412}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "if": "{{error.status == 409}}",
+                            "then": [
+                              {
+                                "toast": "{{ t('admin.group_exists', 'A group with this name exists') }}"
+                              }
+                            ],
+                            "else": [
+                              {
+                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "groups"
+            }
+          ]
+        },
+        {
+          "id": "btn-remove-group",
+          "label": "{{ t('common.remove', 'Remove') }}",
+          "visibleIf": "{{row._perm.remove}}",
+          "onClick": [
+            {
+              "confirm": "{{ t('admin.remove_group', 'Remove the group {name}? Its projects lose it too.', {'name': row.name}) }}"
+            },
+            {
+              "call": "removeGroup",
+              "args": {
+                "id": "{{row.id}}"
+              },
+              "onError": [
+                {
+                  "if": "{{error.status == 409}}",
+                  "then": [
+                    {
+                      "toast": "{{ t('admin.last_admin', 'A project would be left without an admin: give it another one first') }}"
+                    }
+                  ],
+                  "else": [
+                    {
+                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "refresh": "groups"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

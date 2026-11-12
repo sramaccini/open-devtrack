@@ -6,6 +6,7 @@ package com.logicwarez.opendevtrack.project;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -31,8 +32,21 @@ final class ProjectApi {
     record EditProject(String name, String description, String lead, Long version) {
     }
 
-    record MemberView(String username, String role, String grantedBy, Instant grantedAt,
-                      @JsonProperty("_perm") Map<String, Boolean> perm) {
+    /**
+     * A member: {@code role} is the highest of their own ({@code ownRole}, null for a member only through groups) and
+     * those of the {@code groups} they are members through (ADR-22).
+     */
+    record MemberView(String username, String role, String ownRole, List<String> groups, String grantedBy,
+                      Instant grantedAt, @JsonProperty("_perm") Map<String, Boolean> perm) {
+    }
+
+    /** A group with a role in the project. */
+    record ProjectGroupView(UUID id, String name, String role, String grantedBy, Instant grantedAt,
+                           @JsonProperty("_perm") Map<String, Boolean> perm) {
+    }
+
+    /** A group to add to the project, or the new role of one. */
+    record GroupRequest(UUID group, String role) {
     }
 
     record MemberRequest(String username, String role) {

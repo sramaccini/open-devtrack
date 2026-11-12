@@ -13,6 +13,7 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 /** The role of a user in a project. */
@@ -51,6 +52,10 @@ class MemberEntity {
         this.grantedAt = at;
     }
 
+    String username() {
+        return username;
+    }
+
     UUID projectId() {
         return projectId;
     }
@@ -60,6 +65,6 @@ class MemberEntity {
     }
 
     ProjectMember toMember() {
-        return new ProjectMember(username, role, grantedBy, grantedAt);
+        return new ProjectMember(username, role, role, List.of(), grantedBy, grantedAt);
     }
 }

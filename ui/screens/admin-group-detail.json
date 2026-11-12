@@ -1,0 +1,142 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "admin-group-detail",
+  "title": "{{ t('admin.group', 'Group') }}",
+  "requires": "odt.project.admin",
+  "dataSources": {
+    "group": {
+      "ref": "admin/group"
+    },
+    "groupMembers": {
+      "ref": "admin/groupMembers"
+    },
+    "addGroupMember": {
+      "ref": "admin/addGroupMember"
+    },
+    "removeGroupMember": {
+      "ref": "admin/removeGroupMember"
+    },
+    "users": {
+      "ref": "users/search"
+    }
+  },
+  "components": [
+    {
+      "id": "group-name",
+      "type": "text",
+      "style": "heading",
+      "text": "{{ data.group != null ? data.group.name : '' }}"
+    },
+    {
+      "id": "group-description",
+      "type": "text",
+      "text": "{{ data.group != null && data.group.description != null ? data.group.description : '' }}"
+    },
+    {
+      "id": "btn-add-group-member",
+      "type": "button",
+      "label": "{{ t('admin.add_group_member', 'Add member') }}",
+      "onClick": [
+        {
+          "dialog": {
+            "title": "{{ t('admin.add_group_member', 'Add member') }}",
+            "submitLabel": "{{ t('projects.add', 'Add') }}",
+            "fields": [
+              {
+                "name": "username",
+                "type": "lookup",
+                "label": "{{ t('projects.user', 'User') }}",
+                "required": true,
+                "lookup": {
+                  "source": "users",
+                  "valueField": "username",
+                  "labelField": "username",
+                  "minChars": 1
+                }
+              }
+            ],
+            "onSubmit": [
+              {
+                "call": "addGroupMember",
+                "onError": [
+                  {
+                    "if": "{{error.status == 409}}",
+                    "then": [
+                      {
+                        "toast": "{{ t('admin.group_member_exists', 'Already in the group') }}"
+                      }
+                    ],
+                    "else": [
+                      {
+                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "refresh": "groupMembers"
+        }
+      ]
+    },
+    {
+      "id": "group-member-table",
+      "type": "table",
+      "source": "groupMembers",
+      "columns": [
+        {
+          "field": "username",
+          "label": "{{ t('projects.user', 'User') }}"
+        },
+        {
+          "field": "addedBy",
+          "label": "{{ t('admin.added_by', 'Added by') }}"
+        },
+        {
+          "field": "addedAt",
+          "label": "{{ t('admin.added_at', 'Added') }}",
+          "format": "datetime"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-remove-group-member",
+          "label": "{{ t('common.remove', 'Remove') }}",
+          "visibleIf": "{{row._perm.remove}}",
+          "onClick": [
+            {
+              "confirm": "{{ t('admin.remove_group_member', 'Remove {name} from the group?', {'name': row.username}) }}"
+            },
+            {
+              "call": "removeGroupMember",
+              "args": {
+                "username": "{{row.username}}"
+              },
+              "onError": [
+                {
+                  "if": "{{error.status == 409}}",
+                  "then": [
+                    {
+                      "toast": "{{ t('admin.last_admin', 'A project would be left without an admin: give it another one first') }}"
+                    }
+                  ],
+                  "else": [
+                    {
+                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "refresh": "groupMembers"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

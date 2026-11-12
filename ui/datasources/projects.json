@@ -88,6 +88,22 @@
       "method": "PUT",
       "url": "/api/projects/{{params.key}}/permission-scheme",
       "body": "{{form}}"
+    },
+    "groups": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/groups"
+    },
+    "addGroup": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{params.key}}/groups",
+      "body": "{{form}}"
+    },
+    "removeGroup": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/projects/{{params.key}}/groups/{{group}}"
     }
   }
 }

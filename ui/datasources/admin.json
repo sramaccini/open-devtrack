@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "datasources": "admin",
-  "description": "The administration (ADR-22): users, roles, tenants, the audit of access and the sessions of authz-library; the permission schemes of OpenDevTrack.",
+  "description": "The administration (ADR-22): users, roles, tenants, the audit of access and the sessions of authz-library; the permission schemes and the groups of OpenDevTrack.",
   "sources": {
     "users": {
       "type": "rest",
@@ -92,6 +92,52 @@
       "type": "rest",
       "method": "DELETE",
       "url": "/api/permission-schemes/{{id}}"
+    },
+    "groups": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/groups",
+      "params": {
+        "q": "{{search}}"
+      }
+    },
+    "group": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/groups/{{params.id}}"
+    },
+    "addGroup": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/groups",
+      "body": "{{form}}"
+    },
+    "saveGroup": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/groups/{{id}}",
+      "body": "{{form}}"
+    },
+    "removeGroup": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/groups/{{id}}"
+    },
+    "groupMembers": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/groups/{{params.id}}/members"
+    },
+    "addGroupMember": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/groups/{{params.id}}/members",
+      "body": "{{form}}"
+    },
+    "removeGroupMember": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/groups/{{params.id}}/members/{{username}}"
     }
   }
 }

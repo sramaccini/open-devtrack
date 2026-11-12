@@ -80,7 +80,14 @@ picks one (`PUT /api/projects/{key}/permission-scheme`). Only the project permis
 every role keeps `odt.issue.browse` and the admin keeps `odt.project.edit` and `odt.member.manage`; a scheme in use, or
 the default one, is not removed (409). What each project gets is kept in memory and dropped at every change of a
 scheme or of a choice: with more than one instance of the back end, the others see a change only after their restart
-(one instance until ADR-16 says otherwise). The codes are
+(one instance until ADR-16 says otherwise).
+Groups (ADR-22, `odt_access.user_group`, `group_member`, `project_group`; `user_group` since `group` is a reserved
+word) are named sets of users of the tenant, managed by the admin of the tenant (`/api/groups`). A group is a member of
+a project with a role (`/api/projects/{key}/groups`), and a user's role in a project is the highest of their own and
+those of their groups: `ProjectAccess.role`, `roles` and `members` count them, so `_perm`, `/authz/check`, the lists,
+the search and the notifications follow. The members of a project include those through groups (`ownRole` null,
+`groups` names them). A project keeps an admin through groups too: removing a group, a user from a group or a
+member is refused with 409 when no admin would be left. Mentions and assignments stay per user. The codes are
 in the catalogue (ADR-07) and reach the screens as `_perm` on rows and forms; `POST /authz/check` decides them for a
 `project` or `issue` resource (`ProjectPermissions`, the `PermissionContributor` of authz-library 2.2.0, A1). `identity`
 lists the users of the tenant for the pickers (`GET /api/users`) from the `TenantDirectory` of authz-library (A5). The

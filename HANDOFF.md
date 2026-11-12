@@ -129,8 +129,8 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    `webhook-detail` (a screen of their own, not a section of `project-detail`: `ui/README.md`) and the receiver `echo`
    of the stack. A1, A2 and A5 of authz-library 2.2.0 adopted. ADR-22 (administration, E10) and ADR-23
    (hardening: ASVS L2, WCAG 2.2 AA) accepted 12 November 2026. ADR-22: the Administration area (users, roles,
-   tenants, access log over the admin API of authz-library) and the permission schemes (module `access`, the screen
-   `admin-permission-schemes`, the choice in `project-detail`) built; next the groups and the audit log of the
-   configuration; then ADR-23. Q16 and Q17 for Quadrava are written in `docs/README.md` and not sent yet; then the documentation, the public demo
+   tenants, access log over the admin API of authz-library) the permission schemes (module `access`, the screen
+   `admin-permission-schemes`, the choice in `project-detail`) and the groups (`admin-groups`, the groups of a
+   project in `project-detail`) built; next the audit log of the configuration; then ADR-23. Q16 and Q17 for Quadrava are written in `docs/README.md` and not sent yet; then the documentation, the public demo
    and 1.0.
 2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

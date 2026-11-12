@@ -7,6 +7,7 @@ package com.logicwarez.opendevtrack.project;
 import com.logicwarez.opendevtrack.access.PermissionSchemes;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
 import com.logicwarez.opendevtrack.access.ProjectAccess.Change;
+import com.logicwarez.opendevtrack.access.ProjectGroup;
 import com.logicwarez.opendevtrack.access.ProjectMember;
 import com.logicwarez.opendevtrack.access.ProjectRole;
 import com.logicwarez.opendevtrack.identity.TenantUsers;
@@ -17,6 +18,8 @@ import com.logicwarez.opendevtrack.project.ProjectApi.CreateProject;
 import com.logicwarez.opendevtrack.project.ProjectApi.EditProject;
 import com.logicwarez.opendevtrack.project.ProjectApi.MemberRequest;
 import com.logicwarez.opendevtrack.project.ProjectApi.MemberView;
+import com.logicwarez.opendevtrack.project.ProjectApi.ProjectGroupView;
+import com.logicwarez.opendevtrack.project.ProjectApi.GroupRequest;
 import com.logicwarez.opendevtrack.project.ProjectApi.ProjectView;
 import com.logicwarez.opendevtrack.project.ProjectApi.SchemeChoice;
 import java.time.Instant;
@@ -25,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -81,7 +85,7 @@ class ProjectController {
     @GetMapping("/api/projects")
     List<ProjectView> list() {
         List<ProjectEntity> all = projects.findByTenantIdOrderByKey(user.tenantId());
-        Map<java.util.UUID, ProjectRole> roles = access.roles(all.stream().map(ProjectEntity::id).toList(), user.username());
+        Map<UUID, ProjectRole> roles = access.roles(all.stream().map(ProjectEntity::id).toList(), user.username());
         return all.stream().map(p -> view(p, Optional.ofNullable(roles.get(p.id())))).toList();
     }
 
@@ -219,6 +223,67 @@ class ProjectController {
         return ResponseEntity.ok(memberView(saved, true));
     }
 
+    /** The groups that are members of the project, with their roles (ADR-22). */
+    @ApiDoc(value = "The groups of a project and their roles", answer = ProjectGroupView.class, list = true)
+    @GetMapping("/api/projects/{key}/groups")
+    ResponseEntity<?> groups(@PathVariable String key) {
+        return find(key).<ResponseEntity<?>>map(p -> {
+            boolean manage = can(p, "odt.member.manage");
+            return ResponseEntity.ok(access.groups(p.id()).stream().map(g -> groupView(g, manage)).toList());
+        }).orElseGet(() -> Problems.notFound(NOT_FOUND));
+    }
+
+    /** Adds a group of the workspace to the project with a role, or changes its role. */
+    @ApiDoc(value = "Adds a group to a project, or changes its role", answer = ProjectGroupView.class,
+            project = "odt.member.manage")
+    @PostMapping("/api/projects/{key}/groups")
+    @Transactional
+    ResponseEntity<?> addGroup(@PathVariable String key, @RequestBody GroupRequest request) {
+        Optional<ProjectEntity> found = find(key);
+        if (found.isEmpty()) {
+            return Problems.notFound(NOT_FOUND);
+        }
+        ProjectEntity project = found.get();
+        if (!can(project, "odt.member.manage")) {
+            return Problems.forbidden("Only an admin of the project can manage its members");
+        }
+        Optional<ProjectRole> role = request == null ? Optional.empty() : ProjectRole.parse(request.role());
+        if (role.isEmpty()) {
+            return Problems.badRequest("The role is one of " + String.join(", ", ProjectRole.names()));
+        }
+        if (request.group() == null) {
+            return Problems.badRequest("No group with this id in the workspace");
+        }
+        Optional<Change> change = access.grantGroup(project.id(), request.group(), role.get(), user.username());
+        if (change.isEmpty()) {
+            return Problems.badRequest("No group with this id in the workspace");
+        }
+        if (change.get() == Change.LAST_ADMIN) {
+            return Problems.conflict("A project keeps at least one admin");
+        }
+        ProjectGroup saved = access.groups(project.id()).stream().filter(g -> g.id().equals(request.group()))
+                .findFirst().orElseThrow();
+        return ResponseEntity.ok(groupView(saved, true));
+    }
+
+    @ApiDoc(value = "Removes a group from a project", status = 204, project = "odt.member.manage")
+    @DeleteMapping("/api/projects/{key}/groups/{group}")
+    @Transactional
+    ResponseEntity<?> removeGroup(@PathVariable String key, @PathVariable UUID group) {
+        Optional<ProjectEntity> found = find(key);
+        if (found.isEmpty()) {
+            return Problems.notFound(NOT_FOUND);
+        }
+        if (!can(found.get(), "odt.member.manage")) {
+            return Problems.forbidden("Only an admin of the project can manage its members");
+        }
+        return switch (access.revokeGroup(found.get().id(), group)) {
+            case DONE -> ResponseEntity.noContent().build();
+            case NOT_A_MEMBER -> Problems.notFound("The group is not in the project");
+            case LAST_ADMIN -> Problems.conflict("A project keeps at least one admin");
+        };
+    }
+
     /** The permission scheme the project uses, among those of the tenant; the default one drops the choice. */
     @ApiDoc(value = "Picks the permission scheme of a project", answer = ProjectView.class, project = "odt.project.edit")
     @PutMapping("/api/projects/{key}/permission-scheme")
@@ -274,7 +339,13 @@ class ProjectController {
     }
 
     private MemberView memberView(ProjectMember m, boolean manage) {
-        return new MemberView(m.username(), m.role().value(), m.grantedBy(), m.grantedAt(),
-                Map.of("change", manage, "remove", manage && !m.username().equals(user.username())));
+        return new MemberView(m.username(), m.role().value(), m.own() == null ? null : m.own().value(), m.groups(),
+                m.grantedBy(), m.grantedAt(),
+                Map.of("change", manage, "remove", manage && m.own() != null && !m.username().equals(user.username())));
+    }
+
+    private static ProjectGroupView groupView(ProjectGroup g, boolean manage) {
+        return new ProjectGroupView(g.id(), g.name(), g.role().value(), g.grantedBy(), g.grantedAt(),
+                Map.of("change", manage, "remove", manage));
     }
 }

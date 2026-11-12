@@ -63,6 +63,18 @@
     },
     "useScheme": {
       "ref": "projects/useScheme"
+    },
+    "groups": {
+      "ref": "projects/groups"
+    },
+    "addGroup": {
+      "ref": "projects/addGroup"
+    },
+    "removeGroup": {
+      "ref": "projects/removeGroup"
+    },
+    "groupChoices": {
+      "ref": "admin/groups"
     }
   },
   "components": [
@@ -751,6 +763,10 @@
           "valueKey": "values.role"
         },
         {
+          "field": "groups",
+          "label": "{{ t('projects.through_groups', 'Through groups') }}"
+        },
+        {
           "field": "grantedBy",
           "label": "{{ t('projects.granted_by', 'Added by') }}"
         }
@@ -839,6 +855,197 @@
                   ]
                 }
               ]
+            },
+            {
+              "refresh": "members"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "groups-title",
+      "type": "text",
+      "style": "heading",
+      "text": "{{ t('projects.groups', 'Groups') }}"
+    },
+    {
+      "id": "btn-add-group",
+      "type": "button",
+      "label": "{{ t('projects.add_group', 'Add group') }}",
+      "visibleIf": "{{ data.project != null && data.project._perm.manageMembers }}",
+      "onClick": [
+        {
+          "dialog": {
+            "title": "{{ t('projects.add_group', 'Add group') }}",
+            "submitLabel": "{{ t('projects.add', 'Add') }}",
+            "initial": {
+              "role": "developer"
+            },
+            "fields": [
+              {
+                "name": "group",
+                "type": "lookup",
+                "label": "{{ t('admin.group', 'Group') }}",
+                "required": true,
+                "lookup": {
+                  "source": "groupChoices",
+                  "valueField": "id",
+                  "labelField": "name",
+                  "minChars": 0
+                },
+                "tooltip": "{{ t('projects.group_help', 'The groups of the workspace, in Administration') }}"
+              },
+              {
+                "name": "role",
+                "type": "select",
+                "label": "{{ t('projects.role', 'Role') }}",
+                "options": [
+                  "viewer",
+                  "developer",
+                  "admin"
+                ],
+                "optionKey": "values.role",
+                "required": true
+              }
+            ],
+            "onSubmit": [
+              {
+                "call": "addGroup",
+                "onError": [
+                  {
+                    "if": "{{error.status == 409}}",
+                    "then": [
+                      {
+                        "toast": "{{ t('projects.last_admin', 'A project keeps at least one admin') }}"
+                      }
+                    ],
+                    "else": [
+                      {
+                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "refresh": "groups"
+        },
+        {
+          "refresh": "members"
+        }
+      ]
+    },
+    {
+      "id": "group-table",
+      "type": "table",
+      "source": "groups",
+      "columns": [
+        {
+          "field": "name",
+          "label": "{{ t('admin.group', 'Group') }}"
+        },
+        {
+          "field": "role",
+          "label": "{{ t('projects.role', 'Role') }}",
+          "valueKey": "values.role"
+        },
+        {
+          "field": "grantedBy",
+          "label": "{{ t('projects.granted_by', 'Added by') }}"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-change-group-role",
+          "label": "{{ t('projects.change_role', 'Change role') }}",
+          "visibleIf": "{{row._perm.change}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('projects.change_role', 'Change role') }}",
+                "initial": {
+                  "group": "{{row.id}}",
+                  "role": "{{row.role}}"
+                },
+                "fields": [
+                  {
+                    "name": "role",
+                    "type": "select",
+                    "label": "{{ t('projects.role', 'Role') }}",
+                    "options": [
+                      "viewer",
+                      "developer",
+                      "admin"
+                    ],
+                    "optionKey": "values.role",
+                    "required": true
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "addGroup",
+                    "onError": [
+                      {
+                        "if": "{{error.status == 409}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('projects.last_admin', 'A project keeps at least one admin') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "groups"
+            },
+            {
+              "refresh": "members"
+            }
+          ]
+        },
+        {
+          "id": "btn-remove-group",
+          "label": "{{ t('common.remove', 'Remove') }}",
+          "visibleIf": "{{row._perm.remove}}",
+          "onClick": [
+            {
+              "confirm": "{{ t('projects.remove_group', 'Remove the group {name} from the project?', {'name': row.name}) }}"
+            },
+            {
+              "call": "removeGroup",
+              "args": {
+                "group": "{{row.id}}"
+              },
+              "onError": [
+                {
+                  "if": "{{error.status == 409}}",
+                  "then": [
+                    {
+                      "toast": "{{ t('projects.last_admin', 'A project keeps at least one admin') }}"
+                    }
+                  ],
+                  "else": [
+                    {
+                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "refresh": "groups"
             },
             {
               "refresh": "members"

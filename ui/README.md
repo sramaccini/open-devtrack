@@ -164,6 +164,10 @@ The area `admin` (ADR-22), shown to whoever holds `authz.rbac.manage` in the ten
   of those that are not system roles.
 - `admin-tenants` (`authz.rbac.manageglobal`): the tenants, and «New tenant».
 - `admin-access-log`: the last 200 entries of the log of authz-library, with the actions and kinds translated.
+- `admin-groups` and `admin-group-detail` (params `id`) (`odt.project.admin`): the groups of the tenant (New, Edit,
+  Remove, Open) and the members of one (Add member with a lookup on the users, Remove). A multiselect cannot list the
+  users (the options of Quadrava are static), so members are added one at a time. A removal that would leave a project
+  without an admin answers 409 and the toast says so.
 - `admin-permission-schemes` (`odt.project.admin`, the admin of the projects of the tenant): the permission schemes of
   OpenDevTrack (`/api/permission-schemes`), New (a copy of the default), Edit (name, description, the permissions of
   each project role), Remove (not the default, not one in use). A refused change (400) says the rules: every role sees
@@ -173,7 +177,9 @@ Each item has its own `requires`; an area with no item to show is hidden, so the
 and to the admin of the projects alike. In `project-detail` the form shows the scheme of the project, and «Change the
 permission scheme» (for whoever edits the project) picks another one with a lookup on the schemes. It is a button of
 its own under the form, not one more action of the form: the actions of a form do not wrap (Q17), and the row is
-already wider than a 1280 px window since the Webhooks button.
+already wider than a 1280 px window since the Webhooks button. The members table of `project-detail` shows through which
+groups a user is a member, and a «Groups» table under it lists the groups of the project with Change role and Remove;
+«Add group» is a button of its own for the same reason.
 
 Passwords and sign-in stay in Keycloak, and the users screen says so. ADR-22 asks for a link to the console of
 Keycloak for the tenant: there is no address of the console in the configuration of the front end, so the text names
