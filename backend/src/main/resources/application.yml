@@ -52,7 +52,7 @@ spring:
     # One schema and one folder per module (ADR-04), all under db/odt with one history table in odt: the version
     # numbers are global across the folders (V1 uiregistry, V2 access, V3 project, V4 issue, V5 the event
     # publications, …). The RBAC schema has its own Flyway and history, run by authz-rbac.
-    schemas: odt,odt_uiregistry,odt_access,odt_project,odt_issue,odt_audit,odt_collaboration,odt_workflow,odt_notification,odt_agile,odt_search,odt_reporting
+    schemas: odt,odt_uiregistry,odt_access,odt_project,odt_issue,odt_audit,odt_collaboration,odt_workflow,odt_notification,odt_agile,odt_search,odt_reporting,odt_integration
     locations: classpath:db/odt
     placeholders:
       # The days of the reports (ADR-17), also in the migration that fills them from the existing data
@@ -151,6 +151,12 @@ odt:
     digest-at: ${ODT_MAIL_DIGEST_AT:07:00}
     # How often the outbox is read
     outbox-delay: ${ODT_MAIL_OUTBOX_DELAY:PT1M}
+  webhooks:
+    # Outgoing webhooks (ADR-21, B): only https to public addresses. A development environment with a receiver on
+    # its own network allows http and private addresses with ODT_WEBHOOKS_ALLOW_PRIVATE=true.
+    allow-private: ${ODT_WEBHOOKS_ALLOW_PRIVATE:false}
+    # How often the deliveries that are due are posted
+    delay: ${ODT_WEBHOOKS_DELAY:PT15S}
   uiregistry:
     # Environments where only versions approved by someone other than their author are published: none (ADR-12, the
     # review is the one of the code). An installation that wants it lists them:

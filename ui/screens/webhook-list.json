@@ -1,0 +1,433 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "webhook-list",
+  "title": "{{ t('webhooks.title', 'Webhooks') }}",
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "webhooks": {
+      "ref": "webhooks/list"
+    },
+    "create": {
+      "ref": "webhooks/create"
+    },
+    "save": {
+      "ref": "webhooks/save"
+    },
+    "remove": {
+      "ref": "webhooks/remove"
+    },
+    "rotate": {
+      "ref": "webhooks/rotate"
+    },
+    "ping": {
+      "ref": "webhooks/ping"
+    }
+  },
+  "components": [
+    {
+      "id": "webhooks-help",
+      "type": "text",
+      "text": "{{ t('webhooks.help', 'Each webhook receives the events of the project it wants, posted as JSON and signed with its secret (Standard Webhooks).') }}"
+    },
+    {
+      "id": "btn-add-webhook",
+      "type": "button",
+      "label": "{{ t('webhooks.new', 'New webhook') }}",
+      "onClick": [
+        {
+          "dialog": {
+            "title": "{{ t('webhooks.new', 'New webhook') }}",
+            "submitLabel": "{{ t('projects.add', 'Add') }}",
+            "initial": {
+              "events": [
+                "*"
+              ]
+            },
+            "fields": [
+              {
+                "name": "name",
+                "type": "text",
+                "label": "{{ t('webhooks.name', 'Name') }}",
+                "required": true,
+                "maxLength": 100
+              },
+              {
+                "name": "url",
+                "type": "text",
+                "label": "{{ t('webhooks.url', 'Address') }}",
+                "required": true,
+                "maxLength": 2000,
+                "tooltip": "{{ t('webhooks.url_help', 'An https address on the internet, for example https://chat.example.org/hooks/123') }}"
+              },
+              {
+                "name": "events",
+                "type": "multiselect",
+                "label": "{{ t('webhooks.events', 'Events') }}",
+                "required": true,
+                "options": [
+                  "*",
+                  "issue.created",
+                  "issue.changed",
+                  "issue.deleted",
+                  "comment.posted",
+                  "attachment.added",
+                  "attachment.removed",
+                  "sprint.started",
+                  "sprint.completed"
+                ],
+                "optionKey": "values.webhook_event",
+                "tooltip": "{{ t('webhooks.events_help', 'What it is told about; * for every event, those of tomorrow too') }}"
+              }
+            ],
+            "onSubmit": [
+              {
+                "call": "create",
+                "as": "created",
+                "onError": [
+                  {
+                    "if": "{{error.status == 412}}",
+                    "then": [
+                      {
+                        "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                      }
+                    ],
+                    "else": [
+                      {
+                        "if": "{{error.status == 409}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('webhooks.exists', 'The project already has a webhook with this name, or ten webhooks') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "if": "{{error.status == 400}}",
+                            "then": [
+                              {
+                                "toast": "{{ t('webhooks.invalid', 'Check the name, the address (https, on the internet) and the events') }}"
+                              }
+                            ],
+                            "else": [
+                              {
+                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "set": {
+                  "path": "state.secret",
+                  "value": "{{created.secret}}"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "dialog": {
+            "title": "{{ t('webhooks.secret', 'Signing secret') }}",
+            "submitLabel": "{{ t('webhooks.done', 'Done') }}",
+            "initial": {
+              "secret": "{{ state.secret }}"
+            },
+            "fields": [
+              {
+                "name": "secret",
+                "type": "text",
+                "label": "{{ t('webhooks.secret', 'Signing secret') }}",
+                "readOnlyIf": "{{true}}",
+                "tooltip": "{{ t('webhooks.secret_help', 'Copy it now into the receiver, which checks the signature with it: it is not shown again') }}"
+              }
+            ],
+            "onSubmit": [
+              {
+                "toast": "{{ t('webhooks.secret_kept', 'Keep the secret safe: it is not shown again') }}"
+              }
+            ]
+          }
+        },
+        {
+          "set": {
+            "path": "state.secret",
+            "value": null
+          }
+        },
+        {
+          "refresh": "webhooks"
+        }
+      ]
+    },
+    {
+      "id": "webhook-table",
+      "type": "table",
+      "source": "webhooks",
+      "columns": [
+        {
+          "field": "name",
+          "label": "{{ t('webhooks.name', 'Name') }}"
+        },
+        {
+          "field": "url",
+          "label": "{{ t('webhooks.url', 'Address') }}"
+        },
+        {
+          "field": "events",
+          "label": "{{ t('webhooks.events', 'Events') }}",
+          "valueKey": "values.webhook_event"
+        },
+        {
+          "field": "active",
+          "label": "{{ t('webhooks.active', 'Active') }}",
+          "format": "badge",
+          "valueKey": "values.active",
+          "badges": {
+            "true": "success",
+            "false": "danger"
+          }
+        },
+        {
+          "field": "lastStatus",
+          "label": "{{ t('webhooks.last', 'Last delivery') }}",
+          "valueKey": "values.delivery_status",
+          "format": "badge",
+          "badges": {
+            "delivered": "success",
+            "pending": "neutral",
+            "failed": "danger"
+          }
+        },
+        {
+          "field": "lastCode",
+          "label": "{{ t('webhooks.code', 'Answer') }}",
+          "format": "number"
+        },
+        {
+          "field": "lastAt",
+          "label": "{{ t('webhooks.at', 'When') }}",
+          "format": "datetime"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-open-webhook",
+          "label": "{{ t('webhooks.deliveries', 'Deliveries') }}",
+          "onClick": [
+            {
+              "navigate": "webhook-detail",
+              "params": {
+                "key": "{{params.key}}",
+                "id": "{{row.id}}"
+              }
+            }
+          ]
+        },
+        {
+          "id": "btn-edit-webhook",
+          "label": "{{ t('projects.edit_field', 'Edit') }}",
+          "visibleIf": "{{row._perm.edit}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('webhooks.edit', 'Edit the webhook') }}",
+                "submitLabel": "{{ t('common.save', 'Save') }}",
+                "initial": {
+                  "name": "{{row.name}}",
+                  "url": "{{row.url}}",
+                  "events": "{{row.events}}",
+                  "active": "{{row.active}}",
+                  "version": "{{row.version}}"
+                },
+                "fields": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "{{ t('webhooks.name', 'Name') }}",
+                    "required": true,
+                    "maxLength": 100
+                  },
+                  {
+                    "name": "url",
+                    "type": "text",
+                    "label": "{{ t('webhooks.url', 'Address') }}",
+                    "required": true,
+                    "maxLength": 2000,
+                    "tooltip": "{{ t('webhooks.url_help', 'An https address on the internet, for example https://chat.example.org/hooks/123') }}"
+                  },
+                  {
+                    "name": "events",
+                    "type": "multiselect",
+                    "label": "{{ t('webhooks.events', 'Events') }}",
+                    "required": true,
+                    "options": [
+                      "*",
+                      "issue.created",
+                      "issue.changed",
+                      "issue.deleted",
+                      "comment.posted",
+                      "attachment.added",
+                      "attachment.removed",
+                      "sprint.started",
+                      "sprint.completed"
+                    ],
+                    "optionKey": "values.webhook_event",
+                    "tooltip": "{{ t('webhooks.events_help', 'What it is told about; * for every event, those of tomorrow too') }}"
+                  },
+                  {
+                    "name": "active",
+                    "type": "switch",
+                    "label": "{{ t('webhooks.active', 'Active') }}",
+                    "tooltip": "{{ t('webhooks.active_help', 'Off: nothing is queued or posted. Turned off by itself after three days of failures') }}"
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "save",
+                    "args": {
+                      "id": "{{row.id}}"
+                    },
+                    "onError": [
+                      {
+                        "if": "{{error.status == 412}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "if": "{{error.status == 409}}",
+                            "then": [
+                              {
+                                "toast": "{{ t('webhooks.exists', 'The project already has a webhook with this name, or ten webhooks') }}"
+                              }
+                            ],
+                            "else": [
+                              {
+                                "if": "{{error.status == 400}}",
+                                "then": [
+                                  {
+                                    "toast": "{{ t('webhooks.invalid', 'Check the name, the address (https, on the internet) and the events') }}"
+                                  }
+                                ],
+                                "else": [
+                                  {
+                                    "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "webhooks"
+            }
+          ]
+        },
+        {
+          "id": "btn-ping-webhook",
+          "label": "{{ t('webhooks.ping', 'Send a test') }}",
+          "visibleIf": "{{row._perm.edit}}",
+          "onClick": [
+            {
+              "call": "ping",
+              "args": {
+                "id": "{{row.id}}"
+              },
+              "onError": [
+                {
+                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                }
+              ]
+            },
+            {
+              "toast": "{{ t('webhooks.ping_sent', 'A test event is on its way') }}"
+            },
+            {
+              "refresh": "webhooks"
+            }
+          ]
+        },
+        {
+          "id": "btn-rotate-webhook",
+          "label": "{{ t('webhooks.rotate', 'New secret') }}",
+          "visibleIf": "{{row._perm.edit}}",
+          "onClick": [
+            {
+              "confirm": "{{ t('webhooks.rotate_confirm', 'Make a new signing secret? For a day the old one signs too, so that the receiver can change it.') }}"
+            },
+            {
+              "call": "rotate",
+              "args": {
+                "id": "{{row.id}}"
+              },
+              "as": "rotated",
+              "onError": [
+                {
+                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                }
+              ]
+            },
+            {
+              "dialog": {
+                "title": "{{ t('webhooks.secret', 'Signing secret') }}",
+                "submitLabel": "{{ t('webhooks.done', 'Done') }}",
+                "initial": {
+                  "secret": "{{ rotated.secret }}"
+                },
+                "fields": [
+                  {
+                    "name": "secret",
+                    "type": "text",
+                    "label": "{{ t('webhooks.secret', 'Signing secret') }}",
+                    "readOnlyIf": "{{true}}",
+                    "tooltip": "{{ t('webhooks.secret_help', 'Copy it now into the receiver, which checks the signature with it: it is not shown again') }}"
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "toast": "{{ t('webhooks.secret_kept', 'Keep the secret safe: it is not shown again') }}"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "btn-remove-webhook",
+          "label": "{{ t('projects.remove', 'Remove') }}",
+          "visibleIf": "{{row._perm.remove}}",
+          "onClick": [
+            {
+              "confirm": "{{ t('webhooks.remove_confirm', 'Remove the webhook {name}? Its deliveries go with it.', {'name': row.name}) }}"
+            },
+            {
+              "call": "remove",
+              "args": {
+                "id": "{{row.id}}"
+              },
+              "onError": [
+                {
+                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                }
+              ]
+            },
+            {
+              "refresh": "webhooks"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

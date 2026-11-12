@@ -181,7 +181,8 @@ Each comment posted or edited publishes `CommentPosted` with the mentions, the a
 
 The bell of the runtime (`notifications` in `navigation.json`) reads the messages of the user (`odt_notification`,
 ADR-13), written after the commit from the events: `mentioned` to the people mentioned, `assigned` to a new assignee,
-`review_requested` to a new reviewer (ADR-19), `commented` and `transitioned` to the watchers. Nobody is told of what they did, and each user gets one message per
+`review_requested` to a new reviewer (ADR-19), `commented` and `transitioned` to the watchers, `webhook_off` to the
+admins of a project whose webhook was turned off (ADR-21; it opens `project-detail` and has no preference). Nobody is told of what they did, and each user gets one message per
 event, the most direct one. `GET /api/notifications` gives the last 50 of the projects of the session tenant that the
 user still sees, with title and text in the language of `Accept-Language` (English and Italian,
 `notification/messages*.properties`) and the screen `issue-detail` to open; `POST /api/notifications/read` with `ids`
@@ -304,3 +305,25 @@ from the changelog of `audit` and the last 30 days of each project rebuilt from 
   assigned to and reported by the user, open critical bugs, issues resolved since Monday, the user's open issues past
   their due date (`overdue`) and the issues in progress they review (`reviewing`, ADR-19); the user's filters marked for
   the dashboard (at most 10) with how many issues each finds.
+
+## Outgoing webhooks (`integration`)
+
+The webhooks of ADR-21 (B) in `odt_integration`: each project has at most 10 (`webhook`: name, address, events,
+signing secret, `active`), managed by its admins under `/api/projects/{key}/webhooks` (guide in
+[docs/api.md](../docs/api.md#webhooks)). The module listens, after the commit, to the events of `issue`,
+`collaboration` and `agile` (`shared`), and writes one `delivery` per active webhook that wants the event, with its
+payload: the outbox. No module depends on it; it tells `notification` of a webhook turned off
+(`shared.WebhookTurnedOff`), which writes the message `webhook_off` to the admins of the project.
+
+`Deliveries` posts what is due every `odt.webhooks.delay` (15 seconds), the rows held with `FOR UPDATE SKIP LOCKED`
+so two instances never post the same one: a `POST` signed as Standard Webhooks asks (`Signature`), 10 seconds of
+timeout, no redirects. A 2xx is a delivery; anything else is tried again after 1, 5 and 30 minutes, 2, 6 and 12 hours,
+then given up; a webhook given up for 3 days is turned off. Deliveries older than 30 days are deleted at 3:15 every
+night. The secret is kept in clear, since it signs; after a rotation the old one signs too for 24 hours.
+
+`Addresses` refuses an address that is not `https`, has credentials or a fragment, or resolves to a loopback,
+private, link-local, shared, multicast or reserved address (the metadata of the clouds too), when it is saved and
+again before each attempt. `odt.webhooks.allow-private` (`ODT_WEBHOOKS_ALLOW_PRIVATE`, off by default) allows `http`
+and those addresses, for a receiver on the same network: on in the stack and in the e2e environment. Between the check
+and the connection the name is resolved again by the HTTP client, so a DNS answer that changes in that instant is not
+caught (DNS rebinding): a resolver or an egress proxy of the installation closes it.

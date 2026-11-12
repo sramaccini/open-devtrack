@@ -135,3 +135,17 @@ switch (in the application) and a choice (by email: off, at once, in the daily s
 end (`fieldsFrom` into `channels`). When the installation has no mail server it says so. The screen has no title: the
 tab names it. `/?settings=notification-settings` opens the dialog on it (Q15, Quadrava 0.12.1), the link in the footer
 of the mails; the query parameter `settings` belongs to the shell, so no screen takes one with that name.
+
+## Webhooks
+
+`webhook-list` (params `key`, from the «Webhooks» button of `project-detail`, shown to the admins of the project) and
+`webhook-detail` (params `key` and `id`), on `datasources/webhooks.json` (ADR-21, B). The list has New, Edit, «Send a
+test», «New secret» and Remove; the secret is shown once, in a dialog with a read-only field after the creation or
+the rotation. The answer of a `call` with `as` stays in its own sequence, so the dialog of the creation passes the
+secret to the next one through `state.secret`, emptied afterwards. `webhook-detail` shows the last 50 deliveries with
+«Deliver again».
+
+ADR-21 puts the webhooks in a section of `project-detail`. They are a screen of their own because the list answers
+403 to whoever is not an admin of the project, and a data source of a screen loads for everybody who opens it: a
+member would see the table fail. The value `*` (every event) is shown as it is: a key of the catalogues cannot hold
+`*`, so `values.webhook_event.*` cannot exist, and the tooltip of the field explains it.

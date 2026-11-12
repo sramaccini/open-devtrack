@@ -91,6 +91,9 @@ Quadrava and authz-library, and the ADRs say where.
   its issues), and a project has several workflows mapped by issue type, a default one for the rest (B; an issue that
   changes workflow keeps its status or moves to the first one of the same category). Screens: the Workflows table of
   `project-detail`, `workflow-detail`.
+- F5, ADR-21 (accepted 12 November 2026): the public API on `/api` with Keycloak tokens, service accounts and the
+  OpenAPI definition (A), and outgoing webhooks per project, signed, retried and turned off after three days of
+  failures, with a message to the admins (B; module `integration`).
 
 ## Requests to the dependencies
 
@@ -120,7 +123,9 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F5: ADR-21 (public API and webhooks). Part A built: `/api` with Keycloak tokens and service accounts (the bearer
-   access of authz-library 2.2.0, A4), the OpenAPI definition `docs/openapi.json` and `docs/api.md`. Part B, the
-   webhooks (module `integration`), being built.
+1. F5: ADR-21 (public API and webhooks) built. A: `/api` with Keycloak tokens and service accounts (the bearer
+   access of authz-library 2.2.0, A4), the OpenAPI definition `docs/openapi.json` and `docs/api.md`. B: outgoing
+   webhooks (module `integration`), signed as Standard Webhooks, from an outbox, with the screens `webhook-list` and
+   `webhook-detail` (a screen of their own, not a section of `project-detail`: `ui/README.md`) and the receiver `echo`
+   of the stack. Next in F5: hardening and the adoption of A1, A2, A5 (authz-library 2.2.0), then 1.0.
 2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

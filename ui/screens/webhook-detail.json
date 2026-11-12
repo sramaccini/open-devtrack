@@ -1,0 +1,150 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "webhook-detail",
+  "title": "{{ t('webhooks.webhook', 'Webhook') }}",
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "webhook": {
+      "ref": "webhooks/get"
+    },
+    "deliveries": {
+      "ref": "webhooks/deliveries"
+    },
+    "again": {
+      "ref": "webhooks/again"
+    }
+  },
+  "components": [
+    {
+      "id": "webhook-form",
+      "type": "form",
+      "layout": "flow",
+      "source": "webhook",
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "label": "{{ t('webhooks.name', 'Name') }}",
+          "width": "m",
+          "readOnlyIf": "{{true}}"
+        },
+        {
+          "name": "url",
+          "type": "text",
+          "label": "{{ t('webhooks.url', 'Address') }}",
+          "width": "l",
+          "readOnlyIf": "{{true}}"
+        },
+        {
+          "name": "active",
+          "type": "switch",
+          "label": "{{ t('webhooks.active', 'Active') }}",
+          "readOnlyIf": "{{true}}"
+        }
+      ],
+      "actions": [
+        {
+          "id": "btn-webhooks",
+          "label": "{{ t('webhooks.title', 'Webhooks') }}",
+          "onClick": [
+            {
+              "navigate": "webhook-list",
+              "params": {
+                "key": "{{params.key}}"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "deliveries-title",
+      "type": "text",
+      "style": "heading",
+      "text": "{{ t('webhooks.deliveries', 'Deliveries') }}"
+    },
+    {
+      "id": "deliveries-help",
+      "type": "text",
+      "text": "{{ t('webhooks.deliveries_help', 'The last 50, kept for 30 days. A failed one is tried again after 1, 5 and 30 minutes, then 2, 6 and 12 hours: seven attempts in about a day. A webhook that has failed for three days is turned off.') }}"
+    },
+    {
+      "id": "delivery-table",
+      "type": "table",
+      "source": "deliveries",
+      "columns": [
+        {
+          "field": "createdAt",
+          "label": "{{ t('webhooks.created', 'Queued') }}",
+          "format": "datetime"
+        },
+        {
+          "field": "event",
+          "label": "{{ t('webhooks.event', 'Event') }}",
+          "valueKey": "values.webhook_event"
+        },
+        {
+          "field": "status",
+          "label": "{{ t('webhooks.status', 'Status') }}",
+          "valueKey": "values.delivery_status",
+          "format": "badge",
+          "badges": {
+            "delivered": "success",
+            "pending": "neutral",
+            "failed": "danger"
+          }
+        },
+        {
+          "field": "attempts",
+          "label": "{{ t('webhooks.attempts', 'Attempts') }}",
+          "format": "number"
+        },
+        {
+          "field": "lastCode",
+          "label": "{{ t('webhooks.code', 'Answer') }}",
+          "format": "number"
+        },
+        {
+          "field": "lastError",
+          "label": "{{ t('webhooks.error', 'Error') }}"
+        },
+        {
+          "field": "lastAt",
+          "label": "{{ t('webhooks.at', 'When') }}",
+          "format": "datetime"
+        },
+        {
+          "field": "nextAt",
+          "label": "{{ t('webhooks.next', 'Next attempt') }}",
+          "format": "datetime"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-again",
+          "label": "{{ t('webhooks.again', 'Deliver again') }}",
+          "visibleIf": "{{row.status != 'pending'}}",
+          "onClick": [
+            {
+              "call": "again",
+              "args": {
+                "delivery": "{{row.id}}"
+              },
+              "onError": [
+                {
+                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                }
+              ]
+            },
+            {
+              "toast": "{{ t('webhooks.again_queued', 'Queued again: it is posted within a minute') }}"
+            },
+            {
+              "refresh": "deliveries"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

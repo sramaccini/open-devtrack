@@ -31,6 +31,13 @@ services:
     ports:
       - "${MAILPIT_PORT:-18025}:8025"
 
+  # A receiver for the webhooks (ADR-21, B): it prints each request it gets, headers and body (stack.sh hooks).
+  # Address of a webhook: http://echo:8080/anything, allowed by ODT_WEBHOOKS_ALLOW_PRIVATE on the back end.
+  echo:
+    image: mendhak/http-https-echo:34
+    environment:
+      LOG_IGNORE_PATH: /healthz
+
   # The realm of the end-to-end check (users mario.rossi and anna.bianchi), imported when the container is created.
   keycloak:
     image: quay.io/keycloak/keycloak:26.8.0
@@ -86,6 +93,8 @@ services:
       SPRING_MAIL_HOST: mailpit
       SPRING_MAIL_PORT: "1025"
       ODT_MAIL_OUTBOX_DELAY: PT5S
+      ODT_WEBHOOKS_ALLOW_PRIVATE: "true"
+      ODT_WEBHOOKS_DELAY: PT5S
 
   # The front (ADR-01): the Quadrava runtime with the screens of ui/ from the registry of the back end.
   runtime:

@@ -31,13 +31,16 @@ stack/stack.sh info     # addresses, users and their password
 stack/stack.sh publish  # after a change of ui/
 stack/stack.sh up       # after a change of backend/: the image is built again
 stack/stack.sh logs     # the log of the back end
+stack/stack.sh hooks    # what the webhook receiver got (address http://echo:8080/anything)
 stack/stack.sh down     # stop, keeping the data
 stack/stack.sh reset    # stop and delete the data; the next up starts empty and adds the samples again
 ```
 
 Then open http://localhost:18090 and sign in as `mario.rossi` (one tenant, ACME) or `anna.bianchi` (two tenants),
 with the password `info` prints (`DEV_USER_PASSWORD` in `stack/.work/.env`, generated at the first `up`). The mails
-of the notifications are at http://localhost:18025.
+of the notifications are at http://localhost:18025. A webhook of a project (ADR-21) can post to the receiver `echo` of the stack,
+`http://echo:8080/<any path>`, which prints each request with its headers: `stack.sh hooks`. The back end allows that
+address with `ODT_WEBHOOKS_ALLOW_PRIVATE`.
 
 Ports: `FRONT_PORT` (18090), `KEYCLOAK_PORT` (18180), `APP_PORT` (18080, the back end for tools on the host),
 `MAILPIT_PORT` (18025). They differ from the end-to-end check (`e2e/authz`, 28xxx), so both can run.

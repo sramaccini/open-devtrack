@@ -196,6 +196,7 @@ info() {
   echo "users mario.rossi and anna.bianchi, password: $DEV_USER_PASSWORD"
   echo "API:      http://localhost:$APP_PORT/api (docs/api.md); service account opendevtrack-ci, secret CI_CLIENT_SECRET in stack/.work/.env"
   echo "mails:    http://localhost:$MAILPIT_PORT"
+  echo "webhooks: http://echo:8080/anything as the address, then stack.sh hooks to see what it got"
   echo "Keycloak: http://localhost:$KEYCLOAK_PORT (admin, password KEYCLOAK_ADMIN_PASSWORD in stack/.work/.env)"
 }
 
@@ -203,7 +204,7 @@ up() {
   credentials
   packages
   log "back end image (built from backend/) and containers"
-  "${compose[@]}" up -d --wait postgres redis mailpit keycloak
+  "${compose[@]}" up -d --wait postgres redis mailpit echo keycloak
   "${compose[@]}" up -d --build backend
   wait_for "http://localhost:$APP_PORT/actuator/health" "The back end"
   publish
@@ -219,7 +220,8 @@ case "${1:-}" in
   seed) credentials; seed ;;
   info) credentials; info ;;
   logs) credentials; "${compose[@]}" logs -f backend ;;
+  hooks) credentials; "${compose[@]}" logs -f echo ;;
   down) credentials; "${compose[@]}" down ;;
   reset) credentials; "${compose[@]}" down -v ;;
-  *) echo "usage: $0 up | publish | seed | info | logs | down | reset" >&2; exit 2 ;;
+  *) echo "usage: $0 up | publish | seed | info | logs | hooks | down | reset" >&2; exit 2 ;;
 esac

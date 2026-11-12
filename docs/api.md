@@ -128,3 +128,80 @@ Errors are Problems (RFC 9457, `application/problem+json`) with an English `titl
 
 Requests with a token are limited per user or service account: 600 a minute by default (authz-library, counted on
 Redis). Past it the answer is 429 with `Retry-After` in seconds.
+
+## Webhooks
+
+A project can tell other systems what happens in it (ADR-21, B): an admin of the project (`odt.project.edit`) adds up
+to 10 webhooks under `/api/projects/{key}/webhooks`, or in the «Webhooks» screen of the project. Each has a name, an
+`https` address on the internet, the events it wants (`*` for all, the future ones too) and an `active` flag.
+
+| Method and path | What it does |
+| --- | --- |
+| `GET /api/projects/{key}/webhooks` | The webhooks, with the last delivery |
+| `POST /api/projects/{key}/webhooks` | A new one: `name`, `url`, `events`; 201 with the `secret`, shown only here |
+| `GET`, `PUT`, `DELETE /api/projects/{key}/webhooks/{id}` | One webhook; `PUT` with `version` (412 when it changed) |
+| `POST /api/projects/{key}/webhooks/{id}/secret` | A new secret, in the answer; the old one signs too for 24 hours |
+| `POST /api/projects/{key}/webhooks/{id}/ping` | «Send a test»: a `ping` event, at once |
+| `GET /api/projects/{key}/webhooks/{id}/deliveries` | The last 50 deliveries |
+| `POST /api/projects/{key}/webhooks/{id}/deliveries/{delivery}/again` | The same delivery queued again, with its id and body |
+
+An address that is not `https`, has a user and password or a fragment, or resolves to a loopback, private, link-local,
+shared or metadata address is refused (400, `/url`); it is checked again before each delivery, since DNS can change.
+A name used by another webhook of the project, or an eleventh webhook, is 409.
+
+### Events
+
+| Type | `data` |
+| --- | --- |
+| `issue.created` | `key`, `url` of the issue in the API, `changes`: the fields set, as in the history |
+| `issue.changed` | `key`, `url`, `changes`: `[{ "field", "from", "to" }]` |
+| `issue.deleted` | `key` |
+| `comment.posted` | `key`, `url` of its comments, `comment` (id), `edited`; not the text |
+| `attachment.added`, `attachment.removed` | `key`, `url` of its attachments, `attachment` (id), `filename` |
+| `sprint.started` | `sprint` (id), `name`, `url` of the sprints, `startsOn`, `endsOn`, `committedPoints` |
+| `sprint.completed` | `sprint`, `name`, `url`, `done`, `carried`, `donePoints`, `carriedPoints` |
+| `ping` | `webhook`: its name |
+
+Every request is a `POST` of JSON:
+
+```json
+{ "id": "1f0c…", "type": "issue.changed", "time": "2026-11-12T10:15:00Z",
+  "tenant": "ACME", "project": "WEB", "actor": "mario.rossi",
+  "data": { "key": "WEB-42", "url": "https://odt.example.org/api/issues/WEB-42",
+            "changes": [{ "field": "status", "from": "todo", "to": "in_progress" }] } }
+```
+
+The payload holds no copy of the resource: the receiver reads more through the API when it needs it. The fields of
+`data` follow the rule of the versions above: new ones may come in 1.x, none goes away.
+
+### Signature
+
+The requests follow [Standard Webhooks](https://www.standardwebhooks.com/), so its libraries verify them. Each one
+carries:
+
+- `webhook-id`: the `id` of the payload, the same in every attempt of a delivery;
+- `webhook-timestamp`: seconds since 1970 of this attempt;
+- `webhook-signature`: `v1,<base64 HMAC-SHA256 of "<id>.<timestamp>.<body>">`, the key being the bytes of the secret
+  after `whsec_`, base64-decoded. After a rotation there are two, separated by a space, for 24 hours.
+
+A receiver computes the signature of the body it got, as it got it, compares it in constant time with each one of the
+header, and refuses a timestamp more than 5 minutes away from its clock. In Java:
+
+```java
+byte[] key = Base64.getDecoder().decode(secret.substring("whsec_".length()));
+Mac mac = Mac.getInstance("HmacSHA256");
+mac.init(new SecretKeySpec(key, "HmacSHA256"));
+String expected = "v1," + Base64.getEncoder().encodeToString(
+        mac.doFinal((id + "." + timestamp + "." + body).getBytes(StandardCharsets.UTF_8)));
+```
+
+### Delivery
+
+- Any 2xx answer within 10 seconds is a delivery; redirects are not followed.
+- Anything else is tried again after 1, 5 and 30 minutes, then 2, 6 and 12 hours, and given up after the seventh
+  attempt.
+- A webhook whose deliveries have been given up for 3 days is turned off, and the admins of the project get a message
+  in the application. Turned on again (`PUT` with `active: true`), it starts with the new events.
+- The order is not guaranteed and a delivery can arrive twice: `time` and `id` let a receiver sort and drop
+  duplicates.
+- Deliveries are kept for 30 days.

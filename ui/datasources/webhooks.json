@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "1.0",
+  "datasources": "webhooks",
+  "description": "Outgoing webhooks of a project and their deliveries (module integration, ADR-21 B); for the admins of the project.",
+  "sources": {
+    "list": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/webhooks"
+    },
+    "create": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{params.key}}/webhooks",
+      "body": "{{form}}"
+    },
+    "get": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/webhooks/{{params.id}}"
+    },
+    "save": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/projects/{{params.key}}/webhooks/{{id}}",
+      "body": "{{form}}"
+    },
+    "remove": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/projects/{{params.key}}/webhooks/{{id}}"
+    },
+    "rotate": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{params.key}}/webhooks/{{id}}/secret"
+    },
+    "ping": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{params.key}}/webhooks/{{id}}/ping"
+    },
+    "deliveries": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/webhooks/{{params.id}}/deliveries"
+    },
+    "again": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{params.key}}/webhooks/{{params.id}}/deliveries/{{delivery}}/again"
+    }
+  }
+}

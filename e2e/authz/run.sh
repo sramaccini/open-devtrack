@@ -81,7 +81,7 @@ up() {
   DB_URL="jdbc:postgresql://localhost:$DB_PORT/opendevtrack" DB_USER=opendevtrack DB_PASSWORD="$DB_PASSWORD" \
   REDIS_PORT="$REDIS_PORT" IAM_CLIENT_SECRET="$BFF_CLIENT_SECRET" ODT_BEARER_CLIENTS=opendevtrack-tools,opendevtrack-ci \
   IAM_ISSUER_URI="http://localhost:$KEYCLOAK_PORT/realms/opendevtrack" FRONTEND_URL="$front" PORT="$APP_PORT" \
-  SPRING_MAIL_HOST=localhost SPRING_MAIL_PORT="$SMTP_PORT" ODT_MAIL_OUTBOX_DELAY=PT5S \
+  SPRING_MAIL_HOST=localhost SPRING_MAIL_PORT="$SMTP_PORT" ODT_MAIL_OUTBOX_DELAY=PT5S ODT_WEBHOOKS_ALLOW_PRIVATE=true \
     nohup "${JAVA_HOME:?set JAVA_HOME to a JDK 25}/bin/java" ${E2E_JAVA_OPTS:-} -jar "$jar" \
       --spring.profiles.active=dev > "$work/backend.log" 2>&1 &
   echo $! > "$work/backend.pid"

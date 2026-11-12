@@ -75,7 +75,7 @@ class PreferenceController {
             options.add(Map.of("value", value, "label", texts.preference("email." + value, locale)));
         }
         List<Map<String, Object>> fields = new ArrayList<>();
-        for (MessageKind kind : MessageKind.values()) {
+        for (MessageKind kind : MessageKind.SETTABLE) {
             String label = texts.preference(kind.value(), locale);
             fields.add(Map.of("key", kind.key() + "App", "label", texts.preference("app", locale, label), "type", "switch"));
             fields.add(Map.of("key", kind.key() + "Email", "label", texts.preference("email", locale, label),
@@ -92,7 +92,7 @@ class PreferenceController {
         Map<String, Object> channels = request.channels() == null ? Map.of() : request.channels();
         Map<MessageKind, Preference> current = preferences.of(user.tenantId(), user.username());
         List<Preference> changed = new ArrayList<>();
-        for (MessageKind kind : MessageKind.values()) {
+        for (MessageKind kind : MessageKind.SETTABLE) {
             Object app = channels.get(kind.key() + "App");
             Object email = channels.get(kind.key() + "Email");
             if (app != null && !(app instanceof Boolean)) {

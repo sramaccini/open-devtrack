@@ -28,6 +28,11 @@ class MessageTexts {
     }
 
     Text of(MessageEntity m, Locale locale) {
+        if (m.kind() == MessageKind.WEBHOOK_OFF) {
+            Object[] args = {m.params().get("name"), m.params().get("project")};
+            return new Text(texts.getMessage("message.webhook_off.title", args, locale),
+                    texts.getMessage("message.webhook_off.text", args, locale));
+        }
         String to = status(m.params().get("to"), locale);
         String title = texts.getMessage("message." + m.kind().value() + ".title", new Object[] {m.actor(), m.issueKey(), to},
                 locale);
@@ -35,7 +40,7 @@ class MessageTexts {
             case MENTIONED, COMMENTED -> m.params().get("excerpt");
             case TRANSITIONED -> texts.getMessage("message.transitioned.text",
                     new Object[] {status(m.params().get("from"), locale), to}, locale);
-            case ASSIGNED, REVIEW_REQUESTED -> null;
+            case ASSIGNED, REVIEW_REQUESTED, WEBHOOK_OFF -> null;
         };
         return new Text(title, text);
     }

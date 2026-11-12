@@ -4,6 +4,9 @@
  */
 package com.logicwarez.opendevtrack.notification;
 
+import com.logicwarez.opendevtrack.access.ProjectAccess;
+import com.logicwarez.opendevtrack.access.ProjectMember;
+import com.logicwarez.opendevtrack.access.ProjectRole;
 import com.logicwarez.opendevtrack.collaboration.CommentEvents.CommentPosted;
 import com.logicwarez.opendevtrack.issue.IssueEvents.FieldChange;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
@@ -13,6 +16,7 @@ import com.logicwarez.opendevtrack.issue.Watchers;
 import com.logicwarez.opendevtrack.notification.Preferences.Preference;
 import com.logicwarez.opendevtrack.project.ProjectRef;
 import com.logicwarez.opendevtrack.project.Projects;
+import com.logicwarez.opendevtrack.shared.WebhookTurnedOff;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -36,8 +40,11 @@ class Messages {
     private final Projects projects;
     private final Preferences preferences;
     private final MailSettings mail;
+    private final ProjectAccess access;
 
-    Messages(MessageRepository messages, Watchers watchers, Projects projects, Preferences preferences, MailSettings mail) {
+    Messages(MessageRepository messages, Watchers watchers, Projects projects, Preferences preferences, MailSettings mail,
+             ProjectAccess access) {
+        this.access = access;
         this.messages = messages;
         this.watchers = watchers;
         this.projects = projects;
@@ -79,6 +86,23 @@ class Messages {
     @ApplicationModuleListener
     void on(IssueDeleted event) {
         messages.deleteByIssue(event.projectId(), event.key());
+    }
+
+    /**
+     * A webhook turned off (ADR-21, B11): a message to each admin of the project, in the application only and whatever
+     * their settings, since there is no issue for a mail to open.
+     */
+    @ApplicationModuleListener
+    void on(WebhookTurnedOff event) {
+        Optional<ProjectRef> project = projects.byId(event.projectId());
+        if (project.isEmpty()) {
+            return;
+        }
+        Map<String, String> params = Map.of("name", event.name(), "project", project.get().key());
+        messages.saveAll(access.members(event.projectId()).stream().filter(m -> m.role() == ProjectRole.ADMIN)
+                .map(ProjectMember::username)
+                .map(admin -> new MessageEntity(event.projectId(), admin, MessageKind.WEBHOOK_OFF, "", "", params, event.at()))
+                .toList());
     }
 
     /**

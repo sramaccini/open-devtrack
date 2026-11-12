@@ -95,6 +95,10 @@ class NotificationController {
 
     private MessageView view(MessageEntity m, ProjectRef project, Locale locale) {
         MessageTexts.Text text = texts.of(m, locale);
+        if (m.kind() == MessageKind.WEBHOOK_OFF) {
+            return new MessageView(m.id(), text.title(), text.text(), m.createdAt(), m.readAt() != null, "project-detail",
+                    Map.of("key", project.key()));
+        }
         return new MessageView(m.id(), text.title(), text.text(), m.createdAt(), m.readAt() != null, "issue-detail",
                 Map.of("key", project.key(), "issue", m.issueKey()));
     }

@@ -473,6 +473,19 @@
               }
             }
           ]
+        },
+        {
+          "id": "btn-webhooks",
+          "label": "{{ t('webhooks.title', 'Webhooks') }}",
+          "visibleIf": "{{form._perm.edit}}",
+          "onClick": [
+            {
+              "navigate": "webhook-list",
+              "params": {
+                "key": "{{form.key}}"
+              }
+            }
+          ]
         }
       ]
     },

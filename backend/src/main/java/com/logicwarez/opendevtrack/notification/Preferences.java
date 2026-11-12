@@ -57,7 +57,7 @@ class Preferences {
     /** The preferences of the user for every kind, the defaults where they have none. */
     Map<MessageKind, Preference> of(String tenantId, String username) {
         Map<MessageKind, Preference> all = new EnumMap<>(MessageKind.class);
-        for (MessageKind kind : MessageKind.values()) {
+        for (MessageKind kind : MessageKind.SETTABLE) {
             all.put(kind, Preference.defaults(kind));
         }
         for (Record r : sql.select(KIND, IN_APP, EMAIL).from(PREFERENCE)

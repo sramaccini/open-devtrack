@@ -17,7 +17,7 @@ What is missing in Quadrava or in authz-library is added there, with their own t
 
 ## Status
 
-Phases **F0–F4 done**: the back end, the `ui/` project and CI are in place, with projects, issues, workflow, comments, attachments, boards, backlog and sprints, search, dashboards and notifications. Next is **F5**. The decisions are ADRs in [docs/](docs/README.md); [HANDOFF.md](HANDOFF.md) has the details and the next steps. The first release, 1.0, is planned for 28 May 2027.
+Phases **F0–F4 done**: the back end, the `ui/` project and CI are in place, with projects, issues, workflow, comments, attachments, boards, backlog and sprints, search, dashboards and notifications. **F5** is under way: the public API and the webhooks are built. The decisions are ADRs in [docs/](docs/README.md); [HANDOFF.md](HANDOFF.md) has the details and the next steps. The first release, 1.0, is planned for 28 May 2027.
 
 | Phase | Content | State |
 | --- | --- | --- |
@@ -26,7 +26,7 @@ Phases **F0–F4 done**: the back end, the `ui/` project and CI are in place, wi
 | F2 | Projects, issues, workflow, comments and attachments | Done (gate M1); also mentions and in-app messages (ADR-13) |
 | F3 | Boards, backlog and sprints | Done (ADR-15) |
 | F4 | Search, dashboards, notifications | Done (gate M3: search load test) |
-| F5 | Public API and webhooks, hardening, 1.0 | Next (ADR-21 accepted) |
+| F5 | Public API and webhooks, hardening, 1.0 | Under way: public API and webhooks built (ADR-21) |
 
 ## Documentation
 
