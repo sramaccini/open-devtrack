@@ -26,6 +26,7 @@ The decisions D1–D9 of the project plan, all accepted by the maintainer on 31 
 | [18](adr-18-email-notifications.md) | Email, preferences and digests (E9) | Preferences per user and kind; an outbox sent by a job, instant or in a daily digest; plain text mails over SMTP, off without a mail host | Accepted |
 | [19](adr-19-due-date-and-reviewer.md) | Due date and reviewer of an issue (E8) | Two standard fields `due_on` and `reviewer`, in ODQL as `due` and `reviewer`; «Overdue» and «In review by me» on the dashboard; a message `review_requested` | Accepted |
 | [20](adr-20-editing-workflows-and-schemes.md) | Editing workflows, and workflows by issue type (ADR-10) | Statuses and transitions edited by the project admin, removing a status moves its issues; then several workflows per project mapped by issue type, a default for the rest | Accepted |
+| [21](adr-21-public-api-and-webhooks.md) | Public REST API and outgoing webhooks (E11) | The `/api` of the screens as the public API, OpenAPI 3.1 by springdoc kept as a contract in `docs/openapi.json`; Keycloak tokens and service accounts (authz-library A4); webhooks per project from an outbox, signed as Standard Webhooks | Proposed |
 
 ## Requests to the dependencies
 
@@ -49,9 +50,10 @@ Found while writing the ADRs; each is built in its own repository, optional for 
 | Q15 | Quadrava | An address that opens the settings dialog on a section (for example `/?settings=notification-settings`), so a mail can link to the notification settings (ADR-18; asked 7 November 2026; released in Quadrava 0.12.1, `?settings=<section>`, and adopted: the footer of the mails links to `/?settings=notification-settings`) | F4 |
 | A1 | authz-library | Extension point for permissions that depend on a resource (ADR-07; until then `_perm` on rows and forms) | F2 |
 | A2 | authz-library | A configurable schema for the RBAC tables (today they go into `public`, next to the `odt_*` schemas of the modules) | F1 |
-| A3 | authz-library | Problem titles and details in English (today Italian, for example «Troppi tentativi di accesso») | F5 |
-| A4 | authz-library | Bearer access for tools: a Keycloak access token resolved to the same permissions as a session, on chosen paths (today `platform/BearerTokenSecurity.java`, ADR-03) | F5 |
+| A3 | authz-library | Problem titles and details in English (today Italian, for example «Troppi tentativi di accesso»); released in authz-library 2.1.0, to adopt | F5 |
+| A4 | authz-library | Bearer access for tools: a Keycloak access token resolved to the same permissions as a session, on chosen paths (today `platform/BearerTokenSecurity.java`, ADR-03); for the public API (ADR-21) also service accounts, the tenant in a header (`X-Tenant`) and a rate limit per user or client (asked again 12 November 2026) | F5 |
 | A5 | authz-library | A read-only list of the users of the session's tenant, for pickers, behind a permission of the application (today `identity/TenantUsers.java` reads `RbacAdminService.tenantUsers` with an admin scope of its own, and, for the mails of ADR-18, with the scope of the system and no session) | F2 |
+| A6 | authz-library | Personal access tokens: created, listed and revoked by their user, stored hashed, shown once, accepted by the bearer access of A4 (ADR-21; asked 12 November 2026; not needed for 1.0) | F5 |
 
 ## Checks
 
