@@ -48,7 +48,7 @@ class CustomFields {
     }
 
     /** A row of {@code fieldsFrom}: the field as the form draws it. */
-    record Row(String key, String label, String type, List<Option> options, boolean required) {
+    record FieldRow(String key, String label, String type, List<Option> options, boolean required) {
     }
 
     /** The values given, checked; {@code errors} empty when they can be saved. */
@@ -63,9 +63,9 @@ class CustomFields {
      * The fields of the forms, without the archived ones; {@code issue} the issue as the conditions see it, or null for
      * a new issue, where only the fields always required ({@code true}) are marked.
      */
-    List<Row> rows(UUID projectId, Map<String, ?> issue, Map<String, ?> user, Set<String> permissions) {
+    List<FieldRow> rows(UUID projectId, Map<String, ?> issue, Map<String, ?> user, Set<String> permissions) {
         return all(projectId).stream().filter(d -> !d.archived())
-                .map(d -> new Row(d.key(), d.label(), d.type().value(), d.options(),
+                .map(d -> new FieldRow(d.key(), d.label(), d.type().value(), d.options(),
                         issue == null ? "true".equals(d.requiredIf()) : required(d, issue, user, permissions)))
                 .toList();
     }

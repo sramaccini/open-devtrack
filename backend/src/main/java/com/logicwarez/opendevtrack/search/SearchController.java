@@ -6,6 +6,7 @@ package com.logicwarez.opendevtrack.search;
 
 import com.logicwarez.opendevtrack.access.ProjectAccess;
 import com.logicwarez.opendevtrack.issue.Issues;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.project.ProjectRef;
@@ -65,8 +66,9 @@ class SearchController {
     }
 
     /** The request of the {@code serverDataTable} with the query; groups, rows or the values of a column. */
+    @ApiDoc(value = "Runs an ODQL query: a page of issues, or the groups asked", answer = Map.class)
     @PostMapping("/api/search")
-    ResponseEntity<?> search(@RequestBody Searches.Request request) {
+    ResponseEntity<?> search(@RequestBody Searches.SearchRequest request) {
         try {
             return ResponseEntity.ok(searches.run(request));
         } catch (OdqlException e) {
@@ -77,6 +79,7 @@ class SearchController {
     }
 
     /** Whether a query is right, for the field of the screen: the answer of a remote check of Quadrava. */
+    @ApiDoc(value = "Whether an ODQL query is right, and where it is wrong", answer = Map.class, internal = true)
     @GetMapping("/api/search/check")
     Map<String, Object> check(@RequestParam(name = "q", defaultValue = "") String query) {
         // The answer of a remote check of Quadrava: the field shows validation.odql with the position and the reason.
@@ -89,6 +92,8 @@ class SearchController {
         }
     }
 
+    @ApiDoc(value = "The words that may follow in an ODQL query",
+            answer = Words.Word.class, list = true, internal = true)
     @GetMapping("/api/search/words")
     List<Words.Word> words(@RequestParam(name = "q", defaultValue = "") String query,
                            @RequestParam(defaultValue = "") String word) {
@@ -96,6 +101,7 @@ class SearchController {
     }
 
     /** Rebuilds the index of every issue of the tenant: for its admin, after a restore or a fault. */
+    @ApiDoc(value = "Rebuilds the search index of the tenant: its admin, after a restore", answer = Map.class)
     @PostMapping("/api/search/reindex")
     @Transactional(readOnly = false)
     ResponseEntity<?> reindex() {
@@ -120,6 +126,7 @@ class SearchController {
      * Open issues assigned to and reported by the user, open critical bugs, issues resolved since Monday; the user's
      * open issues past their due date and the issues in progress they review (ADR-19).
      */
+    @ApiDoc(value = "The counts of the personal dashboard", answer = Map.class, internal = true)
     @GetMapping("/api/me/summary")
     Map<String, Object> mine() {
         List<ProjectRef> visible = searches.visible();
@@ -138,6 +145,8 @@ class SearchController {
      * The filters of the user marked for the dashboard, with how many issues each finds now (null when its query no
      * longer compiles, for example after a sprint was renamed).
      */
+    @ApiDoc(value = "The filters of the personal dashboard, with what each finds",
+            answer = Map.class, list = true, internal = true)
     @GetMapping("/api/me/filters")
     List<Map<String, Object>> dashboardFilters() {
         List<ProjectRef> visible = searches.visible();
@@ -163,11 +172,13 @@ class SearchController {
     record FilterRequest(String name, String query, Boolean shared, Boolean onDashboard, Long version) {
     }
 
+    @ApiDoc(value = "The filters of the user and those shared in the tenant", answer = Map.class, list = true)
     @GetMapping("/api/filters")
     List<Map<String, Object>> filters() {
         return filters.visible(user.tenantId(), user.username()).stream().map(this::view).toList();
     }
 
+    @ApiDoc(value = "Saves a filter", answer = Map.class, status = 201)
     @PostMapping("/api/filters")
     @Transactional
     ResponseEntity<?> create(@RequestBody FilterRequest request) {
@@ -181,6 +192,7 @@ class SearchController {
         return ResponseEntity.status(HttpStatus.CREATED).body(view(filters.saveAndFlush(filter)));
     }
 
+    @ApiDoc(value = "Changes a filter: its owner", answer = Map.class)
     @PutMapping("/api/filters/{id}")
     @Transactional
     ResponseEntity<?> edit(@PathVariable UUID id, @RequestBody FilterRequest request) {
@@ -205,6 +217,7 @@ class SearchController {
         }
     }
 
+    @ApiDoc(value = "Removes a filter: its owner", status = 204)
     @DeleteMapping("/api/filters/{id}")
     @Transactional
     ResponseEntity<?> delete(@PathVariable UUID id) {

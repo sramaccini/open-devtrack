@@ -87,6 +87,17 @@ spring:
             issuer-uri: ${IAM_ISSUER_URI:http://localhost:8180/realms/opendevtrack}
             user-name-attribute: preferred_username
 
+springdoc:
+  # The OpenAPI definition of /api at /v3/api-docs (ADR-21), kept in docs/openapi.json; the instance serves no Swagger UI
+  api-docs:
+    version: openapi_3_1
+  paths-to-match: /api/**
+  # The RBAC administration of authz-library has its own definition, in that library
+  paths-to-exclude: /api/v1/admin/**
+  writer-with-order-by-keys: true
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+
 authz:
   rbac:
     flyway:
@@ -101,12 +112,16 @@ authz:
         - ${FRONTEND_URL:http://localhost:8090}
     session:
       absolute-timeout: 10h
+    # Tools and integrations without a session (the Quadrava CLI, scripts, service accounts) send a Keycloak access
+    # token, resolved to the permissions of a session of its user on the tenant of X-Tenant (ADR-03, ADR-21; A4).
+    # Limited to 600 requests a minute per user, counted on Redis.
+    bearer:
+      enabled: true
+      paths: /api/**,/registry/**,/v3/api-docs
+      # The clients (azp) whose tokens are accepted: the tools client and the service accounts of the installation
+      allowed-clients: ${ODT_BEARER_CLIENTS:opendevtrack-tools}
 
 odt:
-  security:
-    bearer:
-      # Clients whose access tokens may call /registry/** (BearerTokenSecurity, temporary until request A4)
-      clients: opendevtrack-tools
   attachments:
     # Where the bytes of the attachments are kept (ADR-14): database (default), filesystem or s3. Changing it on an
     # installation that has attachments is a migration: the back end does not start.

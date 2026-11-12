@@ -7,6 +7,7 @@ package com.logicwarez.opendevtrack.issue;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
 import com.logicwarez.opendevtrack.issue.FieldDefinitionEntity.Option;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.project.ProjectRef;
@@ -79,6 +80,8 @@ class FieldController {
     }
 
     /** The rows of {@code fieldsFrom} for a new issue of the project. */
+    @ApiDoc(value = "The custom fields of a project, as the fields of a form",
+            answer = CustomFields.FieldRow.class, list = true, project = "odt.issue.browse", internal = true)
     @GetMapping("/api/projects/{key}/fields")
     ResponseEntity<?> rows(@PathVariable String key) {
         Optional<ProjectRef> project = projects.find(key);
@@ -91,6 +94,8 @@ class FieldController {
         return ResponseEntity.ok(customFields.rows(project.get().id(), null, Map.of(), Set.of()));
     }
 
+    @ApiDoc(value = "The custom fields of a project",
+            answer = DefinitionView.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/projects/{key}/field-definitions")
     ResponseEntity<?> list(@PathVariable String key) {
         Optional<ProjectRef> project = projects.find(key);
@@ -106,6 +111,7 @@ class FieldController {
                 .map(d -> view(d, edit)).toList());
     }
 
+    @ApiDoc(value = "Adds a custom field", answer = DefinitionView.class, status = 201, project = "odt.project.edit")
     @PostMapping("/api/projects/{key}/field-definitions")
     @Transactional
     ResponseEntity<?> create(@PathVariable String key, @RequestBody DefinitionRequest request) {
@@ -142,6 +148,7 @@ class FieldController {
     }
 
     /** Label, options, {@code required_if} and archived, from the version read, or 412 if it changed meanwhile. */
+    @ApiDoc(value = "Changes a custom field", answer = DefinitionView.class, project = "odt.project.edit")
     @PutMapping("/api/projects/{key}/field-definitions/{fieldKey}")
     @Transactional
     ResponseEntity<?> edit(@PathVariable String key, @PathVariable String fieldKey,

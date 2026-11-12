@@ -10,6 +10,7 @@ import com.logicwarez.opendevtrack.collaboration.AttachmentEvents.AttachmentAdde
 import com.logicwarez.opendevtrack.collaboration.AttachmentEvents.AttachmentRemoved;
 import com.logicwarez.opendevtrack.issue.IssueRef;
 import com.logicwarez.opendevtrack.issue.Issues;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import java.io.IOException;
@@ -84,6 +85,8 @@ class AttachmentController {
                           Instant uploadedAt, @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
+    @ApiDoc(value = "The attachments of an issue",
+            answer = AttachmentView.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/issues/{issueKey}/attachments")
     ResponseEntity<?> list(@PathVariable String issueKey) {
         Optional<IssueRef> issue = issues.find(issueKey);
@@ -98,6 +101,8 @@ class AttachmentController {
                 .map(a -> view(a, permissions)).toList());
     }
 
+    @ApiDoc(value = "Attaches a file to an issue (multipart, part file)",
+            answer = AttachmentView.class, status = 201, project = "odt.issue.attach")
     @PostMapping(path = "/api/issues/{issueKey}/attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
     ResponseEntity<?> add(@PathVariable String issueKey, @RequestParam("file") MultipartFile file) throws IOException {
@@ -127,6 +132,7 @@ class AttachmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(view(attachment, permissions));
     }
 
+    @ApiDoc(value = "The content of an attachment, with its media type", project = "odt.issue.browse")
     @GetMapping("/api/issues/{issueKey}/attachments/{id}/content")
     ResponseEntity<?> content(@PathVariable String issueKey, @PathVariable UUID id) throws IOException {
         Optional<Found> found = find(issueKey, id);
@@ -151,6 +157,8 @@ class AttachmentController {
                 .body(new InputStreamResource(content));
     }
 
+    @ApiDoc(value = "Removes an attachment: whoever attached it, or an admin of the project",
+            status = 204, project = {"odt.issue.attach", "odt.issue.delete"})
     @DeleteMapping("/api/issues/{issueKey}/attachments/{id}")
     @Transactional
     ResponseEntity<?> delete(@PathVariable String issueKey, @PathVariable UUID id) {

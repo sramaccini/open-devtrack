@@ -9,6 +9,7 @@ import com.logicwarez.opendevtrack.access.ProjectAccess.Change;
 import com.logicwarez.opendevtrack.access.ProjectMember;
 import com.logicwarez.opendevtrack.access.ProjectRole;
 import com.logicwarez.opendevtrack.identity.TenantUsers;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.project.ProjectApi.CreateProject;
@@ -71,6 +72,7 @@ class ProjectController {
         this.events = events;
     }
 
+    @ApiDoc(value = "The projects of the tenant the user sees", answer = ProjectView.class, list = true)
     @GetMapping("/api/projects")
     List<ProjectView> list() {
         List<ProjectEntity> all = projects.findByTenantIdOrderByKey(user.tenantId());
@@ -78,12 +80,14 @@ class ProjectController {
         return all.stream().map(p -> view(p, Optional.ofNullable(roles.get(p.id())))).toList();
     }
 
+    @ApiDoc(value = "A project", answer = ProjectView.class)
     @GetMapping("/api/projects/{key}")
     ResponseEntity<?> get(@PathVariable String key) {
         return find(key).<ResponseEntity<?>>map(p -> ResponseEntity.ok(view(p, access.role(p.id(), user.username()))))
                 .orElseGet(() -> Problems.notFound(NOT_FOUND));
     }
 
+    @ApiDoc(value = "Creates a project; its author becomes its admin", answer = ProjectView.class, status = 201)
     @PostMapping("/api/projects")
     @PreAuthorize("hasAuthority('odt.project.create')")
     @Transactional
@@ -107,6 +111,7 @@ class ProjectController {
     }
 
     /** Name, description and lead; the version read with the project, or 412 if someone saved in the meantime. */
+    @ApiDoc(value = "Changes a project", answer = ProjectView.class, project = "odt.project.edit")
     @PutMapping("/api/projects/{key}")
     @Transactional
     ResponseEntity<?> edit(@PathVariable String key, @RequestBody EditProject request) {
@@ -139,6 +144,7 @@ class ProjectController {
     }
 
     /** Members of the project; {@code q} keeps those whose name contains it (the pickers of assignees). */
+    @ApiDoc(value = "The members of a project and their roles", answer = MemberView.class, list = true)
     @GetMapping("/api/projects/{key}/members")
     ResponseEntity<?> members(@PathVariable String key, @RequestParam(required = false) String q) {
         String text = q == null ? "" : q.strip().toLowerCase(Locale.ROOT);
@@ -151,18 +157,22 @@ class ProjectController {
     }
 
     /** Adds a member, or changes the role of one: only users of the tenant. */
+    @ApiDoc(value = "Adds a member to a project, or changes the role of one",
+            answer = MemberView.class, project = "odt.member.manage")
     @PostMapping("/api/projects/{key}/members")
     @Transactional
     ResponseEntity<?> addMember(@PathVariable String key, @RequestBody MemberRequest request) {
         return setRole(key, request.username(), request.role());
     }
 
+    @ApiDoc(value = "Changes the role of a member", answer = MemberView.class, project = "odt.member.manage")
     @PutMapping("/api/projects/{key}/members/{username}")
     @Transactional
     ResponseEntity<?> changeRole(@PathVariable String key, @PathVariable String username, @RequestBody MemberRequest request) {
         return setRole(key, username, request.role());
     }
 
+    @ApiDoc(value = "Removes a member from a project", status = 204, project = "odt.member.manage")
     @DeleteMapping("/api/projects/{key}/members/{username}")
     @Transactional
     ResponseEntity<?> removeMember(@PathVariable String key, @PathVariable String username) {

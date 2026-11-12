@@ -10,6 +10,7 @@ import com.logicwarez.opendevtrack.issue.IssueEvents.FieldChange;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
 import com.logicwarez.opendevtrack.issue.Issues.Found;
 import com.logicwarez.opendevtrack.issue.LinkType.Relation;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.project.ProjectRef;
@@ -89,6 +90,7 @@ class LinkController {
     record Candidate(String key, String label) {
     }
 
+    @ApiDoc(value = "The links of an issue", answer = LinkView.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/issues/{issueKey}/links")
     ResponseEntity<?> list(@PathVariable String issueKey) {
         Optional<Found> found = finder.findEntity(issueKey);
@@ -117,6 +119,8 @@ class LinkController {
     }
 
     /** Issues of the same project to link to, by key or number ({@code 3}, {@code ODT-3}) or by text of the summary. */
+    @ApiDoc(value = "The issues an issue may be linked to, matching q",
+            answer = Candidate.class, list = true, project = "odt.issue.browse", internal = true)
     @GetMapping("/api/issues/{issueKey}/links/candidates")
     ResponseEntity<?> candidates(@PathVariable String issueKey, @RequestParam(required = false) String q) {
         Optional<Found> found = finder.findEntity(issueKey);
@@ -135,6 +139,7 @@ class LinkController {
                 .stream().map(i -> new Candidate(key(project, i), key(project, i) + " " + i.summary())).toList());
     }
 
+    @ApiDoc(value = "Links two issues", answer = LinkView.class, status = 201, project = "odt.issue.edit")
     @PostMapping("/api/issues/{issueKey}/links")
     @Transactional
     ResponseEntity<?> add(@PathVariable String issueKey, @RequestBody LinkRequest request) {
@@ -182,6 +187,7 @@ class LinkController {
                 other.summary(), other.status(), Map.of("delete", true)));
     }
 
+    @ApiDoc(value = "Removes a link", status = 204, project = "odt.issue.edit")
     @DeleteMapping("/api/issues/{issueKey}/links/{id}")
     @Transactional
     ResponseEntity<?> remove(@PathVariable String issueKey, @PathVariable UUID id) {

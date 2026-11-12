@@ -64,7 +64,7 @@ class RegistryApiTest {
     JdbcTemplate jdbc;
 
     /** The token is the user name: what is under test is what the registry does with the user, not the signature. */
-    @MockitoBean
+    @MockitoBean(name = "authzBearerJwtDecoder")
     JwtDecoder toolTokens;
 
     MockMvc mvc;

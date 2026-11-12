@@ -7,6 +7,7 @@ package com.logicwarez.opendevtrack.issue;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
 import com.logicwarez.opendevtrack.issue.Issues.Found;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import java.time.Instant;
@@ -56,6 +57,7 @@ class WatcherController {
     record WatchRequest(String username) {
     }
 
+    @ApiDoc(value = "The watchers of an issue", answer = WatcherView.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/issues/{issueKey}/watchers")
     ResponseEntity<?> list(@PathVariable String issueKey) {
         Optional<Found> found = finder.findEntity(issueKey);
@@ -72,6 +74,8 @@ class WatcherController {
                 .toList());
     }
 
+    @ApiDoc(value = "Watches an issue: the user, or another member for whoever edits the issue",
+            status = 204, project = {"odt.issue.browse", "odt.issue.edit"})
     @PostMapping("/api/issues/{issueKey}/watchers")
     @Transactional
     ResponseEntity<?> watch(@PathVariable String issueKey, @RequestBody(required = false) WatchRequest request) {
@@ -96,6 +100,8 @@ class WatcherController {
         return ResponseEntity.noContent().build();
     }
 
+    @ApiDoc(value = "Stops watching an issue: the user, or another member for whoever edits the issue",
+            status = 204, project = {"odt.issue.browse", "odt.issue.edit"})
     @DeleteMapping("/api/issues/{issueKey}/watchers/{username}")
     @Transactional
     ResponseEntity<?> unwatch(@PathVariable String issueKey, @PathVariable String username) {

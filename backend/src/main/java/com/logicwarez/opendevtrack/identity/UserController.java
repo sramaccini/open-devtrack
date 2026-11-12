@@ -4,6 +4,7 @@
  */
 package com.logicwarez.opendevtrack.identity;
 
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,7 @@ class UserController {
         this.users = users;
     }
 
+    @ApiDoc(value = "The users of the tenant", answer = TenantUser.class, list = true)
     @GetMapping("/api/users")
     @PreAuthorize("hasAuthority('odt.user.browse')")
     List<TenantUser> search(@RequestParam(name = "q", defaultValue = "") String text,

@@ -15,6 +15,7 @@ import com.logicwarez.opendevtrack.agile.Cards.Planned;
 import com.logicwarez.opendevtrack.agile.Scopes.Scope;
 import com.logicwarez.opendevtrack.issue.IssueRef;
 import com.logicwarez.opendevtrack.issue.Issues;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.project.Projects;
 import com.logicwarez.opendevtrack.shared.IssueQueries;
@@ -91,6 +92,8 @@ class BoardController {
     }
 
     /** The boards of the projects the user is a member of, by project. */
+    @ApiDoc(value = "The boards of the projects the user sees",
+            answer = BoardRow.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/boards")
     List<BoardRow> mine() {
         Map<UUID, Scope> visible = projects.all().stream().map(scopes::scope).filter(s -> s.can(Scopes.BROWSE))
@@ -102,6 +105,7 @@ class BoardController {
                 .map(b -> row(visible.get(b.projectId()), b)).toList();
     }
 
+    @ApiDoc(value = "The boards of a project", answer = BoardRow.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/projects/{key}/boards")
     ResponseEntity<?> list(@PathVariable String key) {
         Optional<Scope> scope = scopes.of(key);
@@ -115,6 +119,7 @@ class BoardController {
                 .map(b -> row(scope.get(), b)).toList());
     }
 
+    @ApiDoc(value = "Creates a board", answer = BoardRow.class, status = 201, project = "odt.project.edit")
     @PostMapping("/api/projects/{key}/boards")
     @Transactional
     ResponseEntity<?> create(@PathVariable String key, @RequestBody BoardRequest request) {
@@ -137,6 +142,7 @@ class BoardController {
         return ResponseEntity.status(HttpStatus.CREATED).body(row(scope.get(), board));
     }
 
+    @ApiDoc(value = "Changes a board", answer = BoardRow.class, project = "odt.project.edit")
     @PutMapping("/api/boards/{id}")
     @Transactional
     ResponseEntity<?> edit(@PathVariable UUID id, @RequestBody BoardRequest request) {
@@ -165,6 +171,7 @@ class BoardController {
         return ResponseEntity.ok(row(scope, board));
     }
 
+    @ApiDoc(value = "Removes a board", status = 204, project = "odt.project.edit")
     @DeleteMapping("/api/boards/{id}")
     @Transactional
     ResponseEntity<?> delete(@PathVariable UUID id) {
@@ -182,6 +189,8 @@ class BoardController {
         return ResponseEntity.noContent().build();
     }
 
+    @ApiDoc(value = "A board, with its sprint for a Scrum board",
+            answer = BoardView.class, project = "odt.issue.browse")
     @GetMapping("/api/boards/{id}")
     ResponseEntity<?> get(@PathVariable UUID id) {
         Optional<Found> found = visible(id);
@@ -198,6 +207,7 @@ class BoardController {
     }
 
     /** The columns, for {@code columnsFrom}: value (the position), header, limit. */
+    @ApiDoc(value = "The columns of a board", answer = ColumnRow.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/boards/{id}/columns")
     ResponseEntity<?> columns(@PathVariable UUID id) {
         Optional<Found> found = visible(id);
@@ -219,6 +229,8 @@ class BoardController {
      * (the lanes of the kanban follow them), those of nobody last. With a filter, only the issues it finds; a filter
      * that is no longer right (409) says where.
      */
+    @ApiDoc(value = "The cards of a board, in their order",
+            answer = CardRow.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/boards/{id}/cards")
     ResponseEntity<?> cards(@PathVariable UUID id) {
         Optional<Found> found = visible(id);
@@ -263,6 +275,8 @@ class BoardController {
      * A card dropped on a column, between two cards: to another column it runs a transition (409 when none can run now,
      * and the card goes back), then it takes its place in the order of the project.
      */
+    @ApiDoc(value = "Moves a card: to another column (a transition) or between two others (the order)",
+            answer = Map.class, project = {"odt.issue.transition", "odt.issue.edit"})
     @PostMapping("/api/boards/{id}/cards/{issueKey}/move")
     @Transactional
     ResponseEntity<?> move(@PathVariable UUID id, @PathVariable String issueKey, @RequestBody MoveRequest request) {

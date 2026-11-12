@@ -43,6 +43,7 @@ services:
       # Replaced in the placeholders of realm-opendevtrack.json
       BFF_CLIENT_SECRET: ${BFF_CLIENT_SECRET:?run stack.sh}
       DEV_USER_PASSWORD: ${DEV_USER_PASSWORD:?run stack.sh}
+      CI_CLIENT_SECRET: ${CI_CLIENT_SECRET:?run stack.sh}
       FRONT_URL: http://localhost:${FRONT_PORT:-18090}
     volumes:
       - ../e2e/authz/realm-opendevtrack.json:/opt/keycloak/data/import/realm-opendevtrack.json:ro
@@ -80,6 +81,7 @@ services:
       REDIS_HOST: redis
       IAM_ISSUER_URI: http://localhost:${KEYCLOAK_PORT:-18180}/realms/opendevtrack
       IAM_CLIENT_SECRET: ${BFF_CLIENT_SECRET}
+      ODT_BEARER_CLIENTS: opendevtrack-tools,opendevtrack-ci
       FRONTEND_URL: http://localhost:${FRONT_PORT:-18090}
       SPRING_MAIL_HOST: mailpit
       SPRING_MAIL_PORT: "1025"

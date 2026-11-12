@@ -30,7 +30,7 @@
     {
       "clientId": "opendevtrack-tools",
       "name": "OpenDevTrack tools (registry)",
-      "description": "Command-line tools that call /registry/** with a bearer token: the Quadrava CLI, the conformance kit",
+      "description": "Command-line tools and people that call /registry/** or /api with a bearer token: the Quadrava CLI, the conformance kit, scripts",
       "enabled": true,
       "protocol": "openid-connect",
       "publicClient": true,
@@ -38,6 +38,20 @@
       "implicitFlowEnabled": false,
       "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": false
+    },
+    {
+      "clientId": "opendevtrack-ci",
+      "name": "OpenDevTrack CI (service account)",
+      "description": "A machine that calls /api with the token of its service account (ADR-21): user service-account-opendevtrack-ci",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${CI_CLIENT_SECRET}",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true
     }
   ],
   "users": [

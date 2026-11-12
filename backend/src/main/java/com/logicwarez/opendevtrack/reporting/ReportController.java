@@ -5,10 +5,12 @@
 package com.logicwarez.opendevtrack.reporting;
 
 import com.logicwarez.opendevtrack.access.ProjectAccess;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.project.ProjectRef;
 import com.logicwarez.opendevtrack.project.Projects;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -41,16 +43,21 @@ class ReportController {
         this.user = user;
     }
 
+    @ApiDoc(value = "The indicators of a project", answer = Map.class, project = "odt.issue.browse")
     @GetMapping("/api/projects/{key}/reports/summary")
     ResponseEntity<?> summary(@PathVariable String key) {
         return of(key, p -> reports.summary(p.id()));
     }
 
+    @ApiDoc(value = "The sprints of a project that match q, for the choice of the burndown",
+            answer = Map.class, list = true, project = "odt.issue.browse", internal = true)
     @GetMapping("/api/projects/{key}/reports/sprints")
     ResponseEntity<?> sprints(@PathVariable String key, @RequestParam(required = false) String q) {
         return of(key, p -> reports.sprints(p.id(), q));
     }
 
+    @ApiDoc(value = "The burndown of a sprint, by day (the active one, else the last, without sprint)",
+            answer = Map.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/projects/{key}/reports/burndown")
     ResponseEntity<?> burndown(@PathVariable String key, @RequestParam(required = false) String sprint) {
         UUID sprintId;
@@ -62,16 +69,22 @@ class ReportController {
         return of(key, p -> reports.burndown(p.id(), sprintId));
     }
 
+    @ApiDoc(value = "The points committed and done in the last sprints",
+            answer = Map.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/projects/{key}/reports/velocity")
     ResponseEntity<?> velocity(@PathVariable String key) {
         return of(key, p -> reports.velocity(p.id()));
     }
 
+    @ApiDoc(value = "The issues of each status category, by day",
+            answer = Map.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/projects/{key}/reports/flow")
     ResponseEntity<?> flow(@PathVariable String key) {
         return of(key, p -> reports.flow(p.id()));
     }
 
+    @ApiDoc(value = "The issues created and resolved, by day",
+            answer = Map.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/projects/{key}/reports/created-resolved")
     ResponseEntity<?> createdResolved(@PathVariable String key) {
         return of(key, p -> reports.createdResolved(p.id()));

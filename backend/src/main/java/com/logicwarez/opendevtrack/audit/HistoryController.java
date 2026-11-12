@@ -7,6 +7,7 @@ package com.logicwarez.opendevtrack.audit;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
 import com.logicwarez.opendevtrack.issue.IssueRef;
 import com.logicwarez.opendevtrack.issue.Issues;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import java.time.Instant;
@@ -43,6 +44,8 @@ class HistoryController {
     }
 
     /** Newest first: one row per field changed, and one {@code created} row with the key. */
+    @ApiDoc(value = "The changes of an issue, newest first",
+            answer = Change.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/issues/{issueKey}/history")
     ResponseEntity<?> history(@PathVariable String issueKey) {
         Optional<IssueRef> issue = issues.find(issueKey);

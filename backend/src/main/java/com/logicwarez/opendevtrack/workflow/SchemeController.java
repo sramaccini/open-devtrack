@@ -6,6 +6,7 @@ package com.logicwarez.opendevtrack.workflow;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.project.ProjectRef;
@@ -82,6 +83,8 @@ class SchemeController {
     record WorkflowRequest(String name, List<String> types, Long version) {
     }
 
+    @ApiDoc(value = "The workflows of a project, the default first",
+            answer = WorkflowView.class, list = true, project = "odt.issue.browse")
     @GetMapping(WORKFLOWS)
     ResponseEntity<?> list(@PathVariable String key) {
         Optional<ProjectRef> project = projects.find(key);
@@ -93,6 +96,7 @@ class SchemeController {
                 .map(w -> view(w, edit)).toList());
     }
 
+    @ApiDoc(value = "A workflow of a project", answer = WorkflowView.class, project = "odt.issue.browse")
     @GetMapping(WORKFLOWS + "/{workflow}")
     ResponseEntity<?> get(@PathVariable String key, @PathVariable UUID workflow) {
         Optional<ProjectRef> project = projects.find(key);
@@ -105,6 +109,8 @@ class SchemeController {
     }
 
     /** A copy of the default workflow, with its statuses and transitions, under a new name; it serves no type yet. */
+    @ApiDoc(value = "Adds a workflow, a copy of the default",
+            answer = WorkflowView.class, status = 201, project = "odt.project.edit")
     @PostMapping(WORKFLOWS)
     @Transactional
     ResponseEntity<?> add(@PathVariable String key, @RequestBody WorkflowRequest request) {
@@ -144,6 +150,8 @@ class SchemeController {
      * Renames the workflow and maps types to it: a type taken from another workflow, or given back to the default, has
      * its issues moved where their status is missing (ADR-20, B.5).
      */
+    @ApiDoc(value = "Renames a workflow and sets the issue types it serves",
+            answer = WorkflowView.class, project = "odt.project.edit")
     @PutMapping(WORKFLOWS + "/{workflow}")
     @Transactional
     ResponseEntity<?> change(@PathVariable String key, @PathVariable UUID workflow, @RequestBody WorkflowRequest request) {
@@ -189,6 +197,7 @@ class SchemeController {
     }
 
     /** Removes a workflow that is not the default and serves no type, with its statuses and transitions. */
+    @ApiDoc(value = "Removes a workflow that serves no issue type", status = 204, project = "odt.project.edit")
     @DeleteMapping(WORKFLOWS + "/{workflow}")
     @Transactional
     ResponseEntity<?> remove(@PathVariable String key, @PathVariable UUID workflow,

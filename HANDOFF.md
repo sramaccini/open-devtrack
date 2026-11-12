@@ -16,7 +16,7 @@ Quadrava and authz-library, and the ADRs say where.
 - Module `uiregistry` (ADR-03): `contracts/registry.yaml` 0.7.0, adapted from the Quadrava reference registry
   (commit 9fa1916, contract 0.6.0), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.13.1 in the classpath.
   The browser uses the session; tools use Keycloak access tokens of `opendevtrack-tools` on `/registry/**`
-  (`platform/BearerTokenSecurity.java`, temporary until A4).
+  (the bearer access of authz-library, A4).
 - `ui/`: the Quadrava project, with the main navigation, home and projects placeholder screens, themes `odt-light` and
   `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.13.1 checks it (`quadrava validate`) and publishes it
   (`quadrava publish`) to any environment: no environment is protected (ADR-12).
@@ -120,6 +120,7 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
 
 ## Next steps
 
-1. F5: ADR-21 (public API and webhooks) accepted, being built on authz-library 2.2.0 (A4, bearer access with
-   service accounts and the tenant header).
+1. F5: ADR-21 (public API and webhooks). Part A built: `/api` with Keycloak tokens and service accounts (the bearer
+   access of authz-library 2.2.0, A4), the OpenAPI definition `docs/openapi.json` and `docs/api.md`. Part B, the
+   webhooks (module `integration`), being built.
 2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

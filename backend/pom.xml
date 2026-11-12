@@ -30,6 +30,7 @@
         <spring-modulith.version>2.1.2</spring-modulith.version>
         <aws-sdk.version>2.46.7</aws-sdk.version>
         <json-schema-validator.version>1.5.9</json-schema-validator.version>
+        <springdoc.version>3.1.1</springdoc.version>
         <!-- The load test of the search (ADR-16) is left out of the build; it runs on request:
              mvn test -Dgroups=load -DexcludedGroups=none -->
         <excludedGroups>load</excludedGroups>
@@ -81,6 +82,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <!-- The OpenAPI definition of /api (ADR-21), kept in docs/openapi.json -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+            <version>${springdoc.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.modulith</groupId>

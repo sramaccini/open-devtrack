@@ -51,6 +51,8 @@ credentials() {
       echo "DEV_USER_PASSWORD=$(secret)"
     } > "$work/.env"
   fi
+  # The secret of the service account client opendevtrack-ci (ADR-21), also in an .env written before it existed
+  grep -q '^CI_CLIENT_SECRET=' "$work/.env" || echo "CI_CLIENT_SECRET=$(secret)" >> "$work/.env"
   set -a; . "$work/.env"; set +a
 }
 
@@ -192,6 +194,7 @@ seed() {
 info() {
   log "OpenDevTrack: $front"
   echo "users mario.rossi and anna.bianchi, password: $DEV_USER_PASSWORD"
+  echo "API:      http://localhost:$APP_PORT/api (docs/api.md); service account opendevtrack-ci, secret CI_CLIENT_SECRET in stack/.work/.env"
   echo "mails:    http://localhost:$MAILPIT_PORT"
   echo "Keycloak: http://localhost:$KEYCLOAK_PORT (admin, password KEYCLOAK_ADMIN_PASSWORD in stack/.work/.env)"
 }

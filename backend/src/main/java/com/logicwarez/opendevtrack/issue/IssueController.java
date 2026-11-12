@@ -16,6 +16,7 @@ import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueCreated;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueDeleted;
 import com.logicwarez.opendevtrack.issue.Issues.Found;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.platform.Problems.FieldError;
@@ -110,6 +111,8 @@ class IssueController {
     }
 
     /** Issues of the project, newest first; {@code assignee=me} for those of the user. */
+    @ApiDoc(value = "The issues of a project, newest first (at most 500; the search pages them)",
+            answer = IssueRow.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/projects/{key}/issues")
     ResponseEntity<?> list(@PathVariable String key, @RequestParam(required = false) String status,
                            @RequestParam(required = false) String assignee, @RequestParam(required = false) String q) {
@@ -137,6 +140,8 @@ class IssueController {
      * The labels already used in the issues of the project that start with {@code q} (all without it), in alphabetical
      * order, at most 20: the suggestions of the labels field.
      */
+    @ApiDoc(value = "The labels used in a project that start with q",
+            answer = LabelRow.class, list = true, project = "odt.issue.browse", internal = true)
     @GetMapping("/api/projects/{key}/labels")
     ResponseEntity<?> labels(@PathVariable String key, @RequestParam(required = false) String q) {
         Optional<ProjectRef> project = projects.find(key);
@@ -150,6 +155,7 @@ class IssueController {
         return ResponseEntity.ok(issues.labels(project.get().id(), prefix, MAX_SUGGESTED).stream().map(LabelRow::new).toList());
     }
 
+    @ApiDoc(value = "Creates an issue", answer = IssueView.class, status = 201, project = "odt.issue.create")
     @PostMapping("/api/projects/{key}/issues")
     @Transactional
     ResponseEntity<?> create(@PathVariable String key, @RequestBody IssueRequest request) {
@@ -185,6 +191,7 @@ class IssueController {
         return ResponseEntity.status(HttpStatus.CREATED).body(view(project.get(), issue, permissions));
     }
 
+    @ApiDoc(value = "An issue", answer = IssueView.class, project = "odt.issue.browse")
     @GetMapping("/api/issues/{issueKey}")
     ResponseEntity<?> get(@PathVariable String issueKey) {
         Optional<Found> found = find(issueKey);
@@ -199,6 +206,7 @@ class IssueController {
     }
 
     /** Changes the fields, from the version read with the issue, or 412 if someone saved it in the meantime. */
+    @ApiDoc(value = "Changes the fields of an issue", answer = IssueView.class, project = "odt.issue.edit")
     @PutMapping("/api/issues/{issueKey}")
     @Transactional
     ResponseEntity<?> edit(@PathVariable String issueKey, @RequestBody IssueRequest request) {
@@ -253,6 +261,7 @@ class IssueController {
         return ResponseEntity.ok(view(project, issue, permissions));
     }
 
+    @ApiDoc(value = "Deletes an issue", status = 204, project = "odt.issue.delete")
     @DeleteMapping("/api/issues/{issueKey}")
     @Transactional
     ResponseEntity<?> delete(@PathVariable String issueKey) {
@@ -270,6 +279,8 @@ class IssueController {
     }
 
     /** The custom fields of the issue for {@code fieldsFrom}, required as their rules say for the issue as it is. */
+    @ApiDoc(value = "The custom fields of an issue, as the fields of a form",
+            answer = CustomFields.FieldRow.class, list = true, project = "odt.issue.browse", internal = true)
     @GetMapping("/api/issues/{issueKey}/fields")
     ResponseEntity<?> customFields(@PathVariable String issueKey) {
         Optional<Found> found = find(issueKey);
@@ -285,6 +296,8 @@ class IssueController {
     }
 
     /** The transitions that can run now on the issue, for the user (empty without {@code odt.issue.transition}). */
+    @ApiDoc(value = "The transitions the user may take from the status of an issue",
+            answer = TransitionView.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/issues/{issueKey}/transitions")
     ResponseEntity<?> transitions(@PathVariable String issueKey) {
         Optional<Found> found = find(issueKey);
@@ -302,6 +315,7 @@ class IssueController {
     }
 
     /** Runs a transition, from the version read with the issue: 409 when it cannot run now, 412 if the issue changed. */
+    @ApiDoc(value = "Takes a transition of the workflow", answer = IssueView.class, project = "odt.issue.transition")
     @PostMapping("/api/issues/{issueKey}/transitions")
     @Transactional
     ResponseEntity<?> transition(@PathVariable String issueKey, @RequestBody TransitionRequest request) {

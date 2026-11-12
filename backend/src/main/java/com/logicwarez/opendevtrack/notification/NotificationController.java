@@ -5,6 +5,7 @@
 package com.logicwarez.opendevtrack.notification;
 
 import com.logicwarez.opendevtrack.access.ProjectAccess;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.project.ProjectRef;
@@ -63,6 +64,7 @@ class NotificationController {
     }
 
     /** The messages of the bell; the language of the request is remembered for the mails of the user (ADR-18). */
+    @ApiDoc(value = "The in-app messages of the user, newest first", answer = MessageView.class, list = true)
     @GetMapping("/api/notifications")
     @Transactional
     List<MessageView> list(Locale locale) {
@@ -74,6 +76,7 @@ class NotificationController {
                 .toList();
     }
 
+    @ApiDoc(value = "Marks messages as read", status = 204)
     @PostMapping("/api/notifications/read")
     @Transactional
     ResponseEntity<?> read(@RequestBody ReadRequest request) {

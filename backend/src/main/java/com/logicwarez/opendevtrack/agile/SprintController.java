@@ -10,6 +10,7 @@ import com.logicwarez.opendevtrack.agile.AgileApi.SprintRow;
 import com.logicwarez.opendevtrack.agile.Scopes.Scope;
 import com.logicwarez.opendevtrack.agile.SprintEvents.SprintCompleted;
 import com.logicwarez.opendevtrack.agile.SprintEvents.SprintStarted;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.Problems;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -71,6 +72,8 @@ class SprintController {
     }
 
     /** Every sprint of the project, the newest first, with the issues and the points it holds now. */
+    @ApiDoc(value = "The sprints of a project, newest first",
+            answer = SprintRow.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/projects/{key}/sprints")
     ResponseEntity<?> list(@PathVariable String key) {
         Optional<Scope> scope = scopes.of(key);
@@ -85,6 +88,7 @@ class SprintController {
                 .map(s -> row(scope.get(), s, planned)).toList());
     }
 
+    @ApiDoc(value = "Creates a sprint", answer = SprintRow.class, status = 201, project = "odt.sprint.manage")
     @PostMapping("/api/projects/{key}/sprints")
     @Transactional
     ResponseEntity<?> create(@PathVariable String key, @RequestBody SprintRequest request) {
@@ -111,6 +115,7 @@ class SprintController {
     }
 
     /** Changes the name, the goal and the dates of a sprint not completed, from the version read with it. */
+    @ApiDoc(value = "Changes a sprint", answer = SprintRow.class, project = "odt.sprint.manage")
     @PutMapping("/api/sprints/{id}")
     @Transactional
     ResponseEntity<?> edit(@PathVariable UUID id, @RequestBody SprintRequest request) {
@@ -143,6 +148,7 @@ class SprintController {
     }
 
     /** Starts a planned sprint, from today for two weeks unless the request gives the dates; 409 with another active. */
+    @ApiDoc(value = "Starts a sprint", answer = SprintRow.class, project = "odt.sprint.manage")
     @PostMapping("/api/sprints/{id}/start")
     @Transactional
     ResponseEntity<?> start(@PathVariable UUID id, @RequestBody(required = false) SprintRequest request) {
@@ -183,6 +189,8 @@ class SprintController {
      * Completes the active sprint: its issues done stay with it, the others go to {@code moveTo}, the backlog or a
      * planned sprint of the project.
      */
+    @ApiDoc(value = "Completes a sprint: its open issues go to the backlog or to another sprint",
+            answer = SprintRow.class, project = "odt.sprint.manage")
     @PostMapping("/api/sprints/{id}/complete")
     @Transactional
     ResponseEntity<?> complete(@PathVariable UUID id, @RequestBody(required = false) CompleteRequest request) {
@@ -247,6 +255,7 @@ class SprintController {
     }
 
     /** Removes a planned sprint; its issues go back to the backlog. */
+    @ApiDoc(value = "Removes a sprint", status = 204, project = "odt.sprint.manage")
     @DeleteMapping("/api/sprints/{id}")
     @Transactional
     ResponseEntity<?> delete(@PathVariable UUID id) {

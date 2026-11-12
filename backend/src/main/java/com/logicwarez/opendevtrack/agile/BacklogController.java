@@ -12,6 +12,7 @@ import com.logicwarez.opendevtrack.agile.AgileApi.PlanView;
 import com.logicwarez.opendevtrack.agile.Scopes.Scope;
 import com.logicwarez.opendevtrack.issue.IssueRef;
 import com.logicwarez.opendevtrack.issue.Issues;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.Problems;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -66,6 +67,8 @@ class BacklogController {
         this.texts = texts;
     }
 
+    @ApiDoc(value = "The columns of the backlog: the sprints not completed, then the backlog",
+            answer = ColumnRow.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/projects/{key}/backlog/columns")
     ResponseEntity<?> columns(@PathVariable String key) {
         Optional<Scope> scope = member(key);
@@ -80,6 +83,8 @@ class BacklogController {
         return ResponseEntity.ok(rows);
     }
 
+    @ApiDoc(value = "The issues of the backlog and of the sprints not completed, in their order",
+            answer = CardRow.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/projects/{key}/backlog/cards")
     ResponseEntity<?> cards(@PathVariable String key) {
         Optional<Scope> scope = member(key);
@@ -96,6 +101,8 @@ class BacklogController {
     }
 
     /** A card dropped on a sprint or on the backlog, between two cards. */
+    @ApiDoc(value = "Moves an issue to a sprint or the backlog, or between two others",
+            answer = Map.class, project = {"odt.sprint.manage", "odt.issue.edit"})
     @PostMapping("/api/projects/{key}/backlog/cards/{issueKey}/move")
     @Transactional
     ResponseEntity<?> move(@PathVariable String key, @PathVariable String issueKey, @RequestBody MoveRequest request) {
@@ -133,6 +140,7 @@ class BacklogController {
     }
 
     /** The plan of an issue: its story points and its sprint not completed. */
+    @ApiDoc(value = "The estimate and the sprint of an issue", answer = PlanView.class, project = "odt.issue.browse")
     @GetMapping("/api/issues/{issueKey}/plan")
     ResponseEntity<?> plan(@PathVariable String issueKey) {
         Optional<IssueRef> issue = issues.find(issueKey);
@@ -147,6 +155,8 @@ class BacklogController {
         return ResponseEntity.ok(view(scope.get(), plan.orElse(null)));
     }
 
+    @ApiDoc(value = "Sets the estimate of an issue, in story points",
+            answer = PlanView.class, project = "odt.issue.edit")
     @PutMapping("/api/issues/{issueKey}/plan")
     @Transactional
     ResponseEntity<?> points(@PathVariable String issueKey, @RequestBody PlanRequest request) {

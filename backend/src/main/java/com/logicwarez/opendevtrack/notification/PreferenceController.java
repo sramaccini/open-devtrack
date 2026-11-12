@@ -5,6 +5,7 @@
 package com.logicwarez.opendevtrack.notification;
 
 import com.logicwarez.opendevtrack.notification.Preferences.Preference;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ class PreferenceController {
     }
 
     /** The address of the mails (from the identity provider, read only), whether mail is on, the channels. */
+    @ApiDoc(value = "The notification settings of the user", answer = Map.class)
     @GetMapping("/api/notifications/preferences")
     Map<String, Object> get() {
         Map<String, Object> channels = new LinkedHashMap<>();
@@ -64,6 +66,8 @@ class PreferenceController {
     }
 
     /** The rows of the form, in the language of the request. */
+    @ApiDoc(value = "The notification settings, as the fields of a form",
+            answer = Map.class, list = true, internal = true)
     @GetMapping("/api/notifications/preferences/fields")
     List<Map<String, Object>> fields(Locale locale) {
         List<Map<String, Object>> options = new ArrayList<>();
@@ -81,6 +85,7 @@ class PreferenceController {
     }
 
     /** Saves the channels given (the others stay as they are) and the language of the request. */
+    @ApiDoc(value = "Changes the notification settings of the user", answer = Map.class)
     @PutMapping("/api/notifications/preferences")
     @Transactional
     ResponseEntity<?> save(@RequestBody PreferencesRequest request, Locale locale) {

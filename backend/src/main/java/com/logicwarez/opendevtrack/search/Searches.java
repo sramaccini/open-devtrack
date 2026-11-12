@@ -98,7 +98,7 @@ class Searches {
     }
 
     /** The request of a {@code serverDataTable} (catalogue § 2.19 of Quadrava) with the query. */
-    record Request(String query, Integer page, Integer size, Sort sort, List<Filter> filters, List<String> groupBy,
+    record SearchRequest(String query, Integer page, Integer size, Sort sort, List<Filter> filters, List<String> groupBy,
                    List<GroupStep> groupPath, String distinct) {
     }
 
@@ -151,7 +151,7 @@ class Searches {
     }
 
     /** What the table asked for: groups of the next level, rows of a page, or the values of a column. */
-    Map<String, Object> run(Request request) {
+    Map<String, Object> run(SearchRequest request) {
         List<ProjectRef> visible = visible();
         Compiled compiled = compile(request.query(), visible);
         Condition where = TENANT_ID.eq(user.tenantId()).and(PROJECT_ID.in(visible.stream().map(ProjectRef::id).toList()))

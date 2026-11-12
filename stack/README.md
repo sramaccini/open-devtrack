@@ -68,3 +68,6 @@ have something to show from the first login.
 - `ui/` is published to the environment `development` of the registry by the service `publish` (Node 24 and the
   Quadrava CLI 0.13.1), with an access token of `mario.rossi` from the tools client.
 - Keycloak imports the realm only when its container is created: after a change of the realm, `down` then `up`.
+- The API with a token (docs/api.md): the client `opendevtrack-ci` is a service account (client credentials, its
+  secret `CI_CLIENT_SECRET` in `.work/.env`), whose user `service-account-opendevtrack-ci` is a member of `ACME`;
+  add it to a project to let it work there. `http://localhost:18080/v3/api-docs` is the OpenAPI definition.

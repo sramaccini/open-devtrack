@@ -9,6 +9,7 @@ import com.logicwarez.opendevtrack.access.ProjectAccess;
 import com.logicwarez.opendevtrack.collaboration.CommentEvents.CommentPosted;
 import com.logicwarez.opendevtrack.issue.IssueRef;
 import com.logicwarez.opendevtrack.issue.Issues;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import java.time.Instant;
@@ -71,6 +72,8 @@ class CommentController {
     record CommentRequest(String body, Long version) {
     }
 
+    @ApiDoc(value = "The comments of an issue, oldest first",
+            answer = CommentView.class, list = true, project = "odt.issue.browse")
     @GetMapping("/api/issues/{issueKey}/comments")
     ResponseEntity<?> list(@PathVariable String issueKey) {
         Optional<IssueRef> issue = issues.find(issueKey);
@@ -85,6 +88,8 @@ class CommentController {
                 .map(c -> view(c, permissions)).toList());
     }
 
+    @ApiDoc(value = "Posts a comment (Markdown, @ mentions the members)",
+            answer = CommentView.class, status = 201, project = "odt.issue.comment")
     @PostMapping("/api/issues/{issueKey}/comments")
     @Transactional
     ResponseEntity<?> add(@PathVariable String issueKey, @RequestBody CommentRequest request) {
@@ -108,6 +113,7 @@ class CommentController {
     }
 
     /** Only the author, from the version read, or 412 if it changed in the meantime. */
+    @ApiDoc(value = "Edits a comment: its author", answer = CommentView.class, project = "odt.issue.comment")
     @PutMapping("/api/issues/{issueKey}/comments/{id}")
     @Transactional
     ResponseEntity<?> edit(@PathVariable String issueKey, @PathVariable UUID id, @RequestBody CommentRequest request) {
@@ -137,6 +143,8 @@ class CommentController {
         return ResponseEntity.ok(view(comment, found.get().permissions()));
     }
 
+    @ApiDoc(value = "Deletes a comment: its author, or an admin of the project",
+            status = 204, project = {"odt.issue.comment", "odt.issue.delete"})
     @DeleteMapping("/api/issues/{issueKey}/comments/{id}")
     @Transactional
     ResponseEntity<?> delete(@PathVariable String issueKey, @PathVariable UUID id) {

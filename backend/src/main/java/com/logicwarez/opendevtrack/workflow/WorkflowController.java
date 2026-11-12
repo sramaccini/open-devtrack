@@ -6,6 +6,7 @@ package com.logicwarez.opendevtrack.workflow;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
+import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.project.ProjectRef;
@@ -88,7 +89,7 @@ class WorkflowController {
                       @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
-    record TransitionView(String code, String from, String to, String guard, long version,
+    record WorkflowTransitionView(String code, String from, String to, String guard, long version,
                           @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
@@ -101,10 +102,10 @@ class WorkflowController {
     }
 
     /** A transition: from empty for every status, guard empty for none. */
-    record TransitionRequest(String code, String from, String to, String guard, Long version) {
+    record WorkflowTransitionRequest(String code, String from, String to, String guard, Long version) {
     }
 
-    record Removed(String code, String movedTo, int moved) {
+    record StatusRemoved(String code, String movedTo, int moved) {
     }
 
     /** The project and the workflow, for an edit: or the answer that stops it. */
@@ -112,6 +113,8 @@ class WorkflowController {
     }
 
     /** The statuses in their order; with {@code q}, those whose code holds it (the lookups of the screens). */
+    @ApiDoc(value = "The statuses of the default workflow, or of one",
+            answer = StatusView.class, list = true, project = "odt.issue.browse")
     @GetMapping({DEFAULT + "/statuses", ONE + "/statuses"})
     ResponseEntity<?> statuses(@PathVariable String key, @PathVariable(required = false) UUID workflow,
                                @RequestParam(required = false) String q) {
@@ -130,6 +133,8 @@ class WorkflowController {
                 .map(s -> view(project.get(), w.get(), types, s, edit)).toList());
     }
 
+    @ApiDoc(value = "The transitions of the default workflow, or of one",
+            answer = WorkflowTransitionView.class, list = true, project = "odt.issue.browse")
     @GetMapping({DEFAULT + "/transitions", ONE + "/transitions"})
     ResponseEntity<?> transitions(@PathVariable String key, @PathVariable(required = false) UUID workflow) {
         Optional<ProjectRef> project = projects.find(key);
@@ -145,6 +150,7 @@ class WorkflowController {
                 .map(t -> view(w.get(), t, edit)).toList());
     }
 
+    @ApiDoc(value = "Adds a status", answer = StatusView.class, status = 201, project = "odt.project.edit")
     @PostMapping({DEFAULT + "/statuses", ONE + "/statuses"})
     @Transactional
     ResponseEntity<?> addStatus(@PathVariable String key, @PathVariable(required = false) UUID workflow,
@@ -187,6 +193,7 @@ class WorkflowController {
     }
 
     /** The category or the position of a status; the code never changes. */
+    @ApiDoc(value = "Changes a status", answer = StatusView.class, project = "odt.project.edit")
     @PutMapping({DEFAULT + "/statuses/{code}", ONE + "/statuses/{code}"})
     @Transactional
     ResponseEntity<?> changeStatus(@PathVariable String key, @PathVariable(required = false) UUID workflow,
@@ -228,6 +235,8 @@ class WorkflowController {
     }
 
     /** Removes a status: the issues that follow the workflow move to {@code moveTo}, the transitions from or to it go. */
+    @ApiDoc(value = "Removes a status, moving its issues to another",
+            answer = StatusRemoved.class, project = "odt.project.edit")
     @PostMapping({DEFAULT + "/statuses/{code}/remove", ONE + "/statuses/{code}/remove"})
     @Transactional
     ResponseEntity<?> removeStatus(@PathVariable String key, @PathVariable(required = false) UUID workflow,
@@ -258,13 +267,15 @@ class WorkflowController {
         number(all);
         statuses.saveAll(all);
         number(transitions.findByWorkflowIdOrderByPosition(w.id()));
-        return saved(w, () -> ResponseEntity.ok(new Removed(code, moveTo, moved)));
+        return saved(w, () -> ResponseEntity.ok(new StatusRemoved(code, moveTo, moved)));
     }
 
+    @ApiDoc(value = "Adds a transition",
+            answer = WorkflowTransitionView.class, status = 201, project = "odt.project.edit")
     @PostMapping({DEFAULT + "/transitions", ONE + "/transitions"})
     @Transactional
     ResponseEntity<?> addTransition(@PathVariable String key, @PathVariable(required = false) UUID workflow,
-                                    @RequestBody TransitionRequest request) {
+                                    @RequestBody WorkflowTransitionRequest request) {
         Editing editing = editing(key, workflow, request.version(), false);
         if (editing.problem() != null) {
             return editing.problem();
@@ -289,10 +300,11 @@ class WorkflowController {
     }
 
     /** From, to and guard of a transition; the code never changes. */
+    @ApiDoc(value = "Changes a transition", answer = WorkflowTransitionView.class, project = "odt.project.edit")
     @PutMapping({DEFAULT + "/transitions/{code}", ONE + "/transitions/{code}"})
     @Transactional
     ResponseEntity<?> changeTransition(@PathVariable String key, @PathVariable(required = false) UUID workflow,
-                                       @PathVariable String code, @RequestBody TransitionRequest request) {
+                                       @PathVariable String code, @RequestBody WorkflowTransitionRequest request) {
         Editing editing = editing(key, workflow, request.version(), true);
         if (editing.problem() != null) {
             return editing.problem();
@@ -312,6 +324,7 @@ class WorkflowController {
         return saved(w, () -> ResponseEntity.ok(view(w, t, true)));
     }
 
+    @ApiDoc(value = "Removes a transition", status = 204, project = "odt.project.edit")
     @DeleteMapping({DEFAULT + "/transitions/{code}", ONE + "/transitions/{code}"})
     @Transactional
     ResponseEntity<?> removeTransition(@PathVariable String key, @PathVariable(required = false) UUID workflow,
@@ -373,7 +386,7 @@ class WorkflowController {
     }
 
     /** From (empty for every status) and to are statuses of the workflow, not the same; the guard is CEL. */
-    private Optional<ResponseEntity<?>> invalid(WorkflowEntity w, TransitionRequest request) {
+    private Optional<ResponseEntity<?>> invalid(WorkflowEntity w, WorkflowTransitionRequest request) {
         List<String> codes = statuses.findByWorkflowIdOrderByPosition(w.id()).stream().map(StatusEntity::code).toList();
         String from = blank(request.from());
         if (request.to() == null || !codes.contains(request.to()) || (from != null && !codes.contains(from))) {
@@ -441,8 +454,8 @@ class WorkflowController {
                 w.version(), Map.of("edit", edit));
     }
 
-    private static TransitionView view(WorkflowEntity w, TransitionEntity t, boolean edit) {
-        return new TransitionView(t.code(), t.fromStatus(), t.toStatus(), t.guardCel(), w.version(), Map.of("edit", edit));
+    private static WorkflowTransitionView view(WorkflowEntity w, TransitionEntity t, boolean edit) {
+        return new WorkflowTransitionView(t.code(), t.fromStatus(), t.toStatus(), t.guardCel(), w.version(), Map.of("edit", edit));
     }
 
     private static String blank(String value) {
