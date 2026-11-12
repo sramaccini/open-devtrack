@@ -60,19 +60,20 @@
       "id": "admin",
       "label": "{{ t('nav.admin', 'Administration') }}",
       "icon": "settings",
-      "requires": "authz.rbac.manage",
       "items": [
         {
           "id": "admin-users",
           "label": "{{ t('nav.admin_users', 'Users') }}",
           "icon": "user",
-          "screen": "admin-users"
+          "screen": "admin-users",
+          "requires": "authz.rbac.manage"
         },
         {
           "id": "admin-roles",
           "label": "{{ t('nav.admin_roles', 'Global roles') }}",
           "icon": "safety",
-          "screen": "admin-roles"
+          "screen": "admin-roles",
+          "requires": "authz.rbac.manage"
         },
         {
           "id": "admin-tenants",
@@ -82,10 +83,18 @@
           "requires": "authz.rbac.manageglobal"
         },
         {
+          "id": "admin-permission-schemes",
+          "label": "{{ t('nav.admin_schemes', 'Permission schemes') }}",
+          "icon": "check-circle",
+          "screen": "admin-permission-schemes",
+          "requires": "odt.project.admin"
+        },
+        {
           "id": "admin-access-log",
           "label": "{{ t('nav.admin_access_log', 'Access log') }}",
           "icon": "receipt",
-          "screen": "admin-access-log"
+          "screen": "admin-access-log",
+          "requires": "authz.rbac.manage"
         }
       ]
     }

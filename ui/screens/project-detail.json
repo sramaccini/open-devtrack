@@ -57,6 +57,12 @@
     },
     "check": {
       "ref": "search/check"
+    },
+    "schemes": {
+      "ref": "admin/schemes"
+    },
+    "useScheme": {
+      "ref": "projects/useScheme"
     }
   },
   "components": [
@@ -103,6 +109,14 @@
           ],
           "optionKey": "values.role",
           "readOnlyIf": "{{true}}"
+        },
+        {
+          "name": "permissionSchemeName",
+          "type": "text",
+          "label": "{{ t('projects.scheme', 'Permission scheme') }}",
+          "width": "m",
+          "readOnlyIf": "{{true}}",
+          "tooltip": "{{ t('projects.scheme_help', 'What each project role gives here; the admin of the workspace defines the schemes') }}"
         },
         {
           "name": "description",
@@ -486,6 +500,51 @@
               }
             }
           ]
+        }
+      ]
+    },
+    {
+      "id": "btn-permission-scheme",
+      "type": "button",
+      "label": "{{ t('projects.change_scheme', 'Change the permission scheme') }}",
+      "visibleIf": "{{ data.project != null && data.project._perm.edit }}",
+      "onClick": [
+        {
+          "dialog": {
+            "title": "{{ t('projects.pick_scheme', 'Permission scheme of the project') }}",
+            "submitLabel": "{{ t('common.save', 'Save') }}",
+            "initial": {
+              "scheme": "{{data.project.permissionScheme}}"
+            },
+            "fields": [
+              {
+                "name": "scheme",
+                "type": "lookup",
+                "label": "{{ t('projects.scheme', 'Permission scheme') }}",
+                "required": true,
+                "lookup": {
+                  "source": "schemes",
+                  "valueField": "id",
+                  "labelField": "name",
+                  "minChars": 0
+                },
+                "tooltip": "{{ t('projects.scheme_pick_help', 'The schemes of the workspace, in Administration') }}"
+              }
+            ],
+            "onSubmit": [
+              {
+                "call": "useScheme",
+                "onError": [
+                  {
+                    "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "refresh": "project"
         }
       ]
     },

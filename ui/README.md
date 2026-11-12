@@ -164,8 +164,19 @@ The area `admin` (ADR-22), shown to whoever holds `authz.rbac.manage` in the ten
   of those that are not system roles.
 - `admin-tenants` (`authz.rbac.manageglobal`): the tenants, and «New tenant».
 - `admin-access-log`: the last 200 entries of the log of authz-library, with the actions and kinds translated.
+- `admin-permission-schemes` (`odt.project.admin`, the admin of the projects of the tenant): the permission schemes of
+  OpenDevTrack (`/api/permission-schemes`), New (a copy of the default), Edit (name, description, the permissions of
+  each project role), Remove (not the default, not one in use). A refused change (400) says the rules: every role sees
+  the issues, the admin always edits the project and manages its members.
+
+Each item has its own `requires`; an area with no item to show is hidden, so the area shows to the admin of the users
+and to the admin of the projects alike. In `project-detail` the form shows the scheme of the project, and «Change the
+permission scheme» (for whoever edits the project) picks another one with a lookup on the schemes. It is a button of
+its own under the form, not one more action of the form: the actions of a form do not wrap (Q17), and the row is
+already wider than a 1280 px window since the Webhooks button.
 
 Passwords and sign-in stay in Keycloak, and the users screen says so. ADR-22 asks for a link to the console of
 Keycloak for the tenant: there is no address of the console in the configuration of the front end, so the text names
 it without a link. The roles and permissions in the pickers are static lists (the options of Quadrava are strings):
-the role of global admin is offered to the admin of a tenant too, and authz-library refuses it with 403.
+the role of global admin is offered to the admin of a tenant too, and authz-library refuses it with 403. It refuses
+with 403 a change to one's own roles too; the toast names both reasons, since the screen cannot tell them apart.

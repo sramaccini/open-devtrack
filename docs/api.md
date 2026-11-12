@@ -74,7 +74,8 @@ Each operation of the definition lists what it needs:
 
 - `x-permissions`: permissions of the user in the tenant (`odt.project.browse`, `odt.project.create`…);
 - `x-project-permissions`: permissions of the role of the user in the project of the request (`odt.issue.edit`,
-  `odt.sprint.manage`…). Without them the answer is 403; a project the user does not see answers 404.
+  `odt.sprint.manage`…), as the permission scheme of the project gives them (ADR-22). Without them the answer is 403;
+  a project the user does not see answers 404.
 
 The answers carry `_perm`: what the user may do with that row or form (`{"edit": true, "delete": false}`), so a
 client need not compute the roles.

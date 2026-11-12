@@ -73,7 +73,14 @@ access token of a client listed in `authz.bff.bearer.allowed-clients` (the beare
 Projects belong to the tenant of the session (`odt_project`, ADR-09): another tenant gets 404, and the key is unique per
 tenant. Each project numbers its issues (`Projects.nextIssueNumber`). The module `access` keeps the members and their
 project role (`odt_access`, `ProjectRole`): viewer browses, developer also creates, edits, transitions and comments,
-admin also deletes issues, edits the project and manages its members; a project always keeps one admin. The codes are
+admin also deletes issues, edits the project and manages its members; a project always keeps one admin. Those are the
+sets of the default permission scheme of a tenant (ADR-22, `PermissionSchemes`, made the first time the tenant needs
+it): the admin of the tenant edits it and adds other schemes (`/api/permission-schemes`), and the admin of a project
+picks one (`PUT /api/projects/{key}/permission-scheme`). Only the project permissions of the catalogue go in a scheme,
+every role keeps `odt.issue.browse` and the admin keeps `odt.project.edit` and `odt.member.manage`; a scheme in use, or
+the default one, is not removed (409). What each project gets is kept in memory and dropped at every change of a
+scheme or of a choice: with more than one instance of the back end, the others see a change only after their restart
+(one instance until ADR-16 says otherwise). The codes are
 in the catalogue (ADR-07) and reach the screens as `_perm` on rows and forms; `POST /authz/check` decides them for a
 `project` or `issue` resource (`ProjectPermissions`, the `PermissionContributor` of authz-library 2.2.0, A1). `identity`
 lists the users of the tenant for the pickers (`GET /api/users`) from the `TenantDirectory` of authz-library (A5). The

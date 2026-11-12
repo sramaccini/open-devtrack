@@ -15,8 +15,14 @@ final class ProjectApi {
     private ProjectApi() {
     }
 
+    /** {@code permissionScheme}: the permission scheme of the project (ADR-22), its id and name. */
     record ProjectView(UUID id, String key, String name, String description, String lead, String role,
-                       Instant createdAt, long version, @JsonProperty("_perm") Map<String, Boolean> perm) {
+                       Instant createdAt, long version, UUID permissionScheme, String permissionSchemeName,
+                       @JsonProperty("_perm") Map<String, Boolean> perm) {
+    }
+
+    /** The permission scheme the project uses, among those of the tenant. */
+    record SchemeChoice(UUID scheme) {
     }
 
     record CreateProject(String key, String name, String description) {

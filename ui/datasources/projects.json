@@ -82,6 +82,12 @@
       "method": "PUT",
       "url": "/api/projects/{{params.key}}/field-definitions/{{fieldKey}}",
       "body": "{{form}}"
+    },
+    "useScheme": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/projects/{{params.key}}/permission-scheme",
+      "body": "{{form}}"
     }
   }
 }

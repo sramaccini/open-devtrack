@@ -211,7 +211,7 @@
                         "if": "{{error.status == 403}}",
                         "then": [
                           {
-                            "toast": "{{ t('admin.role_global', 'Only the global admin gives the role of global admin') }}"
+                            "toast": "{{ t('admin.role_refused', 'Not allowed: nobody changes their own roles, and only the global admin gives the role of global admin') }}"
                           }
                         ],
                         "else": [

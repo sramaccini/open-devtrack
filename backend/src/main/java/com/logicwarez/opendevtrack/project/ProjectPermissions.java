@@ -6,8 +6,8 @@ package com.logicwarez.opendevtrack.project;
 
 import com.logicwarez.authz.session.PermissionContributor;
 import com.logicwarez.authz.session.SessionContext;
+import com.logicwarez.opendevtrack.access.PermissionSchemes;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
-import com.logicwarez.opendevtrack.access.ProjectRole;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +36,7 @@ class ProjectPermissions implements PermissionContributor {
 
     @Override
     public Optional<Boolean> check(SessionContext session, String permission, Resource resource) {
-        if (!ProjectRole.ADMIN.permissions().contains(permission) || resource.id() == null) {
+        if (!PermissionSchemes.CATALOGUE.contains(permission) || resource.id() == null) {
             return Optional.empty();
         }
         String key = switch (resource.type()) {

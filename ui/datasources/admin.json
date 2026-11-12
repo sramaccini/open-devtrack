@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "datasources": "admin",
-  "description": "The administration of authz-library (ADR-22): users, roles and tenants, the audit of access, the sessions.",
+  "description": "The administration (ADR-22): users, roles, tenants, the audit of access and the sessions of authz-library; the permission schemes of OpenDevTrack.",
   "sources": {
     "users": {
       "type": "rest",
@@ -70,6 +70,28 @@
       "params": {
         "limit": 200
       }
+    },
+    "schemes": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/permission-schemes"
+    },
+    "addScheme": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/permission-schemes",
+      "body": "{{form}}"
+    },
+    "saveScheme": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/permission-schemes/{{id}}",
+      "body": "{{form}}"
+    },
+    "removeScheme": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/permission-schemes/{{id}}"
     }
   }
 }

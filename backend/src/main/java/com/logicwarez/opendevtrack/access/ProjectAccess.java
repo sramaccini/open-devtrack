@@ -17,8 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Project roles: who has which role in a project, and the permissions it gives. The project is only an identifier: the
- * module {@code project} checks the tenant before calling here (ADR-09).
+ * Project roles: who has which role in a project, and the permissions it gives under the permission scheme of the
+ * project ({@link PermissionSchemes}, ADR-22). The project is only an identifier: the module {@code project} checks the
+ * tenant before calling here (ADR-09), and the scheme is looked for in the tenant of the session.
  *
  * <p>These permissions reach the screens as row permissions ({@code _perm}) in the answers of the modules, and the
  * checks of {@code /authz/check} with a project or an issue through {@code project.ProjectPermissions} (A1); they are
@@ -38,10 +39,12 @@ public class ProjectAccess {
     public static final String TENANT_ADMIN = "odt.project.admin";
 
     private final MemberRepository members;
+    private final PermissionSchemes schemes;
     private final CurrentUser user;
 
-    ProjectAccess(MemberRepository members, CurrentUser user) {
+    ProjectAccess(MemberRepository members, PermissionSchemes schemes, CurrentUser user) {
         this.members = members;
+        this.schemes = schemes;
         this.user = user;
     }
 
@@ -55,7 +58,16 @@ public class ProjectAccess {
      */
     public Set<String> permissions(UUID projectId, String username) {
         Optional<ProjectRole> own = role(projectId, username);
-        return (username.equals(user.username()) ? effective(own) : own).map(ProjectRole::permissions).orElse(Set.of());
+        return given(projectId, username.equals(user.username()) ? effective(own) : own);
+    }
+
+    /** Permissions of the user of the session in the project, whose own role there is already known (for lists). */
+    public Set<String> permissions(UUID projectId, Optional<ProjectRole> own) {
+        return given(projectId, effective(own));
+    }
+
+    private Set<String> given(UUID projectId, Optional<ProjectRole> role) {
+        return role.map(r -> schemes.permissions(user.tenantId(), projectId, r)).orElse(Set.of());
     }
 
     /** The role that decides what the user of the session can do: admin for an admin of the tenant, else their own. */

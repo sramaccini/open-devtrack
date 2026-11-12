@@ -1735,6 +1735,194 @@
         "x-permissions" : [ "odt.project.browse" ]
       }
     },
+    "/api/permission-schemes" : {
+      "get" : {
+        "operationId" : "permissionScheme.list",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/SchemeView"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          }
+        },
+        "summary" : "The permission schemes of the workspace, the default first",
+        "tags" : [ "access" ],
+        "x-permissions" : [ "odt.project.browse" ]
+      },
+      "post" : {
+        "operationId" : "permissionScheme.add",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SchemeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SchemeView"
+                }
+              }
+            },
+            "description" : "Created"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "412" : {
+            "$ref" : "#/components/responses/ChangedMeanwhile"
+          }
+        },
+        "summary" : "Adds a permission scheme, a copy of the default",
+        "tags" : [ "access" ],
+        "x-permissions" : [ "odt.project.admin" ]
+      }
+    },
+    "/api/permission-schemes/{id}" : {
+      "delete" : {
+        "operationId" : "permissionScheme.remove",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Done"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Removes a permission scheme no project uses",
+        "tags" : [ "access" ],
+        "x-permissions" : [ "odt.project.admin" ]
+      },
+      "get" : {
+        "operationId" : "permissionScheme.get",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SchemeView"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "A permission scheme",
+        "tags" : [ "access" ],
+        "x-permissions" : [ "odt.project.browse" ]
+      },
+      "put" : {
+        "operationId" : "permissionScheme.edit",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SchemeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SchemeView"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          },
+          "412" : {
+            "$ref" : "#/components/responses/ChangedMeanwhile"
+          }
+        },
+        "summary" : "Changes a permission scheme",
+        "tags" : [ "access" ],
+        "x-permissions" : [ "odt.project.admin" ]
+      }
+    },
     "/api/projects" : {
       "get" : {
         "operationId" : "project.list",
@@ -2680,6 +2868,57 @@
         "tags" : [ "project" ],
         "x-permissions" : [ "odt.project.browse" ],
         "x-project-permissions" : [ "odt.member.manage" ]
+      }
+    },
+    "/api/projects/{key}/permission-scheme" : {
+      "put" : {
+        "operationId" : "project.useScheme",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SchemeChoice"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProjectView"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Picks the permission scheme of a project",
+        "tags" : [ "project" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.project.edit" ]
       }
     },
     "/api/projects/{key}/reports/burndown" : {
@@ -5996,6 +6235,13 @@
           "name" : {
             "type" : "string"
           },
+          "permissionScheme" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "permissionSchemeName" : {
+            "type" : "string"
+          },
           "role" : {
             "type" : "string"
           },
@@ -6026,6 +6272,104 @@
           "version" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }
+      },
+      "SchemeChoice" : {
+        "type" : "object",
+        "properties" : {
+          "scheme" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }
+      },
+      "SchemeRequest" : {
+        "type" : "object",
+        "properties" : {
+          "admin" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "developer" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "viewer" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "SchemeView" : {
+        "type" : "object",
+        "properties" : {
+          "_perm" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "boolean"
+            }
+          },
+          "admin" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "default" : {
+            "type" : "boolean"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "developer" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "inUse" : {
+            "type" : "boolean"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updatedBy" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "viewer" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },

@@ -12,7 +12,8 @@ import java.util.Set;
 
 /**
  * The roles a user can have in a project, each with its permissions ({@code odt.<resource>.<action>}, ADR-07). Each
- * role holds the permissions of the one before it. Fixed in code for 1.0; permission schemes per project come later.
+ * role holds the permissions of the one before it. These are the sets of a new default permission scheme; a project
+ * gets those of its scheme ({@link PermissionSchemes}, ADR-22).
  */
 public enum ProjectRole {
 

@@ -4,6 +4,7 @@
  */
 package com.logicwarez.opendevtrack.project;
 
+import com.logicwarez.opendevtrack.access.PermissionSchemes;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
 import com.logicwarez.opendevtrack.access.ProjectAccess.Change;
 import com.logicwarez.opendevtrack.access.ProjectMember;
@@ -17,6 +18,7 @@ import com.logicwarez.opendevtrack.project.ProjectApi.EditProject;
 import com.logicwarez.opendevtrack.project.ProjectApi.MemberRequest;
 import com.logicwarez.opendevtrack.project.ProjectApi.MemberView;
 import com.logicwarez.opendevtrack.project.ProjectApi.ProjectView;
+import com.logicwarez.opendevtrack.project.ProjectApi.SchemeChoice;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
@@ -45,7 +47,8 @@ import org.springframework.web.bind.annotation.RestController;
  * <ul>
  *   <li>{@code odt.project.browse} (global): list and read the projects of the tenant and their members;</li>
  *   <li>{@code odt.project.create} (global): create one; the creator becomes its lead and admin;</li>
- *   <li>{@code odt.project.edit}, {@code odt.member.manage} (project role admin): edit it, manage its members.</li>
+ *   <li>{@code odt.project.edit}, {@code odt.member.manage} (project role admin): edit it, pick its permission scheme
+ *   (ADR-22), manage its members.</li>
  * </ul>
  * A project of another tenant answers 404, as one that does not exist (ADR-09).
  */
@@ -59,14 +62,16 @@ class ProjectController {
 
     private final ProjectRepository projects;
     private final ProjectAccess access;
+    private final PermissionSchemes schemes;
     private final TenantUsers users;
     private final CurrentUser user;
     private final ApplicationEventPublisher events;
 
-    ProjectController(ProjectRepository projects, ProjectAccess access, TenantUsers users, CurrentUser user,
-                      ApplicationEventPublisher events) {
+    ProjectController(ProjectRepository projects, ProjectAccess access, PermissionSchemes schemes, TenantUsers users,
+                      CurrentUser user, ApplicationEventPublisher events) {
         this.projects = projects;
         this.access = access;
+        this.schemes = schemes;
         this.users = users;
         this.user = user;
         this.events = events;
@@ -214,6 +219,26 @@ class ProjectController {
         return ResponseEntity.ok(memberView(saved, true));
     }
 
+    /** The permission scheme the project uses, among those of the tenant; the default one drops the choice. */
+    @ApiDoc(value = "Picks the permission scheme of a project", answer = ProjectView.class, project = "odt.project.edit")
+    @PutMapping("/api/projects/{key}/permission-scheme")
+    @Transactional
+    ResponseEntity<?> useScheme(@PathVariable String key, @RequestBody SchemeChoice request) {
+        Optional<ProjectEntity> found = find(key);
+        if (found.isEmpty()) {
+            return Problems.notFound(NOT_FOUND);
+        }
+        ProjectEntity project = found.get();
+        if (!can(project, "odt.project.edit")) {
+            return Problems.forbidden("Only an admin of the project can pick its permission scheme");
+        }
+        if (request == null || request.scheme() == null
+                || schemes.use(user.tenantId(), project.id(), request.scheme()).isEmpty()) {
+            return Problems.badRequest("No permission scheme with this id in the workspace");
+        }
+        return ResponseEntity.ok(view(project, access.role(project.id(), user.username())));
+    }
+
     private Optional<ProjectEntity> find(String key) {
         return projects.findByTenantIdAndKey(user.tenantId(), key);
     }
@@ -237,14 +262,15 @@ class ProjectController {
     }
 
     private ProjectView view(ProjectEntity p, Optional<ProjectRole> role) {
-        Set<String> permissions = access.effective(role).map(ProjectRole::permissions).orElse(Set.of());
+        Set<String> permissions = access.permissions(p.id(), role);
         Map<String, Boolean> perm = Map.of(
                 "edit", permissions.contains("odt.project.edit"),
                 "manageMembers", permissions.contains("odt.member.manage"),
                 "createIssue", permissions.contains("odt.issue.create"),
                 "manageSprints", permissions.contains("odt.sprint.manage"));
+        PermissionSchemes.SchemeRef scheme = schemes.scheme(p.tenantId(), p.id());
         return new ProjectView(p.id(), p.key(), p.name(), p.description(), p.lead(), role.map(ProjectRole::value).orElse(null),
-                p.createdAt(), p.version(), perm);
+                p.createdAt(), p.version(), scheme.id(), scheme.name(), perm);
     }
 
     private MemberView memberView(ProjectMember m, boolean manage) {
