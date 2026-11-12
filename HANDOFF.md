@@ -10,7 +10,7 @@ Quadrava and authz-library, and the ADRs say where.
 
 - Repository github.com/sramaccini/open-devtrack, branch `main`: licence MPL-2.0 with CLA, contribution rules and
   project rules as Quadrava (ADR-05). Decisions D1–D9 and ADR-10 accepted, in `docs/`.
-- `backend/`: the monolith on authz-library 2.0.1, split into the Spring Modulith modules of the plan
+- `backend/`: the monolith on authz-library 2.2.0, split into the Spring Modulith modules of the plan
   (`ModularityTests`: `verify()` and the module documentation). The `odt.*` permission catalogue is a repeatable
   Flyway migration of the RBAC schema (ADR-07); the dev profile adds tenants, users and the UI author/approver roles.
 - Module `uiregistry` (ADR-03): `contracts/registry.yaml` 0.7.0, adapted from the Quadrava reference registry
@@ -108,7 +108,7 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
   `npm.pkg.github.com` (Quadrava CLI) is in `~/.npmrc`; the `.npmrc` of the repository only maps `@sramaccini`.
 - Docker is needed by the back end tests (Testcontainers) and by the e2e. The e2e login is limited to 20 per minute per
   IP by authz-library: wait a minute between two `check` runs or a check and a browser login.
-- No `~/.m2/settings.xml`: the authz-library 2.0.1 artifacts resolve from the local Maven repository, where the
+- No `~/.m2/settings.xml`: the authz-library artifacts resolve from the local Maven repository, where the
   authz-library build installed them. A clean machine or CI needs the token (backend/README.md).
 - Ports 8180 and 8090 are used by containers of other projects: the e2e environment uses 25432, 26379, 28080, 28090,
   28180.
