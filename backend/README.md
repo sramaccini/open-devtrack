@@ -74,8 +74,11 @@ Projects belong to the tenant of the session (`odt_project`, ADR-09): another te
 tenant. Each project numbers its issues (`Projects.nextIssueNumber`). The module `access` keeps the members and their
 project role (`odt_access`, `ProjectRole`): viewer browses, developer also creates, edits, transitions and comments,
 admin also deletes issues, edits the project and manages its members; a project always keeps one admin. The codes are
-in the catalogue (ADR-07) and reach the screens as `_perm` until authz-library A1. `identity` lists the users of the
-tenant for the pickers (`GET /api/users`, temporary until A5).
+in the catalogue (ADR-07) and reach the screens as `_perm` on rows and forms; `POST /authz/check` decides them for a
+`project` or `issue` resource (`ProjectPermissions`, the `PermissionContributor` of authz-library 2.2.0, A1). `identity`
+lists the users of the tenant for the pickers (`GET /api/users`) from the `TenantDirectory` of authz-library (A5). The
+tables of authz-library are in the schema `authz` (`authz.rbac.schema`, A2). A database created before keeps the old
+tables in `public`, unused, and the users and roles are those of the seeds again: `stack/stack.sh reset` starts clean.
 
 - `odt.project.browse`: list and read the projects of the tenant and their members.
 - `odt.project.create` (role `ODT_PROJECT_CREATOR`): create one; the creator becomes its lead and admin.
@@ -209,7 +212,7 @@ Email is on only when `spring.mail.host` is set (`SPRING_MAIL_HOST`, `SPRING_MAI
 `SPRING_MAIL_PASSWORD`; TLS through `spring.mail.properties`), with the sender `ODT_MAIL_FROM` and the address
 `ODT_PUBLIC_URL` (by default `FRONTEND_URL`). The health of the mail server is not part of `/actuator/health`: the
 outbox waits for it. The address of a user is read from the directory of authz-library without a session
-(`TenantUsers.find(tenant, user)`, with the admin scope of the system: temporary, as A5).
+(`TenantUsers.find(tenant, user)`, on `TenantDirectory`, A5).
 
 ## Attachments (`collaboration`)
 

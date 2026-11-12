@@ -20,7 +20,7 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   reference them, they are not copied here.
 - **Permissions**: an area, item or screen that needs one says so with `requires` (`odt.<resource>.<action>`, ADR-07).
   Global permissions with `can()`; those of a project role with the `_perm` the back end puts on each row and form
-  (until authz-library A1).
+  (`/authz/check` also answers them for a `project` or `issue` resource, A1, but `_perm` needs no extra request).
 - **Texts**: every visible text goes through `t()` and has its key in both catalogues. The shell texts of the runtime
   (`app.*`) are built into it in English and Italian; the catalogues keep only `app.title` and the names of the
   themes (`app.theme.<id>`), and a shell key here would override the built-in text.

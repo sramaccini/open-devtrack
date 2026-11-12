@@ -20,8 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
  * Project roles: who has which role in a project, and the permissions it gives. The project is only an identifier: the
  * module {@code project} checks the tenant before calling here (ADR-09).
  *
- * <p>Until authz-library has an extension point for the capabilities (request A1), these permissions reach the screens
- * as row permissions ({@code _perm}) in the answers of the modules, not through {@code /authz/capabilities}.
+ * <p>These permissions reach the screens as row permissions ({@code _perm}) in the answers of the modules, and the
+ * checks of {@code /authz/check} with a project or an issue through {@code project.ProjectPermissions} (A1); they are
+ * not in {@code /authz/capabilities}, since they depend on the project.
  *
  * <p>The admin of the tenant (global permission {@value #TENANT_ADMIN}) holds the role admin in every project of the
  * tenant, member or not (ADR-07).

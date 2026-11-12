@@ -57,8 +57,8 @@ they came from `main` at `9fa1916`, since the authorization kit with session coo
   after the kits got `429` with a Problem. Expected, but the `check` makes about ten logins: running it twice in a
   minute fails.
 - **Problem texts in Italian** in authz-library («Troppi tentativi di accesso»): request A3.
-- **RBAC tables in the `public` schema**: authz-rbac has no schema setting; request A2, so that its tables live in
-  their own schema like the modules.
+- **RBAC tables in the `public` schema**: authz-rbac had no schema setting; request A2, released in authz-library
+  2.2.0 and adopted: the tables are in the schema `authz`.
 - **Maven packages need a token**: GitHub Packages answers `401` without one, also to read. This machine has no
   `settings.xml`: the build used the copies of 2.0.1 already in the local Maven repository (installed by the
   authz-library build), not a download. CI needs the token as a secret.

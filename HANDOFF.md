@@ -83,7 +83,7 @@ Quadrava and authz-library, and the ADRs say where.
   `SKIP LOCKED`), plain-text mails in the last language the user used. Screen `notification-settings` as the
   «Notifications» section of the settings dialog (Q13, Quadrava 0.12.0), which the footer of the mails opens with
   `/?settings=notification-settings` (Q15, Quadrava 0.12.1). The e2e environment has Mailpit (mails at http://localhost:28025) and checks that a
-  mention is mailed. The address is read from authz-library without a session (temporary, with A5).
+  mention is mailed. The address is read from the directory of authz-library without a session (A5).
 - F4, ADR-19 (accepted 7 November 2026): an issue has an optional due date (`dueOn`) and reviewer (a member, not the
   assignee, who then watches it); ODQL `due` and `reviewer`; «Overdue» and «In review by me» on `dashboard`; the
   badge «Overdue» in `issue-list` and `search`; the message `review_requested` with its preference.
@@ -127,5 +127,6 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    access of authz-library 2.2.0, A4), the OpenAPI definition `docs/openapi.json` and `docs/api.md`. B: outgoing
    webhooks (module `integration`), signed as Standard Webhooks, from an outbox, with the screens `webhook-list` and
    `webhook-detail` (a screen of their own, not a section of `project-detail`: `ui/README.md`) and the receiver `echo`
-   of the stack. Next in F5: hardening and the adoption of A1, A2, A5 (authz-library 2.2.0), then 1.0.
+   of the stack. A1, A2 and A5 of authz-library 2.2.0 adopted. Next in F5: the administration (E10) and the hardening
+   (ASVS L2, WCAG 2.2 AA), then the documentation, the public demo and 1.0.
 2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

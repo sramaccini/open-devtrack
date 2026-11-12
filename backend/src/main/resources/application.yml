@@ -100,6 +100,8 @@ springdoc:
 
 authz:
   rbac:
+    # The tables of authz-library in a schema of their own, next to the odt_* schemas of the modules (ADR-04; A2)
+    schema: authz
     flyway:
       # The schema of authz-library, then the permission catalogue of OpenDevTrack (ADR-07)
       locations: classpath:db/authz/migration,classpath:db/authz/odt
