@@ -43,6 +43,12 @@ Configuration (`application.yml`): `DB_URL`, `DB_USER`, `DB_PASSWORD`, `REDIS_HO
 The profile `dev` adds the
 development tenants and users (with `service-account-opendevtrack-ci`) and the session cookie over http.
 
+Every answer of the back end carries `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`,
+`Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Cache-Control: no-store`,
+and over TLS (`X-Forwarded-Proto: https` from the proxy) `Strict-Transport-Security` for a year with the subdomains
+(ADR-23, `SecurityConfig`, checked by `SecurityHeadersTest`). The headers of the pages belong to the Quadrava runtime
+image: what they lack is asked as Q18 (`docs/README.md`).
+
 ## Public API (`platform`)
 
 `/api` is also the public API (ADR-21; guide in [docs/api.md](../docs/api.md)). Clients send a Keycloak access token
