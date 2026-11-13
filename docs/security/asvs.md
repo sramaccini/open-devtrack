@@ -16,7 +16,7 @@ again at each release.
 | **N/A** | Not applicable, with the reason |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 183 met, 32 met by the installation, 24 not applicable, 20 open (11 items).
+Level 2 has 259 requirements. Today: 185 met, 32 met by the installation, 24 not applicable, 18 open (10 items).
 
 ## The installation
 
@@ -50,7 +50,7 @@ What an installation must do for the requirements marked **Install**:
 | # | Summary | State | Where, or why |
 | --- | --- | --- | --- |
 | 1.1.1 | Secure development lifecycle | Met | odt: ADRs for each decision (`docs/`), review of each change, CI with tests, CodeQL, OSV-Scanner, ZAP and axe-core |
-| 1.1.2 | Threat modeling for design changes | Open | O1: no threat model is written |
+| 1.1.2 | Threat modeling for design changes | Met | odt: [threat-model.md](threat-model.md), updated with each ADR that changes a flow |
 | 1.1.3 | Security constraints in user stories | Met | odt: each ADR states who may do what (project roles, permission schemes, ADR-07, ADR-22) |
 | 1.1.4 | Trust boundaries, components, data flows documented | Met | odt: `README.md`, `docs/check-authz-end-to-end.md` (the parts and their links), ADR-03, ADR-09 |
 | 1.1.5 | High-level architecture and remote services analysed | Met | odt: the ADRs of the parts (Quadrava, authz-library, Keycloak, PostgreSQL, Redis, S3, SMTP, webhooks) |
@@ -305,7 +305,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 11.1.2 | Steps in realistic human time | N/A | No flow where speed is a risk (no purchases, no voting) |
 | 11.1.3 | Limits per user on business actions | Met | odt: 100 attachments per issue, file size, page sizes |
 | 11.1.4 | Anti-automation against excessive calls | Open | O12: the session API has no rate limit per user |
-| 11.1.5 | Business logic limits from threat modeling | Open | O1 |
+| 11.1.5 | Business logic limits from threat modeling | Met | odt: the limits in [threat-model.md](threat-model.md), «Limits of the business logic» |
 | 11.1.6 | No TOCTOU on sensitive operations | Met | odt: optimistic versions on every edit, uniqueness by constraints, transactions |
 | 11.1.7 | Monitor unusual business events | Open | O12 |
 | 11.1.8 | Configurable alerting on attacks | Open | O12 |
@@ -383,7 +383,6 @@ application.
 
 | Item | Issue | Requirements | Severity | Work |
 | --- | --- | --- | --- | --- |
-| O1 | [#4](https://github.com/sramaccini/open-devtrack/issues/4) | 1.1.2, 11.1.5 | Medium | A threat model of the main flows (login, issues, attachments, webhooks, public API), reviewed with each ADR |
 | O4 | [#7](https://github.com/sramaccini/open-devtrack/issues/7) | 1.14.2 | Low | Signed images (cosign) and their check at deploy |
 | O5 | [#8](https://github.com/sramaccini/open-devtrack/issues/8) | 2.1.8 | Low | A strength meter in a Keycloak theme of the project |
 | O6 | [#9](https://github.com/sramaccini/open-devtrack/issues/9) | 2.4.5, 2.8.5 | Low | Keycloak features: pepper, notification of a reused OTP; to ask upstream or accept |
@@ -405,6 +404,7 @@ Closed:
 - O8 ([#11](https://github.com/sramaccini/open-devtrack/issues/11)): the session cookie `__Host-SESSION_ID`.
 - O11 ([#14](https://github.com/sramaccini/open-devtrack/issues/14)): a log line for each refusal of access control.
 - O3 ([#6](https://github.com/sramaccini/open-devtrack/issues/6)): [data.md](data.md), the classification of the data.
+- O1 ([#4](https://github.com/sramaccini/open-devtrack/issues/4)): [threat-model.md](threat-model.md).
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).
