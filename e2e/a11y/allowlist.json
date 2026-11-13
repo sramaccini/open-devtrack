@@ -1,11 +1,4 @@
 {
   "_comment": "Serious or critical violations accepted for now (ADR-23): each names the rule of axe-core, the screens (all when absent), why, and the request that fixes it.",
-  "allowed": [
-    {
-      "rule": "color-contrast",
-      "screens": ["project-detail", "issue-list", "issue-detail", "backlog"],
-      "why": "The value of a select that is read only (the role of the user in a project, the status of an issue) is drawn by NG-ZORRO as disabled, rgba(0,0,0,0.25) on #f5f5f5, about 1.6:1; a read-only field is not disabled and keeps the contrast of the text.",
-      "request": "Q19 (docs/README.md)"
-    }
-  ]
+  "allowed": []
 }

@@ -1,7 +1,7 @@
 # OpenDevTrack screens
 
 The front end of OpenDevTrack is this Quadrava project: screens, navigation, themes and translations, as JSON documents
-validated by the schemas of the pinned Quadrava version (0.13.1, ADR-01). No Angular code: the runtime image of Quadrava
+validated by the schemas of the pinned Quadrava version (0.14.0, ADR-01). No Angular code: the runtime image of Quadrava
 loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 | Path | Registry kind | What |
@@ -34,14 +34,14 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 ## Publishing
 
-The Quadrava CLI (`@sramaccini/quadrava-cli@0.13.1`, the version of the runtime) is on GitHub Packages: the `.npmrc`
+The Quadrava CLI (`@sramaccini/quadrava-cli@0.14.0`, the version of the runtime) is on GitHub Packages: the `.npmrc`
 of the repository maps `@sramaccini` there, and npm needs a token with `read:packages` for `npm.pkg.github.com` in
 the user config (`~/.npmrc`; in CI, `NODE_AUTH_TOKEN`). From the root of the repository, with a Keycloak access token
 of the client `opendevtrack-tools` in `QUADRAVA_TOKEN`:
 
 ```bash
-npx --yes @sramaccini/quadrava-cli@0.13.1 validate ui
-npx --yes @sramaccini/quadrava-cli@0.13.1 publish ui --registry http://localhost:28080 --app opendevtrack --env development
+npx --yes @sramaccini/quadrava-cli@0.14.0 validate ui
+npx --yes @sramaccini/quadrava-cli@0.14.0 publish ui --registry http://localhost:28080 --app opendevtrack --env development
 ```
 
 The same command publishes to `testing` and `production`: the registry has no protected environments (ADR-12), the
@@ -147,8 +147,9 @@ secret to the next one through `state.secret`, emptied afterwards. `webhook-deta
 
 ADR-21 puts the webhooks in a section of `project-detail`. They are a screen of their own because the list answers
 403 to whoever is not an admin of the project, and a data source of a screen loads for everybody who opens it: a
-member would see the table fail. The value `*` (every event) is shown as it is: a key of the catalogues cannot hold
-`*`, so `values.webhook_event.*` cannot exist, and the tooltip of the field explains it.
+member would see the table fail. The value `*` (every event, those added later too) shows
+as «All events»: a key of the catalogues cannot hold `*`, so `optionKeys` and `valueKeys` (Quadrava 0.14.0) give it
+the key `values.webhook_event.all`.
 
 ## Administration
 
@@ -182,10 +183,10 @@ The area `admin` (ADR-22), shown to whoever holds `authz.rbac.manage` in the ten
 Each item has its own `requires`; an area with no item to show is hidden, so the area shows to the admin of the users
 and to the admin of the projects alike. In `project-detail` the form shows the scheme of the project, and «Change the
 permission scheme» (for whoever edits the project) picks another one with a lookup on the schemes. It is a button of
-its own under the form, not one more action of the form: the actions of a form do not wrap (Q17), and the row is
-already wider than a 1280 px window since the Webhooks button. The members table of `project-detail` shows through which
-groups a user is a member, and a «Groups» table under it lists the groups of the project with Change role and Remove;
-«Add group» is a button of its own for the same reason.
+its own under the form, with its own dialog, since it does not save the fields of the form; the actions of the form
+wrap when they do not fit (Quadrava 0.14.0, Q17). The members table of `project-detail` shows through which groups a
+user is a member, and a «Groups» table under it lists the groups of the project with Change role and Remove; «Add
+group» is the button of that table.
 
 Passwords and sign-in stay in Keycloak, and the users screen says so. ADR-22 asks for a link to the console of
 Keycloak for the tenant: there is no address of the console in the configuration of the front end, so the text names

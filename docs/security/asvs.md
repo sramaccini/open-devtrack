@@ -4,7 +4,7 @@ The state of every level 2 requirement of the [Application Security Verification
 4.0.3](https://github.com/OWASP/ASVS/tree/v4.0.3) (CC BY-SA 4.0), as ADR-23 asks. The requirements are named by number
 with a short summary; the standard has the full text.
 
-Reviewed on 13 November 2026 against `main` (authz-library 2.2.0, Quadrava 0.13.1, Keycloak 26.8). It is reviewed
+Reviewed on 13 November 2026 against `main` (authz-library 2.2.0, Quadrava 0.14.0, Keycloak 26.8). It is reviewed
 again at each release.
 
 ## States
@@ -14,9 +14,9 @@ again at each release.
 | **Met** | Where: OpenDevTrack (`odt`), authz-library (`authz`), the Quadrava runtime (`quadrava`), Keycloak (`kc`) |
 | **Install** | Met by the installation, as [the installation](#the-installation) below asks; OpenDevTrack cannot do it alone |
 | **N/A** | Not applicable, with the reason |
-| **Open** | Not met yet: an item of [Open items](#open-items), to become an issue |
+| **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 172 met, 31 met by the installation, 24 not applicable, 32 open (18 items).
+Level 2 has 259 requirements. Today: 174 met, 32 met by the installation, 24 not applicable, 29 open (16 items, and O19, which hardens a met one).
 
 ## The installation
 
@@ -39,6 +39,8 @@ What an installation must do for the requirements marked **Install**:
   secret store of the platform (Kubernetes secrets, a vault), never from files in the image.
 - **Logs**: the logs of the back end, the runtime and Keycloak go to a central system, kept away from the hosts, with
   UTC clocks synchronised by NTP.
+- **HSTS**: `QUADRAVA_HSTS` set on the runtime, for example `max-age=31536000; includeSubDomains`, or the same header at
+  the proxy that ends TLS.
 - **Network**: PostgreSQL, Redis and the back end are not reachable from outside; only the runtime is published.
 
 ## V1 Architecture, design and threat modeling
@@ -52,7 +54,7 @@ What an installation must do for the requirements marked **Install**:
 | 1.1.5 | High-level architecture and remote services analysed | Met | odt: the ADRs of the parts (Quadrava, authz-library, Keycloak, PostgreSQL, Redis, S3, SMTP, webhooks) |
 | 1.1.6 | Central, vetted, reusable security controls | Met | authz: login, session, CSRF, roles; odt: `platform/CurrentUser`, `access/ProjectAccess` as the one way in |
 | 1.1.7 | Secure coding checklist for developers | Met | odt: `AGENTS.md`, `CONTRIBUTING.md` and this list |
-| 1.2.1 | Low-privilege OS accounts | Open | O18: the back end runs as user `odt` (`backend/Dockerfile`); the runtime image of Quadrava starts nginx as root (request Q20) |
+| 1.2.1 | Low-privilege OS accounts | Met | odt: the back end runs as user `odt` (`backend/Dockerfile`); quadrava: nginx runs as user 101 in group 0 (0.14.0) |
 | 1.2.2 | Communications between components authenticated | Install | The passwords of PostgreSQL, Redis, SMTP, storage; the client secret to Keycloak |
 | 1.2.3 | One vetted authentication mechanism | Met | authz + kc: OpenID Connect with PKCE, the BFF keeps the tokens |
 | 1.2.4 | No weaker alternative authentication path | Met | authz: the session and the bearer path (`authz.bff.bearer`) take the same permissions; no local login |
@@ -362,9 +364,9 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 14.3.3 | No version details in headers | Met | odt: no `Server` or `X-Powered-By` from the back end |
 | 14.4.1 | Content-Type with charset | Met | odt: `application/json` (UTF-8 by definition) and `application/problem+json` |
 | 14.4.2 | `Content-Disposition` on API answers | Open | O16: only on attachments; the API answers have CSP `default-src 'none'` and `nosniff` |
-| 14.4.3 | Content Security Policy | Open | O17: on the API answers; not on the pages of the runtime image (request Q18) |
+| 14.4.3 | Content Security Policy | Met | odt: `default-src 'none'` on the API answers; quadrava: a policy of its own files, no inline script (0.14.0); O19 tightens it |
 | 14.4.4 | `nosniff` on all answers | Met | odt and quadrava |
-| 14.4.5 | HSTS on all answers | Open | O17: on the API answers; the pages of the runtime image need Q18 or the proxy |
+| 14.4.5 | HSTS on all answers | Install | odt sends it on the API answers; the runtime sends it with `QUADRAVA_HSTS` |
 | 14.4.6 | Referrer-Policy | Met | odt: `no-referrer`; quadrava: `same-origin` |
 | 14.4.7 | No embedding by third-party sites | Met | odt: `frame-ancestors 'none'`; quadrava: `X-Frame-Options: SAMEORIGIN` |
 | 14.5.1 | Only the HTTP methods in use | Met | odt: Spring MVC answers 405 to others |
@@ -395,8 +397,10 @@ application.
 | O14 | [#17](https://github.com/sramaccini/open-devtrack/issues/17) | 12.1.3, 12.2.1, 12.4.2 | Medium | Quotas per project, a type check by content, an antivirus hook for attachments |
 | O15 | [#18](https://github.com/sramaccini/open-devtrack/issues/18) | 13.2.2 | Low | Requests checked against the OpenAPI schema |
 | O16 | [#19](https://github.com/sramaccini/open-devtrack/issues/19) | 14.4.2 | Low | `Content-Disposition` on the JSON answers of the API |
-| O17 | [#20](https://github.com/sramaccini/open-devtrack/issues/20) | 14.4.3, 14.4.5 | Medium | CSP and HSTS on the pages of the runtime image: request Q18 to Quadrava |
-| O18 | [#21](https://github.com/sramaccini/open-devtrack/issues/21) | 1.2.1 | Low | The runtime image of Quadrava as a non-root user: request Q20 |
+| O19 | [#22](https://github.com/sramaccini/open-devtrack/issues/22) | 14.4.3 (met) | Low | The CSP of the runtime image without `https:` images and inline styles (ZAP 10055): request Q21 |
+
+Closed: O17 ([#20](https://github.com/sramaccini/open-devtrack/issues/20)) and O18
+([#21](https://github.com/sramaccini/open-devtrack/issues/21)), with Quadrava 0.14.0 (requests Q18 and Q20).
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).

@@ -1,12 +1,12 @@
 # End-to-end check of authz-library (F0)
 
 Result on 31 October 2026: **all checks passed**. The OpenDevTrack back end, built on the authz-library 2.0.1
-libraries, talks to the Quadrava runtime 0.13.1 as the contracts of Quadrava ask, with the versions OpenDevTrack targets.
+libraries, talks to the Quadrava runtime 0.14.0 as the contracts of Quadrava ask, with the versions OpenDevTrack targets.
 
 ## What runs
 
 ```
-browser / kits ──▶ quadrava-runtime 0.13.1 (:28090) ──/bff /authz /logout /oauth2──▶ backend/ (:28080, profile dev)
+browser / kits ──▶ quadrava-runtime 0.14.0 (:28090) ──/bff /authz /logout /oauth2──▶ backend/ (:28080, profile dev)
                                                                                     │ authz-bff, authz-session, authz-rbac 2.0.1
                          Keycloak 26.8.0 (:28180, realm opendevtrack) ◀── OIDC ─────┤
                          PostgreSQL 18.6 (:25432) ◀── RBAC schema + odt.* catalogue ┤
@@ -46,11 +46,11 @@ Maven must reach the authz-library packages: see [backend/README.md](../backend/
 | `ui/` published to the registry (`development`) and served by the runtime, from F1 | 7 documents; home and projects screens in both themes and languages |
 | A mention mailed at once through the outbox (ADR-18), from F4 | the mail of the new issue in Mailpit |
 | Tenant switch kept for the next login (ADR-08) | ACME → GLOBEX, then GLOBEX after a new login |
-| axe-core on 11 main screens, signed in as `mario.rossi` (ADR-23, `e2e/a11y`), from F5 | no serious or critical violation outside `e2e/a11y/allowlist.json` (the contrast of a read-only select, Q19) |
-| ZAP baseline scan through the runtime, signed in (`run.sh zap`, ADR-23), from F5 | no medium or high alert outside `e2e/zap/allowlist.json` (no `Content-Security-Policy` on the pages of the runtime image, Q18); low: the `XSRF-TOKEN` cookie of authz-library is readable by scripts, as the front end needs, and has no `SameSite` |
+| axe-core on 11 main screens, signed in as `mario.rossi` (ADR-23, `e2e/a11y`), from F5 | no serious or critical violation outside `e2e/a11y/allowlist.json`, empty since Quadrava 0.14.0 (Q19) |
+| ZAP baseline scan through the runtime, signed in (`run.sh zap`, ADR-23), from F5 | no medium or high alert outside `e2e/zap/allowlist.json` (since Quadrava 0.14.0 the pages carry a CSP, Q18; its `https:` images and inline styles, plugin 10055, wait for Q21); low: the `XSRF-TOKEN` cookie of authz-library is readable by scripts, as the front end needs, and has no `SameSite` |
 | In the browser: login through the runtime, the user menu | «Spazio di lavoro» with both tenants, GLOBEX selected, 2 permissions |
 
-The kits come from the Quadrava tag `v0.13.1`, the pinned release (downloaded file by file, not cloned); until 0.2.0
+The kits come from the Quadrava tag `v0.14.0`, the pinned release (downloaded file by file, not cloned); until 0.2.0
 they came from `main` at `9fa1916`, since the authorization kit with session cookies was not in `v0.1.0`.
 
 ## Found along the way

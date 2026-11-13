@@ -76,7 +76,10 @@
                   "sprint.completed"
                 ],
                 "optionKey": "values.webhook_event",
-                "tooltip": "{{ t('webhooks.events_help', 'What it is told about; * for every event, those of tomorrow too') }}"
+                "optionKeys": {
+                  "*": "values.webhook_event.all"
+                },
+                "tooltip": "{{ t('webhooks.events_help', 'What it is told about; «All events» includes those added later') }}"
               }
             ],
             "onSubmit": [
@@ -178,7 +181,10 @@
         {
           "field": "events",
           "label": "{{ t('webhooks.events', 'Events') }}",
-          "valueKey": "values.webhook_event"
+          "valueKey": "values.webhook_event",
+          "valueKeys": {
+            "*": "values.webhook_event.all"
+          }
         },
         {
           "field": "active",
@@ -275,7 +281,10 @@
                       "sprint.completed"
                     ],
                     "optionKey": "values.webhook_event",
-                    "tooltip": "{{ t('webhooks.events_help', 'What it is told about; * for every event, those of tomorrow too') }}"
+                    "optionKeys": {
+                      "*": "values.webhook_event.all"
+                    },
+                    "tooltip": "{{ t('webhooks.events_help', 'What it is told about; «All events» includes those added later') }}"
                   },
                   {
                     "name": "active",

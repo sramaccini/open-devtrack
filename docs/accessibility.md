@@ -1,4 +1,4 @@
-# Accessibility, WCAG 2.2 AA
+| backlog | 0 | 0 | || issue-detail | 0 | 0 | || issue-list | 0 | 0 | || project-detail | 0 | 0 | |# Accessibility, WCAG 2.2 AA
 
 What ADR-23 asks for accessibility: an automated check in CI and a manual check at each release. Most of what a user
 meets is drawn by the components of Quadrava (NG-ZORRO). OpenDevTrack controls its screens: labels, headings, the order
@@ -28,25 +28,25 @@ e2e/authz/run.sh down
 
 ### Results
 
-On 13 November 2026, `main`:
+On 13 November 2026, `main` with Quadrava 0.14.0:
 
 | Screen | Violations | Serious or critical | Allowed |
 | --- | ---: | ---: | --- |
 | dashboard | 0 | 0 | |
 | project-list | 0 | 0 | |
-| project-detail | 1 | 1 | `color-contrast`, Q19 |
-| issue-list | 1 | 1 | `color-contrast`, Q19 |
-| issue-detail | 1 | 1 | `color-contrast`, Q19 |
+| project-detail | 0 | 0 | |
+| issue-list | 0 | 0 | |
+| issue-detail | 0 | 0 | |
 | issue-new | 0 | 0 | |
 | board | 0 | 0 | |
-| backlog | 1 | 1 | `color-contrast`, Q19 |
+| backlog | 0 | 0 | |
 | search | 0 | 0 | |
 | notification-settings | 0 | 0 | |
 | webhook-list | 0 | 0 | |
 
-The only finding is the contrast of a read-only `select`: NG-ZORRO draws it as disabled, about 1.6:1 where 4.5:1 is
-asked (request Q19 to Quadrava). axe-core finds what can be found automatically, about a third of the criteria; the
-manual check covers the rest.
+No finding. Until Quadrava 0.14.0 a read-only `select` was drawn as disabled, about 1.6:1 where 4.5:1 is asked
+(request Q19, released and adopted); the allow-list of `e2e/a11y` is empty. axe-core finds what can be found
+automatically, about a third of the criteria; the manual check covers the rest.
 
 ## Manual check at each release
 
@@ -75,8 +75,8 @@ With NVDA and Firefox (Windows) or VoiceOver and Safari (macOS):
 ### Zoom and reflow
 
 - [ ] Zoom at 200%: nothing is cut and no text overlaps.
-- [ ] A width of 320 px: one column, no horizontal scroll except tables and the board. Known: the actions of the
-      form of `project-detail` do not wrap (request Q17).
+- [ ] A width of 320 px: one column, no horizontal scroll except tables and the board. The actions of a form wrap
+      since Quadrava 0.14.0 (request Q17).
 
 ### Contrast and colour
 

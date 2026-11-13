@@ -774,6 +774,19 @@
           "maxLength": 100,
           "description": "Prefix of the translation keys for the option labels: the label of an option is t('<prefix>.<value>'), with the value as a fallback."
         },
+        "optionKeys": {
+          "type": "object",
+          "maxProperties": 100,
+          "propertyNames": {
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]{1,200}$"
+          },
+          "description": "Translation keys of single option labels, by value, for values that cannot be part of a key, for example {\"*\": \"values.events.all\"}: the label of * is then t('values.events.all'). They come before optionKey; a missing key shows the value."
+        },
         "rows": {
           "type": "integer",
           "minimum": 2,
@@ -3160,6 +3173,19 @@
           "maxLength": 100,
           "description": "Prefix of the translation keys for the shown values: the text is t('<prefix>.<value>'), with the value as a fallback. Badge colours stay tied to the original value."
         },
+        "valueKeys": {
+          "type": "object",
+          "maxProperties": 100,
+          "propertyNames": {
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]{1,200}$"
+          },
+          "description": "Translation keys of single shown values, by value, for values that cannot be part of a key, for example {\"*\": \"values.events.all\"}: the text of * is then t('values.events.all'). They come before valueKey; a missing key shows the value. Badge colours stay tied to the original value."
+        },
         "decimals": {
           "type": "integer",
           "minimum": 0,
@@ -3351,6 +3377,19 @@
           "minLength": 1,
           "maxLength": 100,
           "description": "Prefix of the translation keys for the shown values: the text is t('<prefix>.<value>'), with the value as a fallback. Badge colours stay tied to the original value."
+        },
+        "valueKeys": {
+          "type": "object",
+          "maxProperties": 100,
+          "propertyNames": {
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]{1,200}$"
+          },
+          "description": "Translation keys of single shown values, by value, for values that cannot be part of a key, for example {\"*\": \"values.events.all\"}: the text of * is then t('values.events.all'). They come before valueKey; a missing key shows the value. Badge colours stay tied to the original value."
         },
         "tone": {
           "$ref": "#/$defs/tone",
