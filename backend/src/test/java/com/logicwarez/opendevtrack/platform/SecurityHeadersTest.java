@@ -31,7 +31,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 /**
  * The security headers of the answers of the back end (ADR-23): signed in or not, an answer or an error. HSTS only
- * over TLS: the proxy in front says so with X-Forwarded-Proto.
+ * over TLS: the proxy in front says so with X-Forwarded-Proto. Content-Disposition is attachment unless the answer
+ * sets its own (an attachment, with the name of its file: AttachmentApiTest).
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -66,6 +67,7 @@ class SecurityHeadersTest {
                 .andExpect(header().string("X-Content-Type-Options", "nosniff"))
                 .andExpect(header().string("Referrer-Policy", "no-referrer"))
                 .andExpect(header().string("X-Frame-Options", "DENY"))
+                .andExpect(header().string("Content-Disposition", "attachment"))
                 .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")));
     }
 

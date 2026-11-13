@@ -16,7 +16,7 @@ again at each release.
 | **N/A** | Not applicable, with the reason |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 174 met, 32 met by the installation, 24 not applicable, 29 open (16 items).
+Level 2 has 259 requirements. Today: 175 met, 32 met by the installation, 24 not applicable, 28 open (15 items).
 
 ## The installation
 
@@ -365,7 +365,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 14.3.2 | Debug modes off in production | Met | odt: no debug endpoints; `dev` profile only in development |
 | 14.3.3 | No version details in headers | Met | odt: no `Server` or `X-Powered-By` from the back end |
 | 14.4.1 | Content-Type with charset | Met | odt: `application/json` (UTF-8 by definition) and `application/problem+json` |
-| 14.4.2 | `Content-Disposition` on API answers | Open | O16: only on attachments; the API answers have CSP `default-src 'none'` and `nosniff` |
+| 14.4.2 | `Content-Disposition` on API answers | Met | odt: `attachment` on every answer that sets none; attachments keep theirs, with the name of the file |
 | 14.4.3 | Content Security Policy | Met | odt: `default-src 'none'` on the API answers; quadrava: its own files only, style elements with a nonce, images from the origin (0.15.0); style attributes stay allowed for NG-ZORRO |
 | 14.4.4 | `nosniff` on all answers | Met | odt and quadrava |
 | 14.4.5 | HSTS on all answers | Install | odt sends it on the API answers; the runtime sends it with `QUADRAVA_HSTS` |
@@ -398,11 +398,13 @@ application.
 | O13 | [#16](https://github.com/sramaccini/open-devtrack/issues/16) | 8.3.2 | Medium | Export and removal of a user's data on request |
 | O14 | [#17](https://github.com/sramaccini/open-devtrack/issues/17) | 12.1.3, 12.2.1, 12.4.2 | Medium | Quotas per project, a type check by content, an antivirus hook for attachments |
 | O15 | [#18](https://github.com/sramaccini/open-devtrack/issues/18) | 13.2.2 | Low | Requests checked against the OpenAPI schema |
-| O16 | [#19](https://github.com/sramaccini/open-devtrack/issues/19) | 14.4.2 | Low | `Content-Disposition` on the JSON answers of the API |
 
-Closed: O17 ([#20](https://github.com/sramaccini/open-devtrack/issues/20)) and O18
-([#21](https://github.com/sramaccini/open-devtrack/issues/21)) with Quadrava 0.14.0 (requests Q18 and Q20), O19
-([#22](https://github.com/sramaccini/open-devtrack/issues/22)) with Quadrava 0.15.0 (request Q21).
+Closed:
+
+- O16 ([#19](https://github.com/sramaccini/open-devtrack/issues/19)): `Content-Disposition` on every answer.
+- O17 ([#20](https://github.com/sramaccini/open-devtrack/issues/20)) and O18
+  ([#21](https://github.com/sramaccini/open-devtrack/issues/21)): Quadrava 0.14.0 (requests Q18 and Q20).
+- O19 ([#22](https://github.com/sramaccini/open-devtrack/issues/22)): Quadrava 0.15.0 (request Q21).
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).

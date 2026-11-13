@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 
 /**
  * One filter chain for the whole monolith: the BFF of authz-library (login, session, CSRF, Origin check), its RBAC
@@ -33,10 +34,13 @@ public class SecurityConfig {
             // The answers of the back end are data, never pages (ADR-23): nothing may load from them or frame them.
             // nosniff, no-store and X-Frame-Options are the defaults of Spring Security, HSTS too on the requests
             // that arrive over TLS (X-Forwarded-Proto from the proxy, server.forward-headers-strategy).
+            // Content-Disposition: attachment on every answer that has none (ASVS 14.4.2): a browser that opens an
+            // answer saves it instead of drawing it. The attachments keep their own, with the name of the file.
             .headers(headers -> headers
                 .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'none'; frame-ancestors 'none'"))
                 .referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.NO_REFERRER))
-                .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31_536_000)));
+                .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31_536_000))
+                .addHeaderWriter(new StaticHeadersWriter("Content-Disposition", "attachment")));
         return http.build();
     }
 }
