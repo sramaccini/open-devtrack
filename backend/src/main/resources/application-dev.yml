@@ -1,9 +1,10 @@
 # Local development: development tenants and users (aligned with the Keycloak realm of e2e/authz) and the session
-# cookie also on http.
+# cookie also on http, so without the __Host- prefix, which needs Secure.
 server:
   servlet:
     session:
       cookie:
+        name: SESSION_ID
         secure: false
 authz:
   rbac:

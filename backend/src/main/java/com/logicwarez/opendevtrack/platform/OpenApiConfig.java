@@ -35,6 +35,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.customizers.OperationCustomizer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -71,7 +72,7 @@ class OpenApiConfig {
     private final Map<String, Schema> answers = new ConcurrentHashMap<>();
 
     @Bean
-    OpenAPI openDevTrackApi() {
+    OpenAPI openDevTrackApi(@Value("${server.servlet.session.cookie.name}") String sessionCookie) {
         return new OpenAPI()
                 .info(new Info().title("OpenDevTrack API").version(VERSION)
                         .description("""
@@ -87,7 +88,7 @@ class OpenApiConfig {
                                 .scheme("bearer").bearerFormat("JWT")
                                 .description("A Keycloak access token of a client allowed by the installation"))
                         .addSecuritySchemes("session", new SecurityScheme().type(SecurityScheme.Type.APIKEY)
-                                .in(SecurityScheme.In.COOKIE).name("SESSION_ID")
+                                .in(SecurityScheme.In.COOKIE).name(sessionCookie)
                                 .description("The session of the screens (authz-library); writes also need "
                                         + "X-XSRF-TOKEN")))
                 .addSecurityItem(new SecurityRequirement().addList("bearer"))

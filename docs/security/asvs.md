@@ -16,7 +16,7 @@ again at each release.
 | **N/A** | Not applicable, with the reason |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 177 met, 32 met by the installation, 24 not applicable, 26 open (14 items).
+Level 2 has 259 requirements. Today: 178 met, 32 met by the installation, 24 not applicable, 25 open (13 items).
 
 ## The installation
 
@@ -155,7 +155,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 3.1.1 | No session tokens in URLs | Met | authz: cookie only |
 | 3.2.1 | New session token on authentication | Met | authz: Spring Security renews the session id at login |
 | 3.2.2 | Session tokens with 64 bits of entropy | Met | authz: Spring Session ids (random UUID) |
-| 3.2.3 | Session tokens only in secure cookies | Met | authz: `SESSION_ID`, `HttpOnly`, `Secure`, `SameSite=Lax` |
+| 3.2.3 | Session tokens only in secure cookies | Met | odt: `__Host-SESSION_ID` (`SESSION_ID` in the development profile, on http), `HttpOnly`, `Secure`, `SameSite=Lax` |
 | 3.2.4 | Approved algorithms for tokens | Met | authz: `SecureRandom` |
 | 3.3.1 | Logout and expiry invalidate the session | Met | authz: `/logout` removes the session from Redis and ends the Keycloak session |
 | 3.3.2 | Re-authentication when active or idle | Met | authz: idle 30 min (`server.servlet.session.timeout`), absolute 10 h |
@@ -164,7 +164,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 3.4.1 | `Secure` cookie | Met | odt: `server.servlet.session.cookie.secure: true` (false only in `dev`) |
 | 3.4.2 | `HttpOnly` cookie | Met | odt: `http-only: true` |
 | 3.4.3 | `SameSite` cookie | Met | odt: `same-site: lax`, with the CSRF token of authz |
-| 3.4.4 | `__Host-` prefix | Open | O8: the cookie is `SESSION_ID`; to try `__Host-SESSION_ID` through the runtime |
+| 3.4.4 | `__Host-` prefix | Met | odt: `__Host-SESSION_ID`, Secure, Path=/, no Domain (SessionCookieTest); the runtime passes it as it is |
 | 3.4.5 | Cookie path when the domain is shared | Met | odt: no `Domain` attribute; path `/` on its own host |
 | 3.5.1 | Users can revoke OAuth tokens | Met | authz: personal access tokens revoked by their owner; kc: account console for clients |
 | 3.5.2 | Session tokens rather than static keys | Met | authz: sessions for people; access tokens or personal tokens with an expiry for tools |
@@ -389,7 +389,6 @@ application.
 | O5 | [#8](https://github.com/sramaccini/open-devtrack/issues/8) | 2.1.8 | Low | A strength meter in a Keycloak theme of the project |
 | O6 | [#9](https://github.com/sramaccini/open-devtrack/issues/9) | 2.4.5, 2.8.5 | Low | Keycloak features: pepper, notification of a reused OTP; to ask upstream or accept |
 | O7 | [#10](https://github.com/sramaccini/open-devtrack/issues/10) | 3.3.3, 3.3.4 | Medium | authz-library: list and end a user's sessions, end them after a password change (back-channel logout of Keycloak) |
-| O8 | [#11](https://github.com/sramaccini/open-devtrack/issues/11) | 3.4.4 | Low | The session cookie as `__Host-SESSION_ID`, checked through the runtime |
 | O9 | [#12](https://github.com/sramaccini/open-devtrack/issues/12) | 3.7.1, 4.3.3 | Medium | Recent login (`max_age` or `acr`) before the administration and the creation of tokens |
 | O10 | [#13](https://github.com/sramaccini/open-devtrack/issues/13) | 6.4.2 | Low | `ODT_SECRET_KEY` held by a KMS |
 | O11 | [#14](https://github.com/sramaccini/open-devtrack/issues/14) | 7.1.3, 7.2.2 | Medium | A log line for each refusal of access control (403 and the not-found of other tenants) |
@@ -405,6 +404,7 @@ Closed:
   ([#21](https://github.com/sramaccini/open-devtrack/issues/21)): Quadrava 0.14.0 (requests Q18 and Q20).
 - O19 ([#22](https://github.com/sramaccini/open-devtrack/issues/22)): Quadrava 0.15.0 (request Q21).
 - O2 ([#5](https://github.com/sramaccini/open-devtrack/issues/5)): structured logs in the image.
+- O8 ([#11](https://github.com/sramaccini/open-devtrack/issues/11)): the session cookie `__Host-SESSION_ID`.
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).

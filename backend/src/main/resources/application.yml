@@ -9,7 +9,10 @@ server:
       # Sliding inactivity timeout; the absolute lifetime is authz.bff.session.absolute-timeout
       timeout: 30m
       cookie:
-        name: SESSION_ID
+        # The __Host- prefix (ASVS 3.4.4): the browser takes the cookie only if it is Secure, has Path=/ and no Domain,
+        # so no subdomain or other path can set or shadow it. The development profile keeps SESSION_ID, on http.
+        name: __Host-SESSION_ID
+        path: /
         http-only: true
         secure: true
         # Lax, not Strict: the cookie must come back with the return from the identity provider (a cross-site
