@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.UnaryOperator;
 import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
@@ -86,11 +87,14 @@ class WebhookEntity {
         this.updatedAt = now;
     }
 
-    /** The secrets that sign at {@code now}: the current one, and the previous one during the overlap. */
-    List<String> signingSecrets(Instant now) {
-        List<String> secrets = new ArrayList<>(List.of(secret));
+    /**
+     * The secrets that sign at {@code now}: the current one, and the previous one during the overlap; {@code open} reads
+     * them in clear (they are kept encrypted, ADR-23).
+     */
+    List<String> signingSecrets(Instant now, UnaryOperator<String> open) {
+        List<String> secrets = new ArrayList<>(List.of(open.apply(secret)));
         if (previousSecret != null && previousUntil != null && now.isBefore(previousUntil)) {
-            secrets.add(previousSecret);
+            secrets.add(open.apply(previousSecret));
         }
         return secrets;
     }

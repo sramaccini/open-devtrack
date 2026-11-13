@@ -39,7 +39,8 @@ front, is `e2e/authz/run.sh up` ([docs/check-authz-end-to-end.md](../docs/check-
 
 Configuration (`application.yml`): `DB_URL`, `DB_USER`, `DB_PASSWORD`, `REDIS_HOST`, `REDIS_PORT`, `IAM_ISSUER_URI`,
 `IAM_CLIENT_ID`, `IAM_CLIENT_SECRET`, `FRONTEND_URL` (the address of the runtime), `PORT`, `ODT_BEARER_CLIENTS`
-(the clients whose access tokens are accepted, `opendevtrack-tools` by default). The profile `dev` adds the
+(the clients whose access tokens are accepted, `opendevtrack-tools` by default), `ODT_SECRET_KEY` (required: below).
+The profile `dev` adds the
 development tenants and users (with `service-account-opendevtrack-ci`) and the session cookie over http.
 
 ## Public API (`platform`)
@@ -354,7 +355,15 @@ payload: the outbox. No module depends on it; it tells `notification` of a webho
 so two instances never post the same one: a `POST` signed as Standard Webhooks asks (`Signature`), 10 seconds of
 timeout, no redirects. A 2xx is a delivery; anything else is tried again after 1, 5 and 30 minutes, 2, 6 and 12 hours,
 then given up; a webhook given up for 3 days is turned off. Deliveries older than 30 days are deleted at 3:15 every
-night. The secret is kept in clear, since it signs; after a rotation the old one signs too for 24 hours.
+night. The secret must be read back, since it signs; after a rotation the old one signs too for 24 hours.
+
+The secrets are kept encrypted (ADR-23): `SecretBox` (`platform`) encrypts them with AES-GCM (Spring Security
+Crypto, a 256-bit key derived from `ODT_SECRET_KEY`, a random nonce for each value) as `enc:<key id>:<hex>`. The
+back end does not start without a key of at least 32 characters; the stack and the e2e generate one in
+`.work/.env`. To rotate it: set the new key with a new `ODT_SECRET_KEY_ID` and the old one in
+`ODT_SECRET_KEYS_PREVIOUS` (`id=key,id=key`); at start `SecretsAtRest` writes every secret again under the new key
+(and encrypts those stored in clear before V30), then the old key can go. A key lost is every webhook secret lost:
+rotate them from the screen.
 
 `Addresses` refuses an address that is not `https`, has credentials or a fragment, or resolves to a loopback,
 private, link-local, shared, multicast or reserved address (the metadata of the clouds too), when it is saved and

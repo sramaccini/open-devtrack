@@ -88,6 +88,7 @@ services:
       REDIS_HOST: redis
       IAM_ISSUER_URI: http://localhost:${KEYCLOAK_PORT:-18180}/realms/opendevtrack
       IAM_CLIENT_SECRET: ${BFF_CLIENT_SECRET}
+      ODT_SECRET_KEY: ${ODT_SECRET_KEY:?run stack.sh}
       ODT_BEARER_CLIENTS: opendevtrack-tools,opendevtrack-ci
       FRONTEND_URL: http://localhost:${FRONT_PORT:-18090}
       SPRING_MAIL_HOST: mailpit

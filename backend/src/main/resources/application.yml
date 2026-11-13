@@ -124,6 +124,13 @@ authz:
       allowed-clients: ${ODT_BEARER_CLIENTS:opendevtrack-tools}
 
 odt:
+  secrets:
+    # The key that encrypts the secrets at rest (ADR-23: the secrets of the webhooks), at least 32 characters; the
+    # back end does not start without it. To rotate it: a new key with a new id, the old one in previous-keys
+    # ("id=key,id=key") until the next start has written every secret again under the new one.
+    key: ${ODT_SECRET_KEY:}
+    key-id: ${ODT_SECRET_KEY_ID:1}
+    previous-keys: ${ODT_SECRET_KEYS_PREVIOUS:}
   audit:
     # How long the audit log of the administration is kept (ADR-22), deleted once a night after that.
     retention: ${ODT_AUDIT_RETENTION:P730D}

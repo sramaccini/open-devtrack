@@ -153,6 +153,9 @@ class WebhookApiTest {
         JsonNode created = project("[\"issue.created\",\"comment.posted\"]");
         String id = created.get("id").asString();
         assertThat(created.get("secret").asString()).startsWith("whsec_");
+        String stored = jdbc.queryForObject("SELECT secret FROM odt_integration.webhook", String.class);
+        assertThat(stored).as("kept encrypted (ADR-23)").startsWith("enc:1:")
+                .doesNotContain(created.get("secret").asString().substring(6));
         assertThat(created.get("events").toString()).isEqualTo("[\"issue.created\",\"comment.posted\"]");
 
         JsonNode list = read(get("/api/projects/WEB/webhooks"), mario, 200);

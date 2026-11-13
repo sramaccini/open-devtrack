@@ -13,6 +13,7 @@ import com.logicwarez.opendevtrack.platform.AdminLog;
 import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
+import com.logicwarez.opendevtrack.platform.SecretBox;
 import com.logicwarez.opendevtrack.platform.Problems.FieldError;
 import com.logicwarez.opendevtrack.project.ProjectRef;
 import com.logicwarez.opendevtrack.project.Projects;
@@ -69,9 +70,10 @@ class WebhookController {
     private final ProjectAccess access;
     private final CurrentUser user;
     private final AdminLog log;
+    private final SecretBox secrets;
 
     WebhookController(WebhookRepository webhooks, DeliveryRepository deliveries, Events events, Addresses addresses,
-                      Projects projects, ProjectAccess access, CurrentUser user, AdminLog log) {
+                      Projects projects, ProjectAccess access, CurrentUser user, AdminLog log, SecretBox secrets) {
         this.webhooks = webhooks;
         this.deliveries = deliveries;
         this.events = events;
@@ -80,6 +82,7 @@ class WebhookController {
         this.access = access;
         this.user = user;
         this.log = log;
+        this.secrets = secrets;
     }
 
     /**
@@ -173,7 +176,7 @@ class WebhookController {
         }
         String secret = Signature.newSecret();
         WebhookEntity webhook = webhooks.saveAndFlush(new WebhookEntity(project.get().tenantId(), project.get().id(),
-                name, request.url().strip(), events(request.events()), !Boolean.FALSE.equals(request.active()), secret,
+                name, request.url().strip(), events(request.events()), !Boolean.FALSE.equals(request.active()), secrets.seal(secret),
                 user.username(), Instant.now()));
         var after = logged(webhook);
         after.put("secret", ConfigurationChanged.ROTATED);
@@ -234,7 +237,7 @@ class WebhookController {
             return missing(key, id);
         }
         String secret = Signature.newSecret();
-        scope.get().webhook().rotate(secret, Instant.now());
+        scope.get().webhook().rotate(secrets.seal(secret), Instant.now());
         webhooks.saveAndFlush(scope.get().webhook());
         log.project(scope.get().webhook().projectId(), "webhook.secret_rotated", scope.get().webhook().name(), null,
                 values("secret", ConfigurationChanged.ROTATED));

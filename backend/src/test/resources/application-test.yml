@@ -15,3 +15,7 @@ spring:
             jwk-set-uri: http://iam.invalid/certs
             user-info-uri: http://iam.invalid/userinfo
             user-name-attribute: preferred_username
+odt:
+  secrets:
+    # A key for the tests only (ADR-23); an installation generates its own.
+    key: test-key-of-the-secrets-at-rest-not-for-use

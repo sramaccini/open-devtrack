@@ -60,6 +60,8 @@ up() {
   fi
   # The secret of the service account client opendevtrack-ci (ADR-21), also in an .env written before it existed
   grep -q '^CI_CLIENT_SECRET=' "$work/.env" || echo "CI_CLIENT_SECRET=$(secret)" >> "$work/.env"
+  # The key of the secrets at rest (ADR-23), also in an .env written before it existed
+  grep -q '^ODT_SECRET_KEY=' "$work/.env" || echo "ODT_SECRET_KEY=$(secret)" >> "$work/.env"
 
   log "Quadrava conformance kits"
   for kit in conformance-lib.mjs conformance-bff.mjs conformance-authz.mjs conformance-registry.mjs; do
@@ -79,7 +81,7 @@ up() {
   log "back end (start, log in .work/backend.log)"
   set -a; . "$work/.env"; set +a
   DB_URL="jdbc:postgresql://localhost:$DB_PORT/opendevtrack" DB_USER=opendevtrack DB_PASSWORD="$DB_PASSWORD" \
-  REDIS_PORT="$REDIS_PORT" IAM_CLIENT_SECRET="$BFF_CLIENT_SECRET" ODT_BEARER_CLIENTS=opendevtrack-tools,opendevtrack-ci \
+  REDIS_PORT="$REDIS_PORT" IAM_CLIENT_SECRET="$BFF_CLIENT_SECRET" ODT_SECRET_KEY="$ODT_SECRET_KEY" ODT_BEARER_CLIENTS=opendevtrack-tools,opendevtrack-ci \
   IAM_ISSUER_URI="http://localhost:$KEYCLOAK_PORT/realms/opendevtrack" FRONTEND_URL="$front" PORT="$APP_PORT" \
   SPRING_MAIL_HOST=localhost SPRING_MAIL_PORT="$SMTP_PORT" ODT_MAIL_OUTBOX_DELAY=PT5S ODT_WEBHOOKS_ALLOW_PRIVATE=true \
     nohup "${JAVA_HOME:?set JAVA_HOME to a JDK 25}/bin/java" ${E2E_JAVA_OPTS:-} -jar "$jar" \

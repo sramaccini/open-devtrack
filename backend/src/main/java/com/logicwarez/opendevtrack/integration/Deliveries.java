@@ -4,6 +4,7 @@
  */
 package com.logicwarez.opendevtrack.integration;
 
+import com.logicwarez.opendevtrack.platform.SecretBox;
 import com.logicwarez.opendevtrack.shared.WebhookTurnedOff;
 import java.io.IOException;
 import java.net.URI;
@@ -54,13 +55,16 @@ class Deliveries {
     private final TransactionTemplate transactions;
     private final HttpClient http;
 
+    private final SecretBox secrets;
+
     Deliveries(DeliveryRepository deliveries, WebhookRepository webhooks, Addresses addresses,
-               ApplicationEventPublisher events, TransactionTemplate transactions) {
+               ApplicationEventPublisher events, TransactionTemplate transactions, SecretBox secrets) {
         this.deliveries = deliveries;
         this.webhooks = webhooks;
         this.addresses = addresses;
         this.events = events;
         this.transactions = transactions;
+        this.secrets = secrets;
         this.http = HttpClient.newBuilder().connectTimeout(TIMEOUT).followRedirects(HttpClient.Redirect.NEVER).build();
     }
 
@@ -113,7 +117,7 @@ class Deliveries {
                 .header("User-Agent", "OpenDevTrack-Webhooks/1.0")
                 .header("webhook-id", delivery.id().toString())
                 .header("webhook-timestamp", Long.toString(timestamp))
-                .header("webhook-signature", Signature.header(webhook.signingSecrets(now), delivery.id().toString(),
+                .header("webhook-signature", Signature.header(webhook.signingSecrets(now, secrets::open), delivery.id().toString(),
                         timestamp, delivery.payload()))
                 .POST(HttpRequest.BodyPublishers.ofString(delivery.payload()))
                 .build();

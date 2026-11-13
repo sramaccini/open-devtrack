@@ -40,7 +40,8 @@ Then open http://localhost:18090 and sign in as `mario.rossi` (one tenant, ACME,
 with the password `info` prints (`DEV_USER_PASSWORD` in `stack/.work/.env`, generated at the first `up`). The mails
 of the notifications are at http://localhost:18025. A webhook of a project (ADR-21) can post to the receiver `echo` of the stack,
 `http://echo:8080/<any path>`, which prints each request with its headers: `stack.sh hooks`. The back end allows that
-address with `ODT_WEBHOOKS_ALLOW_PRIVATE`.
+address with `ODT_WEBHOOKS_ALLOW_PRIVATE`. The secrets of the webhooks are encrypted with `ODT_SECRET_KEY` (ADR-23),
+generated in `stack/.work/.env` too (also in an `.env` written before it existed).
 
 Ports: `FRONT_PORT` (18090), `KEYCLOAK_PORT` (18180), `APP_PORT` (18080, the back end for tools on the host),
 `MAILPIT_PORT` (18025). They differ from the end-to-end check (`e2e/authz`, 28xxx), so both can run.

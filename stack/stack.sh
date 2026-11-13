@@ -53,6 +53,8 @@ credentials() {
   fi
   # The secret of the service account client opendevtrack-ci (ADR-21), also in an .env written before it existed
   grep -q '^CI_CLIENT_SECRET=' "$work/.env" || echo "CI_CLIENT_SECRET=$(secret)" >> "$work/.env"
+  # The key of the secrets at rest (ADR-23), also in an .env written before it existed
+  grep -q '^ODT_SECRET_KEY=' "$work/.env" || echo "ODT_SECRET_KEY=$(secret)" >> "$work/.env"
   set -a; . "$work/.env"; set +a
 }
 
