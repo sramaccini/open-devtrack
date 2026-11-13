@@ -102,7 +102,7 @@
         <dependency>
             <groupId>dev.cel</groupId>
             <artifactId>cel</artifactId>
-            <version>0.14.0</version>
+            <version>0.15.0</version>
         </dependency>
         <!-- Module uiregistry: versions on PostgreSQL, validation against the schemas of Quadrava, tokens of the tools -->
         <dependency>
