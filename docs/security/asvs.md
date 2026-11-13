@@ -374,29 +374,29 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 
 ## Open items
 
-Each becomes an issue; 1.0 ships with none at high severity (ADR-23). Severity is our assessment for this
+Each is an issue on GitHub, and a new one gets its own; 1.0 ships with none at high severity (ADR-23). Severity is our assessment for this
 application.
 
-| Item | Requirements | Severity | Work |
-| --- | --- | --- | --- |
-| O1 | 1.1.2, 11.1.5 | Medium | A threat model of the main flows (login, issues, attachments, webhooks, public API), reviewed with each ADR |
-| O2 | 1.7.1, 7.3.1 | Medium | Structured logs (`logging.structured.format.console`), which escape line breaks in values |
-| O3 | 1.8.1, 1.8.2, 8.3.4 | Medium | A classification of the data with its protection and retention |
-| O4 | 1.14.2 | Low | Signed images (cosign) and their check at deploy |
-| O5 | 2.1.8 | Low | A strength meter in a Keycloak theme of the project |
-| O6 | 2.4.5, 2.8.5 | Low | Keycloak features: pepper, notification of a reused OTP; to ask upstream or accept |
-| O7 | 3.3.3, 3.3.4 | Medium | authz-library: list and end a user's sessions, end them after a password change (back-channel logout of Keycloak) |
-| O8 | 3.4.4 | Low | The session cookie as `__Host-SESSION_ID`, checked through the runtime |
-| O9 | 3.7.1, 4.3.3 | Medium | Recent login (`max_age` or `acr`) before the administration and the creation of tokens |
-| O10 | 6.4.2 | Low | `ODT_SECRET_KEY` held by a KMS |
-| O11 | 7.1.3, 7.2.2 | Medium | A log line for each refusal of access control (403 and the not-found of other tenants) |
-| O12 | 8.1.4, 11.1.4, 11.1.7, 11.1.8 | Medium | A rate limit per user on the session API and alerts on unusual numbers |
-| O13 | 8.3.2 | Medium | Export and removal of a user's data on request |
-| O14 | 12.1.3, 12.2.1, 12.4.2 | Medium | Quotas per project, a type check by content, an antivirus hook for attachments |
-| O15 | 13.2.2 | Low | Requests checked against the OpenAPI schema |
-| O16 | 14.4.2 | Low | `Content-Disposition` on the JSON answers of the API |
-| O17 | 14.4.3, 14.4.5 | Medium | CSP and HSTS on the pages of the runtime image: request Q18 to Quadrava |
-| O18 | 1.2.1 | Low | The runtime image of Quadrava as a non-root user: request Q20 |
+| Item | Issue | Requirements | Severity | Work |
+| --- | --- | --- | --- | --- |
+| O1 | [#4](https://github.com/sramaccini/open-devtrack/issues/4) | 1.1.2, 11.1.5 | Medium | A threat model of the main flows (login, issues, attachments, webhooks, public API), reviewed with each ADR |
+| O2 | [#5](https://github.com/sramaccini/open-devtrack/issues/5) | 1.7.1, 7.3.1 | Medium | Structured logs (`logging.structured.format.console`), which escape line breaks in values |
+| O3 | [#6](https://github.com/sramaccini/open-devtrack/issues/6) | 1.8.1, 1.8.2, 8.3.4 | Medium | A classification of the data with its protection and retention |
+| O4 | [#7](https://github.com/sramaccini/open-devtrack/issues/7) | 1.14.2 | Low | Signed images (cosign) and their check at deploy |
+| O5 | [#8](https://github.com/sramaccini/open-devtrack/issues/8) | 2.1.8 | Low | A strength meter in a Keycloak theme of the project |
+| O6 | [#9](https://github.com/sramaccini/open-devtrack/issues/9) | 2.4.5, 2.8.5 | Low | Keycloak features: pepper, notification of a reused OTP; to ask upstream or accept |
+| O7 | [#10](https://github.com/sramaccini/open-devtrack/issues/10) | 3.3.3, 3.3.4 | Medium | authz-library: list and end a user's sessions, end them after a password change (back-channel logout of Keycloak) |
+| O8 | [#11](https://github.com/sramaccini/open-devtrack/issues/11) | 3.4.4 | Low | The session cookie as `__Host-SESSION_ID`, checked through the runtime |
+| O9 | [#12](https://github.com/sramaccini/open-devtrack/issues/12) | 3.7.1, 4.3.3 | Medium | Recent login (`max_age` or `acr`) before the administration and the creation of tokens |
+| O10 | [#13](https://github.com/sramaccini/open-devtrack/issues/13) | 6.4.2 | Low | `ODT_SECRET_KEY` held by a KMS |
+| O11 | [#14](https://github.com/sramaccini/open-devtrack/issues/14) | 7.1.3, 7.2.2 | Medium | A log line for each refusal of access control (403 and the not-found of other tenants) |
+| O12 | [#15](https://github.com/sramaccini/open-devtrack/issues/15) | 8.1.4, 11.1.4, 11.1.7, 11.1.8 | Medium | A rate limit per user on the session API and alerts on unusual numbers |
+| O13 | [#16](https://github.com/sramaccini/open-devtrack/issues/16) | 8.3.2 | Medium | Export and removal of a user's data on request |
+| O14 | [#17](https://github.com/sramaccini/open-devtrack/issues/17) | 12.1.3, 12.2.1, 12.4.2 | Medium | Quotas per project, a type check by content, an antivirus hook for attachments |
+| O15 | [#18](https://github.com/sramaccini/open-devtrack/issues/18) | 13.2.2 | Low | Requests checked against the OpenAPI schema |
+| O16 | [#19](https://github.com/sramaccini/open-devtrack/issues/19) | 14.4.2 | Low | `Content-Disposition` on the JSON answers of the API |
+| O17 | [#20](https://github.com/sramaccini/open-devtrack/issues/20) | 14.4.3, 14.4.5 | Medium | CSP and HSTS on the pages of the runtime image: request Q18 to Quadrava |
+| O18 | [#21](https://github.com/sramaccini/open-devtrack/issues/21) | 1.2.1 | Low | The runtime image of Quadrava as a non-root user: request Q20 |
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).

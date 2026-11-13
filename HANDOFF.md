@@ -140,8 +140,8 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    `admin-permission-schemes`, the choice in `project-detail`) and the groups (`admin-groups`, the groups of a
    project in `project-detail`) and the audit log of the configuration (`odt_audit.admin_event`, `admin-config-log`,
    `project-log`) built: ADR-22 is done. ADR-23 is built (above); its open items O1–O18 of `docs/security/asvs.md`
-   become issues, none of high severity, and the first manual accessibility check runs on the first release
-   candidate. Q16–Q20 for Quadrava are written in `docs/README.md` and not sent yet. The Dependabot secret
-   `AUTHZ_PACKAGES_TOKEN` (read:packages) must be set by the maintainer, or the Maven updates fail. Then the
-   documentation, the public demo and 1.0.
+   are issues #4–#21 on GitHub, none of high severity (a new open item gets its own issue), and the first
+   manual accessibility check runs on the first release candidate. Q16–Q20 were asked of Quadrava on 13
+   November 2026 (`docs/README.md`). The Dependabot secret `AUTHZ_PACKAGES_TOKEN` (read:packages) must be set
+   by the maintainer, or the Maven updates fail. Then the documentation, the public demo and 1.0.
 2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.
