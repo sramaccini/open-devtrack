@@ -46,6 +46,8 @@ Maven must reach the authz-library packages: see [backend/README.md](../backend/
 | `ui/` published to the registry (`development`) and served by the runtime, from F1 | 7 documents; home and projects screens in both themes and languages |
 | A mention mailed at once through the outbox (ADR-18), from F4 | the mail of the new issue in Mailpit |
 | Tenant switch kept for the next login (ADR-08) | ACME → GLOBEX, then GLOBEX after a new login |
+| axe-core on 11 main screens, signed in as `mario.rossi` (ADR-23, `e2e/a11y`), from F5 | no serious or critical violation outside `e2e/a11y/allowlist.json` (the contrast of a read-only select, Q19) |
+| ZAP baseline scan through the runtime, signed in (`run.sh zap`, ADR-23), from F5 | no medium or high alert outside `e2e/zap/allowlist.json` (no `Content-Security-Policy` on the pages of the runtime image, Q18); low: the `XSRF-TOKEN` cookie of authz-library is readable by scripts, as the front end needs, and has no `SameSite` |
 | In the browser: login through the runtime, the user menu | «Spazio di lavoro» with both tenants, GLOBEX selected, 2 permissions |
 
 The kits come from the Quadrava tag `v0.13.1`, the pinned release (downloaded file by file, not cloned); until 0.2.0
@@ -55,7 +57,8 @@ they came from `main` at `9fa1916`, since the authorization kit with session coo
 
 - **The login rate limit of authz-library works**: 20 starts of the login per minute per IP; a browser login right
   after the kits got `429` with a Problem. Expected, but the `check` makes about ten logins: running it twice in a
-  minute fails.
+  minute fails. From F5 `check` waits a minute before the browser of axe-core signs in, and `zap` tries its login again
+  after the window.
 - **Problem texts in Italian** in authz-library («Troppi tentativi di accesso»): request A3.
 - **RBAC tables in the `public` schema**: authz-rbac had no schema setting; request A2, released in authz-library
   2.2.0 and adopted: the tables are in the schema `authz`.

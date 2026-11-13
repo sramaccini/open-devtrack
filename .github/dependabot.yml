@@ -1,0 +1,33 @@
+# Updates of the dependencies (ADR-23), once a week, grouped so that each ecosystem opens one pull request.
+# authz-library is on GitHub Packages: Dependabot reads it with the Dependabot secret AUTHZ_PACKAGES_TOKEN (a token
+# with read:packages), set by the maintainer in Settings → Secrets → Dependabot.
+version: 2
+registries:
+  authz-library:
+    type: maven-repository
+    url: https://maven.pkg.github.com/sramaccini/authz-library
+    username: sramaccini
+    password: ${{secrets.AUTHZ_PACKAGES_TOKEN}}
+updates:
+  - package-ecosystem: maven
+    directory: /backend
+    registries: [authz-library]
+    schedule:
+      interval: weekly
+    groups:
+      maven:
+        patterns: ['*']
+  - package-ecosystem: npm
+    directory: /e2e/a11y
+    schedule:
+      interval: weekly
+    groups:
+      a11y:
+        patterns: ['*']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']

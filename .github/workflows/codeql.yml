@@ -1,0 +1,36 @@
+name: CodeQL
+
+# Static analysis of the Java code with the default security queries of CodeQL (ADR-23). The alerts go to Code scanning;
+# a pull request that brings a new one is held by the code scanning check of the repository (Settings → Rules).
+# Accepted findings are dismissed there with a reason, which is the allow-list of this job.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '23 4 * * 1'
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: CodeQL (Java)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      # build-mode none reads the sources without building them: no access to the packages of authz-library is needed
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: java-kotlin
+          build-mode: none
+          queries: security-extended
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:java-kotlin

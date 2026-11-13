@@ -1,0 +1,11 @@
+{
+  "name": "opendevtrack-a11y",
+  "private": true,
+  "description": "Accessibility check of the main screens with axe-core (ADR-23), run by e2e/authz/run.sh",
+  "type": "module",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "playwright": "1.64.1"
+  }
+}

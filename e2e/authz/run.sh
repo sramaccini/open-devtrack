@@ -6,6 +6,7 @@
 #                            front of it
 #   e2e/authz/run.sh check   sign in through the runtime and run the Quadrava conformance kits (BFF, authorization,
 #                            registry) and the tenant checks
+#   e2e/authz/run.sh zap     the ZAP baseline scan, signed in (ADR-23; Docker pulls the image of ZAP)
 #   e2e/authz/run.sh down    stop the back end and remove the containers
 #
 # Needs Docker, curl, JDK 25 (JAVA_HOME), Maven with access to the authz-library packages (backend/README.md) and
@@ -179,6 +180,8 @@ check() {
   if [ "${sent:-0}" -gt 0 ]; then echo "ok   $key-1: mail to anna.bianchi in Mailpit"; else
     echo "FAIL no mail for $key-1 in Mailpit"; failed=1; fi
 
+  log "Accessibility: axe-core on the main screens, project $key (ADR-23, e2e/a11y)"
+  # A11Y_CHANNEL=msedge (or chrome) uses a browser of the machine instead of the Chromium of Playwright.
   log "Tenants: the switch is kept for the next login (ADR-08)"
   login anna.bianchi > /dev/null
   local before target after xsrf
@@ -194,7 +197,46 @@ check() {
   if [ -n "$target" ] && [ "$after" = "$target" ]; then echo "ok   $before → $target, kept after a new login"; else
     echo "FAIL $before → $target, after a new login: $after"; failed=1; fi
 
+  log "Accessibility: axe-core on the main screens, project $key (ADR-23, e2e/a11y)"
+  # The checks above start about ten logins: a minute for the window of the login rate limit (20 a minute per IP)
+  # before the browser signs in. A11Y_CHANNEL=msedge (or chrome) uses a browser of the machine instead of the
+  # Chromium of Playwright.
+  sleep 60
+  (cd "$root/e2e/a11y" && npm ci --silent --no-audit --no-fund --registry=https://registry.npmjs.org \
+    && node axe.mjs --front "$front" --user mario.rossi --password "$DEV_USER_PASSWORD" --project "$key" \
+      --report "$work/axe.json" ${A11Y_CHANNEL:+--channel "$A11Y_CHANNEL"}) || failed=1
+
   [ "$failed" = 0 ] && log "all checks passed" || { log "some checks failed"; return 1; }
+}
+
+# Baseline scan of ZAP (passive: it reads what it finds, attacks nothing) through the runtime, signed in as mario.rossi:
+# the cookies of the session go into every request it makes. A medium or high alert fails, unless e2e/zap/allowlist.json
+# names it with a reason (ADR-23). ZAP_TARGET is the address of the runtime as the container of ZAP sees it.
+zap() {
+  set -a; . "$work/.env"; set +a
+  local target="${ZAP_TARGET:-$front}" cookie network=()
+  [ -z "${ZAP_TARGET:-}" ] && network=(--network host)
+  log "ZAP baseline scan of $target, signed in as mario.rossi (ADR-23)"
+  # Right after check the login rate limit may still be full: try again after its window
+  local attempt
+  for attempt in 1 2 3; do
+    login mario.rossi > /dev/null 2>&1 && cookie="SESSION_ID=$(cookie_value mario.rossi SESSION_ID)" && break
+    echo "login refused (rate limit?), again in 30 s"
+    sleep 30
+  done
+  # Only the session cookie: the scan is passive (GET only, no CSRF token needed), and a value without spaces is one
+  # argument of ZAP
+  [ "$cookie" != "SESSION_ID=" ] && [ -n "$cookie" ] || { echo "FAIL no session for the scan"; return 1; }
+  mkdir -p "$work/zap" && chmod 777 "$work/zap"
+  # On Windows (Git Bash) the folder as Docker wants it, and no rewriting of the paths of the container
+  local reports
+  reports="$(cd "$work/zap" && { pwd -W 2>/dev/null || pwd; })"
+  MSYS_NO_PATHCONV=1 docker run --rm "${network[@]}" -v "$reports:/zap/wrk:rw" "${ZAP_IMAGE:-ghcr.io/zaproxy/zaproxy:stable}" \
+    zap-baseline.py -t "$target/" -j -m 2 -I -J zap.json -r zap.html \
+    -z "-config replacer.full_list(0).description=session -config replacer.full_list(0).enabled=true \
+        -config replacer.full_list(0).matchtype=REQ_HEADER -config replacer.full_list(0).matchstr=Cookie \
+        -config replacer.full_list(0).regex=false -config replacer.full_list(0).replacement=$cookie" || true
+  node "$root/e2e/zap/check.mjs" "$work/zap/zap.json" "$root/e2e/zap/allowlist.json"
 }
 
 down() {
@@ -209,6 +251,7 @@ down() {
 case "${1:-}" in
   up) up ;;
   check) check ;;
+  zap) zap ;;
   down) down ;;
-  *) echo "usage: $0 up | check | down" >&2; exit 2 ;;
+  *) echo "usage: $0 up | check | zap | down" >&2; exit 2 ;;
 esac
