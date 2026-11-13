@@ -386,7 +386,7 @@ application.
 | O4 | [#7](https://github.com/sramaccini/open-devtrack/issues/7) | 1.14.2 | Low | Signed images (cosign) and their check at deploy |
 | O5 | [#8](https://github.com/sramaccini/open-devtrack/issues/8) | 2.1.8 | Low | A strength meter in a Keycloak theme of the project |
 | O6 | [#9](https://github.com/sramaccini/open-devtrack/issues/9) | 2.4.5, 2.8.5 | Low | Keycloak features: pepper, notification of a reused OTP; to ask upstream or accept |
-| O7 | [#10](https://github.com/sramaccini/open-devtrack/issues/10) | 3.3.3, 3.3.4 | Medium | authz-library: list and end a user's sessions, end them after a password change (back-channel logout of Keycloak) |
+| O7 | [#10](https://github.com/sramaccini/open-devtrack/issues/10) | 3.3.3, 3.3.4 | Medium | authz-library: list and end a user's sessions, end them after a password change (back-channel logout of Keycloak): request A7, asked 13 November 2026 |
 | O9 | [#12](https://github.com/sramaccini/open-devtrack/issues/12) | 3.7.1, 4.3.3 | Medium | Recent login (`max_age` or `acr`) before the administration and the creation of tokens |
 | O10 | [#13](https://github.com/sramaccini/open-devtrack/issues/13) | 6.4.2 | Low | `ODT_SECRET_KEY` held by a KMS |
 | O12 | [#15](https://github.com/sramaccini/open-devtrack/issues/15) | 8.1.4, 11.1.4, 11.1.7, 11.1.8 | Medium | A rate limit per user on the session API and alerts on unusual numbers |

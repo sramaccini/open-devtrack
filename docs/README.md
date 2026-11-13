@@ -62,6 +62,7 @@ Found while writing the ADRs; each is built in its own repository, optional for 
 | A4 | authz-library | Bearer access for tools: a Keycloak access token resolved to the same permissions as a session, on chosen paths (until then `platform/BearerTokenSecurity.java`, ADR-03); for the public API (ADR-21) also service accounts, the tenant in a header (`X-Tenant`) and a rate limit per user or client (asked again 12 November 2026; released in authz-library 2.2.0, `authz.bff.bearer`, and adopted: `/api/**`, `/registry/**`, `/v3/api-docs`; `platform/BearerTokenSecurity.java` removed) | F5 |
 | A5 | authz-library | A read-only list of the users of the session's tenant, for pickers, behind a permission of the application (today `identity/TenantUsers.java` reads `RbacAdminService.tenantUsers` with an admin scope of its own, and, for the mails of ADR-18, with the scope of the system and no session; released in authz-library 2.2.0, `TenantDirectory`, and adopted in `identity/TenantUsers`) | F2 |
 | A6 | authz-library | Personal access tokens: created, listed and revoked by their user, stored hashed, shown once, accepted by the bearer access of A4 (ADR-21; asked 12 November 2026; not needed for 1.0; released in authz-library 2.2.0, `authz.rbac.tokens`, to adopt) | F5 |
+| A7 | authz-library | A user lists and ends their own sessions, and the sessions end on a password change (OIDC back-channel logout); optionally the admin API lists a user's sessions (ASVS 3.3.3, 3.3.4; open item O7, #10; asked 13 November 2026) | F5 |
 
 ## Checks
 
