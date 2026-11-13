@@ -16,7 +16,7 @@ again at each release.
 | **N/A** | Not applicable, with the reason |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 175 met, 32 met by the installation, 24 not applicable, 28 open (15 items).
+Level 2 has 259 requirements. Today: 177 met, 32 met by the installation, 24 not applicable, 26 open (14 items).
 
 ## The installation
 
@@ -71,7 +71,7 @@ What an installation must do for the requirements marked **Install**:
 | 1.6.2 | Key material in vaults | Install | The secret store of the platform |
 | 1.6.3 | Keys replaceable, data re-encrypted | Met | odt: key ids and `odt.secrets.previous-keys`; secrets resealed at start (`integration/SecretsAtRest`) |
 | 1.6.4 | No client-side secrets protecting data | Met | quadrava + authz: no token or key in the browser (BFF) |
-| 1.7.1 | Common logging format | Open | O2: plain text logs of Spring Boot; to switch to structured (JSON) logs |
+| 1.7.1 | Common logging format | Met | odt: the image logs one JSON object a line in the Elastic Common Schema (`LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs`) |
 | 1.7.2 | Logs sent to a remote system | Install | The log system of the platform |
 | 1.8.1 | Sensitive data identified and classified | Open | O3: no written classification (names, emails, issue texts, attachments, secrets) |
 | 1.8.2 | Protection requirements per level | Open | O3 |
@@ -248,7 +248,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 7.1.4 | Log events allow a timeline | Met | odt: time, level, thread and logger in each line; the audit log of the administration (ADR-22) |
 | 7.2.1 | Authentication decisions logged | Met | authz: session created, user not enabled; kc: login events (Install) |
 | 7.2.2 | Access control decisions logged, failures always | Open | O11 |
-| 7.3.1 | Log encoding against injection | Open | O2: plain text logs do not escape line breaks in values |
+| 7.3.1 | Log encoding against injection | Met | odt: structured (JSON) logs escape line breaks and quotes of logged values |
 | 7.3.3 | Security logs protected | Install | The log system of the platform; odt: the audit log is read-only through the API |
 | 7.3.4 | Synchronized time | Install | NTP; odt: times stored in UTC (`timestamptz`) |
 | 7.4.1 | Generic message on errors | Met | odt: Problems with a title and no internal details; Spring Boot hides stack traces and messages |
@@ -384,7 +384,6 @@ application.
 | Item | Issue | Requirements | Severity | Work |
 | --- | --- | --- | --- | --- |
 | O1 | [#4](https://github.com/sramaccini/open-devtrack/issues/4) | 1.1.2, 11.1.5 | Medium | A threat model of the main flows (login, issues, attachments, webhooks, public API), reviewed with each ADR |
-| O2 | [#5](https://github.com/sramaccini/open-devtrack/issues/5) | 1.7.1, 7.3.1 | Medium | Structured logs (`logging.structured.format.console`), which escape line breaks in values |
 | O3 | [#6](https://github.com/sramaccini/open-devtrack/issues/6) | 1.8.1, 1.8.2, 8.3.4 | Medium | A classification of the data with its protection and retention |
 | O4 | [#7](https://github.com/sramaccini/open-devtrack/issues/7) | 1.14.2 | Low | Signed images (cosign) and their check at deploy |
 | O5 | [#8](https://github.com/sramaccini/open-devtrack/issues/8) | 2.1.8 | Low | A strength meter in a Keycloak theme of the project |
@@ -405,6 +404,7 @@ Closed:
 - O17 ([#20](https://github.com/sramaccini/open-devtrack/issues/20)) and O18
   ([#21](https://github.com/sramaccini/open-devtrack/issues/21)): Quadrava 0.14.0 (requests Q18 and Q20).
 - O19 ([#22](https://github.com/sramaccini/open-devtrack/issues/22)): Quadrava 0.15.0 (request Q21).
+- O2 ([#5](https://github.com/sramaccini/open-devtrack/issues/5)): structured logs in the image.
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).

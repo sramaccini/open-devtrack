@@ -30,7 +30,7 @@ stack/stack.sh up       # first time: credentials, image, containers, ui/ publis
 stack/stack.sh info     # addresses, users and their password
 stack/stack.sh publish  # after a change of ui/
 stack/stack.sh up       # after a change of backend/: the image is built again
-stack/stack.sh logs     # the log of the back end
+stack/stack.sh logs     # the log of the back end (JSON lines, Elastic Common Schema, as in the image)
 stack/stack.sh hooks    # what the webhook receiver got (address http://echo:8080/anything)
 stack/stack.sh down     # stop, keeping the data
 stack/stack.sh reset    # stop and delete the data; the next up starts empty and adds the samples again

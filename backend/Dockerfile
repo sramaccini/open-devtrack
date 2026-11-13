@@ -19,5 +19,8 @@ RUN groupadd --system odt && useradd --system --gid odt --home /app odt
 WORKDIR /app
 COPY --from=build /app.jar app.jar
 USER odt
+# Structured logs (ASVS 1.7.1, 7.3.1): one JSON object a line in the Elastic Common Schema, which a central log
+# system reads as it is and in which a line break of a logged value stays escaped. A plain run of the jar keeps text.
+ENV LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
