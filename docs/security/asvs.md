@@ -16,7 +16,7 @@ again at each release.
 | **N/A** | Not applicable, with the reason |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 178 met, 32 met by the installation, 24 not applicable, 25 open (13 items).
+Level 2 has 259 requirements. Today: 180 met, 32 met by the installation, 24 not applicable, 23 open (12 items).
 
 ## The installation
 
@@ -244,10 +244,10 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | --- | --- | --- | --- |
 | 7.1.1 | No credentials in logs | Met | odt: the webhook URLs logged as origin only, no secrets; authz: no tokens |
 | 7.1.2 | No sensitive data in logs | Met | odt: user names and ids only |
-| 7.1.3 | Security events logged | Open | O11: logins are logged (authz, kc events); refusals of access control are not |
+| 7.1.3 | Security events logged | Met | authz: logins; kc: login events; odt: a line for each refusal of access control (`AccessRefusalLog`) |
 | 7.1.4 | Log events allow a timeline | Met | odt: time, level, thread and logger in each line; the audit log of the administration (ADR-22) |
 | 7.2.1 | Authentication decisions logged | Met | authz: session created, user not enabled; kc: login events (Install) |
-| 7.2.2 | Access control decisions logged, failures always | Open | O11 |
+| 7.2.2 | Access control decisions logged, failures always | Met | odt: every 401 and 403, whoever refuses, and the not-found of the API, with user and tenant (`AccessRefusalLog`) |
 | 7.3.1 | Log encoding against injection | Met | odt: structured (JSON) logs escape line breaks and quotes of logged values |
 | 7.3.3 | Security logs protected | Install | The log system of the platform; odt: the audit log is read-only through the API |
 | 7.3.4 | Synchronized time | Install | NTP; odt: times stored in UTC (`timestamptz`) |
@@ -391,7 +391,6 @@ application.
 | O7 | [#10](https://github.com/sramaccini/open-devtrack/issues/10) | 3.3.3, 3.3.4 | Medium | authz-library: list and end a user's sessions, end them after a password change (back-channel logout of Keycloak) |
 | O9 | [#12](https://github.com/sramaccini/open-devtrack/issues/12) | 3.7.1, 4.3.3 | Medium | Recent login (`max_age` or `acr`) before the administration and the creation of tokens |
 | O10 | [#13](https://github.com/sramaccini/open-devtrack/issues/13) | 6.4.2 | Low | `ODT_SECRET_KEY` held by a KMS |
-| O11 | [#14](https://github.com/sramaccini/open-devtrack/issues/14) | 7.1.3, 7.2.2 | Medium | A log line for each refusal of access control (403 and the not-found of other tenants) |
 | O12 | [#15](https://github.com/sramaccini/open-devtrack/issues/15) | 8.1.4, 11.1.4, 11.1.7, 11.1.8 | Medium | A rate limit per user on the session API and alerts on unusual numbers |
 | O13 | [#16](https://github.com/sramaccini/open-devtrack/issues/16) | 8.3.2 | Medium | Export and removal of a user's data on request |
 | O14 | [#17](https://github.com/sramaccini/open-devtrack/issues/17) | 12.1.3, 12.2.1, 12.4.2 | Medium | Quotas per project, a type check by content, an antivirus hook for attachments |
@@ -405,6 +404,7 @@ Closed:
 - O19 ([#22](https://github.com/sramaccini/open-devtrack/issues/22)): Quadrava 0.15.0 (request Q21).
 - O2 ([#5](https://github.com/sramaccini/open-devtrack/issues/5)): structured logs in the image.
 - O8 ([#11](https://github.com/sramaccini/open-devtrack/issues/11)): the session cookie `__Host-SESSION_ID`.
+- O11 ([#14](https://github.com/sramaccini/open-devtrack/issues/14)): a log line for each refusal of access control.
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).

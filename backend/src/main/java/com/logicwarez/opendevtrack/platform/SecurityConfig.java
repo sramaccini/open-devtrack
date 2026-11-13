@@ -13,6 +13,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 import org.springframework.security.web.header.writers.StaticHeadersWriter;
 
@@ -40,7 +41,9 @@ public class SecurityConfig {
                 .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'none'; frame-ancestors 'none'"))
                 .referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.NO_REFERRER))
                 .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31_536_000))
-                .addHeaderWriter(new StaticHeadersWriter("Content-Disposition", "attachment")));
+                .addHeaderWriter(new StaticHeadersWriter("Content-Disposition", "attachment")))
+            // A log line for each refusal (ASVS 7.2.2), with the user and the tenant of the session just loaded
+            .addFilterAfter(new AccessRefusalLog(), SecurityContextHolderFilter.class);
         return http.build();
     }
 }
