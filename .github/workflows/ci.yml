@@ -26,8 +26,8 @@ jobs:
     name: Screens (quadrava validate)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '24'
           registry-url: https://npm.pkg.github.com
@@ -42,8 +42,8 @@ jobs:
     name: Back end (build, modules, tests)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-java@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '25'
@@ -62,8 +62,8 @@ jobs:
     name: Dependencies (OSV-Scanner)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-java@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '25'
@@ -71,7 +71,7 @@ jobs:
           server-id: authz-library
           server-username: PACKAGES_USER
           server-password: PACKAGES_TOKEN
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
           node-version: '24'
       # Every dependency of the back end as Maven resolves it (the transitive ones and authz-library too), as a CycloneDX
@@ -81,7 +81,7 @@ jobs:
           PACKAGES_USER: ${{ github.actor }}
         run: mvn -B -q -f backend/pom.xml org.cyclonedx:cyclonedx-maven-plugin:2.9.1:makeAggregateBom -DoutputFormat=json -DoutputName=bom
       - name: Known vulnerabilities (osv.dev)
-        uses: google/osv-scanner-action/osv-scanner-action@v2.2.1
+        uses: google/osv-scanner-action/osv-scanner-action@v2.7.0
         continue-on-error: true
         with:
           scan-args: |-
@@ -100,8 +100,8 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [ui, backend]
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-java@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '25'
@@ -109,7 +109,7 @@ jobs:
           server-id: authz-library
           server-username: PACKAGES_USER
           server-password: PACKAGES_TOKEN
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
           node-version: '24'
           registry-url: https://npm.pkg.github.com
@@ -133,7 +133,7 @@ jobs:
         run: e2e/authz/run.sh zap
       - name: Reports of axe-core and ZAP
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: security-reports
           path: |
