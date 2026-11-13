@@ -16,7 +16,7 @@ again at each release.
 | **N/A** | Not applicable, with the reason |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 180 met, 32 met by the installation, 24 not applicable, 23 open (12 items).
+Level 2 has 259 requirements. Today: 183 met, 32 met by the installation, 24 not applicable, 20 open (11 items).
 
 ## The installation
 
@@ -73,8 +73,8 @@ What an installation must do for the requirements marked **Install**:
 | 1.6.4 | No client-side secrets protecting data | Met | quadrava + authz: no token or key in the browser (BFF) |
 | 1.7.1 | Common logging format | Met | odt: the image logs one JSON object a line in the Elastic Common Schema (`LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs`) |
 | 1.7.2 | Logs sent to a remote system | Install | The log system of the platform |
-| 1.8.1 | Sensitive data identified and classified | Open | O3: no written classification (names, emails, issue texts, attachments, secrets) |
-| 1.8.2 | Protection requirements per level | Open | O3 |
+| 1.8.1 | Sensitive data identified and classified | Met | odt: [data.md](data.md), four levels and where each piece of data is |
+| 1.8.2 | Protection requirements per level | Met | odt: [data.md](data.md), the protection of each level |
 | 1.9.1 | Encrypted communications between components | Install | TLS on every link |
 | 1.9.2 | Components verify each other's identity | Install | Trusted certificates, host name checks |
 | 1.10.1 | Source control with change tracking | Met | odt: Git on GitHub, Conventional Commits, pull requests, protected `main` |
@@ -269,7 +269,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 8.3.1 | No sensitive data in query strings | Met | odt: the ODQL of a search goes in the body; ids only in paths |
 | 8.3.2 | Users can remove or export their data | Open | O13: no export or removal of a user's data on request |
 | 8.3.3 | Clear language and consent for personal data | Install | The privacy notice of the installation |
-| 8.3.4 | Sensitive data identified, with a policy | Open | O3 |
+| 8.3.4 | Sensitive data identified, with a policy | Met | odt: [data.md](data.md), levels, protection and periods; reviewed with each ADR that adds data |
 | 8.3.5 | Access to sensitive data audited | Met | odt: the audit log of the administration (ADR-22) and the history of the issues |
 | 8.3.6 | Sensitive data overwritten in memory | N/A | The JVM gives no control over freed memory; secrets are held as short-lived strings |
 | 8.3.7 | Encryption with confidentiality and integrity | Met | odt: AES-GCM for the webhook secrets |
@@ -384,7 +384,6 @@ application.
 | Item | Issue | Requirements | Severity | Work |
 | --- | --- | --- | --- | --- |
 | O1 | [#4](https://github.com/sramaccini/open-devtrack/issues/4) | 1.1.2, 11.1.5 | Medium | A threat model of the main flows (login, issues, attachments, webhooks, public API), reviewed with each ADR |
-| O3 | [#6](https://github.com/sramaccini/open-devtrack/issues/6) | 1.8.1, 1.8.2, 8.3.4 | Medium | A classification of the data with its protection and retention |
 | O4 | [#7](https://github.com/sramaccini/open-devtrack/issues/7) | 1.14.2 | Low | Signed images (cosign) and their check at deploy |
 | O5 | [#8](https://github.com/sramaccini/open-devtrack/issues/8) | 2.1.8 | Low | A strength meter in a Keycloak theme of the project |
 | O6 | [#9](https://github.com/sramaccini/open-devtrack/issues/9) | 2.4.5, 2.8.5 | Low | Keycloak features: pepper, notification of a reused OTP; to ask upstream or accept |
@@ -405,6 +404,7 @@ Closed:
 - O2 ([#5](https://github.com/sramaccini/open-devtrack/issues/5)): structured logs in the image.
 - O8 ([#11](https://github.com/sramaccini/open-devtrack/issues/11)): the session cookie `__Host-SESSION_ID`.
 - O11 ([#14](https://github.com/sramaccini/open-devtrack/issues/14)): a log line for each refusal of access control.
+- O3 ([#6](https://github.com/sramaccini/open-devtrack/issues/6)): [data.md](data.md), the classification of the data.
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).

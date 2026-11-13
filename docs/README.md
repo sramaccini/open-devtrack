@@ -68,4 +68,5 @@ Found while writing the ADRs; each is built in its own repository, optional for 
 - [End-to-end check of authz-library](check-authz-end-to-end.md) (F0).
 - [Load test of the search](search-load.md) (F4, ADR-16 point 8, gate M3).
 - [OWASP ASVS 4.0.3, level 2](security/asvs.md): the state of each requirement and the open items (F5, ADR-23).
+- [The data of OpenDevTrack](security/data.md): what is kept, its level, protection and period (ASVS 1.8, ADR-23).
 - [Accessibility, WCAG 2.2 AA](accessibility.md): the automated check and the manual check of each release (F5, ADR-23).
