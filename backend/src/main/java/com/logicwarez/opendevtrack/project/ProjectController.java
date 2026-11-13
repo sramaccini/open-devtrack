@@ -4,6 +4,8 @@
  */
 package com.logicwarez.opendevtrack.project;
 
+import static com.logicwarez.opendevtrack.shared.ConfigurationChanged.values;
+
 import com.logicwarez.opendevtrack.access.PermissionSchemes;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
 import com.logicwarez.opendevtrack.access.ProjectAccess.Change;
@@ -11,6 +13,7 @@ import com.logicwarez.opendevtrack.access.ProjectGroup;
 import com.logicwarez.opendevtrack.access.ProjectMember;
 import com.logicwarez.opendevtrack.access.ProjectRole;
 import com.logicwarez.opendevtrack.identity.TenantUsers;
+import com.logicwarez.opendevtrack.platform.AdminLog;
 import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
@@ -22,6 +25,7 @@ import com.logicwarez.opendevtrack.project.ProjectApi.ProjectGroupView;
 import com.logicwarez.opendevtrack.project.ProjectApi.GroupRequest;
 import com.logicwarez.opendevtrack.project.ProjectApi.ProjectView;
 import com.logicwarez.opendevtrack.project.ProjectApi.SchemeChoice;
+import static com.logicwarez.opendevtrack.shared.ConfigurationChanged.values;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
@@ -70,15 +74,17 @@ class ProjectController {
     private final TenantUsers users;
     private final CurrentUser user;
     private final ApplicationEventPublisher events;
+    private final AdminLog log;
 
     ProjectController(ProjectRepository projects, ProjectAccess access, PermissionSchemes schemes, TenantUsers users,
-                      CurrentUser user, ApplicationEventPublisher events) {
+                      CurrentUser user, ApplicationEventPublisher events, AdminLog log) {
         this.projects = projects;
         this.access = access;
         this.schemes = schemes;
         this.users = users;
         this.user = user;
         this.events = events;
+        this.log = log;
     }
 
     @ApiDoc(value = "The projects of the tenant the user sees", answer = ProjectView.class, list = true)
@@ -116,6 +122,8 @@ class ProjectController {
                 blankToNull(request.description()), user.username(), Instant.now()));
         access.grant(project.id(), user.username(), ProjectRole.ADMIN, user.username());
         events.publishEvent(new ProjectCreated(project.id(), project.tenantId(), key, user.username(), project.createdAt()));
+        log.project(project.id(), "project.created", key, null,
+                values("key", key, "name", project.name(), "description", project.description(), "lead", project.lead()));
         return ResponseEntity.status(HttpStatus.CREATED).body(view(project, Optional.of(ProjectRole.ADMIN)));
     }
 
@@ -143,7 +151,10 @@ class ProjectController {
         if (request.version() == null || request.version() != project.version()) {
             return Problems.changedMeanwhile();
         }
+        var before = values("name", project.name(), "description", project.description(), "lead", project.lead());
         project.edit(request.name().strip(), blankToNull(request.description()), lead);
+        log.project(project.id(), "project.changed", project.key(), before,
+                values("name", project.name(), "description", project.description(), "lead", project.lead()));
         try {
             projects.saveAndFlush(project);
         } catch (ObjectOptimisticLockingFailureException e) {
@@ -192,8 +203,12 @@ class ProjectController {
         if (!can(found.get(), "odt.member.manage")) {
             return Problems.forbidden("Only an admin of the project can manage its members");
         }
+        Optional<ProjectRole> was = ownRole(found.get(), username);
         return switch (access.revoke(found.get().id(), username)) {
-            case DONE -> ResponseEntity.noContent().build();
+            case DONE -> {
+                log.project(found.get().id(), "member.removed", username, values("role", was.map(ProjectRole::value).orElse(null)), null);
+                yield ResponseEntity.noContent().build();
+            }
             case NOT_A_MEMBER -> Problems.notFound("Not a member of the project");
             case LAST_ADMIN -> Problems.conflict("A project keeps at least one admin");
         };
@@ -216,10 +231,13 @@ class ProjectController {
             return Problems.badRequest("No user with this name in the workspace");
         }
         String member = username.strip();
+        Optional<ProjectRole> was = ownRole(project, member);
         if (access.grant(project.id(), member, role.get(), user.username()) == Change.LAST_ADMIN) {
             return Problems.conflict("A project keeps at least one admin");
         }
         ProjectMember saved = access.members(project.id()).stream().filter(m -> m.username().equals(member)).findFirst().orElseThrow();
+        log.project(project.id(), was.isEmpty() ? "member.added" : "member.role_changed", member,
+                was.map(r -> values("role", r.value())).orElse(null), values("role", role.get().value()));
         return ResponseEntity.ok(memberView(saved, true));
     }
 
@@ -254,6 +272,7 @@ class ProjectController {
         if (request.group() == null) {
             return Problems.badRequest("No group with this id in the workspace");
         }
+        Optional<ProjectGroup> wasGroup = access.groups(project.id()).stream().filter(g -> g.id().equals(request.group())).findFirst();
         Optional<Change> change = access.grantGroup(project.id(), request.group(), role.get(), user.username());
         if (change.isEmpty()) {
             return Problems.badRequest("No group with this id in the workspace");
@@ -263,6 +282,8 @@ class ProjectController {
         }
         ProjectGroup saved = access.groups(project.id()).stream().filter(g -> g.id().equals(request.group()))
                 .findFirst().orElseThrow();
+        log.project(project.id(), wasGroup.isEmpty() ? "project.group_added" : "project.group_role_changed", saved.name(),
+                wasGroup.map(g -> values("role", g.role().value())).orElse(null), values("role", saved.role().value()));
         return ResponseEntity.ok(groupView(saved, true));
     }
 
@@ -277,8 +298,13 @@ class ProjectController {
         if (!can(found.get(), "odt.member.manage")) {
             return Problems.forbidden("Only an admin of the project can manage its members");
         }
+        Optional<ProjectGroup> was = access.groups(found.get().id()).stream().filter(g -> g.id().equals(group)).findFirst();
         return switch (access.revokeGroup(found.get().id(), group)) {
-            case DONE -> ResponseEntity.noContent().build();
+            case DONE -> {
+                log.project(found.get().id(), "project.group_removed", was.map(ProjectGroup::name).orElse(group.toString()),
+                        values("role", was.map(g -> g.role().value()).orElse(null)), null);
+                yield ResponseEntity.noContent().build();
+            }
             case NOT_A_MEMBER -> Problems.notFound("The group is not in the project");
             case LAST_ADMIN -> Problems.conflict("A project keeps at least one admin");
         };
@@ -297,11 +323,19 @@ class ProjectController {
         if (!can(project, "odt.project.edit")) {
             return Problems.forbidden("Only an admin of the project can pick its permission scheme");
         }
-        if (request == null || request.scheme() == null
-                || schemes.use(user.tenantId(), project.id(), request.scheme()).isEmpty()) {
+        String before = schemes.scheme(user.tenantId(), project.id()).name();
+        Optional<PermissionSchemes.SchemeRef> used = request == null || request.scheme() == null ? Optional.empty()
+                : schemes.use(user.tenantId(), project.id(), request.scheme());
+        if (used.isEmpty()) {
             return Problems.badRequest("No permission scheme with this id in the workspace");
         }
+        log.project(project.id(), "project.scheme_changed", project.key(), values("scheme", before), values("scheme", used.get().name()));
         return ResponseEntity.ok(view(project, access.role(project.id(), user.username())));
+    }
+
+    private Optional<ProjectRole> ownRole(ProjectEntity project, String username) {
+        return access.members(project.id()).stream().filter(m -> m.username().equals(username)).findFirst()
+                .map(ProjectMember::own);
     }
 
     private Optional<ProjectEntity> find(String key) {

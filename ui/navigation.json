@@ -97,6 +97,13 @@
           "requires": "odt.project.admin"
         },
         {
+          "id": "admin-config-log",
+          "label": "{{ t('nav.admin_config_log', 'Administration log') }}",
+          "icon": "list",
+          "screen": "admin-config-log",
+          "requires": "odt.project.admin"
+        },
+        {
           "id": "admin-access-log",
           "label": "{{ t('nav.admin_access_log', 'Access log') }}",
           "icon": "receipt",

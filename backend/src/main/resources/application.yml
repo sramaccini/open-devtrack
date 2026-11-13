@@ -124,6 +124,9 @@ authz:
       allowed-clients: ${ODT_BEARER_CLIENTS:opendevtrack-tools}
 
 odt:
+  audit:
+    # How long the audit log of the administration is kept (ADR-22), deleted once a night after that.
+    retention: ${ODT_AUDIT_RETENTION:P730D}
   attachments:
     # Where the bytes of the attachments are kept (ADR-14): database (default), filesystem or s3. Changing it on an
     # installation that has attachments is a migration: the back end does not start.

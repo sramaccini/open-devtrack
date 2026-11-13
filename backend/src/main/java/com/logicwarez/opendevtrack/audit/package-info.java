@@ -3,7 +3,7 @@
  * distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-/** Changelog of every issue and audit of the project roles. */
+/** Changelog of every issue, and the audit log of the administration (ADR-22). */
 @ApplicationModule(displayName = "Audit")
 package com.logicwarez.opendevtrack.audit;
 

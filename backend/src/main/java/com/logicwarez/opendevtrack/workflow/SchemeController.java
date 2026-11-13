@@ -4,8 +4,11 @@
  */
 package com.logicwarez.opendevtrack.workflow;
 
+import static com.logicwarez.opendevtrack.shared.ConfigurationChanged.values;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
+import com.logicwarez.opendevtrack.platform.AdminLog;
 import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
@@ -59,10 +62,11 @@ class SchemeController {
     private final IssueStatuses issues;
     private final ProjectAccess access;
     private final CurrentUser user;
+    private final AdminLog log;
 
     SchemeController(Projects projects, Workflows workflows, WorkflowRepository workflowRepository,
                      SchemeRepository schemes, StatusRepository statuses, TransitionRepository transitions,
-                     IssueStatuses issues, ProjectAccess access, CurrentUser user) {
+                     IssueStatuses issues, ProjectAccess access, CurrentUser user, AdminLog log) {
         this.projects = projects;
         this.workflows = workflows;
         this.workflowRepository = workflowRepository;
@@ -72,6 +76,7 @@ class SchemeController {
         this.issues = issues;
         this.access = access;
         this.user = user;
+        this.log = log;
     }
 
     /** A workflow, the types whose issues follow it, and how many statuses and transitions it has. */
@@ -143,6 +148,7 @@ class SchemeController {
             transitions.save(c);
         }
         workflowRepository.flush();
+        log.project(project.get().id(), "workflow.created", name, null, values("name", name, "types", List.of()));
         return ResponseEntity.status(HttpStatus.CREATED).body(view(copy, true));
     }
 
@@ -183,6 +189,7 @@ class SchemeController {
         if (w.isDefault() && !after.equals(new LinkedHashSet<>(before))) {
             return Problems.badRequest("The default workflow serves the types that no other workflow maps");
         }
+        var logBefore = values("name", w.name(), "types", List.copyOf(before));
         w.rename(name);
         if (!w.isDefault()) {
             map(project.get(), w, before, after);
@@ -193,6 +200,8 @@ class SchemeController {
         } catch (ObjectOptimisticLockingFailureException e) {
             return WorkflowController.rollback(Problems.changedMeanwhile());
         }
+        log.project(project.get().id(), "workflow.changed", w.name(), logBefore,
+                values("name", w.name(), "types", List.copyOf(after)));
         return ResponseEntity.ok(view(w, true));
     }
 
@@ -224,6 +233,7 @@ class SchemeController {
             return Problems.conflict("A workflow is removed when no type maps to it");
         }
         workflowRepository.delete(w);
+        log.project(project.get().id(), "workflow.removed", w.name(), values("name", w.name()), null);
         workflowRepository.flush();
         return ResponseEntity.noContent().build();
     }

@@ -4,7 +4,10 @@
  */
 package com.logicwarez.opendevtrack.access;
 
+import static com.logicwarez.opendevtrack.shared.ConfigurationChanged.values;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.logicwarez.opendevtrack.platform.AdminLog;
 import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
@@ -48,11 +51,14 @@ class PermissionSchemeController {
     private final PermissionSchemeRepository repository;
     private final PermissionSchemes schemes;
     private final CurrentUser user;
+    private final AdminLog log;
 
-    PermissionSchemeController(PermissionSchemeRepository repository, PermissionSchemes schemes, CurrentUser user) {
+    PermissionSchemeController(PermissionSchemeRepository repository, PermissionSchemes schemes, CurrentUser user,
+                               AdminLog log) {
         this.repository = repository;
         this.schemes = schemes;
         this.user = user;
+        this.log = log;
     }
 
     /** A scheme: what each project role gives, and whether projects use it. */
@@ -93,6 +99,7 @@ class PermissionSchemeController {
         PermissionSchemeEntity added = repository.saveAndFlush(new PermissionSchemeEntity(user.tenantId(),
                 request.name().strip(), blankToNull(request.description()), false, source.grants(), user.username(),
                 Instant.now()));
+        log.tenant("scheme.created", added.name(), null, logged(added));
         return ResponseEntity.status(HttpStatus.CREATED).body(view(added));
     }
 
@@ -120,10 +127,12 @@ class PermissionSchemeController {
         if (request.version() == null || request.version() != found.get().version()) {
             return Problems.changedMeanwhile();
         }
+        var before = logged(found.get());
         found.get().edit(request.name().strip(), blankToNull(request.description()), grants, user.username(),
                 Instant.now());
         PermissionSchemeEntity saved = repository.saveAndFlush(found.get());
         schemes.changed();
+        log.tenant("scheme.changed", saved.name(), before, logged(saved));
         return ResponseEntity.ok(view(saved));
     }
 
@@ -143,8 +152,17 @@ class PermissionSchemeController {
             return Problems.conflict("Projects use this scheme: pick another one for them first");
         }
         repository.delete(found.get());
+        log.tenant("scheme.removed", found.get().name(), logged(found.get()), null);
         schemes.changed();
         return ResponseEntity.noContent().build();
+    }
+
+    /** What the audit log keeps of a scheme: its name, description and the sorted permissions of each role. */
+    private static Map<String, Object> logged(PermissionSchemeEntity scheme) {
+        Map<ProjectRole, Set<String>> grants = scheme.grants();
+        return values("name", scheme.name(), "description", scheme.description(),
+                "viewer", sorted(grants.get(ProjectRole.VIEWER)), "developer", sorted(grants.get(ProjectRole.DEVELOPER)),
+                "admin", sorted(grants.get(ProjectRole.ADMIN)));
     }
 
     private static void put(Map<ProjectRole, Set<String>> grants, ProjectRole role, List<String> permissions) {

@@ -4,9 +4,12 @@
  */
 package com.logicwarez.opendevtrack.issue;
 
+import static com.logicwarez.opendevtrack.shared.ConfigurationChanged.values;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
 import com.logicwarez.opendevtrack.issue.FieldDefinitionEntity.Option;
+import com.logicwarez.opendevtrack.platform.AdminLog;
 import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
@@ -58,15 +61,17 @@ class FieldController {
     private final ProjectAccess access;
     private final CurrentUser user;
     private final Conditions conditions;
+    private final AdminLog log;
 
     FieldController(Projects projects, FieldDefinitionRepository definitions, CustomFields customFields,
-                    ProjectAccess access, CurrentUser user, Conditions conditions) {
+                    ProjectAccess access, CurrentUser user, Conditions conditions, AdminLog log) {
         this.projects = projects;
         this.definitions = definitions;
         this.customFields = customFields;
         this.access = access;
         this.user = user;
         this.conditions = conditions;
+        this.log = log;
     }
 
     /** A field as its admins see it, the options as text to edit. */
@@ -144,6 +149,7 @@ class FieldController {
             return Problems.badRequest(e.getMessage());
         }
         definitions.saveAndFlush(field);
+        log.project(project.get().id(), "customfield.created", field.key(), null, logged(field));
         return ResponseEntity.status(HttpStatus.CREATED).body(view(field, true));
     }
 
@@ -168,6 +174,7 @@ class FieldController {
         if (request.version() == null || request.version() != field.version()) {
             return Problems.changedMeanwhile();
         }
+        var before = logged(field);
         try {
             apply(field, request);
         } catch (InvalidDefinition e) {
@@ -178,6 +185,7 @@ class FieldController {
         } catch (ObjectOptimisticLockingFailureException e) {
             return Problems.changedMeanwhile();
         }
+        log.project(project.get().id(), "customfield.changed", field.key(), before, logged(field));
         return ResponseEntity.ok(view(field, true));
     }
 
@@ -241,6 +249,13 @@ class FieldController {
 
     private Set<String> permissions(ProjectRef project) {
         return access.permissions(project.id(), user.username());
+    }
+
+    /** What the audit log keeps of a custom field: label, type, options, rule and whether it is archived. */
+    private static Map<String, Object> logged(FieldDefinitionEntity d) {
+        DefinitionView v = view(d, false);
+        return values("label", v.label(), "type", v.type(), "options", v.options().isEmpty() ? null : v.options(),
+                "requiredIf", v.requiredIf(), "archived", v.archived());
     }
 
     private static DefinitionView view(FieldDefinitionEntity d, boolean edit) {

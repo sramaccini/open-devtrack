@@ -138,6 +138,18 @@
       "type": "rest",
       "method": "DELETE",
       "url": "/api/groups/{{params.id}}/members/{{username}}"
+    },
+    "configLog": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/admin-events",
+      "params": {
+        "project": "{{ state.project }}",
+        "actor": "{{ state.actor }}",
+        "action": "{{ state.action }}",
+        "from": "{{ state.from }}",
+        "to": "{{ state.to }}"
+      }
     }
   }
 }

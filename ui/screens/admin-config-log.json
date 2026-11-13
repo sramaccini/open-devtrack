@@ -1,0 +1,134 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "admin-config-log",
+  "title": "{{ t('admin.config_log', 'Administration log') }}",
+  "requires": "odt.project.admin",
+  "dataSources": {
+    "configLog": {
+      "ref": "admin/configLog"
+    },
+    "projects": {
+      "ref": "projects/list"
+    }
+  },
+  "components": [
+    {
+      "id": "config-log-help",
+      "type": "text",
+      "text": "{{ t('admin.config_log_help', 'The changes to the configuration of the workspace and of its projects, the most recent first (at most 500). They are kept for two years.') }}"
+    },
+    {
+      "id": "config-log-filters",
+      "type": "grid",
+      "columns": 5,
+      "components": [
+        {
+          "id": "filter-project",
+          "type": "input",
+          "bind": "state.project",
+          "default": "",
+          "field": {
+            "name": "project",
+            "type": "lookup",
+            "label": "{{ t('projects.project', 'Project') }}",
+            "lookup": {
+              "source": "projects",
+              "valueField": "key",
+              "labelField": "name",
+              "minChars": 0
+            }
+          }
+        },
+        {
+          "id": "filter-actor",
+          "type": "input",
+          "bind": "state.actor",
+          "default": "",
+          "field": {
+            "name": "actor",
+            "type": "text",
+            "label": "{{ t('admin.changed_by', 'Changed by') }}",
+            "maxLength": 150
+          }
+        },
+        {
+          "id": "filter-action",
+          "type": "input",
+          "bind": "state.action",
+          "default": "",
+          "field": {
+            "name": "action",
+            "type": "select",
+            "label": "{{ t('admin.kind', 'Kind') }}",
+            "options": [
+              "project.",
+              "member.",
+              "group.",
+              "scheme.",
+              "workflow.",
+              "board.",
+              "customfield.",
+              "webhook."
+            ],
+            "optionKey": "values.config_kind"
+          }
+        },
+        {
+          "id": "filter-from",
+          "type": "input",
+          "bind": "state.from",
+          "default": "",
+          "field": {
+            "name": "from",
+            "type": "date",
+            "label": "{{ t('admin.from', 'From') }}"
+          }
+        },
+        {
+          "id": "filter-to",
+          "type": "input",
+          "bind": "state.to",
+          "default": "",
+          "field": {
+            "name": "to",
+            "type": "date",
+            "label": "{{ t('admin.to', 'To') }}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "config-log-table",
+      "type": "table",
+      "source": "configLog",
+      "columns": [
+        {
+          "field": "at",
+          "label": "{{ t('admin.when', 'When') }}",
+          "format": "datetime"
+        },
+        {
+          "field": "actor",
+          "label": "{{ t('admin.actor', 'By') }}"
+        },
+        {
+          "field": "action",
+          "label": "{{ t('admin.action', 'Action') }}",
+          "valueKey": "values.config_action"
+        },
+        {
+          "field": "project",
+          "label": "{{ t('projects.key', 'Key') }}"
+        },
+        {
+          "field": "target",
+          "label": "{{ t('admin.target', 'Target') }}"
+        },
+        {
+          "field": "changes",
+          "label": "{{ t('admin.changes', 'Changes') }}"
+        }
+      ]
+    }
+  ]
+}

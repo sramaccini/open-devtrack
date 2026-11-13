@@ -104,6 +104,11 @@
       "type": "rest",
       "method": "DELETE",
       "url": "/api/projects/{{params.key}}/groups/{{group}}"
+    },
+    "log": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/admin-events"
     }
   }
 }

@@ -190,6 +190,20 @@ one for the creation. Both react to the events of `issue` with `@ApplicationModu
 transaction of their own, through the Event Publication Registry in `odt.event_publication` (an event whose listener
 fails is republished at the next start). The comments of a deleted issue are removed the same way.
 
+The audit log of the administration (ADR-22, `odt_audit.admin_event`) keeps the changes to the configuration: who,
+when, the tenant, the project if any, the action (`project.*`, `member.*`, `group.*`, `scheme.*`, `workflow.*`,
+`board.*`, `customfield.*`, `webhook.*`), what it changed and the values before and after (JSON). The controllers
+that change the configuration call `AdminLog` (module `platform`) inside their transaction; it publishes
+`ConfigurationChanged` (module `shared`) with the user and the tenant of the session, and `audit` writes it after the
+commit, like the changelog. A change that saves the same values logs nothing. Secrets are never logged: a new secret
+of a webhook is «rotated», and of the address of a webhook only the scheme and the host are kept, since the path
+of some addresses is a secret (the incoming webhooks of chat services). `GET /api/admin-events` is the log of the
+tenant for its admin (`odt.project.admin`), filtered by `project`, `actor`, `action` (or a whole kind, `member.`) and
+the days `from` and `to`; `GET /api/projects/{key}/admin-events` is the log of a project for its admins. Both give
+the newest 500. The rows are kept for `odt.audit.retention` (`ODT_AUDIT_RETENTION`, `P730D`), then deleted at 3:40
+every night (`odt.audit.retention-cron`). Sprints, saved filters and the preferences of a user are work, not
+configuration, and are not logged; a webhook turned off by its failures is in its own deliveries.
+
 ## Mentions (`collaboration`)
 
 A comment mentions a member of the project with `@username` (ADR-13): at the start of the text or after a space, so an

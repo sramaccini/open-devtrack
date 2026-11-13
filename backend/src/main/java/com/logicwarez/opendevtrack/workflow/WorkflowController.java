@@ -4,8 +4,11 @@
  */
 package com.logicwarez.opendevtrack.workflow;
 
+import static com.logicwarez.opendevtrack.shared.ConfigurationChanged.values;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
+import com.logicwarez.opendevtrack.platform.AdminLog;
 import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
@@ -67,10 +70,11 @@ class WorkflowController {
     private final Conditions guards;
     private final ProjectAccess access;
     private final CurrentUser user;
+    private final AdminLog log;
 
     WorkflowController(Projects projects, Workflows workflows, WorkflowRepository workflowRepository,
                        StatusRepository statuses, TransitionRepository transitions, IssueStatuses issues,
-                       Conditions guards, ProjectAccess access, CurrentUser user) {
+                       Conditions guards, ProjectAccess access, CurrentUser user, AdminLog log) {
         this.projects = projects;
         this.workflows = workflows;
         this.workflowRepository = workflowRepository;
@@ -80,6 +84,7 @@ class WorkflowController {
         this.guards = guards;
         this.access = access;
         this.user = user;
+        this.log = log;
     }
 
     /**
@@ -150,6 +155,11 @@ class WorkflowController {
                 .map(t -> view(w.get(), t, edit)).toList());
     }
 
+    /** What the audit log keeps of a transition: code, from (null for every status), to and guard. */
+    private static Map<String, Object> logged(TransitionEntity t) {
+        return values("transition", t.code(), "from", t.fromStatus(), "to", t.toStatus(), "guard", t.guardCel());
+    }
+
     @ApiDoc(value = "Adds a status", answer = StatusView.class, status = 201, project = "odt.project.edit")
     @PostMapping({DEFAULT + "/statuses", ONE + "/statuses"})
     @Transactional
@@ -187,6 +197,8 @@ class WorkflowController {
         }
         number(all);
         statuses.saveAll(all);
+        log.project(editing.project().id(), "workflow.status_added", w.name(), null,
+                values("status", code, "category", status.category(), "position", at));
         List<String> types = workflows.types(w);
         return saved(w, () -> ResponseEntity.status(HttpStatus.CREATED)
                 .body(view(editing.project(), w, types, status, true)));
@@ -221,6 +233,7 @@ class WorkflowController {
         if (at < 1 || at > all.size()) {
             return Problems.badRequest("The position is from 1 to " + all.size());
         }
+        var before = values("status", code, "category", status.category(), "position", all.indexOf(status) + 1);
         status.category(category);
         all.remove(status);
         all.add(at - 1, status);
@@ -230,6 +243,8 @@ class WorkflowController {
         }
         number(all);
         statuses.saveAll(all);
+        log.project(editing.project().id(), "workflow.status_changed", w.name(), before,
+                values("status", code, "category", category, "position", at));
         List<String> types = workflows.types(w);
         return saved(w, () -> ResponseEntity.ok(view(editing.project(), w, types, status, true)));
     }
@@ -267,6 +282,8 @@ class WorkflowController {
         number(all);
         statuses.saveAll(all);
         number(transitions.findByWorkflowIdOrderByPosition(w.id()));
+        log.project(editing.project().id(), "workflow.status_removed", w.name(),
+                values("status", code, "category", found.get().category()), values("movedTo", moveTo, "issuesMoved", moved));
         return saved(w, () -> ResponseEntity.ok(new StatusRemoved(code, moveTo, moved)));
     }
 
@@ -296,6 +313,7 @@ class WorkflowController {
         TransitionEntity t = new TransitionEntity(w.id(), code, blank(request.from()), request.to(), all.size());
         t.guard(blank(request.guard()));
         transitions.save(t);
+        log.project(editing.project().id(), "workflow.transition_added", w.name(), null, logged(t));
         return saved(w, () -> ResponseEntity.status(HttpStatus.CREATED).body(view(w, t, true)));
     }
 
@@ -319,8 +337,10 @@ class WorkflowController {
             return invalid.get();
         }
         TransitionEntity t = found.get();
+        var before = logged(t);
         t.change(blank(request.from()), request.to(), blank(request.guard()));
         transitions.save(t);
+        log.project(editing.project().id(), "workflow.transition_changed", w.name(), before, logged(t));
         return saved(w, () -> ResponseEntity.ok(view(w, t, true)));
     }
 
@@ -339,6 +359,7 @@ class WorkflowController {
             return Problems.notFound("Transition not found");
         }
         transitions.delete(found.get());
+        log.project(editing.project().id(), "workflow.transition_removed", w.name(), logged(found.get()), null);
         transitions.flush();
         number(transitions.findByWorkflowIdOrderByPosition(w.id()));
         return saved(w, () -> ResponseEntity.noContent().build());

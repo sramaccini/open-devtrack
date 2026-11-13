@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "project-log",
+  "title": "{{ t('admin.config_log', 'Administration log') }}",
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "log": {
+      "ref": "projects/log"
+    }
+  },
+  "components": [
+    {
+      "id": "project-log-help",
+      "type": "text",
+      "text": "{{ t('projects.log_help', 'The changes to the configuration of the project, the most recent first (at most 500): members, groups, permission scheme, workflows, boards, custom fields and webhooks.') }}"
+    },
+    {
+      "id": "project-log-table",
+      "type": "table",
+      "source": "log",
+      "columns": [
+        {
+          "field": "at",
+          "label": "{{ t('admin.when', 'When') }}",
+          "format": "datetime"
+        },
+        {
+          "field": "actor",
+          "label": "{{ t('admin.actor', 'By') }}"
+        },
+        {
+          "field": "action",
+          "label": "{{ t('admin.action', 'Action') }}",
+          "valueKey": "values.config_action"
+        },
+        {
+          "field": "target",
+          "label": "{{ t('admin.target', 'Target') }}"
+        },
+        {
+          "field": "changes",
+          "label": "{{ t('admin.changes', 'Changes') }}"
+        }
+      ]
+    }
+  ]
+}

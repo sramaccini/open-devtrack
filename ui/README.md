@@ -164,6 +164,12 @@ The area `admin` (ADR-22), shown to whoever holds `authz.rbac.manage` in the ten
   of those that are not system roles.
 - `admin-tenants` (`authz.rbac.manageglobal`): the tenants, and «New tenant».
 - `admin-access-log`: the last 200 entries of the log of authz-library, with the actions and kinds translated.
+- `admin-config-log` (`odt.project.admin`): the audit log of the administration of OpenDevTrack (ADR-22), the newest
+  500, filtered by project, user, kind and days (inputs bound to `state`, so the table reloads by itself). The
+  column «Changes» names the fields as the API does (`role`, `name`…): they are not translated.
+- `project-log` (params `key`): the same log for one project, opened by the button «Administration log» of
+  `project-detail`, shown to the admins of the project. A screen of its own and not a table in `project-detail`:
+  every GET data source of a screen loads, so the members who are not admins would get a 403.
 - `admin-groups` and `admin-group-detail` (params `id`) (`odt.project.admin`): the groups of the tenant (New, Edit,
   Remove, Open) and the members of one (Add member with a lookup on the users, Remove). A multiselect cannot list the
   users (the options of Quadrava are static), so members are added one at a time. A removal that would leave a project

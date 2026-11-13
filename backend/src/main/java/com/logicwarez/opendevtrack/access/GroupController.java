@@ -4,8 +4,11 @@
  */
 package com.logicwarez.opendevtrack.access;
 
+import static com.logicwarez.opendevtrack.shared.ConfigurationChanged.values;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logicwarez.opendevtrack.identity.TenantUsers;
+import com.logicwarez.opendevtrack.platform.AdminLog;
 import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
@@ -52,15 +55,17 @@ class GroupController {
     private final ProjectAccess access;
     private final TenantUsers users;
     private final CurrentUser user;
+    private final AdminLog log;
 
     GroupController(GroupRepository groups, GroupMemberRepository members, ProjectGroupRepository projectGroups,
-                    ProjectAccess access, TenantUsers users, CurrentUser user) {
+                    ProjectAccess access, TenantUsers users, CurrentUser user, AdminLog log) {
         this.groups = groups;
         this.members = members;
         this.projectGroups = projectGroups;
         this.access = access;
         this.users = users;
         this.user = user;
+        this.log = log;
     }
 
     /** A group, how many members it has and in how many projects it is. */
@@ -109,6 +114,7 @@ class GroupController {
         }
         GroupEntity added = groups.saveAndFlush(new GroupEntity(user.tenantId(), request.name().strip(),
                 blankToNull(request.description()), user.username(), Instant.now()));
+        log.tenant("group.created", added.name(), null, values("name", added.name(), "description", added.description()));
         return ResponseEntity.status(HttpStatus.CREATED).body(view(added));
     }
 
@@ -128,7 +134,10 @@ class GroupController {
         if (request.version() == null || request.version() != found.get().version()) {
             return Problems.changedMeanwhile();
         }
+        var before = values("name", found.get().name(), "description", found.get().description());
         found.get().edit(request.name().strip(), blankToNull(request.description()));
+        log.tenant("group.changed", found.get().name(), before,
+                values("name", found.get().name(), "description", found.get().description()));
         return ResponseEntity.ok(view(groups.saveAndFlush(found.get())));
     }
 
@@ -145,6 +154,8 @@ class GroupController {
             return Problems.conflict(LAST_ADMIN);
         }
         groups.delete(found.get());
+        log.tenant("group.removed", found.get().name(), values("name", found.get().name(), "description",
+                found.get().description()), null);
         return ResponseEntity.noContent().build();
     }
 
@@ -176,6 +187,7 @@ class GroupController {
             return Problems.conflict("Already in the group");
         }
         GroupMemberEntity added = members.save(new GroupMemberEntity(id, username, user.username(), Instant.now()));
+        log.tenant("group.member_added", find(id).orElseThrow().name(), null, values("member", username));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new GroupMemberView(added.username(), added.addedBy(), added.addedAt(), Map.of("remove", true)));
     }
@@ -199,6 +211,7 @@ class GroupController {
             return Problems.conflict(LAST_ADMIN);
         }
         members.deleteById(key);
+        log.tenant("group.member_removed", find(id).orElseThrow().name(), values("member", username), null);
         return ResponseEntity.noContent().build();
     }
 

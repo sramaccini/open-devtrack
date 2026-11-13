@@ -561,6 +561,20 @@
       ]
     },
     {
+      "id": "btn-project-log",
+      "type": "button",
+      "label": "{{ t('admin.config_log', 'Administration log') }}",
+      "visibleIf": "{{ data.project != null && data.project._perm.edit }}",
+      "onClick": [
+        {
+          "navigate": "project-log",
+          "params": {
+            "key": "{{data.project.key}}"
+          }
+        }
+      ]
+    },
+    {
       "id": "boards-title",
       "type": "text",
       "style": "heading",

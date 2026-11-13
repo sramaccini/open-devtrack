@@ -19,6 +19,74 @@
     "session" : [ ]
   } ],
   "paths" : {
+    "/api/admin-events" : {
+      "get" : {
+        "operationId" : "adminEvent.tenant",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "project",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "actor",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "action",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "from",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "to",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/AdminEventView"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          }
+        },
+        "summary" : "The audit log of the administration of the tenant, newest first",
+        "tags" : [ "audit" ],
+        "x-permissions" : [ "odt.project.admin" ]
+      }
+    },
     "/api/boards" : {
       "get" : {
         "operationId" : "board.mine",
@@ -2402,6 +2470,46 @@
         "summary" : "Changes a project",
         "tags" : [ "project" ],
         "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.project.edit" ]
+      }
+    },
+    "/api/projects/{key}/admin-events" : {
+      "get" : {
+        "operationId" : "adminEvent.project",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/AdminEventView"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "The audit log of the administration of a project, newest first",
+        "tags" : [ "audit" ],
         "x-project-permissions" : [ "odt.project.edit" ]
       }
     },
@@ -5788,6 +5896,42 @@
       }
     },
     "schemas" : {
+      "AdminEventView" : {
+        "type" : "object",
+        "properties" : {
+          "action" : {
+            "type" : "string"
+          },
+          "actor" : {
+            "type" : "string"
+          },
+          "after" : {
+            "type" : "object",
+            "additionalProperties" : { }
+          },
+          "at" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "before" : {
+            "type" : "object",
+            "additionalProperties" : { }
+          },
+          "changes" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "project" : {
+            "type" : "string"
+          },
+          "target" : {
+            "type" : "string"
+          }
+        }
+      },
       "AttachmentView" : {
         "type" : "object",
         "properties" : {

@@ -4,6 +4,8 @@
  */
 package com.logicwarez.opendevtrack.agile;
 
+import static com.logicwarez.opendevtrack.shared.ConfigurationChanged.values;
+
 import com.logicwarez.opendevtrack.agile.AgileApi.BoardRequest;
 import com.logicwarez.opendevtrack.agile.AgileApi.BoardRow;
 import com.logicwarez.opendevtrack.agile.AgileApi.BoardView;
@@ -15,6 +17,7 @@ import com.logicwarez.opendevtrack.agile.Cards.Planned;
 import com.logicwarez.opendevtrack.agile.Scopes.Scope;
 import com.logicwarez.opendevtrack.issue.IssueRef;
 import com.logicwarez.opendevtrack.issue.Issues;
+import com.logicwarez.opendevtrack.platform.AdminLog;
 import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.project.Projects;
@@ -77,9 +80,10 @@ class BoardController {
     private final Issues issues;
     private final Texts texts;
     private final IssueQueries queries;
+    private final AdminLog log;
 
     BoardController(BoardRepository boards, Scopes scopes, Projects projects, Workflows workflows, Cards cards, Plans plans,
-                    Issues issues, Texts texts, IssueQueries queries) {
+                    Issues issues, Texts texts, IssueQueries queries, AdminLog log) {
         this.boards = boards;
         this.scopes = scopes;
         this.projects = projects;
@@ -89,6 +93,7 @@ class BoardController {
         this.issues = issues;
         this.texts = texts;
         this.queries = queries;
+        this.log = log;
     }
 
     /** The boards of the projects the user is a member of, by project. */
@@ -139,6 +144,7 @@ class BoardController {
         }
         BoardEntity board = boards.saveAndFlush(new BoardEntity(scope.get().projectId(), checked.name(), checked.kind(),
                 checked.lane(), checked.columns(), checked.filter(), Instant.now()));
+        log.project(board.projectId(), "board.created", board.name(), null, logged(board));
         return ResponseEntity.status(HttpStatus.CREATED).body(row(scope.get(), board));
     }
 
@@ -162,12 +168,14 @@ class BoardController {
         if (request.version() == null || request.version() != board.version()) {
             return Problems.changedMeanwhile();
         }
+        var before = logged(board);
         board.edit(checked.name(), checked.kind(), checked.lane(), checked.columns(), checked.filter());
         try {
             boards.saveAndFlush(board);
         } catch (ObjectOptimisticLockingFailureException e) {
             return Problems.changedMeanwhile();
         }
+        log.project(board.projectId(), "board.changed", board.name(), before, logged(board));
         return ResponseEntity.ok(row(scope, board));
     }
 
@@ -186,6 +194,8 @@ class BoardController {
             return Problems.conflict("A project keeps at least one board");
         }
         boards.delete(found.get().board());
+        log.project(found.get().board().projectId(), "board.removed", found.get().board().name(),
+                logged(found.get().board()), null);
         return ResponseEntity.noContent().build();
     }
 
@@ -339,6 +349,14 @@ class BoardController {
     }
 
     private record Found(Scope scope, BoardEntity board) {
+    }
+
+    /** What the audit log keeps of a board: name, kind, lanes, columns (name, statuses, limit) and filter. */
+    private static Map<String, Object> logged(BoardEntity board) {
+        return values("name", board.name(), "kind", board.kind(), "lane", board.lane(),
+                "columns", board.columns().stream().map(c -> c.name() + " " + c.statuses()
+                        + (c.wipLimit() == null ? "" : " ≤ " + c.wipLimit())).toList(),
+                "filter", board.filter());
     }
 
     private Optional<Found> find(UUID id) {

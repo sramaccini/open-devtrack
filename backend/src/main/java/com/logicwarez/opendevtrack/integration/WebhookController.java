@@ -4,15 +4,20 @@
  */
 package com.logicwarez.opendevtrack.integration;
 
+import static com.logicwarez.opendevtrack.shared.ConfigurationChanged.values;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
+import com.logicwarez.opendevtrack.platform.AdminLog;
 import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.platform.Problems.FieldError;
 import com.logicwarez.opendevtrack.project.ProjectRef;
 import com.logicwarez.opendevtrack.project.Projects;
+import com.logicwarez.opendevtrack.shared.ConfigurationChanged;
+import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -63,9 +68,10 @@ class WebhookController {
     private final Projects projects;
     private final ProjectAccess access;
     private final CurrentUser user;
+    private final AdminLog log;
 
     WebhookController(WebhookRepository webhooks, DeliveryRepository deliveries, Events events, Addresses addresses,
-                      Projects projects, ProjectAccess access, CurrentUser user) {
+                      Projects projects, ProjectAccess access, CurrentUser user, AdminLog log) {
         this.webhooks = webhooks;
         this.deliveries = deliveries;
         this.events = events;
@@ -73,6 +79,7 @@ class WebhookController {
         this.projects = projects;
         this.access = access;
         this.user = user;
+        this.log = log;
     }
 
     /**
@@ -117,6 +124,30 @@ class WebhookController {
                 .orElseGet(() -> missing(key, id));
     }
 
+    /**
+     * What the audit log keeps of a webhook: name, events, on or off, and of its address only the scheme and the host,
+     * since the path or the query of some addresses is a secret (the incoming webhooks of chat services).
+     */
+    static Map<String, Object> logged(WebhookEntity webhook) {
+        return values("name", webhook.name(), "url", origin(webhook.url()), "events", List.copyOf(webhook.events()),
+                "active", webhook.active());
+    }
+
+    /** {@code https://hooks.example.com/…}: the scheme, the host and the port of an address, the rest hidden. */
+    static String origin(String url) {
+        try {
+            URI uri = URI.create(url);
+            if (uri.getScheme() == null || uri.getHost() == null) {
+                return "…";
+            }
+            String origin = uri.getScheme() + "://" + uri.getHost() + (uri.getPort() < 0 ? "" : ":" + uri.getPort());
+            boolean more = (uri.getRawPath() != null && uri.getRawPath().length() > 1) || uri.getRawQuery() != null;
+            return more ? origin + "/…" : origin;
+        } catch (IllegalArgumentException e) {
+            return "…";
+        }
+    }
+
     @ApiDoc(value = "Adds a webhook; the answer has its secret, the only time it is shown",
             answer = WebhookView.class, status = 201, project = EDIT)
     @PostMapping(BASE)
@@ -144,6 +175,9 @@ class WebhookController {
         WebhookEntity webhook = webhooks.saveAndFlush(new WebhookEntity(project.get().tenantId(), project.get().id(),
                 name, request.url().strip(), events(request.events()), !Boolean.FALSE.equals(request.active()), secret,
                 user.username(), Instant.now()));
+        var after = logged(webhook);
+        after.put("secret", ConfigurationChanged.ROTATED);
+        log.project(webhook.projectId(), "webhook.created", webhook.name(), null, after);
         return ResponseEntity.status(HttpStatus.CREATED).body(view(webhook, secret));
     }
 
@@ -168,9 +202,11 @@ class WebhookController {
                 && webhooks.existsByProjectIdAndNameIgnoreCase(webhook.projectId(), name)) {
             return Problems.conflict("The project has a webhook with this name");
         }
+        var before = logged(webhook);
         webhook.edit(name, request.url().strip(), events(request.events()),
                 request.active() == null ? webhook.active() : request.active(), Instant.now());
         webhooks.saveAndFlush(webhook);
+        log.project(webhook.projectId(), "webhook.changed", webhook.name(), before, logged(webhook));
         return ResponseEntity.ok(view(webhook, null));
     }
 
@@ -183,6 +219,8 @@ class WebhookController {
             return missing(key, id);
         }
         webhooks.delete(scope.get().webhook());
+        log.project(scope.get().webhook().projectId(), "webhook.removed", scope.get().webhook().name(),
+                logged(scope.get().webhook()), null);
         return ResponseEntity.noContent().build();
     }
 
@@ -198,6 +236,8 @@ class WebhookController {
         String secret = Signature.newSecret();
         scope.get().webhook().rotate(secret, Instant.now());
         webhooks.saveAndFlush(scope.get().webhook());
+        log.project(scope.get().webhook().projectId(), "webhook.secret_rotated", scope.get().webhook().name(), null,
+                values("secret", ConfigurationChanged.ROTATED));
         return ResponseEntity.ok(view(scope.get().webhook(), secret));
     }
 
