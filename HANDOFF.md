@@ -94,6 +94,12 @@ Quadrava and authz-library, and the ADRs say where.
 - F5, ADR-21 (accepted 12 November 2026): the public API on `/api` with Keycloak tokens, service accounts and the
   OpenAPI definition (A), and outgoing webhooks per project, signed, retried and turned off after three days of
   failures, with a message to the admins (B; module `integration`).
+- ADR-22 (accepted 12 November 2026): the Administration area, permission schemes, groups as members, the audit log of
+  the configuration.
+- ADR-23 (accepted 12 November 2026): webhook secrets encrypted at rest (`ODT_SECRET_KEY`), security headers on the
+  answers of the back end, OSV-Scanner, CodeQL, Dependabot, the ZAP baseline (`run.sh zap`) and axe-core in CI;
+  `docs/security/asvs.md` (259 requirements, 18 open items O1–O18), `docs/accessibility.md`. Row-level security
+  measured and left for 1.x (`docs/search-load.md`).
 
 ## Requests to the dependencies
 
@@ -109,7 +115,8 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
   the poms.
 - Node through fnm: `eval "$(fnm env --shell bash)"; fnm use 24.21.0`. No `gh`, no Python. The token for
   `npm.pkg.github.com` (Quadrava CLI) is in `~/.npmrc`; the `.npmrc` of the repository only maps `@sramaccini`.
-- Docker is needed by the back end tests (Testcontainers) and by the e2e. The e2e login is limited to 20 per minute per
+- Docker is needed by the back end tests (Testcontainers) and by the e2e. `e2e/authz/run.sh zap` runs the ZAP image
+  against the e2e; from Git Bash on Windows set `ZAP_TARGET=http://host.docker.internal:28090`. The e2e login is limited to 20 per minute per
   IP by authz-library: wait a minute between two `check` runs or a check and a browser login.
 - No `~/.m2/settings.xml`: the authz-library artifacts resolve from the local Maven repository, where the
   authz-library build installed them. A clean machine or CI needs the token (backend/README.md).
@@ -132,6 +139,9 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    tenants, access log over the admin API of authz-library) the permission schemes (module `access`, the screen
    `admin-permission-schemes`, the choice in `project-detail`) and the groups (`admin-groups`, the groups of a
    project in `project-detail`) and the audit log of the configuration (`odt_audit.admin_event`, `admin-config-log`,
-   `project-log`) built: ADR-22 is done; next ADR-23. Q16 and Q17 for Quadrava are written in `docs/README.md` and not sent yet; then the documentation, the public demo
-   and 1.0.
+   `project-log`) built: ADR-22 is done. ADR-23 is built (above); its open items O1–O18 of `docs/security/asvs.md`
+   become issues, none of high severity, and the first manual accessibility check runs on the first release
+   candidate. Q16–Q20 for Quadrava are written in `docs/README.md` and not sent yet. The Dependabot secret
+   `AUTHZ_PACKAGES_TOKEN` (read:packages) must be set by the maintainer, or the Maven updates fail. Then the
+   documentation, the public demo and 1.0.
 2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.
