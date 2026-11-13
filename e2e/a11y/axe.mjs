@@ -1,6 +1,7 @@
 // Accessibility check of the main screens of OpenDevTrack (ADR-23): axe-core in a headless browser, signed in as a
 // user of the development tenants. A serious or critical violation fails, unless allowlist.json names it with the
-// request that fixes it (Quadrava or ui/).
+// request that fixes it (Quadrava or ui/). A violation of the Content-Security-Policy of the runtime image, reported
+// by the browser on any screen, fails too: the policy must not break what the screens draw.
 //
 //   node e2e/a11y/axe.mjs --front http://localhost:28090 --user mario.rossi --password … --project KEY
 //
@@ -28,6 +29,12 @@ const FAILING = new Set(['serious', 'critical']);
 const browser = await chromium.launch({ channel: args.channel });
 const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, locale: 'en-GB' });
 const page = await context.newPage();
+const cspViolations = [];
+page.on('console', (message) => {
+  if (/Content Security Policy/i.test(message.text())) {
+    cspViolations.push(message.text());
+  }
+});
 
 // Sign in through the runtime and Keycloak, as a person does
 await page.goto(`${front}/`);
@@ -77,12 +84,17 @@ for (const [screen, path] of screens) {
   const open = serious.filter(v => !allowlist.some(a => a.rule === v.id && (!a.screens || a.screens.includes(screen))));
   report.push({ screen, path, violations: result.violations.map(v => ({ rule: v.id, impact: v.impact, nodes: v.nodes.length,
     help: v.help, targets: v.nodes.slice(0, 5).map(n => n.target.join(' ')) })) });
-  const line = `${screen}: ${result.violations.length} violations, ${serious.length} serious or critical, ${open.length} not allowed`;
-  if (open.length) {
+  const csp = cspViolations.splice(0);
+  const line = `${screen}: ${result.violations.length} violations, ${serious.length} serious or critical, ${open.length} not allowed, ` +
+    `${csp.length} CSP violations`;
+  if (open.length || csp.length) {
     failed = true;
     console.log(`FAIL ${line}`);
     for (const v of open) {
       console.log(`     ${v.impact} ${v.id}: ${v.help} (${v.nodes.length}): ${v.nodes.slice(0, 3).map(n => n.target.join(' ')).join(' | ')}`);
+    }
+    for (const text of csp.slice(0, 3)) {
+      console.log(`     csp: ${text}`);
     }
   } else {
     console.log(`ok   ${line}`);

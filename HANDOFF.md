@@ -14,18 +14,18 @@ Quadrava and authz-library, and the ADRs say where.
   (`ModularityTests`: `verify()` and the module documentation). The `odt.*` permission catalogue is a repeatable
   Flyway migration of the RBAC schema (ADR-07); the dev profile adds tenants, users and the UI author/approver roles.
 - Module `uiregistry` (ADR-03): `contracts/registry.yaml` 0.7.0, adapted from the Quadrava reference registry
-  (commit 9fa1916, contract 0.6.0), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.14.0 in the classpath.
+  (commit 9fa1916, contract 0.6.0), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.15.0 in the classpath.
   The browser uses the session; tools use Keycloak access tokens of `opendevtrack-tools` on `/registry/**`
   (the bearer access of authz-library, A4).
 - `ui/`: the Quadrava project, with the main navigation, home and projects placeholder screens, themes `odt-light` and
-  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.14.0 checks it (`quadrava validate`) and publishes it
+  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.15.0 checks it (`quadrava validate`) and publishes it
   (`quadrava publish`) to any environment: no environment is protected (ADR-12).
 - End-to-end check (`docs/check-authz-end-to-end.md`): Quadrava kits bff 13/13 with and without a session, authz 11/11,
-  registry 24/24 (`--protected-env none`), tenant switch kept across logins, `ui/` served by the runtime 0.14.0 from the
+  registry 24/24 (`--protected-env none`), tenant switch kept across logins, `ui/` served by the runtime 0.15.0 from the
   registry. Quadrava 0.5.0 adopted on 4 November 2026 (from 0.2.1: same schemas, registry contract 0.7), 0.6.0 on 5
   November (tab title and icons from the theme, shell texts built in: Q3 and Q4), 0.7.0 on 5 November (theme and
   language in the settings dialog of the user menu; the message bell of ADR-22), 0.8.0 on 6 November (`data.<name>` in the expressions: Q9), 0.9.0 on 6 November (links from the rows, Q10;
-  request size of the runtime image, Q11), 0.10.0 on 6 November (comment actions, Q8; tags field, Q5), 0.11.0 on 6 November (the side menu runs the full height of the page; «lowcode» renamed «lc», which OpenDevTrack did not use), 0.11.1 on 7 November (Q12 on the kanban; the collapse button of the side menu back on its edge), 0.12.0 on 7 November (application sections in the settings dialog, Q13; chart axis labels that fit, Q14; the CLI checks the navigation as the runtime does), 0.12.1 on 7 November (an address that opens the settings dialog on a section, Q15), 0.13.0 on 8 November (field widths and the flow layout of forms, used by every form of `ui/`), 0.13.1 on 12 November (a value of a select outside its options shown as it is: a status of a workflow in `issue-detail`), 0.14.0 on 13 November (Q16–Q20: «All events» for `*` in `webhook-list`, form actions that wrap, a CSP and `QUADRAVA_HSTS` in the runtime image, read-only fields with the contrast of their text, nginx not root; the allow-list of `e2e/a11y` is empty, O17 and O18 closed; the CSP has `https:` images and inline styles, ZAP 10055, Q21 and O19).
+  request size of the runtime image, Q11), 0.10.0 on 6 November (comment actions, Q8; tags field, Q5), 0.11.0 on 6 November (the side menu runs the full height of the page; «lowcode» renamed «lc», which OpenDevTrack did not use), 0.11.1 on 7 November (Q12 on the kanban; the collapse button of the side menu back on its edge), 0.12.0 on 7 November (application sections in the settings dialog, Q13; chart axis labels that fit, Q14; the CLI checks the navigation as the runtime does), 0.12.1 on 7 November (an address that opens the settings dialog on a section, Q15), 0.13.0 on 8 November (field widths and the flow layout of forms, used by every form of `ui/`), 0.13.1 on 12 November (a value of a select outside its options shown as it is: a status of a workflow in `issue-detail`), 0.14.0 on 13 November (Q16–Q20: «All events» for `*` in `webhook-list`, form actions that wrap, a CSP and `QUADRAVA_HSTS` in the runtime image, read-only fields with the contrast of their text, nginx not root; the allow-list of `e2e/a11y` is empty, O17 and O18 closed; the CSP had `https:` images and inline styles, ZAP 10055: Q21), 0.15.0 on 13 November (Q21: style elements with a nonce, images from the origin; O19 closed, the ZAP allow-list empty, `e2e/a11y` fails on a CSP violation).
 - CI (`.github/workflows/ci.yml`), green on its first run: `quadrava validate` of `ui/` and the back end tests, then the e2e with the
   kits. It reads authz-library and the Quadrava CLI from GitHub Packages with the secret `AUTHZ_PACKAGES_TOKEN` (or the workflow token if the packages grant this repository access).
 - F2 E1 Projects: modules `project` (projects of the tenant, issue numbering), `access` (members and project roles
@@ -141,7 +141,7 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    project in `project-detail`) and the audit log of the configuration (`odt_audit.admin_event`, `admin-config-log`,
    `project-log`) built: ADR-22 is done. ADR-23 is built (above); its open items O1–O18 of `docs/security/asvs.md`
    are issues #4–#21 on GitHub, none of high severity (a new open item gets its own issue); O17 and O18 are
-   closed by Quadrava 0.14.0 (Q16–Q20, adopted). The first manual accessibility check runs on the first release
+   closed by Quadrava 0.14.0 (Q16–Q20) and O19 by 0.15.0 (Q21). The first manual accessibility check runs on the first release
    candidate. The Dependabot secret `AUTHZ_PACKAGES_TOKEN` (read:packages) must be set
    by the maintainer, or the Maven updates fail. Then the documentation, the public demo and 1.0.
 2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.

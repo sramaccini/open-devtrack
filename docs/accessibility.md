@@ -17,7 +17,8 @@ of the fields, texts, the colours of the theme (`brand/`).
 
 The rules are those of WCAG 2.0, 2.1 and 2.2 at levels A and AA (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`,
 `wcag22aa`). A serious or critical violation fails the build unless `e2e/a11y/allowlist.json` names it, for the screens
-it names, with the request that fixes it. The report is `e2e/authz/.work/axe.json`, uploaded by CI with the ZAP
+it names, with the request that fixes it. A violation of the Content-Security-Policy of the runtime, reported by the
+browser on one of the screens, fails too. The report is `e2e/authz/.work/axe.json`, uploaded by CI with the ZAP
 report.
 
 ```bash
@@ -28,7 +29,7 @@ e2e/authz/run.sh down
 
 ### Results
 
-On 13 November 2026, `main` with Quadrava 0.14.0:
+On 13 November 2026, `main` with Quadrava 0.15.0:
 
 | Screen | Violations | Serious or critical | Allowed |
 | --- | ---: | ---: | --- |

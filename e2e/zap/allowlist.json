@@ -1,10 +1,4 @@
 {
   "_comment": "Medium or high alerts of the ZAP baseline scan accepted for now (ADR-23): the plugin id of ZAP, why, and the request that fixes it.",
-  "allowed": [
-    {
-      "plugin": "10055",
-      "why": "The Content-Security-Policy of the Quadrava runtime image allows images from any https origin (img-src https:) and inline styles (style-src 'unsafe-inline'); scripts are 'self' only",
-      "request": "Q21, open item O19"
-    }
-  ]
+  "allowed": []
 }
