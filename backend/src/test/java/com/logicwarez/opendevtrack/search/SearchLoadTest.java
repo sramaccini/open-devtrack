@@ -93,7 +93,7 @@ class SearchLoadTest {
         mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(security).build();
         TestInfrastructure.awaitListeners(jdbc);
         long started = System.nanoTime();
-        jdbc.execute("INSERT INTO tenant (code, description) VALUES ('" + TENANT + "', 'Load') ON CONFLICT DO NOTHING");
+        jdbc.execute("INSERT INTO authz.tenant (code, description) VALUES ('" + TENANT + "', 'Load') ON CONFLICT DO NOTHING");
         jdbc.execute("DELETE FROM odt_search.issue_doc WHERE tenant_id = '" + TENANT + "'");
         jdbc.execute("DELETE FROM odt_access.project_member WHERE project_id IN "
                 + "(SELECT id FROM odt_project.project WHERE tenant_id = '" + TENANT + "')");

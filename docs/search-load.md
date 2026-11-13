@@ -70,3 +70,44 @@ and about 16 GB; `postgres:18` from Testcontainers with its default settings.
   to be batched if a tenant has many more projects.
 - The data is spread evenly; a real tenant with a few large projects would make `project = …` queries slower and the
   queries of the whole tenant no slower. The test is the place to try such shapes before changing an index.
+
+## Row-level security (ADR-23)
+
+ADR-23 puts row-level security of PostgreSQL on the tables with a `tenant_id` only if this test stays under p95 <
+0.6 s with it. Tried on 13 November 2026, same machine, with what row-level security needs:
+
+- a policy `tenant_id = current_setting('odt.tenant')` (or `'*'` for the system) on the 11 tables, `FORCE`d;
+- the back end connected as an ordinary role owning its database (a superuser is never bound);
+- `odt.tenant` set on each connection taken from the pool.
+
+| Query | p95 ms without | p95 ms with |
+| --- | ---: | ---: |
+| My open work | 129 | 177 |
+| One project, in progress | 200 | 280 |
+| Sprint of a project | 156 | 165 |
+| Urgent open bugs | 159 | 204 |
+| Full text | 131 | 284 |
+| **Summary contains** | 350 | **2,358** |
+| Label, updated this week | 131 | 247 |
+| Created this month | 129 | 146 |
+| Reported by me, resolved lately | 109 | 125 |
+| Everything open, newest first | 246 | 312 |
+| Suggestions: values of labels | 504 | 332 |
+| Suggestions: values of status | 106 | 190 |
+
+`summary ~` is far over the limit, and the full text doubles. Under a policy, PostgreSQL does not use an operator
+that is not `LEAKPROOF` as an index condition before the policy. The trigram match (`ILIKE`, `%`) and the full text
+(`@@`) are not leakproof, so their GIN indexes stop serving and the match runs on every row of the tenant. Marking
+them leakproof needs a superuser and would not be true of them.
+
+So row-level security is left for 1.x, as ADR-23 says. Ways to look at then:
+
+- policies only on the tables that the search does not read with such operators, `odt_search.issue_doc` keeping the
+  checks of ADR-09 alone;
+- or the search on a role or a view of its own.
+
+Either way, the role of the back end must not be a superuser: that is written in the requirements of
+`docs/security/asvs.md` for the installation.
+
+The test itself wrote to `tenant` without a schema, which broke when the RBAC tables moved to the schema `authz`
+(request A2): fixed with this run.
