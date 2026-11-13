@@ -29,6 +29,7 @@ The decisions D1–D9 of the project plan, all accepted by the maintainer on 31 
 | [21](adr-21-public-api-and-webhooks.md) | Public REST API and outgoing webhooks (E11) | The `/api` of the screens as the public API, OpenAPI 3.1 by springdoc kept as a contract in `docs/openapi.json`; Keycloak tokens and service accounts (authz-library A4); webhooks per project from an outbox, signed as Standard Webhooks | Accepted |
 | [22](adr-22-administration.md) | Administration: users, groups, permission schemes, audit log (E10) | Screens over the admin API of authz-library for users, roles, tenants and sessions; groups and permission schemes for the project roles in `access`; an audit log of the configuration in `audit` | Accepted |
 | [23](adr-23-hardening.md) | Hardening for 1.0: ASVS level 2 and WCAG 2.2 AA | A requirement list, OSV-Scanner, CodeQL and a ZAP baseline in CI; webhook secrets encrypted; row-level security if the load test allows; axe-core on the main screens and a manual check per release | Accepted |
+| [24](adr-24-security-open-items.md) | The open security items that need a decision (ASVS level 2) | Signed images with the release, a Keycloak theme with a strength meter, pepper and OTP notice accepted, a recent login (A8), a key plugin for Vault transit, rate limit (A9) and Prometheus alerts, export and pseudonymised removal of a user, attachment quota, type by content and clamd hook, requests checked against the OpenAPI | Proposed |
 
 ## Requests to the dependencies
 
