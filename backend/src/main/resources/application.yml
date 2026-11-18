@@ -134,6 +134,16 @@ odt:
     key: ${ODT_SECRET_KEY:}
     key-id: ${ODT_SECRET_KEY_ID:1}
     previous-keys: ${ODT_SECRET_KEYS_PREVIOUS:}
+    # Where the key lives (ADR-24): local (the key above, in memory) or transit (Vault or OpenBao; the key above is
+    # then needed only while values under it remain, and they are moved to transit at start)
+    plugin: ${ODT_SECRETS_PLUGIN:local}
+    transit:
+      address: ${ODT_SECRETS_TRANSIT_ADDRESS:}
+      mount: ${ODT_SECRETS_TRANSIT_MOUNT:transit}
+      key: ${ODT_SECRETS_TRANSIT_KEY:opendevtrack}
+      # A token with update on <mount>/encrypt/<key> and <mount>/decrypt/<key>; the file is read at each call
+      token: ${ODT_SECRETS_TRANSIT_TOKEN:}
+      token-file: ${ODT_SECRETS_TRANSIT_TOKEN_FILE:}
   audit:
     # How long the audit log of the administration is kept (ADR-22), deleted once a night after that.
     retention: ${ODT_AUDIT_RETENTION:P730D}

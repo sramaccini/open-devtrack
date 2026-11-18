@@ -19,7 +19,7 @@ class SecretBoxTest {
     void sealsAndOpens() {
         SecretBox box = new SecretBox(OLD, "1", "");
         String sealed = box.seal("whsec_abc");
-        assertThat(sealed).startsWith("enc:1:").doesNotContain("abc");
+        assertThat(sealed).startsWith("enc:1:").doesNotContain("whsec_");
         assertThat(box.seal("whsec_abc")).as("a new nonce each time").isNotEqualTo(sealed);
         assertThat(box.open(sealed)).isEqualTo("whsec_abc");
         assertThat(box.open("whsec_clear")).as("stored before the encryption").isEqualTo("whsec_clear");

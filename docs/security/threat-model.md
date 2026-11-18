@@ -86,7 +86,7 @@ webhook; the operator of the installation.
 | Threat | What stops it | Left |
 | --- | --- | --- |
 | I, E: server-side request forgery | Only `https` addresses whose host resolves to public addresses: loopback, private, link-local and reserved ranges refused at saving and before each attempt (ADR-21) | |
-| S: a forged delivery to the receiver | Signed with the secret of the webhook (Standard Webhooks); the secret encrypted at rest (ADR-23) | `ODT_SECRET_KEY` is in the memory of the back end (O10) |
+| S: a forged delivery to the receiver | Signed with the secret of the webhook (Standard Webhooks); the secret encrypted at rest (ADR-23) | With the plugin `local`, `ODT_SECRET_KEY` is in the memory of the back end; `transit` keeps it in Vault (installation) |
 | D: a receiver that never answers | A timeout of 10 s, no redirect followed, retries with backoff, turned off after three days of failures; at most 10 webhooks a project | |
 | I: a body with data the receiver should not see | The project's events only; a comment's text is never sent (ADR-21) | |
 

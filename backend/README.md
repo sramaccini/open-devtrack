@@ -39,7 +39,7 @@ front, is `e2e/authz/run.sh up` ([docs/check-authz-end-to-end.md](../docs/check-
 
 Configuration (`application.yml`): `DB_URL`, `DB_USER`, `DB_PASSWORD`, `REDIS_HOST`, `REDIS_PORT`, `IAM_ISSUER_URI`,
 `IAM_CLIENT_ID`, `IAM_CLIENT_SECRET`, `FRONTEND_URL` (the address of the runtime), `PORT`, `ODT_BEARER_CLIENTS`
-(the clients whose access tokens are accepted, `opendevtrack-tools` by default), `ODT_SECRET_KEY` (required: below).
+(the clients whose access tokens are accepted, `opendevtrack-tools` by default), `ODT_SECRET_KEY` (required, unless the key is in Vault: below).
 The profile `dev` adds the
 development tenants and users (with `service-account-opendevtrack-ci`) and the session cookie over http.
 
@@ -384,6 +384,15 @@ back end does not start without a key of at least 32 characters; the stack and t
 `ODT_SECRET_KEYS_PREVIOUS` (`id=key,id=key`); at start `SecretsAtRest` writes every secret again under the new key
 (and encrypts those stored in clear before V30), then the old key can go. A key lost is every webhook secret lost:
 rotate them from the screen.
+
+The key can live outside the back end instead (ADR-24): with `ODT_SECRETS_PLUGIN=transit`, `SecretBox` sends each
+value to the transit engine of Vault or OpenBao (`ODT_SECRETS_TRANSIT_ADDRESS`, `…_MOUNT` `transit`, `…_KEY`
+`opendevtrack`, and `…_TOKEN` or `…_TOKEN_FILE`, a token with `update` on `<mount>/encrypt/<key>` and
+`<mount>/decrypt/<key>`), over its HTTP API, and keeps `transit:vault:v<n>:…`. The key never reaches the back
+end. To move an installation: create the key (`vault write -f transit/keys/opendevtrack`), set the plugin and keep
+`ODT_SECRET_KEY` for one start, which writes every secret again through transit; then it can go. The key is rotated in
+Vault (`vault write -f transit/keys/opendevtrack/rotate`): older versions still decrypt until its
+`min_decryption_version` is raised.
 
 `Addresses` refuses an address that is not `https`, has credentials or a fragment, or resolves to a loopback,
 private, link-local, shared, multicast or reserved address (the metadata of the clouds too), when it is saved and

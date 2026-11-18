@@ -17,7 +17,7 @@ again at each release.
 | **Accepted** | Not met, and accepted by the maintainer with the reason (ADR-24); reconsidered when the reason changes |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 188 met, 36 met by the installation, 24 not applicable, 2 accepted, 9 open (7 items).
+Level 2 has 259 requirements. Today: 188 met, 37 met by the installation, 24 not applicable, 2 accepted, 8 open (6 items).
 
 ## The installation
 
@@ -36,6 +36,8 @@ What an installation must do for the requirements marked **Install**:
   - no default accounts; the realm of `e2e/authz` is for development only.
 - **Database**: the role of the back end owns its database and is neither a superuser nor `BYPASSRLS` (the row-level
   security of 1.x needs it, `docs/search-load.md`). The volume is encrypted.
+- **Key of the secrets at rest**: in the transit engine of Vault or OpenBao (`ODT_SECRETS_PLUGIN=transit`,
+  `backend/README.md`), so that it never reaches the memory of the back end; `local` keeps it there.
 - **Secrets**: `ODT_SECRET_KEY`, `DB_PASSWORD`, `IAM_CLIENT_SECRET` and the mail and storage credentials come from a
   secret store of the platform (Kubernetes secrets, a vault), never from files in the image.
 - **Logs**: the logs of the back end, the runtime and Keycloak go to a central system, kept away from the hosts, with
@@ -243,7 +245,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 6.3.1 | Random values from a CSPRNG | Met | odt: `SecureRandom` for the secrets of the webhooks; authz: for sessions and tokens |
 | 6.3.2 | Random GUIDs are v4 from a CSPRNG | Met | odt: `UUID.randomUUID()` for event ids; the row ids (UUIDv7) are not secrets |
 | 6.4.1 | Secrets management solution | Install | The secret store of the platform |
-| 6.4.2 | Key material in an isolated module | Open | O10: `ODT_SECRET_KEY` is in the memory of the back end; a KMS would hold it outside |
+| 6.4.2 | Key material in an isolated module | Install | odt: `SecretBox` with the plugin `transit` (Vault or OpenBao): the key never leaves the service; `local` keeps it in memory |
 
 ## V7 Error handling and logging
 
@@ -394,7 +396,6 @@ application.
 | O5 | [#8](https://github.com/sramaccini/open-devtrack/issues/8) | 2.1.8 | Low | A strength meter in a Keycloak theme of the project |
 | O7 | [#10](https://github.com/sramaccini/open-devtrack/issues/10) | 3.3.3, 3.3.4 | Medium | authz-library: list and end a user's sessions, end them after a password change (back-channel logout of Keycloak): request A7, asked 13 November 2026 |
 | O9 | [#12](https://github.com/sramaccini/open-devtrack/issues/12) | 3.7.1, 4.3.3 | Medium | Recent login (`max_age` or `acr`) before the administration and the creation of tokens |
-| O10 | [#13](https://github.com/sramaccini/open-devtrack/issues/13) | 6.4.2 | Low | `ODT_SECRET_KEY` held by a KMS |
 | O12 | [#15](https://github.com/sramaccini/open-devtrack/issues/15) | 11.1.4 | Medium | A rate limit per user on the session API: request A9, in authz-library 2.4.0 (the metrics and alerts are built) |
 | O13 | [#16](https://github.com/sramaccini/open-devtrack/issues/16) | 8.3.2 | Medium | Export and removal of a user's data on request |
 
@@ -412,6 +413,7 @@ Closed:
 - O6 ([#9](https://github.com/sramaccini/open-devtrack/issues/9)): accepted by the maintainer, not built (ADR-24 point 3).
 - O15 ([#18](https://github.com/sramaccini/open-devtrack/issues/18)): JSON bodies checked against the OpenAPI schemas; fields not named still ignored until Q22 ([#23](https://github.com/sramaccini/open-devtrack/issues/23)).
 - O14 ([#17](https://github.com/sramaccini/open-devtrack/issues/17)): quota per project, type by content, clamd before storing.
+- O10 ([#13](https://github.com/sramaccini/open-devtrack/issues/13)): the key of the secrets in the transit engine of Vault or OpenBao.
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).

@@ -36,7 +36,7 @@ drawn as restricted Markdown, never as HTML; a file is always downloaded, never 
 | Search read model (copies of the texts) | Project, Personal | PostgreSQL `odt_search.issue_doc` | Volume encryption | With the issue |
 | Saved filters | Project, Personal (owner) | PostgreSQL `odt_search.filter` | Volume encryption | Until removed |
 | Report read models | Project | PostgreSQL `odt_reporting` | Volume encryption | Until the project is removed |
-| Webhooks: address and secret | Project, Secret | PostgreSQL `odt_integration.webhook` | The secret encrypted with `ODT_SECRET_KEY` (AES-GCM, ADR-23) | Until removed |
+| Webhooks: address and secret | Project, Secret | PostgreSQL `odt_integration.webhook` | The secret encrypted with `ODT_SECRET_KEY` (AES-GCM, ADR-23) or by the transit engine of Vault (ADR-24) | Until removed |
 | Webhook deliveries: the body sent, the status and the last error | Project, Personal | PostgreSQL `odt_integration.delivery` | Volume encryption | 30 days |
 | Events between modules | Project | PostgreSQL `odt.event_publication` | Volume encryption | Deleted once handled |
 | Screens of `ui/` | Configuration | PostgreSQL `odt_uiregistry` | Volume encryption | Every published version |
@@ -55,4 +55,3 @@ drawn as restricted Markdown, never as HTML; a file is always downloaded, never 
 
 - Export and removal of a user's data on request (O13, issue #16): today an administrator removes the user from the
   tenant, while what the user wrote stays under their name.
-- `ODT_SECRET_KEY` held outside the memory of the back end (O10, issue #13).
