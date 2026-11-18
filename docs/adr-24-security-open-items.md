@@ -1,6 +1,6 @@
 # ADR-24: The open security items that need a decision (ASVS level 2)
 
-Status: Proposed (13 November 2026) — F5
+Status: Accepted (18 November 2026; decided by the maintainer) — F5
 
 ## Context
 
