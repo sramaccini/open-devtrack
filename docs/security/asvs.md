@@ -17,7 +17,7 @@ again at each release.
 | **Accepted** | Not met, and accepted by the maintainer with the reason (ADR-24); reconsidered when the reason changes |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 185 met, 32 met by the installation, 24 not applicable, 2 accepted, 16 open (9 items).
+Level 2 has 259 requirements. Today: 186 met, 32 met by the installation, 24 not applicable, 2 accepted, 15 open (8 items).
 
 ## The installation
 
@@ -340,7 +340,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 13.1.4 | Authorization at the URI and the resource | Met | odt: the security chain by path, then the project role on each resource |
 | 13.1.5 | Unexpected content types refused | Met | odt: Spring MVC answers 415 to a body that is not JSON |
 | 13.2.1 | HTTP methods allowed per user | Met | odt: each method of each resource checks its own permission |
-| 13.2.2 | JSON schema validation | Open | O15: requests are checked by the controllers, not against a schema; the OpenAPI is published (`docs/openapi.json`) |
+| 13.2.2 | JSON schema validation | Met | odt: every JSON body of `/api` checked against the schema of its operation in `docs/openapi.json` (`RequestSchemas`), 400 with `errors[].path` |
 | 13.2.3 | CSRF protection on cookie APIs | Met | authz: CSRF token and `Origin` check |
 | 13.2.5 | Content-Type checked | Met | odt: as 13.1.5 |
 | 13.2.6 | Headers and payload not modified in transit | Met | odt: TLS (Install); webhook payloads signed |
@@ -392,7 +392,6 @@ application.
 | O12 | [#15](https://github.com/sramaccini/open-devtrack/issues/15) | 8.1.4, 11.1.4, 11.1.7, 11.1.8 | Medium | A rate limit per user on the session API and alerts on unusual numbers |
 | O13 | [#16](https://github.com/sramaccini/open-devtrack/issues/16) | 8.3.2 | Medium | Export and removal of a user's data on request |
 | O14 | [#17](https://github.com/sramaccini/open-devtrack/issues/17) | 12.1.3, 12.2.1, 12.4.2 | Medium | Quotas per project, a type check by content, an antivirus hook for attachments |
-| O15 | [#18](https://github.com/sramaccini/open-devtrack/issues/18) | 13.2.2 | Low | Requests checked against the OpenAPI schema |
 
 Closed:
 
@@ -406,6 +405,7 @@ Closed:
 - O3 ([#6](https://github.com/sramaccini/open-devtrack/issues/6)): [data.md](data.md), the classification of the data.
 - O1 ([#4](https://github.com/sramaccini/open-devtrack/issues/4)): [threat-model.md](threat-model.md).
 - O6 ([#9](https://github.com/sramaccini/open-devtrack/issues/9)): accepted by the maintainer, not built (ADR-24 point 3).
+- O15 ([#18](https://github.com/sramaccini/open-devtrack/issues/18)): JSON bodies checked against the OpenAPI schemas; fields not named still ignored until Q22 ([#23](https://github.com/sramaccini/open-devtrack/issues/23)).
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).

@@ -130,6 +130,11 @@ What is there to build on:
      contract kept by `OpenApiContractTest`, with the validator already in the classpath.
    - A body that does not match gets 400 with the errors as the Problem contract of Quadrava has them (`errors[].path`).
    - The schemas are made strict where they are not (`additionalProperties: false` on the requests), in the same work.
+   - **Note of 18 November 2026, building it.** A form of Quadrava starts from the whole record of its data source,
+     and `"body": "{{form}}"` sends it back with the fields that are only read (`key`, `_perm`, the dates), and with
+     `null` for an empty field. So the check takes a `null` for a field not given, and lets through the fields that
+     the schema does not name. `additionalProperties: false` waits for a body with only the fields of the form
+     (request Q22 to Quadrava, issue #23).
 
 The order of the work, each item one commit with its tests and closing its issue: O15, O14, O12 (metrics and
 alerts), O10, O13, O5, O4 (with the release workflow). O9 and the rate limit of O12 follow A8 and A9. O6 is closed by

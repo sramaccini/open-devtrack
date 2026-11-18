@@ -79,7 +79,7 @@ webhook; the operator of the installation.
 | S: a forged or stolen token | Keycloak tokens checked by signature, issuer and expiry; personal access tokens hashed, shown once, revocable (authz-library) | |
 | E: a token choosing a tenant that is not its user's | `X-Tenant` accepted only among the user's tenants | |
 | D: a script calling too much | 600 requests a minute per user on the bearer path | Not on the session path (O12) |
-| T: a request with unexpected fields | Each controller checks what it reads | Not checked against the OpenAPI schema (O15) |
+| T: a request with unexpected fields | Every JSON body checked against the schema of its operation in the published OpenAPI (`RequestSchemas`); each controller checks what it reads | Fields the schema does not name are ignored, not refused, until the forms send only their fields (Q22, #23) |
 
 ### Webhooks
 

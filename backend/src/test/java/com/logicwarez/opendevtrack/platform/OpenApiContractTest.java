@@ -20,6 +20,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +35,13 @@ import org.springframework.web.context.WebApplicationContext;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The OpenAPI definition of {@code /api} is a contract kept in the repository (ADR-21, A3): this test generates it and
  * fails when it differs from {@code docs/openapi.json}, so every change to the API shows up in review. To write it again
  * after a change: {@code mvn test -Dtest=OpenApiContractTest -Dopenapi.update=true}; the generated copy is also left in
- * {@code target/openapi.json}.
+ * {@code target/openapi.json}. It also writes the schemas of the request bodies for {@code RequestSchemas}.
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -46,6 +49,8 @@ import tools.jackson.databind.json.JsonMapper;
 class OpenApiContractTest {
 
     static final Path CONTRACT = Path.of("..", "docs", "openapi.json");
+
+    static final Path REQUESTS = Path.of("src", "main", "resources", "openapi", "requests.json");
 
     private static final JsonMapper JSON = JsonMapper.builder().enable(SerializationFeature.INDENT_OUTPUT).build();
 
@@ -81,13 +86,51 @@ class OpenApiContractTest {
         assertThat(undocumented).as("Paths without @ApiDoc").isEmpty();
         assertThat(api.get("openapi").asString()).startsWith("3.1");
 
+        String requests = JSON.writeValueAsString(requests(api)).replace("\r\n", "\n") + "\n";
         if (Boolean.getBoolean("openapi.update")) {
             Files.writeString(CONTRACT, generated, StandardCharsets.UTF_8);
+            Files.writeString(REQUESTS, requests, StandardCharsets.UTF_8);
             return;
         }
         assertThat(Files.readString(CONTRACT, StandardCharsets.UTF_8).replace("\r\n", "\n"))
                 .as("%s differs from the code: write it again with -Dopenapi.update=true (see the javadoc)", CONTRACT)
                 .isEqualTo(generated);
+        assertThat(Files.readString(REQUESTS, StandardCharsets.UTF_8).replace("\r\n", "\n"))
+                .as("%s differs from the code: write it again with -Dopenapi.update=true (see the javadoc)", REQUESTS)
+                .isEqualTo(requests);
+    }
+
+    /**
+     * The schemas of the JSON request bodies by {@code "<METHOD> <path>"}, with the components they use, which
+     * {@code RequestSchemas} checks the requests against.
+     */
+    private static ObjectNode requests(JsonNode api) {
+        ObjectNode bodies = JSON.createObjectNode();
+        Set<String> used = new TreeSet<>();
+        api.get("paths").properties().forEach(path -> path.getValue().properties().forEach(operation -> {
+            JsonNode schema = operation.getValue().path("requestBody").path("content").path("application/json")
+                    .path("schema");
+            if (schema.isObject()) {
+                bodies.set(operation.getKey().toUpperCase() + " " + path.getKey(), schema);
+                references(api, schema, used);
+            }
+        }));
+        ObjectNode schemas = JSON.createObjectNode();
+        used.forEach(name -> schemas.set(name, api.path("components").path("schemas").path(name)));
+        ObjectNode out = JSON.createObjectNode();
+        out.set("requests", bodies);
+        out.putObject("components").set("schemas", schemas);
+        return out;
+    }
+
+    private static void references(JsonNode api, JsonNode node, Set<String> used) {
+        if (node.isObject() && node.has("$ref")) {
+            String name = node.get("$ref").asString().substring("#/components/schemas/".length());
+            if (used.add(name)) {
+                references(api, api.path("components").path("schemas").path(name), used);
+            }
+        }
+        node.forEach(child -> references(api, child, used));
     }
 
     @Test

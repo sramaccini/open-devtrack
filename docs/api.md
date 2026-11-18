@@ -120,6 +120,10 @@ Errors are Problems (RFC 9457, `application/problem+json`) with an English `titl
 | 412 | The `version` sent is not the current one |
 | 429 | Too many requests (below) |
 
+A JSON body is first checked against the schema of its operation in `docs/openapi.json`: a field of the wrong type or
+format gets 400 with the title «The body does not match the API definition» and `code` the keyword of JSON Schema that
+failed (`type`, `format`, `required`). A `null` is a field not given; a field the schema does not name is ignored.
+
 ```json
 { "type": "about:blank", "title": "Summary is required", "status": 400,
   "errors": [{ "path": "/summary", "code": "required" }] }
