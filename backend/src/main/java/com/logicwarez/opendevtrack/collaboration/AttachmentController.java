@@ -13,6 +13,7 @@ import com.logicwarez.opendevtrack.issue.Issues;
 import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -78,13 +79,14 @@ class AttachmentController {
     private final DataSize projectQuota;
     private final AttachmentScanner scanner;
     private final boolean failOpen;
+    private final MeterRegistry metrics;
 
     AttachmentController(Issues issues, AttachmentRepository attachments, AttachmentBytes bytes, ProjectAccess access,
                          CurrentUser user, ApplicationEventPublisher events,
                          @Value("${odt.attachments.max-size:25MB}") DataSize maxSize,
                          @Value("${odt.attachments.project-quota:}") DataSize projectQuota,
                          ObjectProvider<AttachmentScanner> scanner,
-                         @Value("${odt.attachments.scan.fail-open:false}") boolean failOpen) {
+                         @Value("${odt.attachments.scan.fail-open:false}") boolean failOpen, MeterRegistry metrics) {
         this.issues = issues;
         this.attachments = attachments;
         this.bytes = bytes;
@@ -95,6 +97,7 @@ class AttachmentController {
         this.projectQuota = projectQuota;
         this.scanner = scanner.getIfAvailable();
         this.failOpen = failOpen;
+        this.metrics = metrics;
     }
 
     record AttachmentView(UUID id, String filename, String mediaType, long size, String sha256, String uploadedBy,
@@ -141,6 +144,7 @@ class AttachmentController {
             ResponseEntity<ProblemDetail> over = Problems.of(HttpStatus.CONTENT_TOO_LARGE,
                     "The attachments of a project are at most " + projectQuota.toMegabytes() + " MB");
             over.getBody().setProperty("quota", projectQuota.toBytes());
+            refused("quota");
             return over;
         }
         ResponseEntity<ProblemDetail> refused = scan(file, issue.get());
@@ -220,16 +224,24 @@ class AttachmentController {
         } catch (IOException e) {
             if (failOpen) {
                 LOG.warn("The antivirus could not look at a file for {}, stored unscanned: {}", issue.key(), e.getMessage());
+                metrics.counter("odt.attachments.unscanned").increment();
                 return null;
             }
             LOG.error("The antivirus could not look at a file for {}, refused: {}", issue.key(), e.getMessage());
+            refused("scanner");
             return Problems.of(HttpStatus.SERVICE_UNAVAILABLE, "The antivirus cannot look at the file now: try again later");
         }
         if (found.isPresent()) {
             LOG.warn("Attachment refused: {} found in a file of {} for {}", found.get(), user.username(), issue.key());
+            refused("infected");
             return Problems.of(HttpStatus.UNPROCESSABLE_CONTENT, "The antivirus found something harmful in the file");
         }
         return null;
+    }
+
+    /** Uploads refused before storing, by reason, in {@code odt.attachments.refused} (ADR-24, the alerts). */
+    private void refused(String reason) {
+        metrics.counter("odt.attachments.refused", "reason", reason).increment();
     }
 
     private record Found(AttachmentEntity attachment, IssueRef issue, Set<String> permissions) {

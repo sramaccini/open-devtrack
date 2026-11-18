@@ -117,7 +117,7 @@ webhook; the operator of the installation.
 | --- | --- | --- |
 | T: a vulnerable or malicious dependency | Versions pinned; OSV-Scanner fails the build on a high one; Dependabot; CodeQL | Images are not signed (O4) |
 | T, I: logs forged or leaking | Structured JSON logs (escaped values); no Secret logged | |
-| D: abuse that nobody sees | Refusals logged | No alerts on unusual numbers (O12) |
+| D: abuse that nobody sees | Refusals logged and counted; Prometheus alert rules on refusals, 429s, logins, webhooks and the antivirus (`docs/operations/alerts.yaml`, installation) | |
 
 ## Limits of the business logic
 

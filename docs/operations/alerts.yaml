@@ -1,0 +1,84 @@
+# Prometheus alert rules for OpenDevTrack (ADR-24, ASVS 8.1.4, 11.1.7, 11.1.8). The back end publishes its metrics at
+# /actuator/prometheus on the management port (MANAGEMENT_SERVER_PORT, docs/operations/README.md). Load this file in
+# the rule_files of Prometheus, and set in Alertmanager where the alerts go. The thresholds are starting points for an
+# installation of a few hundred users: change them here, no release needed.
+#
+# The counters are by status or outcome, never by user. Who caused a burst is in the logs: every refusal is a line
+# with user.name and odt.tenant (AccessRefusalLog), and the log system can alert per user on them.
+groups:
+  - name: opendevtrack
+    rules:
+      # Refusals of access control: someone probing paths or another tenant's resources, or a broken integration
+      - alert: OpenDevTrackManyRefusals
+        expr: sum(increase(odt_access_refused_total{status=~"401|403"}[5m])) > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: More than 50 requests refused in 5 minutes
+          description: Look in the logs for "Access refused" by user.name and url.path.
+
+      # Not found on the API: the answer another tenant gets too (ADR-09), so a burst can be a scan for ids
+      - alert: OpenDevTrackManyNotFound
+        expr: sum(increase(odt_access_refused_total{status="404"}[5m])) > 200
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: More than 200 not-found answers of the API in 5 minutes
+          description: Look in the logs for "Not found" by user.name.
+
+      # Rate limits reached: a script calling too much
+      - alert: OpenDevTrackRateLimited
+        expr: sum(increase(odt_access_refused_total{status="429"}[5m])) > 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: Requests refused by a rate limit for 15 minutes
+          description: A user or a service account goes over its limit; look in the logs for status 429.
+
+      # Logins that fail after Keycloak (a state or a token that does not check out)
+      - alert: OpenDevTrackLoginFailures
+        expr: sum(increase(odt_logins_total{outcome="failure"}[10m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: More than 10 logins failed in the back end in 10 minutes
+          description: Wrong passwords are in the events of Keycloak (LOGIN_ERROR); these are failures after it.
+
+      # Webhooks that keep failing: a receiver down, or an address that is no longer allowed
+      - alert: OpenDevTrackWebhooksFailing
+        expr: >
+          sum(increase(odt_webhook_attempts_total{outcome="failed"}[1h])) > 0
+          and sum(increase(odt_webhook_attempts_total{outcome="delivered"}[1h])) == 0
+        for: 1h
+        labels:
+          severity: info
+        annotations:
+          summary: No webhook delivered for an hour, and some failed
+          description: The project admins see the last error in the screen of each webhook; one failing for three days is turned off.
+
+      # Attachments refused by the antivirus, or not looked at because clamd was not reachable
+      - alert: OpenDevTrackMalwareRefused
+        expr: sum(increase(odt_attachments_refused_total{reason="infected"}[1h])) > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: The antivirus refused an attachment
+          description: Look in the logs for "Attachment refused" for the user and the issue.
+
+      - alert: OpenDevTrackAntivirusUnreachable
+        expr: sum(increase(odt_attachments_refused_total{reason="scanner"}[10m])) > 0 or sum(increase(odt_attachments_unscanned_total[10m])) > 0
+        labels:
+          severity: critical
+        annotations:
+          summary: clamd could not look at an attachment
+          description: Uploads are refused (or stored unscanned with odt.attachments.scan.fail-open) until clamd answers.
+
+      # Keycloak (ADR-24 point 3): a reused OTP or a burst of wrong passwords are login errors of its events. With
+      # --metrics-enabled=true and --event-metrics-user-enabled=true Keycloak counts them in keycloak_user_events_total
+      # (labels event, error); otherwise the log system alerts on its LOGIN_ERROR events. For example:
+      # - alert: KeycloakLoginErrors
+      #   expr: sum(increase(keycloak_user_events_total{event="login", error!=""}[5m])) > 20

@@ -191,7 +191,8 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        # prometheus answers only on the management port of the installation (ADR-24, docs/operations)
+        include: health,info,prometheus
   health:
     mail:
       # A mail server that does not answer does not make the instance unhealthy: the outbox tries again (ADR-18).

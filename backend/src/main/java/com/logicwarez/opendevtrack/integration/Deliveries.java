@@ -6,6 +6,7 @@ package com.logicwarez.opendevtrack.integration;
 
 import com.logicwarez.opendevtrack.platform.SecretBox;
 import com.logicwarez.opendevtrack.shared.WebhookTurnedOff;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -56,15 +57,18 @@ class Deliveries {
     private final HttpClient http;
 
     private final SecretBox secrets;
+    private final MeterRegistry metrics;
 
     Deliveries(DeliveryRepository deliveries, WebhookRepository webhooks, Addresses addresses,
-               ApplicationEventPublisher events, TransactionTemplate transactions, SecretBox secrets) {
+               ApplicationEventPublisher events, TransactionTemplate transactions, SecretBox secrets,
+               MeterRegistry metrics) {
         this.deliveries = deliveries;
         this.webhooks = webhooks;
         this.addresses = addresses;
         this.events = events;
         this.transactions = transactions;
         this.secrets = secrets;
+        this.metrics = metrics;
         this.http = HttpClient.newBuilder().connectTimeout(TIMEOUT).followRedirects(HttpClient.Redirect.NEVER).build();
     }
 
@@ -127,6 +131,7 @@ class Deliveries {
             if (code >= 200 && code < 300) {
                 delivery.delivered(code, now);
                 webhook.delivered();
+                attempted("delivered");
             } else {
                 failed(webhook, delivery, code, "HTTP " + code, now);
             }
@@ -140,7 +145,13 @@ class Deliveries {
         return true;
     }
 
+    /** Each attempt counted by outcome in {@code odt.webhook.attempts}, for the alerts (ADR-24). */
+    private void attempted(String outcome) {
+        metrics.counter("odt.webhook.attempts", "outcome", outcome).increment();
+    }
+
     private void failed(WebhookEntity webhook, DeliveryEntity delivery, Integer code, String error, Instant now) {
+        attempted("failed");
         if (!delivery.failed(code, error, now)) {
             return;
         }

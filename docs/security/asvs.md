@@ -17,7 +17,7 @@ again at each release.
 | **Accepted** | Not met, and accepted by the maintainer with the reason (ADR-24); reconsidered when the reason changes |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 188 met, 33 met by the installation, 24 not applicable, 2 accepted, 12 open (7 items).
+Level 2 has 259 requirements. Today: 188 met, 36 met by the installation, 24 not applicable, 2 accepted, 9 open (7 items).
 
 ## The installation
 
@@ -47,6 +47,9 @@ What an installation must do for the requirements marked **Install**:
 - **Antivirus**: a clamd reachable by the back end (`ODT_ATTACHMENTS_SCAN_CLAMD_HOST`), with its signatures kept up to date
   and `StreamMaxLength` at least the largest attachment; a quota per project (`ODT_ATTACHMENTS_PROJECT_QUOTA`) that
   fits the storage.
+- **Monitoring**: the metrics of the management port (`MANAGEMENT_SERVER_PORT`) scraped by Prometheus with the rules of
+  [alerts.yaml](../operations/alerts.yaml), and alerts per user and on the Keycloak events in the log system
+  ([operations](../operations/README.md)).
 - **Network**: PostgreSQL, Redis and the back end are not reachable from outside; only the runtime is published.
 
 ## V1 Architecture, design and threat modeling
@@ -266,7 +269,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 8.1.1 | Sensitive data not cached by servers | Met | authz: `Cache-Control: no-store` on the answers of the API |
 | 8.1.2 | Server temporary copies protected or purged | Met | odt: uploads streamed to the storage; no copies on disk beyond the request |
 | 8.1.3 | Few parameters in requests | Met | odt: JSON bodies, no hidden state in the client |
-| 8.1.4 | Detect abnormal request numbers | Open | O12: rate limits on the login and the bearer path only; no alert |
+| 8.1.4 | Detect abnormal request numbers | Install | odt: refusals and 429s counted (`odt_access_refused_total`), Prometheus rules in `docs/operations/alerts.yaml`; rate limits on the login and the bearer path (authz) |
 | 8.2.1 | Anti-caching headers | Met | authz: `Cache-Control: no-cache, no-store`, `Pragma`, `Expires` |
 | 8.2.2 | No sensitive data in browser storage | Met | quadrava: only preferences (language, last project) in `localStorage` |
 | 8.2.3 | Client data cleared at logout | Met | quadrava: the logout leaves the page (a redirect through the BFF); only the preferences stay |
@@ -311,8 +314,8 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 11.1.4 | Anti-automation against excessive calls | Open | O12: the session API has no rate limit per user |
 | 11.1.5 | Business logic limits from threat modeling | Met | odt: the limits in [threat-model.md](threat-model.md), «Limits of the business logic» |
 | 11.1.6 | No TOCTOU on sensitive operations | Met | odt: optimistic versions on every edit, uniqueness by constraints, transactions |
-| 11.1.7 | Monitor unusual business events | Open | O12 |
-| 11.1.8 | Configurable alerting on attacks | Open | O12 |
+| 11.1.7 | Monitor unusual business events | Install | odt: metrics of refusals, logins, webhooks and attachments refused, with alert rules (`docs/operations`) |
+| 11.1.8 | Configurable alerting on attacks | Install | odt: alert rules in `docs/operations/alerts.yaml`, thresholds changed without a release; the installation routes them |
 
 ## V12 Files and resources
 
@@ -358,7 +361,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | --- | --- | --- | --- |
 | 14.1.1 | Secure, repeatable build and deploy | Met | odt: CI on GitHub Actions; images from Dockerfiles; `stack/compose.yaml` |
 | 14.1.2 | Compiler hardening flags | N/A | Java bytecode; the JVM of the base image |
-| 14.1.3 | Server configuration hardened | Met | odt: actuator only `health` and `info`; graceful shutdown; no error details |
+| 14.1.3 | Server configuration hardened | Met | odt: actuator only `health` and `info`, and `prometheus` on the management port only; graceful shutdown; no error details |
 | 14.1.4 | Automated re-deployment from a runbook | Met | odt: `stack/README.md`, `stack.sh` |
 | 14.2.1 | Components up to date | Met | odt: Dependabot weekly; OSV-Scanner in CI |
 | 14.2.2 | Unneeded features removed | Met | odt: no samples; the `dev` data only in the `dev` profile |
@@ -392,7 +395,7 @@ application.
 | O7 | [#10](https://github.com/sramaccini/open-devtrack/issues/10) | 3.3.3, 3.3.4 | Medium | authz-library: list and end a user's sessions, end them after a password change (back-channel logout of Keycloak): request A7, asked 13 November 2026 |
 | O9 | [#12](https://github.com/sramaccini/open-devtrack/issues/12) | 3.7.1, 4.3.3 | Medium | Recent login (`max_age` or `acr`) before the administration and the creation of tokens |
 | O10 | [#13](https://github.com/sramaccini/open-devtrack/issues/13) | 6.4.2 | Low | `ODT_SECRET_KEY` held by a KMS |
-| O12 | [#15](https://github.com/sramaccini/open-devtrack/issues/15) | 8.1.4, 11.1.4, 11.1.7, 11.1.8 | Medium | A rate limit per user on the session API and alerts on unusual numbers |
+| O12 | [#15](https://github.com/sramaccini/open-devtrack/issues/15) | 11.1.4 | Medium | A rate limit per user on the session API: request A9, in authz-library 2.4.0 (the metrics and alerts are built) |
 | O13 | [#16](https://github.com/sramaccini/open-devtrack/issues/16) | 8.3.2 | Medium | Export and removal of a user's data on request |
 
 Closed:

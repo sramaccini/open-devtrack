@@ -96,6 +96,9 @@ What is there to build on:
      with more than 50 refusals in 5 minutes, a burst of failed logins, 429s, a webhook failing for an hour. The
      installation loads them into its Prometheus or Alertmanager and sets where they go. Also for the Keycloak events
      of point 3.
+   - **Note of 18 November 2026, building it.** The counters have no tag per user: the series would grow with the
+     users. The rules of `alerts.yaml` count totals; an alert per user (a user with more than 50 refusals in 5
+     minutes) belongs to the log system, where each refusal is a line with `user.name` (`docs/operations/README.md`).
 7. **O13, export and removal of a user's data.**
    - **Export.**
      - `GET /api/me/export` gives the signed-in user a JSON of everything about them in the tenant: profile; the

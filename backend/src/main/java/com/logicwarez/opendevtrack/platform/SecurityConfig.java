@@ -7,6 +7,8 @@ package com.logicwarez.opendevtrack.platform;
 import com.logicwarez.authz.bff.BffConfigurer;
 import com.logicwarez.authz.bff.BffControllers;
 import com.logicwarez.authz.rbac.RbacAdminSecurity;
+import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -26,11 +28,15 @@ import org.springframework.security.web.header.writers.StaticHeadersWriter;
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain security(HttpSecurity http) throws Exception {
+    SecurityFilterChain security(HttpSecurity http, MeterRegistry metrics,
+                                 @Value("${management.server.port:-1}") int managementPort) throws Exception {
         http.with(BffConfigurer.bff(), Customizer.withDefaults())
             .authorizeHttpRequests(auth -> RbacAdminSecurity.adminApi(auth
                     .requestMatchers(BffControllers.PUBLIC_PATHS).permitAll()
-                    .requestMatchers("/actuator/health/**", "/actuator/info").permitAll())
+                    .requestMatchers("/actuator/health/**", "/actuator/info").permitAll()
+                    // The metrics only on the management port of the installation, never through the proxy (ADR-24)
+                    .requestMatchers(request -> managementPort > 0 && request.getLocalPort() == managementPort
+                            && "/actuator/prometheus".equals(request.getRequestURI())).permitAll())
                 .anyRequest().authenticated())
             // The answers of the back end are data, never pages (ADR-23): nothing may load from them or frame them.
             // nosniff, no-store and X-Frame-Options are the defaults of Spring Security, HSTS too on the requests
@@ -43,7 +49,7 @@ public class SecurityConfig {
                 .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31_536_000))
                 .addHeaderWriter(new StaticHeadersWriter("Content-Disposition", "attachment")))
             // A log line for each refusal (ASVS 7.2.2), with the user and the tenant of the session just loaded
-            .addFilterAfter(new AccessRefusalLog(), SecurityContextHolderFilter.class);
+            .addFilterAfter(new AccessRefusalLog(metrics), SecurityContextHolderFilter.class);
         return http.build();
     }
 }

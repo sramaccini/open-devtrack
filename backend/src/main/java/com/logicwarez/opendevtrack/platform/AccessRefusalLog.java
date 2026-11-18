@@ -5,6 +5,7 @@
 package com.logicwarez.opendevtrack.platform;
 
 import com.logicwarez.authz.session.SessionAuthentication;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,11 +23,20 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * (no session, CSRF, Origin), the permissions of a method, or a controller. 401 and 403 at WARN; 404 of the API at
  * INFO, since it is also what a user gets for a resource of another tenant (ADR-09), and the answer must not tell
  * the two apart. It runs inside the security chain, right after the session is loaded, so it knows the user and
- * the tenant; the path is logged without its query, which may hold search texts.
+ * the tenant; the path is logged without its query, which may hold search texts. A 429 of a rate limit is a refusal
+ * too. Each one is counted in {@code odt.access.refused} by status (ADR-24), for the alerts of
+ * {@code docs/operations/alerts.yaml}; by status only, since a tag per user would grow without end.
  */
 class AccessRefusalLog extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(AccessRefusalLog.class);
+    private static final int TOO_MANY_REQUESTS = 429;
+
+    private final MeterRegistry metrics;
+
+    AccessRefusalLog(MeterRegistry metrics) {
+        this.metrics = metrics;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -35,9 +45,11 @@ class AccessRefusalLog extends OncePerRequestFilter {
             chain.doFilter(request, response);
         } finally {
             int status = response.getStatus();
-            boolean refused = status == HttpServletResponse.SC_UNAUTHORIZED || status == HttpServletResponse.SC_FORBIDDEN;
+            boolean refused = status == HttpServletResponse.SC_UNAUTHORIZED || status == HttpServletResponse.SC_FORBIDDEN
+                    || status == TOO_MANY_REQUESTS;
             boolean notFound = status == HttpServletResponse.SC_NOT_FOUND && request.getRequestURI().startsWith("/api/");
             if (refused || notFound) {
+                metrics.counter("odt.access.refused", "status", Integer.toString(status)).increment();
                 Authentication user = SecurityContextHolder.getContext().getAuthentication();
                 String tenant = user instanceof SessionAuthentication session ? session.getPrincipal().tenantId() : null;
                 String name = user == null || !user.isAuthenticated() ? null : user.getName();

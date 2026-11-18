@@ -83,6 +83,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+        <!-- The metrics in the format of Prometheus, on the management port (ADR-24) -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
         <!-- The OpenAPI definition of /api (ADR-21), kept in docs/openapi.json -->
         <dependency>
             <groupId>org.springdoc</groupId>

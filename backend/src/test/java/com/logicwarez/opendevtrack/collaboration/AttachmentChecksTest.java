@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.logicwarez.authz.session.SessionAuthentication;
 import com.logicwarez.opendevtrack.TestInfrastructure;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.Filter;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -83,6 +84,9 @@ class AttachmentChecksTest {
     @Autowired
     JdbcTemplate jdbc;
 
+    @Autowired
+    MeterRegistry metrics;
+
     MockMvc mvc;
 
     private final SessionAuthentication mario = AttachmentTestBase.session("mario", "ALPHA", AttachmentTestBase.CREATOR);
@@ -132,6 +136,7 @@ class AttachmentChecksTest {
         upload("eicar.com", "application/octet-stream", "X5O!P%@AP EICAR test".getBytes(StandardCharsets.US_ASCII))
                 .andExpect(status().isUnprocessableContent());
         assertThat(jdbc.queryForObject("SELECT count(*) FROM odt_collaboration.attachment", Integer.class)).isZero();
+        assertThat(metrics.counter("odt.attachments.refused", "reason", "infected").count()).isGreaterThanOrEqualTo(1);
     }
 
     @Test
