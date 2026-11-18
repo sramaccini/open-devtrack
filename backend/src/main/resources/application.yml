@@ -142,6 +142,16 @@ odt:
     # installation that has attachments is a migration: the back end does not start.
     store: ${ODT_ATTACHMENTS_STORE:database}
     max-size: ${ODT_ATTACHMENTS_MAX_SIZE:25MB}
+    # The bytes of all the attachments of a project (ADR-24): unlimited when empty, for example 5GB
+    project-quota: ${ODT_ATTACHMENTS_PROJECT_QUOTA:}
+    # An antivirus before each file is stored (ADR-24): clamd over TCP, on when its host is set
+    # (ODT_ATTACHMENTS_SCAN_CLAMD_HOST); a file it cannot look at is refused (503) unless fail-open is true.
+    # scan:
+    #   clamd:
+    #     host: clamav
+    #     port: 3310
+    #     timeout: 30s
+    #   fail-open: false
     # filesystem:
     #   root: /var/lib/opendevtrack/attachments
     # s3:

@@ -17,7 +17,7 @@ again at each release.
 | **Accepted** | Not met, and accepted by the maintainer with the reason (ADR-24); reconsidered when the reason changes |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 186 met, 32 met by the installation, 24 not applicable, 2 accepted, 15 open (8 items).
+Level 2 has 259 requirements. Today: 188 met, 33 met by the installation, 24 not applicable, 2 accepted, 12 open (7 items).
 
 ## The installation
 
@@ -44,6 +44,9 @@ What an installation must do for the requirements marked **Install**:
   the proxy that ends TLS.
 - **Images from other hosts**: none by default (`img-src 'self' data:`); `QUADRAVA_CSP_IMG_SRC` adds hosts when an
   installation needs them. The screens of OpenDevTrack and its Markdown show none.
+- **Antivirus**: a clamd reachable by the back end (`ODT_ATTACHMENTS_SCAN_CLAMD_HOST`), with its signatures kept up to date
+  and `StreamMaxLength` at least the largest attachment; a quota per project (`ODT_ATTACHMENTS_PROJECT_QUOTA`) that
+  fits the storage.
 - **Network**: PostgreSQL, Redis and the back end are not reachable from outside; only the runtime is published.
 
 ## V1 Architecture, design and threat modeling
@@ -317,8 +320,8 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | --- | --- | --- | --- |
 | 12.1.1 | No large files | Met | odt: `odt.attachments.max-size` (25 MB) and the multipart limits |
 | 12.1.2 | Compressed files checked before expanding | N/A | Files are never expanded |
-| 12.1.3 | Quota of size and number per user | Open | O14: 100 files per issue, no quota per project or user (ADR-14) |
-| 12.2.1 | File type checked by content | Open | O14: the type is the one declared, made safe; never shown inline |
+| 12.1.3 | Quota of size and number per user | Met | odt: 25 MB a file, 100 files per issue, `odt.attachments.project-quota` per project; a user fills at most the quota of the projects where they attach, which is how ADR-24 reads it |
+| 12.2.1 | File type checked by content | Met | odt: the declared type kept only when the first bytes confirm it, otherwise `application/octet-stream`; never shown inline |
 | 12.3.1 | File names not used by the file system | Met | odt: storage keys are generated (ADR-14) |
 | 12.3.2 | File names cannot reach local files | Met | odt: the name is only metadata |
 | 12.3.3 | File names cannot reach remote files | Met | odt: the name is only metadata |
@@ -326,7 +329,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 12.3.5 | File metadata not passed to system commands | Met | odt: no commands |
 | 12.3.6 | No code from untrusted sources | Met | odt: dependencies from Maven Central and GitHub Packages of the project, checked by OSV-Scanner |
 | 12.4.1 | Uploaded files outside the web root | Met | odt: S3-compatible storage or a folder outside any web root (ADR-14) |
-| 12.4.2 | Uploaded files scanned by an antivirus | Open | O14 |
+| 12.4.2 | Uploaded files scanned by an antivirus | Install | odt: clamd before each file is stored, fail closed (`odt.attachments.scan.clamd`); the installation runs clamd |
 | 12.5.1 | Only allowed file types served by the web tier | Met | quadrava: only the files of its build |
 | 12.5.2 | Uploads never executed as HTML or JavaScript | Met | odt: `Content-Disposition: attachment`, `nosniff`, CSP `default-src 'none'` |
 | 12.6.1 | Allow list for server requests | Met | odt: webhooks to public addresses only; the other outbound links are configured by the installation |
@@ -391,7 +394,6 @@ application.
 | O10 | [#13](https://github.com/sramaccini/open-devtrack/issues/13) | 6.4.2 | Low | `ODT_SECRET_KEY` held by a KMS |
 | O12 | [#15](https://github.com/sramaccini/open-devtrack/issues/15) | 8.1.4, 11.1.4, 11.1.7, 11.1.8 | Medium | A rate limit per user on the session API and alerts on unusual numbers |
 | O13 | [#16](https://github.com/sramaccini/open-devtrack/issues/16) | 8.3.2 | Medium | Export and removal of a user's data on request |
-| O14 | [#17](https://github.com/sramaccini/open-devtrack/issues/17) | 12.1.3, 12.2.1, 12.4.2 | Medium | Quotas per project, a type check by content, an antivirus hook for attachments |
 
 Closed:
 
@@ -406,6 +408,7 @@ Closed:
 - O1 ([#4](https://github.com/sramaccini/open-devtrack/issues/4)): [threat-model.md](threat-model.md).
 - O6 ([#9](https://github.com/sramaccini/open-devtrack/issues/9)): accepted by the maintainer, not built (ADR-24 point 3).
 - O15 ([#18](https://github.com/sramaccini/open-devtrack/issues/18)): JSON bodies checked against the OpenAPI schemas; fields not named still ignored until Q22 ([#23](https://github.com/sramaccini/open-devtrack/issues/23)).
+- O14 ([#17](https://github.com/sramaccini/open-devtrack/issues/17)): quota per project, type by content, clamd before storing.
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).

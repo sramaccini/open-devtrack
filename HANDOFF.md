@@ -144,8 +144,8 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    O11, O16 here (threat model, structured logs, data classification, `__Host-SESSION_ID`, the log of refusals,
    `Content-Disposition`), O17–O19 by Quadrava 0.14.0 and 0.15.0 (Q16–Q21). O7 waits for authz-library (A7, asked
    13 November 2026). The other nine (O4, O5, O6, O9, O10, O12–O15) are in ADR-24, accepted on 18 November
-   2026 and built in its order: O6 is accepted, not built (the state Accepted of asvs.md); O15 is built (`RequestSchemas`, unknown fields
-   ignored until Q22, #23); O9 and the rate limit of
+   2026 and built in its order: O6 is accepted, not built (the state Accepted of asvs.md); O15 and O14 are built (`RequestSchemas`, unknown fields
+   ignored until Q22, #23; quota, type by content and clamd for attachments); O9 and the rate limit of
    O12 wait for A8 and A9 of authz-library (asked the same day). The first manual
    accessibility check runs on the first release candidate. The Dependabot secret `AUTHZ_PACKAGES_TOKEN`
    (read:packages) must be set by the maintainer, or the Maven updates fail. Then the documentation, the public

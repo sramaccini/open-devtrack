@@ -270,7 +270,21 @@ and the back end refuses to start if attachments are kept in another store: chan
 `odt.issue.attach` (developer, admin); `GET …/attachments/{id}/content` downloads one, always as a download
 (`Content-Disposition: attachment`, `nosniff`); `DELETE …/attachments/{id}` is for the uploader or an admin of the
 project. At most `odt.attachments.max-size` per file (25 MB) and 100 per issue; each one added or removed is in the
-changelog (`attachments`). The bytes are removed after the commit of their metadata, with their issue too, and a sweep
+changelog (`attachments`).
+
+Before a file is stored (ADR-24):
+
+- **Quota**: the attachments of a project stay within `odt.attachments.project-quota` (`ODT_ATTACHMENTS_PROJECT_QUOTA`,
+  unlimited when empty); over it, 413 with `quota` in bytes.
+- **Type**: the type sent is kept only when the first bytes confirm it (`ContentTypes`: PDF, PNG, JPEG, GIF, WebP,
+  ZIP and the Office and OpenDocument formats, the old Office formats, gzip, texts); any other file is
+  `application/octet-stream`.
+- **Antivirus**: with `odt.attachments.scan.clamd.host` (`ODT_ATTACHMENTS_SCAN_CLAMD_HOST`, port 3310), each file goes to
+  clamd with `INSTREAM`. Something found is a 422 and the file is not stored. If clamd cannot be reached, the upload is
+  a 503, unless `odt.attachments.scan.fail-open` is set. The `StreamMaxLength` of clamd must be at least
+  `odt.attachments.max-size`.
+
+The bytes are removed after the commit of their metadata, with their issue too, and a sweep
 (`odt.attachments.sweep-cron`, 3:45 every night) removes the bytes older than a day that no attachment names.
 The Quadrava runtime image forwards requests up to its `QUADRAVA_MAX_BODY_SIZE` (100m by default).
 

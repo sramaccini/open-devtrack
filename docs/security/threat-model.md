@@ -67,9 +67,9 @@ webhook; the operator of the installation.
 
 | Threat | What stops it | Left |
 | --- | --- | --- |
-| T: a file that runs in the browser | Always `Content-Disposition: attachment` with `nosniff`, never shown inline; the type declared is made safe | The type is not checked against the content (O14) |
-| T: malware passed to other members | | No antivirus hook (O14) |
-| D: filling the storage | 25 MB a file, 100 files an issue | No quota per project or user (O14) |
+| T: a file that runs in the browser | Always `Content-Disposition: attachment` with `nosniff`, never shown inline; the type declared kept only when the first bytes confirm it, otherwise `application/octet-stream` | |
+| T: malware passed to other members | clamd before the file is stored, refused when infected or when clamd cannot look at it (installation) | Only when the installation runs clamd |
+| D: filling the storage | 25 MB a file, 100 files an issue, a quota per project (installation) | No quota per user |
 | I: reading a file of another project | The bytes go through the back end with the permissions of the issue (ADR-14) | |
 
 ### Public API and tokens
@@ -123,6 +123,6 @@ webhook; the operator of the installation.
 
 The limits that keep one user or one project from taking more than its share (ASVS 11.1.5), all enforced by the back
 end: 20 logins a minute per IP; 600 API requests a minute per user with a token; sessions of 30 minutes idle and 10
-hours at most; 25 MB a file and 100 files an issue; 10 webhooks a project; 50 custom fields a project; 20 labels and
+hours at most; 25 MB a file, 100 files an issue and the quota of a project; 10 webhooks a project; 50 custom fields a project; 20 labels and
 100 links an issue; 32,000 characters for a description or a comment; 100 rows a search page and 500 rows a list of
-history; CEL guards of at most 1,000 iterations. What is still missing is in the open items O12 and O14.
+history; CEL guards of at most 1,000 iterations. What is still missing is in the open item O12.

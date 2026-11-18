@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.InputStreamResource;
@@ -32,6 +33,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +51,11 @@ import org.springframework.web.multipart.MultipartFile;
  * (developer) adds them as the {@code file} part of a multipart request; the uploader removes their own, an admin of
  * the project ({@code odt.issue.delete}) also those of others. A download is always a download
  * ({@code Content-Disposition: attachment}, {@code nosniff}): a file is never shown inside the pages.
+ *
+ * <p>Before it is stored (ADR-24 point 8): the attachments of a project stay within {@code odt.attachments.project-quota}
+ * when it is set; the declared type is kept only when the first bytes confirm it ({@link ContentTypes}); an antivirus,
+ * when there is one ({@link AttachmentScanner}), refuses an infected file, and a file it cannot look at unless
+ * {@code odt.attachments.scan.fail-open} is set.
  */
 @RestController
 @Transactional(readOnly = true)
@@ -68,10 +75,16 @@ class AttachmentController {
     private final CurrentUser user;
     private final ApplicationEventPublisher events;
     private final DataSize maxSize;
+    private final DataSize projectQuota;
+    private final AttachmentScanner scanner;
+    private final boolean failOpen;
 
     AttachmentController(Issues issues, AttachmentRepository attachments, AttachmentBytes bytes, ProjectAccess access,
                          CurrentUser user, ApplicationEventPublisher events,
-                         @Value("${odt.attachments.max-size:25MB}") DataSize maxSize) {
+                         @Value("${odt.attachments.max-size:25MB}") DataSize maxSize,
+                         @Value("${odt.attachments.project-quota:}") DataSize projectQuota,
+                         ObjectProvider<AttachmentScanner> scanner,
+                         @Value("${odt.attachments.scan.fail-open:false}") boolean failOpen) {
         this.issues = issues;
         this.attachments = attachments;
         this.bytes = bytes;
@@ -79,6 +92,9 @@ class AttachmentController {
         this.user = user;
         this.events = events;
         this.maxSize = maxSize;
+        this.projectQuota = projectQuota;
+        this.scanner = scanner.getIfAvailable();
+        this.failOpen = failOpen;
     }
 
     record AttachmentView(UUID id, String filename, String mediaType, long size, String sha256, String uploadedBy,
@@ -120,9 +136,24 @@ class AttachmentController {
         if (attachments.countByIssueId(issue.get().id()) >= MAX_PER_ISSUE) {
             return Problems.conflict("An issue has at most " + MAX_PER_ISSUE + " attachments");
         }
+        if (projectQuota != null && projectQuota.toBytes() > 0
+                && attachments.totalSizeOfProject(issue.get().projectId()) + file.getSize() > projectQuota.toBytes()) {
+            ResponseEntity<ProblemDetail> over = Problems.of(HttpStatus.CONTENT_TOO_LARGE,
+                    "The attachments of a project are at most " + projectQuota.toMegabytes() + " MB");
+            over.getBody().setProperty("quota", projectQuota.toBytes());
+            return over;
+        }
+        ResponseEntity<ProblemDetail> refused = scan(file, issue.get());
+        if (refused != null) {
+            return refused;
+        }
+        String type;
+        try (InputStream content = file.getInputStream()) {
+            type = ContentTypes.checked(mediaType(file.getContentType()), content.readNBytes(ContentTypes.HEAD));
+        }
         Instant now = Instant.now();
         AttachmentEntity attachment = attachments.saveAndFlush(new AttachmentEntity(issue.get().id(),
-                issue.get().projectId(), filename(file.getOriginalFilename()), mediaType(file.getContentType()),
+                issue.get().projectId(), filename(file.getOriginalFilename()), type,
                 file.getSize(), bytes.store(), user.username(), now));
         try (InputStream content = file.getInputStream()) {
             bytes.keep(attachment, content);
@@ -176,6 +207,29 @@ class AttachmentController {
         events.publishEvent(new AttachmentRemoved(attachment.id(), issue.id(), issue.projectId(), issue.key(),
                 attachment.filename(), user.username(), Instant.now()));
         return ResponseEntity.noContent().build();
+    }
+
+    /** The answer that refuses the file after the antivirus, or null to store it. */
+    private ResponseEntity<ProblemDetail> scan(MultipartFile file, IssueRef issue) throws IOException {
+        if (scanner == null) {
+            return null;
+        }
+        Optional<String> found;
+        try (InputStream content = file.getInputStream()) {
+            found = scanner.scan(content);
+        } catch (IOException e) {
+            if (failOpen) {
+                LOG.warn("The antivirus could not look at a file for {}, stored unscanned: {}", issue.key(), e.getMessage());
+                return null;
+            }
+            LOG.error("The antivirus could not look at a file for {}, refused: {}", issue.key(), e.getMessage());
+            return Problems.of(HttpStatus.SERVICE_UNAVAILABLE, "The antivirus cannot look at the file now: try again later");
+        }
+        if (found.isPresent()) {
+            LOG.warn("Attachment refused: {} found in a file of {} for {}", found.get(), user.username(), issue.key());
+            return Problems.of(HttpStatus.UNPROCESSABLE_CONTENT, "The antivirus found something harmful in the file");
+        }
+        return null;
     }
 
     private record Found(AttachmentEntity attachment, IssueRef issue, Set<String> permissions) {
