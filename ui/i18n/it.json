@@ -574,5 +574,21 @@
   "values.config_kind.board.": "Board",
   "values.config_kind.customfield.": "Campi personalizzati",
   "values.config_kind.webhook.": "Webhook",
-  "admin.changed_by": "Modificato da"
+  "admin.changed_by": "Modificato da",
+  "nav.my_sessions": "Le tue sessioni",
+  "sessions.description": "Dove hai effettuato l'accesso. Chiudi una sessione che non riconosci, poi cambia la password.",
+  "sessions.end_others": "Esci da tutte le altre",
+  "sessions.end_others_confirm": "Chiudere tutte le sessioni tranne questa?",
+  "sessions.ended": "Sessioni chiuse",
+  "sessions.last_used": "Ultimo uso",
+  "sessions.signed_in": "Accesso",
+  "sessions.browser": "Browser",
+  "sessions.address": "Indirizzo",
+  "sessions.this_one": "Questa",
+  "sessions.end": "Esci",
+  "sessions.end_confirm": "Chiudere questa sessione?",
+  "sessions.of_user": "Sessioni di {name}",
+  "sessions.of_user_description": "Dove questo utente ha effettuato l'accesso, in questo tenant.",
+  "sessions.tenant": "Tenant",
+  "admin.sessions": "Sessioni"
 }

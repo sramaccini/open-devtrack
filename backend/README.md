@@ -101,7 +101,10 @@ lists the users of the tenant for the pickers (`GET /api/users`) from the `Tenan
 tables of authz-library are in the schema `authz` (`authz.rbac.schema`, A2). A database created before keeps the old
 tables in `public`, unused, and the users and roles are those of the seeds again: `stack/stack.sh reset` starts clean.
 The Administration area of `ui/` (ADR-22) calls the admin API of authz-library (`/api/v1/admin`) and its revocation of
-sessions directly: OpenDevTrack adds no code for it; `AdministrationApiTest` checks those calls with the sessions and
+sessions directly: OpenDevTrack adds no code for it, and the same for the sessions of a user (authz-library 2.3.0, A7):
+«Your sessions» in the settings (`GET|DELETE /bff/sessions`) and «Sessions» of a user in the Administration area
+(`GET /bff/admin/users/{username}/sessions`). `authz.bff.backchannel-logout` is on: when a session of Keycloak ends,
+Keycloak calls `POST /bff/backchannel-logout` and the sessions of the BFF with it end too; `AdministrationApiTest` checks those calls with the sessions and
 the schema of OpenDevTrack. The development seed `V103__dev_administrators.sql` makes `mario.rossi` admin of the users
 of ACME (`TENANT_ADMIN`) and `anna.bianchi` global admin in GLOBEX (`GLOBAL_ADMIN`).
 

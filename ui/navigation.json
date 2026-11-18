@@ -14,6 +14,13 @@
       "icon": "bell",
       "screen": "notification-settings",
       "requires": "odt.project.browse"
+    },
+    {
+      "id": "my-sessions",
+      "label": "{{ t('nav.my_sessions', 'Your sessions') }}",
+      "icon": "safety",
+      "screen": "my-sessions",
+      "requires": "odt.project.browse"
     }
   ],
   "areas": [

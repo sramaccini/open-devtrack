@@ -1,0 +1,99 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "my-sessions",
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "sessions": {
+      "ref": "sessions/mine"
+    },
+    "endOne": {
+      "ref": "sessions/endOne"
+    },
+    "endOthers": {
+      "ref": "sessions/endOthers"
+    }
+  },
+  "components": [
+    {
+      "id": "sessions-intro",
+      "type": "text",
+      "text": "{{ t('sessions.description', 'Where you are signed in. End a session you do not recognise, then change your password.') }}"
+    },
+    {
+      "id": "btn-end-others",
+      "type": "button",
+      "label": "{{ t('sessions.end_others', 'Sign out everywhere else') }}",
+      "onClick": [
+        {
+          "confirm": "{{ t('sessions.end_others_confirm', 'End every session but this one?') }}"
+        },
+        {
+          "call": "endOthers",
+          "onError": {
+            "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+          }
+        },
+        {
+          "toast": "{{ t('sessions.ended', 'Sessions ended') }}"
+        },
+        {
+          "refresh": "sessions"
+        }
+      ]
+    },
+    {
+      "id": "session-table",
+      "type": "table",
+      "source": "sessions",
+      "columns": [
+        {
+          "field": "lastAccessedAt",
+          "label": "{{ t('sessions.last_used', 'Last used') }}",
+          "format": "datetime"
+        },
+        {
+          "field": "createdAt",
+          "label": "{{ t('sessions.signed_in', 'Signed in') }}",
+          "format": "datetime"
+        },
+        {
+          "field": "userAgent",
+          "label": "{{ t('sessions.browser', 'Browser') }}"
+        },
+        {
+          "field": "ipAddress",
+          "label": "{{ t('sessions.address', 'Address') }}"
+        },
+        {
+          "field": "current",
+          "label": "{{ t('sessions.this_one', 'This one') }}",
+          "format": "boolean"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-end-session",
+          "label": "{{ t('sessions.end', 'Sign out') }}",
+          "visibleIf": "{{ !row.current }}",
+          "onClick": [
+            {
+              "confirm": "{{ t('sessions.end_confirm', 'End this session?') }}"
+            },
+            {
+              "call": "endOne",
+              "args": {
+                "id": "{{row.id}}"
+              },
+              "onError": {
+                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+              }
+            },
+            {
+              "refresh": "sessions"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

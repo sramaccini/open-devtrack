@@ -17,7 +17,7 @@ again at each release.
 | **Accepted** | Not met, and accepted by the maintainer with the reason (ADR-24); reconsidered when the reason changes |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 189 met, 37 met by the installation, 24 not applicable, 2 accepted, 7 open (5 items).
+Level 2 has 259 requirements. Today: 190 met, 38 met by the installation, 24 not applicable, 2 accepted, 5 open (4 items).
 
 ## The installation
 
@@ -33,6 +33,9 @@ What an installation must do for the requirements marked **Install**:
   - OTP or WebAuthn required for the administrators (`ODT_ADMIN`, the tenant administrators of authz-library);
   - mails on credential changes (`UPDATE_PASSWORD`, `UPDATE_TOTP` events with the email event listener);
   - the login, admin and error events saved and sent to the log system;
+  - the client of the BFF with *Backchannel logout URL* `<back end>/bff/backchannel-logout`, *Backchannel logout
+    session required* on and *Front channel logout* off, as in the realm of `e2e/authz`; the update of a password
+    keeps *Sign out from other devices*;
   - no default accounts; the realm of `e2e/authz` is for development only.
 - **Database**: the role of the back end owns its database and is neither a superuser nor `BYPASSRLS` (the row-level
   security of 1.x needs it, `docs/search-load.md`). The volume is encrypted.
@@ -168,8 +171,8 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 3.2.4 | Approved algorithms for tokens | Met | authz: `SecureRandom` |
 | 3.3.1 | Logout and expiry invalidate the session | Met | authz: `/logout` removes the session from Redis and ends the Keycloak session |
 | 3.3.2 | Re-authentication when active or idle | Met | authz: idle 30 min (`server.servlet.session.timeout`), absolute 10 h |
-| 3.3.3 | Terminate other sessions after password change | Open | O7: the sessions of the BFF stay until they expire (authz-library request) |
-| 3.3.4 | View and log out of active sessions | Open | O7: no list of a user's sessions (authz-library request) |
+| 3.3.3 | Terminate other sessions after password change | Install | authz: back-channel logout of the IAM ends the sessions of the BFF; kc: *Sign out from other devices* on a new password (installation) |
+| 3.3.4 | View and log out of active sessions | Met | odt: «Your sessions» in the settings, end one or all the others (authz `/bff/sessions`); the sessions of a user for an administrator |
 | 3.4.1 | `Secure` cookie | Met | odt: `server.servlet.session.cookie.secure: true` (false only in `dev`) |
 | 3.4.2 | `HttpOnly` cookie | Met | odt: `http-only: true` |
 | 3.4.3 | `SameSite` cookie | Met | odt: `same-site: lax`, with the CSRF token of authz |
@@ -394,7 +397,6 @@ application.
 | --- | --- | --- | --- | --- |
 | O4 | [#7](https://github.com/sramaccini/open-devtrack/issues/7) | 1.14.2 | Low | Signed images (cosign) and their check at deploy |
 | O5 | [#8](https://github.com/sramaccini/open-devtrack/issues/8) | 2.1.8 | Low | A strength meter in a Keycloak theme of the project |
-| O7 | [#10](https://github.com/sramaccini/open-devtrack/issues/10) | 3.3.3, 3.3.4 | Medium | authz-library: list and end a user's sessions, end them after a password change (back-channel logout of Keycloak): request A7, asked 13 November 2026 |
 | O9 | [#12](https://github.com/sramaccini/open-devtrack/issues/12) | 3.7.1, 4.3.3 | Medium | Recent login (`max_age` or `acr`) before the administration and the creation of tokens |
 | O13 | [#16](https://github.com/sramaccini/open-devtrack/issues/16) | 8.3.2 | Medium | Export and removal of a user's data on request |
 
@@ -414,6 +416,7 @@ Closed:
 - O14 ([#17](https://github.com/sramaccini/open-devtrack/issues/17)): quota per project, type by content, clamd before storing.
 - O10 ([#13](https://github.com/sramaccini/open-devtrack/issues/13)): the key of the secrets in the transit engine of Vault or OpenBao.
 - O12 ([#15](https://github.com/sramaccini/open-devtrack/issues/15)): metrics and alert rules (`docs/operations`), the rate limit on sessions of authz-library 2.4.0 (A9).
+- O7 ([#10](https://github.com/sramaccini/open-devtrack/issues/10)): «Your sessions» and back-channel logout (authz-library 2.3.0, A7).
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).

@@ -231,6 +231,19 @@
           ]
         },
         {
+          "id": "btn-user-sessions",
+          "label": "{{ t('admin.sessions', 'Sessions') }}",
+          "visibleIf": "{{ can('authz.session.revoke') }}",
+          "onClick": [
+            {
+              "navigate": "admin-user-sessions",
+              "params": {
+                "username": "{{row.username}}"
+              }
+            }
+          ]
+        },
+        {
           "id": "btn-sign-out",
           "label": "{{ t('admin.sign_out', 'Sign out everywhere') }}",
           "visibleIf": "{{ can('authz.session.revoke') }}",

@@ -117,6 +117,10 @@ authz:
         - ${FRONTEND_URL:http://localhost:8090}
     session:
       absolute-timeout: 10h
+    # Keycloak tells the BFF when one of its sessions ends (a logout elsewhere, Sign out in its console, a new password
+    # with sign out from other devices), and the sessions of the BFF end with it (ADR-23, A7; ASVS 3.3.3, 3.3.4)
+    backchannel-logout:
+      enabled: true
     # Tools and integrations without a session (the Quadrava CLI, scripts, service accounts) send a Keycloak access
     # token, resolved to the permissions of a session of its user on the tenant of X-Tenant (ADR-03, ADR-21; A4).
     # Limited to 600 requests a minute per user, counted on Redis.

@@ -45,6 +45,10 @@ services:
       DEV_USER_PASSWORD: ${DEV_USER_PASSWORD:?run run.sh}
       CI_CLIENT_SECRET: ${CI_CLIENT_SECRET:?run run.sh}
       FRONT_URL: http://localhost:${FRONT_PORT:-28090}
+      # Where Keycloak tells the back end on the host that a session ended (back-channel logout, A7)
+      BFF_BACKCHANNEL_URL: http://host.docker.internal:${APP_PORT:-28080}/bff/backchannel-logout
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./realm-opendevtrack.json:/opt/keycloak/data/import/realm-opendevtrack.json:ro
     ports:

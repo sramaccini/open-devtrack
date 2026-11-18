@@ -52,6 +52,8 @@ services:
       DEV_USER_PASSWORD: ${DEV_USER_PASSWORD:?run stack.sh}
       CI_CLIENT_SECRET: ${CI_CLIENT_SECRET:?run stack.sh}
       FRONT_URL: http://localhost:${FRONT_PORT:-18090}
+      # The back end shares the network of Keycloak: its back-channel logout is on localhost (A7)
+      BFF_BACKCHANNEL_URL: http://localhost:8080/bff/backchannel-logout
     volumes:
       - ../e2e/authz/realm-opendevtrack.json:/opt/keycloak/data/import/realm-opendevtrack.json:ro
     healthcheck:

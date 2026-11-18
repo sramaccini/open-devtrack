@@ -10,6 +10,7 @@
   "clients": [
     {
       "clientId": "opendevtrack-bff",
+      "frontchannelLogout": false,
       "name": "OpenDevTrack",
       "enabled": true,
       "protocol": "openid-connect",
@@ -24,7 +25,10 @@
       "webOrigins": ["${FRONT_URL}"],
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "${FRONT_URL}/*"
+        "post.logout.redirect.uris": "${FRONT_URL}/*",
+        "backchannel.logout.url": "${BFF_BACKCHANNEL_URL}",
+        "backchannel.logout.session.required": "true",
+        "backchannel.logout.revoke.offline.tokens": "false"
       }
     },
     {

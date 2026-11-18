@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "admin-user-sessions",
+  "title": "{{ t('sessions.of_user', 'Sessions of {name}', {'name': params.username}) }}",
+  "requires": "authz.session.revoke",
+  "dataSources": {
+    "sessions": {
+      "ref": "sessions/ofUser"
+    },
+    "endAll": {
+      "ref": "sessions/endAllOfUser"
+    }
+  },
+  "components": [
+    {
+      "id": "user-sessions-intro",
+      "type": "text",
+      "text": "{{ t('sessions.of_user_description', 'Where this user is signed in, in this tenant.') }}"
+    },
+    {
+      "id": "btn-end-user-sessions",
+      "type": "button",
+      "label": "{{ t('admin.sign_out', 'Sign out everywhere') }}",
+      "onClick": [
+        {
+          "confirm": "{{ t('admin.sign_out_confirm', 'End every session of {name} in this tenant? They sign in again.', {'name': params.username}) }}"
+        },
+        {
+          "call": "endAll",
+          "onError": {
+            "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+          }
+        },
+        {
+          "toast": "{{ t('admin.signed_out', 'Sessions ended') }}"
+        },
+        {
+          "refresh": "sessions"
+        }
+      ]
+    },
+    {
+      "id": "user-session-table",
+      "type": "table",
+      "source": "sessions",
+      "columns": [
+        {
+          "field": "lastAccessedAt",
+          "label": "{{ t('sessions.last_used', 'Last used') }}",
+          "format": "datetime"
+        },
+        {
+          "field": "createdAt",
+          "label": "{{ t('sessions.signed_in', 'Signed in') }}",
+          "format": "datetime"
+        },
+        {
+          "field": "userAgent",
+          "label": "{{ t('sessions.browser', 'Browser') }}"
+        },
+        {
+          "field": "ipAddress",
+          "label": "{{ t('sessions.address', 'Address') }}"
+        },
+        {
+          "field": "tenant",
+          "label": "{{ t('sessions.tenant', 'Tenant') }}"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "1.0",
+  "datasources": "sessions",
+  "description": "The sessions of the user signed in, and of a user of the tenant for an administrator (authz-library 2.3.0, A7).",
+  "sources": {
+    "mine": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/bff/sessions"
+    },
+    "endOne": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/bff/sessions/{{id}}"
+    },
+    "endOthers": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/bff/sessions"
+    },
+    "ofUser": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/bff/admin/users/{{params.username}}/sessions"
+    },
+    "endAllOfUser": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/bff/admin/users/{{params.username}}/sessions"
+    }
+  }
+}

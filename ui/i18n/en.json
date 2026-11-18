@@ -574,5 +574,21 @@
   "values.config_kind.board.": "Boards",
   "values.config_kind.customfield.": "Custom fields",
   "values.config_kind.webhook.": "Webhooks",
-  "admin.changed_by": "Changed by"
+  "admin.changed_by": "Changed by",
+  "nav.my_sessions": "Your sessions",
+  "sessions.description": "Where you are signed in. End a session you do not recognise, then change your password.",
+  "sessions.end_others": "Sign out everywhere else",
+  "sessions.end_others_confirm": "End every session but this one?",
+  "sessions.ended": "Sessions ended",
+  "sessions.last_used": "Last used",
+  "sessions.signed_in": "Signed in",
+  "sessions.browser": "Browser",
+  "sessions.address": "Address",
+  "sessions.this_one": "This one",
+  "sessions.end": "Sign out",
+  "sessions.end_confirm": "End this session?",
+  "sessions.of_user": "Sessions of {name}",
+  "sessions.of_user_description": "Where this user is signed in, in this tenant.",
+  "sessions.tenant": "Tenant",
+  "admin.sessions": "Sessions"
 }

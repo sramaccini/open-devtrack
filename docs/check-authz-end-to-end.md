@@ -46,7 +46,8 @@ Maven must reach the authz-library packages: see [backend/README.md](../backend/
 | `ui/` published to the registry (`development`) and served by the runtime, from F1 | 7 documents; home and projects screens in both themes and languages |
 | A mention mailed at once through the outbox (ADR-18), from F4 | the mail of the new issue in Mailpit |
 | Tenant switch kept for the next login (ADR-08) | ACME → GLOBEX, then GLOBEX after a new login |
-| axe-core on 11 main screens, signed in as `mario.rossi` (ADR-23, `e2e/a11y`), from F5 | no serious or critical violation outside `e2e/a11y/allowlist.json`, empty since Quadrava 0.14.0 (Q19), and no violation of the Content-Security-Policy reported by the browser |
+| The sessions of a user (A7), from F5 | `GET /bff/sessions` lists the current one; Sign out of the user in the admin API of Keycloak ends the session of the BFF (back-channel logout) |
+| axe-core on 12 main screens, signed in as `mario.rossi` (ADR-23, `e2e/a11y`), from F5 | no serious or critical violation outside `e2e/a11y/allowlist.json`, empty since Quadrava 0.14.0 (Q19), and no violation of the Content-Security-Policy reported by the browser |
 | ZAP baseline scan through the runtime, signed in (`run.sh zap`, ADR-23), from F5 | no medium or high alert outside `e2e/zap/allowlist.json` (empty: since Quadrava 0.14.0 the pages carry a CSP, Q18, tightened in 0.15.0, Q21); low: the `XSRF-TOKEN` cookie of authz-library is readable by scripts, as the front end needs, and has no `SameSite` |
 | In the browser: login through the runtime, the user menu | «Spazio di lavoro» with both tenants, GLOBEX selected, 2 permissions |
 

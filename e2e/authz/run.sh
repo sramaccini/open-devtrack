@@ -197,11 +197,29 @@ check() {
   if [ -n "$target" ] && [ "$after" = "$target" ]; then echo "ok   $before → $target, kept after a new login"; else
     echo "FAIL $before → $target, after a new login: $after"; failed=1; fi
 
-  log "Accessibility: axe-core on the main screens, project $key (ADR-23, e2e/a11y)"
   # The checks above start about ten logins: a minute for the window of the login rate limit (20 a minute per IP)
-  # before the browser signs in. A11Y_CHANNEL=msedge (or chrome) uses a browser of the machine instead of the
-  # Chromium of Playwright.
+  # before the next ones.
   sleep 60
+  log "Sessions: the user sees their own, and a logout in Keycloak ends them (A7, back-channel logout)"
+  login anna.bianchi > /dev/null
+  if curl -fs -b "$work/anna.bianchi.cookies" "$front/bff/sessions" | grep -q '"current":true'; then
+    echo "ok   GET /bff/sessions lists the current session"; else echo "FAIL GET /bff/sessions"; failed=1; fi
+  local admin id code
+  admin="$(curl -fs -d grant_type=password -d client_id=admin-cli -d username=admin \
+    --data-urlencode "password=$KEYCLOAK_ADMIN_PASSWORD" \
+    "http://localhost:$KEYCLOAK_PORT/realms/master/protocol/openid-connect/token" \
+    | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4)"
+  id="$(curl -fs -H "Authorization: Bearer $admin" \
+    "http://localhost:$KEYCLOAK_PORT/admin/realms/opendevtrack/users?username=anna.bianchi&exact=true" \
+    | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)"
+  curl -fs -o /dev/null -X POST -H "Authorization: Bearer $admin" \
+    "http://localhost:$KEYCLOAK_PORT/admin/realms/opendevtrack/users/$id/logout"
+  code="$(curl -s -o /dev/null -w '%{http_code}' -b "$work/anna.bianchi.cookies" "$front/bff/user")"
+  if [ "$code" = 401 ]; then echo "ok   Sign out in Keycloak ended the session of the BFF"; else
+    echo "FAIL after Sign out in Keycloak, /bff/user answers $code"; failed=1; fi
+
+  log "Accessibility: axe-core on the main screens, project $key (ADR-23, e2e/a11y)"
+  # A11Y_CHANNEL=msedge (or chrome) uses a browser of the machine instead of the Chromium of Playwright.
   (cd "$root/e2e/a11y" && npm ci --silent --no-audit --no-fund --registry=https://registry.npmjs.org \
     && node axe.mjs --front "$front" --user mario.rossi --password "$DEV_USER_PASSWORD" --project "$key" \
       --report "$work/axe.json" ${A11Y_CHANNEL:+--channel "$A11Y_CHANNEL"}) || failed=1

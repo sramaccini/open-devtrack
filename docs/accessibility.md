@@ -29,7 +29,7 @@ e2e/authz/run.sh down
 
 ### Results
 
-On 13 November 2026, `main` with Quadrava 0.15.0:
+On 18 November 2026, `main` with Quadrava 0.15.0:
 
 | Screen | Violations | Serious or critical | Allowed |
 | --- | ---: | ---: | --- |
@@ -44,6 +44,7 @@ On 13 November 2026, `main` with Quadrava 0.15.0:
 | search | 0 | 0 | |
 | notification-settings | 0 | 0 | |
 | webhook-list | 0 | 0 | |
+| my-sessions | 0 | 0 | |
 
 No finding. Until Quadrava 0.14.0 a read-only `select` was drawn as disabled, about 1.6:1 where 4.5:1 is asked
 (request Q19, released and adopted); the allow-list of `e2e/a11y` is empty. axe-core finds what can be found
