@@ -38,7 +38,7 @@ webhook; the operator of the installation.
 
 | Threat | What stops it | Left |
 | --- | --- | --- |
-| S: stolen or guessed credentials | Keycloak: password policy, brute force detection, OTP or WebAuthn for administrators (installation); login limited to 20 a minute per IP (authz-library) | Keycloak has no pepper and does not notify a reused OTP (O6) |
+| S: stolen or guessed credentials | Keycloak: password policy, brute force detection, OTP or WebAuthn for administrators (installation); login limited to 20 a minute per IP (authz-library) | Keycloak has no pepper and does not notify a reused OTP (O6, accepted in ADR-24) |
 | S: stolen session cookie | `__Host-SESSION_ID`, HttpOnly, Secure, SameSite=Lax; HSTS; 30 minutes idle, 10 hours at most; a new session at each login | Sessions stay after a password change, and a user cannot list or end their sessions (O7) |
 | T: cross-site request forgery | CSRF token in `X-XSRF-TOKEN` for every write and a check of `Origin` (authz-library); SameSite=Lax | |
 | I: open redirect after login | The return address is checked against the allowed origins (authz-library) | |

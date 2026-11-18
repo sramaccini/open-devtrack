@@ -14,9 +14,10 @@ again at each release.
 | **Met** | Where: OpenDevTrack (`odt`), authz-library (`authz`), the Quadrava runtime (`quadrava`), Keycloak (`kc`) |
 | **Install** | Met by the installation, as [the installation](#the-installation) below asks; OpenDevTrack cannot do it alone |
 | **N/A** | Not applicable, with the reason |
+| **Accepted** | Not met, and accepted by the maintainer with the reason (ADR-24); reconsidered when the reason changes |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 185 met, 32 met by the installation, 24 not applicable, 18 open (10 items).
+Level 2 has 259 requirements. Today: 185 met, 32 met by the installation, 24 not applicable, 2 accepted, 16 open (9 items).
 
 ## The installation
 
@@ -116,7 +117,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 2.4.2 | Salt of at least 32 bits, unique | Met | kc |
 | 2.4.3 | PBKDF2 iterations | Met | kc: Argon2, or PBKDF2 with 210,000 iterations if chosen |
 | 2.4.4 | bcrypt work factor | N/A | bcrypt not used |
-| 2.4.5 | Additional KDF iteration with a secret salt | Open | O6: Keycloak has no pepper |
+| 2.4.5 | Additional KDF iteration with a secret salt | Accepted | Keycloak has no pepper; a provider of our own to keep against each Keycloak release (ADR-24 point 3) |
 | 2.5.1 | Recovery secret not sent in clear | Met | kc: a link with a signed action token |
 | 2.5.2 | No hints or secret questions | Met | kc |
 | 2.5.3 | Recovery does not reveal the password | Met | kc |
@@ -137,7 +138,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 2.8.2 | OTP keys protected | Met | kc |
 | 2.8.3 | Approved algorithms for OTP | Met | kc: HMAC-SHA1/256 TOTP (RFC 6238) |
 | 2.8.4 | OTP used once in its period | Met | kc |
-| 2.8.5 | Reused OTP logged and notified | Open | O6: Keycloak refuses it but sends no notification |
+| 2.8.5 | Reused OTP logged and notified | Accepted | kc refuses a reused OTP and records a failed login event, which the installation can alert on; no notification (ADR-24 point 3) |
 | 2.8.6 | Physical OTP generator revocable | Met | kc: the administrator removes the credential |
 | 2.8.7 | Biometrics only as second factor | N/A | No biometrics of the application (WebAuthn decides on the device) |
 | 2.9.1 | Verification keys stored securely | Met | kc |
@@ -385,7 +386,6 @@ application.
 | --- | --- | --- | --- | --- |
 | O4 | [#7](https://github.com/sramaccini/open-devtrack/issues/7) | 1.14.2 | Low | Signed images (cosign) and their check at deploy |
 | O5 | [#8](https://github.com/sramaccini/open-devtrack/issues/8) | 2.1.8 | Low | A strength meter in a Keycloak theme of the project |
-| O6 | [#9](https://github.com/sramaccini/open-devtrack/issues/9) | 2.4.5, 2.8.5 | Low | Keycloak features: pepper, notification of a reused OTP; to ask upstream or accept |
 | O7 | [#10](https://github.com/sramaccini/open-devtrack/issues/10) | 3.3.3, 3.3.4 | Medium | authz-library: list and end a user's sessions, end them after a password change (back-channel logout of Keycloak): request A7, asked 13 November 2026 |
 | O9 | [#12](https://github.com/sramaccini/open-devtrack/issues/12) | 3.7.1, 4.3.3 | Medium | Recent login (`max_age` or `acr`) before the administration and the creation of tokens |
 | O10 | [#13](https://github.com/sramaccini/open-devtrack/issues/13) | 6.4.2 | Low | `ODT_SECRET_KEY` held by a KMS |
@@ -405,6 +405,7 @@ Closed:
 - O11 ([#14](https://github.com/sramaccini/open-devtrack/issues/14)): a log line for each refusal of access control.
 - O3 ([#6](https://github.com/sramaccini/open-devtrack/issues/6)): [data.md](data.md), the classification of the data.
 - O1 ([#4](https://github.com/sramaccini/open-devtrack/issues/4)): [threat-model.md](threat-model.md).
+- O6 ([#9](https://github.com/sramaccini/open-devtrack/issues/9)): accepted by the maintainer, not built (ADR-24 point 3).
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).
