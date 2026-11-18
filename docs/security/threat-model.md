@@ -60,7 +60,7 @@ webhook; the operator of the installation.
 | T: script in a text (stored XSS) | Texts drawn as restricted Markdown by Quadrava, no HTML; CSP of the runtime without inline scripts; `nosniff` | |
 | T: injection in a search | ODQL parsed by hand and compiled with jOOQ to parameters (ADR-16) | |
 | D: a guard of a workflow that never ends | CEL with at most 1,000 iterations and 1,000 characters (ADR-10) | |
-| D: very large texts or lists | Limits on every field: description and comment 32,000 characters, 20 labels, 100 links, 50 custom fields a project, 100 rows a search page | No limit per user on the number of calls with a session (O12) |
+| D: very large texts or lists | Limits on every field: description and comment 32,000 characters, 20 labels, 100 links, 50 custom fields a project, 100 rows a search page | |
 | I: mentions telling who exists | Only members of the project are suggested and notified (ADR-13) | |
 
 ### Attachments
@@ -78,7 +78,7 @@ webhook; the operator of the installation.
 | --- | --- | --- |
 | S: a forged or stolen token | Keycloak tokens checked by signature, issuer and expiry; personal access tokens hashed, shown once, revocable (authz-library) | |
 | E: a token choosing a tenant that is not its user's | `X-Tenant` accepted only among the user's tenants | |
-| D: a script calling too much | 600 requests a minute per user on the bearer path | Not on the session path (O12) |
+| D: a script calling too much | 600 requests a minute per user on the bearer path, and as many across the sessions of a user (authz-library) | |
 | T: a request with unexpected fields | Every JSON body checked against the schema of its operation in the published OpenAPI (`RequestSchemas`); each controller checks what it reads | Fields the schema does not name are ignored, not refused, until the forms send only their fields (Q22, #23) |
 
 ### Webhooks
@@ -122,7 +122,7 @@ webhook; the operator of the installation.
 ## Limits of the business logic
 
 The limits that keep one user or one project from taking more than its share (ASVS 11.1.5), all enforced by the back
-end: 20 logins a minute per IP; 600 API requests a minute per user with a token; sessions of 30 minutes idle and 10
+end: 20 logins a minute per IP; 600 API requests a minute per user with a token, and 600 with a session; sessions of 30 minutes idle and 10
 hours at most; 25 MB a file, 100 files an issue and the quota of a project; 10 webhooks a project; 50 custom fields a project; 20 labels and
 100 links an issue; 32,000 characters for a description or a comment; 100 rows a search page and 500 rows a list of
-history; CEL guards of at most 1,000 iterations. What is still missing is in the open item O12.
+history; CEL guards of at most 1,000 iterations.

@@ -4,7 +4,7 @@ The state of every level 2 requirement of the [Application Security Verification
 4.0.3](https://github.com/OWASP/ASVS/tree/v4.0.3) (CC BY-SA 4.0), as ADR-23 asks. The requirements are named by number
 with a short summary; the standard has the full text.
 
-Reviewed on 13 November 2026 against `main` (authz-library 2.2.0, Quadrava 0.15.0, Keycloak 26.8). It is reviewed
+Reviewed on 13 November 2026 against `main` (authz-library 2.4.0, Quadrava 0.15.0, Keycloak 26.8). It is reviewed
 again at each release.
 
 ## States
@@ -17,7 +17,7 @@ again at each release.
 | **Accepted** | Not met, and accepted by the maintainer with the reason (ADR-24); reconsidered when the reason changes |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 188 met, 37 met by the installation, 24 not applicable, 2 accepted, 8 open (6 items).
+Level 2 has 259 requirements. Today: 189 met, 37 met by the installation, 24 not applicable, 2 accepted, 7 open (5 items).
 
 ## The installation
 
@@ -313,7 +313,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 11.1.1 | Flows in order | Met | odt: the transitions of the workflows are checked by the server (ADR-10) |
 | 11.1.2 | Steps in realistic human time | N/A | No flow where speed is a risk (no purchases, no voting) |
 | 11.1.3 | Limits per user on business actions | Met | odt: 100 attachments per issue, file size, page sizes |
-| 11.1.4 | Anti-automation against excessive calls | Open | O12: the session API has no rate limit per user |
+| 11.1.4 | Anti-automation against excessive calls | Met | authz: 600 requests a minute per user with a token and across the sessions of a user, 20 logins a minute per IP |
 | 11.1.5 | Business logic limits from threat modeling | Met | odt: the limits in [threat-model.md](threat-model.md), «Limits of the business logic» |
 | 11.1.6 | No TOCTOU on sensitive operations | Met | odt: optimistic versions on every edit, uniqueness by constraints, transactions |
 | 11.1.7 | Monitor unusual business events | Install | odt: metrics of refusals, logins, webhooks and attachments refused, with alert rules (`docs/operations`) |
@@ -396,7 +396,6 @@ application.
 | O5 | [#8](https://github.com/sramaccini/open-devtrack/issues/8) | 2.1.8 | Low | A strength meter in a Keycloak theme of the project |
 | O7 | [#10](https://github.com/sramaccini/open-devtrack/issues/10) | 3.3.3, 3.3.4 | Medium | authz-library: list and end a user's sessions, end them after a password change (back-channel logout of Keycloak): request A7, asked 13 November 2026 |
 | O9 | [#12](https://github.com/sramaccini/open-devtrack/issues/12) | 3.7.1, 4.3.3 | Medium | Recent login (`max_age` or `acr`) before the administration and the creation of tokens |
-| O12 | [#15](https://github.com/sramaccini/open-devtrack/issues/15) | 11.1.4 | Medium | A rate limit per user on the session API: request A9, in authz-library 2.4.0 (the metrics and alerts are built) |
 | O13 | [#16](https://github.com/sramaccini/open-devtrack/issues/16) | 8.3.2 | Medium | Export and removal of a user's data on request |
 
 Closed:
@@ -414,6 +413,7 @@ Closed:
 - O15 ([#18](https://github.com/sramaccini/open-devtrack/issues/18)): JSON bodies checked against the OpenAPI schemas; fields not named still ignored until Q22 ([#23](https://github.com/sramaccini/open-devtrack/issues/23)).
 - O14 ([#17](https://github.com/sramaccini/open-devtrack/issues/17)): quota per project, type by content, clamd before storing.
 - O10 ([#13](https://github.com/sramaccini/open-devtrack/issues/13)): the key of the secrets in the transit engine of Vault or OpenBao.
+- O12 ([#15](https://github.com/sramaccini/open-devtrack/issues/15)): metrics and alert rules (`docs/operations`), the rate limit on sessions of authz-library 2.4.0 (A9).
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).

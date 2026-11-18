@@ -10,7 +10,7 @@ Quadrava and authz-library, and the ADRs say where.
 
 - Repository github.com/sramaccini/open-devtrack, branch `main`: licence MPL-2.0 with CLA, contribution rules and
   project rules as Quadrava (ADR-05). Decisions D1–D9 and ADR-10 accepted, in `docs/`.
-- `backend/`: the monolith on authz-library 2.2.0, split into the Spring Modulith modules of the plan
+- `backend/`: the monolith on authz-library 2.4.0, split into the Spring Modulith modules of the plan
   (`ModularityTests`: `verify()` and the module documentation). The `odt.*` permission catalogue is a repeatable
   Flyway migration of the RBAC schema (ADR-07); the dev profile adds tenants, users and the UI author/approver roles.
 - Module `uiregistry` (ADR-03): `contracts/registry.yaml` 0.7.0, adapted from the Quadrava reference registry

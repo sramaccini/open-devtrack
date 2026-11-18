@@ -125,6 +125,11 @@ authz:
       paths: /api/**,/registry/**,/v3/api-docs
       # The clients (azp) whose tokens are accepted: the tools client and the service accounts of the installation
       allowed-clients: ${ODT_BEARER_CLIENTS:opendevtrack-tools}
+    # The same limit on the requests with a session, per user across their sessions (ADR-24, A9): 429 with Retry-After
+    session-rate-limit:
+      enabled: true
+      paths: /api/**
+      max-requests: ${ODT_SESSION_RATE_LIMIT:600}
 
 odt:
   secrets:

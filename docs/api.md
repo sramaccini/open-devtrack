@@ -131,8 +131,9 @@ failed (`type`, `format`, `required`). A `null` is a field not given; a field th
 
 ## Limits
 
-Requests with a token are limited per user or service account: 600 a minute by default (authz-library, counted on
-Redis). Past it the answer is 429 with `Retry-After` in seconds.
+Requests are limited per user or service account: 600 a minute by default with a token, and 600 a minute across the
+sessions of a user (`ODT_SESSION_RATE_LIMIT`), both counted on Redis by authz-library. Past it the answer is 429 with
+`Retry-After` in seconds.
 
 ## Webhooks
 
