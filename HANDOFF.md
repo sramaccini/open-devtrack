@@ -14,14 +14,14 @@ Quadrava and authz-library, and the ADRs say where.
   (`ModularityTests`: `verify()` and the module documentation). The `odt.*` permission catalogue is a repeatable
   Flyway migration of the RBAC schema (ADR-07); the dev profile adds tenants, users and the UI author/approver roles.
 - Module `uiregistry` (ADR-03): `contracts/registry.yaml` 0.7.0, adapted from the Quadrava reference registry
-  (commit 9fa1916, contract 0.6.0), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.17.0 in the classpath.
+  (commit 9fa1916, contract 0.6.0), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.18.0 in the classpath.
   The browser uses the session; tools use Keycloak access tokens of `opendevtrack-tools` on `/registry/**`
   (the bearer access of authz-library, A4).
 - `ui/`: the Quadrava project, with the main navigation, home and projects placeholder screens, themes `odt-light` and
-  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.17.0 checks it (`quadrava validate`) and publishes it
+  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.18.0 checks it (`quadrava validate`) and publishes it
   (`quadrava publish`) to any environment: no environment is protected (ADR-12).
 - End-to-end check (`docs/check-authz-end-to-end.md`): Quadrava kits bff 13/13 with and without a session, authz 11/11,
-  registry 24/24 (`--protected-env none`), tenant switch kept across logins, `ui/` served by the runtime 0.17.0 from the
+  registry 24/24 (`--protected-env none`), tenant switch kept across logins, `ui/` served by the runtime 0.18.0 from the
   registry. Quadrava 0.5.0 adopted on 4 November 2026 (from 0.2.1: same schemas, registry contract 0.7), 0.6.0 on 5
   November (tab title and icons from the theme, shell texts built in: Q3 and Q4), 0.7.0 on 5 November (theme and
   language in the settings dialog of the user menu; the message bell of ADR-22), 0.8.0 on 6 November (`data.<name>` in the expressions: Q9), 0.9.0 on 6 November (links from the rows, Q10;
@@ -144,8 +144,8 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    O11, O16 here (threat model, structured logs, data classification, `__Host-SESSION_ID`, the log of refusals,
    `Content-Disposition`), O17–O19 by Quadrava 0.14.0 and 0.15.0 (Q16–Q21). O7 is built on authz-library 2.3.0 (A7: «Your sessions», back-channel logout). The other nine (O4, O5, O6, O9, O10, O12–O15) are in ADR-24, accepted on 18 November
    2026 and built in its order: O6 is accepted, not built (the state Accepted of asvs.md); O15 and O14 are built (`RequestSchemas`, unknown fields
-   ignored until Q22, #23; quota, type by content and clamd for attachments; metrics and alert rules of O12, `docs/operations`; O10, the key in Vault transit); O7 and O12 are done on authz-library 2.4.0; O9 is built on A8 and Quadrava 0.17.0 (Q23):
-   a login younger than 15 minutes before the administration, workflows, schemes, groups, webhooks and tokens. O13 is built: the module `privacy` exports a user's data and removes them
+   ignored until Q22, #23; quota, type by content and clamd for attachments; metrics and alert rules of O12, `docs/operations`; O10, the key in Vault transit); O7 and O12 are done on authz-library 2.4.0; O9 is built on A8 and Quadrava 0.17.0 and 0.18.0 (Q23, Q24):
+   a login younger than 15 minutes before the administration (the export of a user included), workflows, schemes, groups, webhooks and tokens. O13 is built: the module `privacy` exports a user's data and removes them
    from a tenant, the name becoming `former-user-<n>` (screen «Your data», row actions of `admin-users`); the tables of
    authz-library wait for A10 (#24). O5 is built: `keycloak/themes/opendevtrack`, the logo and colours of
    `brand/` and a strength meter on the login pages, used by the realm of `e2e/authz` and `stack`. O4 is built: `.github/workflows/release.yml` publishes the

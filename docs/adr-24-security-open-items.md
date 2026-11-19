@@ -82,7 +82,8 @@ What is there to build on:
      `/bff/login?max_age=`; what was typed is not kept. `authz.bff.recent-login` in `application.yml` names the
      paths by method: the changes only, reading stays free. The export of a user's data was marked too, but it is a
      download, a link the browser follows, and the runtime turns a 401 into a new login only for its own calls: it
-     waits for a download step of Quadrava (Q24, #25). The tests turn the
+     waited for a download step of Quadrava (Q24, #25), released in 0.18.0: the row action «Export data» is now a
+     `download` step and `GET /api/admin/users/*/export` is marked. The tests turn the
      paths off (their sessions have no time of the login) and `RecentLoginTest` turns them on.
 5. **O10, the key outside the back end: an optional plugin, as the attachment stores.**
    - `SecretBox` gets its key operations from a `SecretKeys` interface, with two implementations:

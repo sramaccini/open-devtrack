@@ -181,7 +181,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 3.5.1 | Users can revoke OAuth tokens | Met | authz: personal access tokens revoked by their owner; kc: account console for clients |
 | 3.5.2 | Session tokens rather than static keys | Met | authz: sessions for people; access tokens or personal tokens with an expiry for tools |
 | 3.5.3 | Stateless tokens signed and checked | Met | authz: Keycloak JWTs checked on their keys (resource server) |
-| 3.7.1 | Valid session or re-authentication for sensitive actions | Met | authz: `authz.bff.recent-login` (A8), 15 minutes, on the changes of the administration, workflows, schemes, groups, webhooks and tokens; quadrava 0.17.0 (Q23) opens the login with `max_age` |
+| 3.7.1 | Valid session or re-authentication for sensitive actions | Met | authz: `authz.bff.recent-login` (A8), 15 minutes, on the changes of the administration, the export of another user's data, workflows, schemes, groups, webhooks and tokens; quadrava 0.17.0 (Q23) opens the login with `max_age`, 0.18.0 (Q24) also for a download |
 
 ## V4 Access control
 

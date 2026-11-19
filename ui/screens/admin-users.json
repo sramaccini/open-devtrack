@@ -16,6 +16,9 @@
     "changeUser": {
       "ref": "admin/changeUser"
     },
+    "exportUser": {
+      "ref": "admin/exportUser"
+    },
     "signOut": {
       "ref": "admin/signOut"
     },
@@ -320,7 +323,15 @@
         {
           "id": "btn-user-export",
           "label": "{{ t('privacy.export', 'Export data') }}",
-          "href": "/api/admin/users/{{ row.username }}/export"
+          "onClick": [
+            {
+              "download": "exportUser",
+              "args": {
+                "username": "{{row.username}}"
+              },
+              "fileName": "opendevtrack-{{row.username}}.json"
+            }
+          ]
         },
         {
           "id": "btn-user-remove",

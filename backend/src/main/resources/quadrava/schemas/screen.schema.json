@@ -238,6 +238,9 @@
           "$ref": "#/$defs/stepExport"
         },
         {
+          "$ref": "#/$defs/stepDownload"
+        },
+        {
           "$ref": "#/$defs/stepIf"
         },
         {
@@ -276,7 +279,7 @@
         },
         "onError": {
           "$ref": "#/$defs/steps",
-          "description": "Steps run if the call fails (instead of the default message). They see error.status: the HTTP code of the response (0 if the service cannot be reached), for example {{ error.status == 409 }}. The server message is not there: it could contain internal details."
+          "description": "Steps run if the call fails (instead of the default message). They see error.status: the HTTP code of the response (0 if the service cannot be reached), for example {{ error.status == 409 }}. The server message is not there: it could contain internal details. Not run on a 401: the runtime signs the user in again (session expired, or an action that needs a recent login)."
         },
         "as": {
           "allOf": [
@@ -3608,6 +3611,31 @@
               }
             }
           }
+        }
+      }
+    },
+    "stepDownload": {
+      "type": "object",
+      "required": [
+        "download"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "download": {
+          "type": "string",
+          "description": "GET data source whose answer is a file to save, called by the runtime like call: with the session, the CSRF rules, a new sign-in when the service asks for a recent login, and onError. The type of the file is the one of the answer."
+        },
+        "args": {
+          "type": "object",
+          "description": "Variables for url and params of the data source (as in call)."
+        },
+        "fileName": {
+          "type": "string",
+          "description": "Name of the file when the service gives none in Content-Disposition; it can contain {{ }}. Without either, the last segment of the address. Folders and characters a file name cannot have are removed."
+        },
+        "onError": {
+          "$ref": "#/$defs/steps",
+          "description": "Steps run if the download fails (instead of the default message). They see error.status, as in call. Not run on a 401: the runtime signs the user in again."
         }
       }
     },

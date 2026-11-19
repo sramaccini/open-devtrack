@@ -45,7 +45,8 @@ import org.springframework.web.context.WebApplicationContext;
 @TestPropertySource(properties = {
         "authz.bff.recent-login.paths[0]=POST /api/admin/**",
         "authz.bff.recent-login.paths[1]=POST /api/groups/**",
-        "authz.bff.recent-login.paths[2]=POST /api/projects/*/webhooks/**"})
+        "authz.bff.recent-login.paths[2]=POST /api/projects/*/webhooks/**",
+        "authz.bff.recent-login.paths[3]=GET /api/admin/users/*/export"})
 class RecentLoginTest {
 
     /** Where authz-library keeps the time of the login in the session (SessionGuards.AUTH_TIME). */
@@ -84,7 +85,8 @@ class RecentLoginTest {
         for (MockHttpServletRequestBuilder request : List.of(
                 post("/api/admin/users/luisa/remove").content("{\"confirm\":\"luisa\"}"),
                 post("/api/groups").content("{\"name\":\"Ops\"}"),
-                post("/api/projects/ODT/webhooks").content("{}"))) {
+                post("/api/projects/ODT/webhooks").content("{}"),
+                get("/api/admin/users/luisa/export"))) {
             mvc.perform(as(request, old))
                     .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.type").value("urn:problem:authz:recent-login-required"))
@@ -92,9 +94,8 @@ class RecentLoginTest {
         }
         // A session without the time of the login counts as old
         mvc.perform(as(post("/api/groups").content("{\"name\":\"Ops\"}"), null)).andExpect(status().isUnauthorized());
-        // Reading is not marked, the download of an export neither (a link: Q24)
+        // Reading is not marked
         mvc.perform(as(get("/api/groups"), old)).andExpect(status().isOk());
-        mvc.perform(as(get("/api/admin/users/luisa/export"), old)).andExpect(status().isOk());
     }
 
     @Test
@@ -102,5 +103,8 @@ class RecentLoginTest {
         int status = mvc.perform(as(post("/api/groups").content("{\"name\":\"\"}"), Instant.now().minus(1, ChronoUnit.MINUTES)))
                 .andReturn().getResponse().getStatus();
         assertThat(status).isNotEqualTo(401);
+        int export = mvc.perform(as(get("/api/admin/users/luisa/export"), Instant.now().minus(1, ChronoUnit.MINUTES)))
+                .andReturn().getResponse().getStatus();
+        assertThat(export).isNotEqualTo(401);
     }
 }

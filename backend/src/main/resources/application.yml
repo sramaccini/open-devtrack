@@ -140,8 +140,9 @@ authz:
     recent-login:
       max-age: ${ODT_RECENT_LOGIN_MAX_AGE:15m}
       paths:
-        # The removal of a user's data. Not its export: a download is a link the browser follows, and the runtime turns
-        # a 401 into a new login only for its own calls (request Q24, #25)
+        # The export and the removal of a user's data; the export is a download step of the runtime (Quadrava 0.18.0,
+        # Q24), not a link, so its 401 becomes a new login too
+        - GET /api/admin/users/*/export
         - POST /api/admin/**
         - PUT /api/admin/**
         - PATCH /api/admin/**

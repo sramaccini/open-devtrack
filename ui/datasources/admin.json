@@ -41,6 +41,11 @@
       "method": "DELETE",
       "url": "/bff/admin/users/{{username}}/sessions"
     },
+    "exportUser": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/admin/users/{{username}}/export"
+    },
     "removeUser": {
       "type": "rest",
       "method": "POST",
