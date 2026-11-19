@@ -56,6 +56,12 @@ services:
       BFF_BACKCHANNEL_URL: http://localhost:8080/bff/backchannel-logout
     volumes:
       - ../e2e/authz/realm-opendevtrack.json:/opt/keycloak/data/import/realm-opendevtrack.json:ro
+      # The login theme of OpenDevTrack (O5), its parts one by one so that brand/ is mounted as it is next to them
+      - ../keycloak/themes/opendevtrack/login/theme.properties:/opt/keycloak/themes/opendevtrack/login/theme.properties:ro
+      - ../keycloak/themes/opendevtrack/login/resources/css:/opt/keycloak/themes/opendevtrack/login/resources/css:ro
+      - ../keycloak/themes/opendevtrack/login/resources/js:/opt/keycloak/themes/opendevtrack/login/resources/js:ro
+      - ../brand:/opt/keycloak/themes/opendevtrack/login/resources/brand:ro
+      - ../brand/favicon.ico:/opt/keycloak/themes/opendevtrack/login/resources/img/favicon.ico:ro
     healthcheck:
       test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && printf 'GET /health/ready HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
       interval: 3s

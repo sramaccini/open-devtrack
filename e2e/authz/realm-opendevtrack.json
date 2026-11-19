@@ -4,6 +4,7 @@
   "sslRequired": "external",
   "registrationAllowed": false,
   "loginWithEmailAllowed": false,
+  "loginTheme": "opendevtrack",
   "duplicateEmailsAllowed": false,
   "bruteForceProtected": true,
   "accessTokenLifespan": 300,

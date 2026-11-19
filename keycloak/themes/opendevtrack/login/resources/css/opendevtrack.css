@@ -1,0 +1,102 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not
+ * distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
+/* The colours of brand/README.md on keycloak.v2: teal #0F766E (4.5:1 on white) for actions and links, ink #13233F when
+   they are pressed, the reference background #F8FAFC; in dark mode #2DD4BF and #E2E8F0 on #0B1220. The red and amber of
+   the meter are states, not the brand. PatternFly 5 compiles the colours of its components, so they are set here on
+   the components themselves. */
+:root {
+  --odt-action: #0F766E;
+  --odt-action-pressed: #13233F;
+  --odt-on-action: #FFFFFF;
+  --odt-ink: #13233F;
+  --odt-background: #F8FAFC;
+  --odt-weak: #B42318;
+  --odt-fair: #9A6700;
+  --odt-good: #0F766E;
+  --keycloak-bg-logo-url: none;
+  --keycloak-card-top-color: var(--odt-action);
+  --pf-v5-global--link--Color: var(--odt-action);
+  --pf-v5-global--link--Color--hover: var(--odt-action-pressed);
+}
+
+:root.pf-v5-theme-dark {
+  --odt-action: #2DD4BF;
+  --odt-action-pressed: #E2E8F0;
+  --odt-on-action: #0B1220;
+  --odt-ink: #E2E8F0;
+  --odt-background: #0B1220;
+  --odt-weak: #FDA29B;
+  --odt-fair: #FEC84B;
+  --odt-good: #2DD4BF;
+}
+
+.login-pf body {
+  background-color: var(--odt-background);
+}
+
+.pf-v5-c-button.pf-m-primary {
+  --pf-v5-c-button--m-primary--BackgroundColor: var(--odt-action);
+  --pf-v5-c-button--m-primary--hover--BackgroundColor: var(--odt-action-pressed);
+  --pf-v5-c-button--m-primary--focus--BackgroundColor: var(--odt-action-pressed);
+  --pf-v5-c-button--m-primary--active--BackgroundColor: var(--odt-action-pressed);
+  --pf-v5-c-button--m-primary--Color: var(--odt-on-action);
+  --pf-v5-c-button--m-primary--hover--Color: var(--odt-background);
+  --pf-v5-c-button--m-primary--focus--Color: var(--odt-background);
+  --pf-v5-c-button--m-primary--active--Color: var(--odt-background);
+}
+
+.pf-v5-c-button.pf-m-link,
+.pf-v5-c-login a {
+  --pf-v5-c-button--m-link--Color: var(--odt-action);
+  --pf-v5-c-button--m-link--hover--Color: var(--odt-action-pressed);
+  color: var(--odt-action);
+}
+
+.pf-v5-c-form-control {
+  --pf-v5-c-form-control--focus--after--BorderBottomColor: var(--odt-action);
+  --pf-v5-c-form-control--hover--after--BorderBottomColor: var(--odt-action);
+}
+
+/* The logo of brand/ in place of the name of the realm, which stays in the page for screen readers */
+#kc-header-wrapper {
+  width: 240px;
+  height: 73px;
+  margin: 0 auto;
+  background: url("../brand/svg/odt-logo-horizontal.svg") no-repeat center / contain;
+  color: transparent;
+  overflow: hidden;
+  white-space: nowrap;
+  text-indent: 100%;
+}
+
+:root.pf-v5-theme-dark #kc-header-wrapper {
+  background-image: url("../brand/svg/odt-logo-horizontal-dark.svg");
+}
+
+/* The strength meter (js/strength.js) */
+.odt-strength {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--odt-ink);
+}
+
+.odt-strength__bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 0.25rem;
+}
+
+.odt-strength__bar span {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--odt-ink) 20%, transparent);
+}
+
+.odt-strength[data-level="1"] .odt-strength__bar span:nth-child(-n+1) { background: var(--odt-weak); }
+.odt-strength[data-level="2"] .odt-strength__bar span:nth-child(-n+2) { background: var(--odt-fair); }
+.odt-strength[data-level="3"] .odt-strength__bar span:nth-child(-n+3) { background: var(--odt-good); }
+.odt-strength[data-level="4"] .odt-strength__bar span:nth-child(-n+4) { background: var(--odt-good); }

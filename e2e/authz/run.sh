@@ -180,8 +180,6 @@ check() {
   if [ "${sent:-0}" -gt 0 ]; then echo "ok   $key-1: mail to anna.bianchi in Mailpit"; else
     echo "FAIL no mail for $key-1 in Mailpit"; failed=1; fi
 
-  log "Accessibility: axe-core on the main screens, project $key (ADR-23, e2e/a11y)"
-  # A11Y_CHANNEL=msedge (or chrome) uses a browser of the machine instead of the Chromium of Playwright.
   log "Tenants: the switch is kept for the next login (ADR-08)"
   login anna.bianchi > /dev/null
   local before target after xsrf
@@ -217,6 +215,18 @@ check() {
   code="$(curl -s -o /dev/null -w '%{http_code}' -b "$work/anna.bianchi.cookies" "$front/bff/user")"
   if [ "$code" = 401 ]; then echo "ok   Sign out in Keycloak ended the session of the BFF"; else
     echo "FAIL after Sign out in Keycloak, /bff/user answers $code"; failed=1; fi
+
+  log "Login theme: the brand and the strength meter (O5, keycloak/themes/opendevtrack)"
+  local page resources
+  # The login page of the BFF client, as the browser gets it (PKCE with a fixed challenge: the page is only read)
+  page="$(curl -fsG "http://localhost:$KEYCLOAK_PORT/realms/opendevtrack/protocol/openid-connect/auth" \
+    -d client_id=opendevtrack-bff -d response_type=code -d scope=openid \
+    --data-urlencode "redirect_uri=$front/login/oauth2/code/iam" \
+    -d code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM -d code_challenge_method=S256)"
+  resources="$(printf '%s' "$page" | grep -o '/resources/[^/]*/login/opendevtrack/' | head -1)"
+  if printf '%s' "$page" | grep -q 'login/opendevtrack/css/opendevtrack.css'     && printf '%s' "$page" | grep -q 'login/opendevtrack/js/strength.js'     && curl -fs -o /dev/null "http://localhost:$KEYCLOAK_PORT${resources}brand/svg/odt-logo-horizontal.svg"; then
+    echo "ok   the login page has the theme, the meter and the logo of brand/"; else
+    echo "FAIL the login page does not have the theme of OpenDevTrack"; failed=1; fi
 
   log "Accessibility: axe-core on the main screens, project $key (ADR-23, e2e/a11y)"
   # A11Y_CHANNEL=msedge (or chrome) uses a browser of the machine instead of the Chromium of Playwright.

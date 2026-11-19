@@ -51,6 +51,12 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - ./realm-opendevtrack.json:/opt/keycloak/data/import/realm-opendevtrack.json:ro
+      # The login theme of OpenDevTrack (O5), its parts one by one so that brand/ is mounted as it is next to them
+      - ../../keycloak/themes/opendevtrack/login/theme.properties:/opt/keycloak/themes/opendevtrack/login/theme.properties:ro
+      - ../../keycloak/themes/opendevtrack/login/resources/css:/opt/keycloak/themes/opendevtrack/login/resources/css:ro
+      - ../../keycloak/themes/opendevtrack/login/resources/js:/opt/keycloak/themes/opendevtrack/login/resources/js:ro
+      - ../../brand:/opt/keycloak/themes/opendevtrack/login/resources/brand:ro
+      - ../../brand/favicon.ico:/opt/keycloak/themes/opendevtrack/login/resources/img/favicon.ico:ro
     ports:
       - "${KEYCLOAK_PORT:-28180}:${KEYCLOAK_PORT:-28180}"
 

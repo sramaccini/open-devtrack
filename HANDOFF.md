@@ -147,7 +147,8 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    ignored until Q22, #23; quota, type by content and clamd for attachments; metrics and alert rules of O12, `docs/operations`; O10, the key in Vault transit); O7 and O12 are done on authz-library 2.4.0; O9 has A8 there but waits for Q23 of Quadrava, the login
    asked again by the runtime. O13 is built: the module `privacy` exports a user's data and removes them
    from a tenant, the name becoming `former-user-<n>` (screen «Your data», row actions of `admin-users`); the tables of
-   authz-library wait for A10 (#24). The first manual
+   authz-library wait for A10 (#24). O5 is built: `keycloak/themes/opendevtrack`, the logo and colours of
+   `brand/` and a strength meter on the login pages, used by the realm of `e2e/authz` and `stack`. The first manual
    accessibility check runs on the first release candidate. The Dependabot secret `AUTHZ_PACKAGES_TOKEN`
    (read:packages) must be set by the maintainer, or the Maven updates fail. Then the documentation, the public
    demo and 1.0.

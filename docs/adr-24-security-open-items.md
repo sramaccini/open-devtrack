@@ -50,6 +50,9 @@ What is there to build on:
    - The meter is a small script of the theme. It scores length and variety and flags the commonest passwords from a
      short list in the theme. It adds no library.
    - The policy that refuses a password stays Keycloak's (asvs.md, «The installation»): the meter only advises.
+   - **Note of 19 November 2026, building it.** The theme extends `keycloak.v2`; the logo is `brand/` mounted next to
+     the theme (`resources/brand`), not a copy, so an installation assembles the theme as `keycloak/README.md` says.
+     PatternFly 5 compiles the colours of its components, so the brand colours are set on the components.
    - The realm of `e2e/authz` uses the theme, and the installation selects it.
 3. **O6, pepper and reused OTP: accepted, not built.**
    - **No pepper (2.4.5).** Keycloak hashes with its own algorithm and iterations, and the passwords live in its

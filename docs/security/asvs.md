@@ -17,7 +17,7 @@ again at each release.
 | **Accepted** | Not met, and accepted by the maintainer with the reason (ADR-24); reconsidered when the reason changes |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 191 met, 38 met by the installation, 24 not applicable, 2 accepted, 4 open (3 items).
+Level 2 has 259 requirements. Today: 192 met, 38 met by the installation, 24 not applicable, 2 accepted, 3 open (2 items).
 
 ## The installation
 
@@ -113,7 +113,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 2.1.5 | Users can change their password | Met | kc: account console |
 | 2.1.6 | Change asks the current password | Met | kc |
 | 2.1.7 | Checked against breached passwords | Install | Keycloak `passwordBlacklist` |
-| 2.1.8 | Password strength meter | Open | O5: Keycloak's default theme has none |
+| 2.1.8 | Password strength meter | Met | odt: the login theme `keycloak/themes/opendevtrack` (O5): a strength meter on registration, update and reset; the realm policy refuses |
 | 2.1.9 | No composition rules | Install | Keycloak password policy |
 | 2.1.10 | No periodic rotation | Install | Keycloak password policy |
 | 2.1.11 | Paste and password managers allowed | Met | kc |
@@ -396,7 +396,6 @@ application.
 | Item | Issue | Requirements | Severity | Work |
 | --- | --- | --- | --- | --- |
 | O4 | [#7](https://github.com/sramaccini/open-devtrack/issues/7) | 1.14.2 | Low | Signed images (cosign) and their check at deploy |
-| O5 | [#8](https://github.com/sramaccini/open-devtrack/issues/8) | 2.1.8 | Low | A strength meter in a Keycloak theme of the project |
 | O9 | [#12](https://github.com/sramaccini/open-devtrack/issues/12) | 3.7.1, 4.3.3 | Medium | Recent login before the administration and the creation of tokens: A8 of authz-library 2.4.0, waiting for Q23 of Quadrava (the runtime asks for the login again) |
 
 Closed:
@@ -417,6 +416,7 @@ Closed:
 - O12 ([#15](https://github.com/sramaccini/open-devtrack/issues/15)): metrics and alert rules (`docs/operations`), the rate limit on sessions of authz-library 2.4.0 (A9).
 - O7 ([#10](https://github.com/sramaccini/open-devtrack/issues/10)): «Your sessions» and back-channel logout (authz-library 2.3.0, A7).
 - O13 ([#16](https://github.com/sramaccini/open-devtrack/issues/16)): export and removal of a user's data, the name replaced by a pseudonym (data.md «Export and removal»); the tables of authz-library wait for A10 ([#24](https://github.com/sramaccini/open-devtrack/issues/24)).
+- O5 ([#8](https://github.com/sramaccini/open-devtrack/issues/8)): the Keycloak theme of the project with a strength meter ([keycloak/README.md](../../keycloak/README.md)).
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).
