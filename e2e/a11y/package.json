@@ -1,7 +1,7 @@
 {
   "name": "opendevtrack-a11y",
   "private": true,
-  "description": "Accessibility check of the main screens with axe-core (ADR-23), run by e2e/authz/run.sh",
+  "description": "Accessibility check of the main screens with axe-core (ADR-23), run by e2e/authz/run.sh, and the images of the user guide (ADR-25)",
   "type": "module",
   "license": "MPL-2.0",
   "dependencies": {

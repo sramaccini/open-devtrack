@@ -156,7 +156,9 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    the host of the demo, public registries for authz-library and the Quadrava CLI, the Dependabot secret). Step 1
    (`deploy/compose`, `docs/admin`) and step 2 are done: tags `vX.Y.Z-rc.N` are candidates, `release.yml` checks the
    installation first and attaches the archive of `deploy/`, `ui/`, `keycloak/` and `brand/`, and `docs/release.md`
-   holds the checklist and what 1.0 promises, with `CHANGELOG.md`. Next: step 3, the user guide in `docs/guide/`.
+   holds the checklist and what 1.0 promises, with `CHANGELOG.md`. Step 3 is done: the user guide in `docs/guide/`,
+   one page per area with the full ODQL reference, its images taken by `stack/stack.sh screenshots`. Next: step 4,
+   `ODT_WEBHOOKS_ALLOWED_HOSTS` and the demo, once its host exists (#28).
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
    SQL, as authz-library documents), and `odt.sh publish-ui` publishes `ui/` to `production` with the service account

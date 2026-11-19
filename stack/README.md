@@ -33,6 +33,7 @@ stack/stack.sh publish  # after a change of ui/
 stack/stack.sh up       # after a change of backend/: the image is built again
 stack/stack.sh logs     # the log of the back end (JSON lines, Elastic Common Schema, as in the image)
 stack/stack.sh hooks    # what the webhook receiver got (address http://echo:8080/anything)
+stack/stack.sh screenshots  # the images of the user guide, into docs/guide/images (below)
 stack/stack.sh down     # stop, keeping the data
 stack/stack.sh reset    # stop and delete the data; the next up starts empty and adds the samples again
 ```
@@ -76,3 +77,16 @@ have something to show from the first login.
 - The API with a token (docs/api.md): the client `opendevtrack-ci` is a service account (client credentials, its
   secret `CI_CLIENT_SECRET` in `.work/.env`), whose user `service-account-opendevtrack-ci` is a member of `ACME`;
   add it to a project to let it work there. `http://localhost:18080/v3/api-docs` is the OpenAPI definition.
+
+## The images of the user guide
+
+`stack.sh screenshots` takes the images of [docs/guide](../docs/guide/README.md) with `e2e/a11y/screenshots.mjs`
+(Playwright, the version the accessibility check pins), signed in as `mario.rossi` on the sample projects. It needs
+Node 24 on the host, and `A11Y_CHANNEL=msedge` uses an installed Edge instead of the Chromium of Playwright. The
+dates of the samples are relative to the day of the seed, so the images are best taken on a stack started empty. A
+second stack beside this one, with its own project name, volume and ports, keeps the data of this one:
+
+```bash
+export COMPOSE_PROJECT_NAME=odt-guide KEYCLOAK_PORT=38180 APP_PORT=38080 FRONT_PORT=38090 MAILPIT_PORT=38025
+stack/stack.sh up && stack/stack.sh screenshots && stack/stack.sh reset
+```

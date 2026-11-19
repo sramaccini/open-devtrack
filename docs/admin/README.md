@@ -1,7 +1,7 @@
 # Administrator guide
 
 For whoever installs and runs OpenDevTrack (ADR-25). How it is built and why is in the [ADRs](../README.md); what
-the users do is in the user guide.
+the users do is in the [user guide](../guide/README.md).
 
 | Page | What |
 | --- | --- |

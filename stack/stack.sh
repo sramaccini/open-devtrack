@@ -7,6 +7,7 @@
 #   stack/stack.sh seed     add the sample projects, when they are not there
 #   stack/stack.sh info     the addresses and the users
 #   stack/stack.sh logs     follow the log of the back end
+#   stack/stack.sh screenshots  the images of the user guide, into docs/guide/images (needs Node 24 on the host)
 #   stack/stack.sh down     stop the containers, keeping the data
 #   stack/stack.sh reset    stop the containers and delete the data (the credentials are kept)
 #
@@ -202,6 +203,14 @@ info() {
   echo "Keycloak: http://localhost:$KEYCLOAK_PORT (admin, password KEYCLOAK_ADMIN_PASSWORD in stack/.work/.env)"
 }
 
+# The images of the user guide (docs/guide/README.md), signed in as mario.rossi on the sample projects
+screenshots() {
+  log "screenshots of the user guide into docs/guide/images (e2e/a11y/screenshots.mjs)"
+  (cd "$here/../e2e/a11y" && npm ci --silent --no-audit --no-fund --registry=https://registry.npmjs.org \
+    && node screenshots.mjs --front "$front" --user mario.rossi --password "$DEV_USER_PASSWORD" \
+      --out "$here/../docs/guide/images" ${A11Y_CHANNEL:+--channel "$A11Y_CHANNEL"})
+}
+
 up() {
   credentials
   packages
@@ -223,7 +232,8 @@ case "${1:-}" in
   info) credentials; info ;;
   logs) credentials; "${compose[@]}" logs -f backend ;;
   hooks) credentials; "${compose[@]}" logs -f echo ;;
+  screenshots) credentials; screenshots ;;
   down) credentials; "${compose[@]}" down ;;
   reset) credentials; "${compose[@]}" down -v ;;
-  *) echo "usage: $0 up | publish | seed | info | logs | hooks | down | reset" >&2; exit 2 ;;
+  *) echo "usage: $0 up | publish | seed | info | logs | hooks | screenshots | down | reset" >&2; exit 2 ;;
 esac

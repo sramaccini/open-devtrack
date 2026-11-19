@@ -33,6 +33,7 @@ The first release, 1.0.0, planned for 28 May 2027. What it holds, by area:
   quota, type check and antivirus for attachments, rate limits, metrics and alert rules (ADR-23, ADR-24).
 - **Installation**: `deploy/compose` with Caddy and Keycloak as options, the realm template, and the administrator
   guide in [docs/admin](docs/admin/README.md). The images are signed, with their SBOM (ADR-24, ADR-25).
+- **Documentation**: the user guide in [docs/guide](docs/guide/README.md), with the reference of ODQL (ADR-25).
 
 ### Dependencies
 
