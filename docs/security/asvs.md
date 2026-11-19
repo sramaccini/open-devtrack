@@ -408,7 +408,7 @@ Closed:
 - O3 ([#6](https://github.com/sramaccini/open-devtrack/issues/6)): [data.md](data.md), the classification of the data.
 - O1 ([#4](https://github.com/sramaccini/open-devtrack/issues/4)): [threat-model.md](threat-model.md).
 - O6 ([#9](https://github.com/sramaccini/open-devtrack/issues/9)): accepted by the maintainer, not built (ADR-24 point 3).
-- O15 ([#18](https://github.com/sramaccini/open-devtrack/issues/18)): JSON bodies checked against the OpenAPI schemas; fields not named still ignored until Q22 ([#23](https://github.com/sramaccini/open-devtrack/issues/23)).
+- O15 ([#18](https://github.com/sramaccini/open-devtrack/issues/18)): JSON bodies checked against the OpenAPI schemas; since Q22 ([#23](https://github.com/sramaccini/open-devtrack/issues/23)) a field not named is refused.
 - O14 ([#17](https://github.com/sramaccini/open-devtrack/issues/17)): quota per project, type by content, clamd before storing.
 - O10 ([#13](https://github.com/sramaccini/open-devtrack/issues/13)): the key of the secrets in the transit engine of Vault or OpenBao.
 - O12 ([#15](https://github.com/sramaccini/open-devtrack/issues/15)): metrics and alert rules (`docs/operations`), the rate limit on sessions of authz-library 2.4.0 (A9).

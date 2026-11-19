@@ -1,7 +1,7 @@
 {
   "requests" : {
     "POST /api/admin/users/{username}/remove" : {
-      "$ref" : "#/components/schemas/RemoveRequest"
+      "$ref" : "#/components/schemas/RemoveUserRequest"
     },
     "PUT /api/boards/{id}" : {
       "$ref" : "#/components/schemas/BoardRequest"
@@ -76,7 +76,7 @@
       "$ref" : "#/components/schemas/DefinitionRequest"
     },
     "POST /api/projects/{key}/groups" : {
-      "$ref" : "#/components/schemas/GroupRequest"
+      "$ref" : "#/components/schemas/ProjectGroupRequest"
     },
     "POST /api/projects/{key}/issues" : {
       "$ref" : "#/components/schemas/IssueRequest"
@@ -152,6 +152,7 @@
     "schemas" : {
       "BoardRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "columns" : {
             "type" : "string"
@@ -176,6 +177,7 @@
       },
       "CommentRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "body" : {
             "type" : "string"
@@ -188,6 +190,7 @@
       },
       "CompleteRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "moveTo" : {
             "type" : "string"
@@ -196,6 +199,7 @@
       },
       "CreateProject" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "description" : {
             "type" : "string"
@@ -210,6 +214,7 @@
       },
       "DefinitionRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "archived" : {
             "type" : "boolean"
@@ -237,6 +242,7 @@
       },
       "EditProject" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "description" : {
             "type" : "string"
@@ -255,6 +261,7 @@
       },
       "Filter" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "field" : {
             "type" : "string"
@@ -281,6 +288,7 @@
       },
       "FilterRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "name" : {
             "type" : "string"
@@ -302,6 +310,7 @@
       },
       "GroupMemberRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "username" : {
             "type" : "string"
@@ -310,6 +319,7 @@
       },
       "GroupRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "description" : {
             "type" : "string"
@@ -325,6 +335,7 @@
       },
       "GroupStep" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "field" : {
             "type" : "string"
@@ -336,6 +347,7 @@
       },
       "IssueRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "assignee" : {
             "type" : "string"
@@ -376,6 +388,7 @@
       },
       "LinkRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "issue" : {
             "type" : "string"
@@ -387,6 +400,7 @@
       },
       "MemberRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "role" : {
             "type" : "string"
@@ -398,6 +412,7 @@
       },
       "MoveRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "afterId" : {
             "type" : "string"
@@ -412,6 +427,7 @@
       },
       "PlanRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "points" : {
             "type" : "integer",
@@ -421,6 +437,7 @@
       },
       "PreferencesRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "channels" : {
             "type" : "object",
@@ -428,8 +445,22 @@
           }
         }
       },
+      "ProjectGroupRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "group" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "role" : {
+            "type" : "string"
+          }
+        }
+      },
       "ReadRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "ids" : {
             "type" : "array",
@@ -442,6 +473,7 @@
       },
       "RemoveRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "moveTo" : {
             "type" : "string"
@@ -452,8 +484,18 @@
           }
         }
       },
+      "RemoveUserRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "confirm" : {
+            "type" : "string"
+          }
+        }
+      },
       "SchemeChoice" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "scheme" : {
             "type" : "string",
@@ -463,6 +505,7 @@
       },
       "SchemeRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "admin" : {
             "type" : "array",
@@ -496,6 +539,7 @@
       },
       "SearchRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "distinct" : {
             "type" : "string"
@@ -536,6 +580,7 @@
       },
       "Sort" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "direction" : {
             "type" : "string"
@@ -547,6 +592,7 @@
       },
       "SprintRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "endsOn" : {
             "type" : "string",
@@ -570,6 +616,7 @@
       },
       "StatusRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "category" : {
             "type" : "string"
@@ -589,6 +636,7 @@
       },
       "TransitionRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "transition" : {
             "type" : "string"
@@ -601,6 +649,7 @@
       },
       "WatchRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "username" : {
             "type" : "string"
@@ -609,6 +658,7 @@
       },
       "WebhookRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "active" : {
             "type" : "boolean"
@@ -633,6 +683,7 @@
       },
       "WorkflowRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "name" : {
             "type" : "string"
@@ -651,6 +702,7 @@
       },
       "WorkflowTransitionRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "code" : {
             "type" : "string"

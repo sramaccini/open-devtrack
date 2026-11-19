@@ -12,7 +12,11 @@
       "type": "rest",
       "method": "PUT",
       "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}",
-      "body": "{{form}}"
+      "body": {
+        "name": "{{formFields.name}}",
+        "types": "{{formFields.types}}",
+        "version": "{{form.version}}"
+      }
     },
     "transitions": {
       "type": "rest",
@@ -23,13 +27,18 @@
       "type": "rest",
       "method": "PUT",
       "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}/transitions/{{code}}",
-      "body": "{{form}}"
+      "body": {
+        "from": "{{formFields.from}}",
+        "to": "{{formFields.to}}",
+        "guard": "{{formFields.guard}}",
+        "version": "{{form.version}}"
+      }
     },
     "addTransition": {
       "type": "rest",
       "method": "POST",
       "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}/transitions",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "removeTransition": {
       "type": "rest",
@@ -56,19 +65,26 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}/statuses",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "changeStatus": {
       "type": "rest",
       "method": "PUT",
       "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}/statuses/{{code}}",
-      "body": "{{form}}"
+      "body": {
+        "category": "{{formFields.category}}",
+        "position": "{{formFields.position}}",
+        "version": "{{form.version}}"
+      }
     },
     "removeStatus": {
       "type": "rest",
       "method": "POST",
       "url": "/api/projects/{{params.key}}/workflows/{{params.workflow}}/statuses/{{code}}/remove",
-      "body": "{{form}}"
+      "body": {
+        "moveTo": "{{formFields.moveTo}}",
+        "version": "{{form.version}}"
+      }
     }
   }
 }

@@ -12,7 +12,7 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/projects/{{params.key}}/webhooks",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "get": {
       "type": "rest",
@@ -23,7 +23,13 @@
       "type": "rest",
       "method": "PUT",
       "url": "/api/projects/{{params.key}}/webhooks/{{id}}",
-      "body": "{{form}}"
+      "body": {
+        "name": "{{formFields.name}}",
+        "url": "{{formFields.url}}",
+        "events": "{{formFields.events}}",
+        "active": "{{formFields.active}}",
+        "version": "{{form.version}}"
+      }
     },
     "remove": {
       "type": "rest",

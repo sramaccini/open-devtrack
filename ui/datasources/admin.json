@@ -63,7 +63,11 @@
       "type": "rest",
       "method": "PUT",
       "url": "/api/v1/admin/roles/{{code}}",
-      "body": "{{form}}"
+      "body": {
+        "description": "{{formFields.description}}",
+        "permissions": "{{formFields.permissions}}",
+        "version": "{{form.version}}"
+      }
     },
     "tenants": {
       "type": "rest",
@@ -74,7 +78,7 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/v1/admin/tenants",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "audit": {
       "type": "rest",
@@ -93,13 +97,20 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/permission-schemes",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "saveScheme": {
       "type": "rest",
       "method": "PUT",
       "url": "/api/permission-schemes/{{id}}",
-      "body": "{{form}}"
+      "body": {
+        "name": "{{formFields.name}}",
+        "description": "{{formFields.description}}",
+        "viewer": "{{formFields.viewer}}",
+        "developer": "{{formFields.developer}}",
+        "admin": "{{formFields.admin}}",
+        "version": "{{form.version}}"
+      }
     },
     "removeScheme": {
       "type": "rest",
@@ -123,13 +134,17 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/groups",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "saveGroup": {
       "type": "rest",
       "method": "PUT",
       "url": "/api/groups/{{id}}",
-      "body": "{{form}}"
+      "body": {
+        "name": "{{formFields.name}}",
+        "description": "{{formFields.description}}",
+        "version": "{{form.version}}"
+      }
     },
     "removeGroup": {
       "type": "rest",
@@ -145,7 +160,7 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/groups/{{params.id}}/members",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "removeGroupMember": {
       "type": "rest",

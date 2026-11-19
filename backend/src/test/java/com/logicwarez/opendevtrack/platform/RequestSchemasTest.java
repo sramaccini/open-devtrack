@@ -76,10 +76,23 @@ class RequestSchemasTest {
     }
 
     @Test
-    void nullsAndFieldsTheSchemaDoesNotNamePass() throws Exception {
+    void nullsPass() throws Exception {
         mvc.perform(post("/api/search").with(authentication(mario)).with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"query\": \"\", \"page\": null, \"sort\": null, \"_perm\": {\"edit\": true}}"))
+                        .content("{\"query\": \"\", \"page\": null, \"sort\": null}"))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void aFieldTheSchemaDoesNotNameIsRefused() throws Exception {
+        mvc.perform(post("/api/search").with(authentication(mario)).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"query\": \"\", \"_perm\": {\"edit\": true}, \"filters\": [{\"field\": \"type\","
+                                + " \"values\": [\"BUG\"], \"key\": \"x\"}]}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].path").value("/_perm"))
+                .andExpect(jsonPath("$.errors[0].code").value("additionalProperties"))
+                .andExpect(jsonPath("$.errors[1].path").value("/filters/0/key"))
+                .andExpect(jsonPath("$.errors[1].code").value("additionalProperties"));
     }
 }

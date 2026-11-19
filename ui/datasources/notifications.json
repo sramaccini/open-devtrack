@@ -17,7 +17,9 @@
       "type": "rest",
       "method": "PUT",
       "url": "/api/notifications/preferences",
-      "body": "{{form}}"
+      "body": {
+        "channels": "{{formFields.channels}}"
+      }
     }
   }
 }

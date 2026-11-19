@@ -131,7 +131,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/RemoveRequest"
+                "$ref" : "#/components/schemas/RemoveUserRequest"
               }
             }
           },
@@ -159,9 +159,6 @@
           },
           "404" : {
             "$ref" : "#/components/responses/NotFound"
-          },
-          "412" : {
-            "$ref" : "#/components/responses/ChangedMeanwhile"
           }
         },
         "summary" : "Removes a user from the tenant: their name in the work of the projects becomes a pseudonym",
@@ -3095,7 +3092,7 @@
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/GroupRequest"
+                "$ref" : "#/components/schemas/ProjectGroupRequest"
               }
             }
           },
@@ -3123,9 +3120,6 @@
           },
           "404" : {
             "$ref" : "#/components/responses/NotFound"
-          },
-          "412" : {
-            "$ref" : "#/components/responses/ChangedMeanwhile"
           }
         },
         "summary" : "Adds a group to a project, or changes its role",
@@ -6068,6 +6062,7 @@
       },
       "BoardRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "columns" : {
             "type" : "string"
@@ -6262,6 +6257,7 @@
       },
       "CommentRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "body" : {
             "type" : "string"
@@ -6310,6 +6306,7 @@
       },
       "CompleteRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "moveTo" : {
             "type" : "string"
@@ -6318,6 +6315,7 @@
       },
       "CreateProject" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "description" : {
             "type" : "string"
@@ -6332,6 +6330,7 @@
       },
       "DefinitionRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "archived" : {
             "type" : "boolean"
@@ -6430,6 +6429,7 @@
       },
       "EditProject" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "description" : {
             "type" : "string"
@@ -6471,6 +6471,7 @@
       },
       "Filter" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "field" : {
             "type" : "string"
@@ -6497,6 +6498,7 @@
       },
       "FilterRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "name" : {
             "type" : "string"
@@ -6518,6 +6520,7 @@
       },
       "GroupMemberRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "username" : {
             "type" : "string"
@@ -6547,6 +6550,7 @@
       },
       "GroupRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "description" : {
             "type" : "string"
@@ -6562,6 +6566,7 @@
       },
       "GroupStep" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "field" : {
             "type" : "string"
@@ -6606,6 +6611,7 @@
       },
       "IssueRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "assignee" : {
             "type" : "string"
@@ -6772,6 +6778,7 @@
       },
       "LinkRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "issue" : {
             "type" : "string"
@@ -6813,6 +6820,7 @@
       },
       "MemberRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "role" : {
             "type" : "string"
@@ -6888,6 +6896,7 @@
       },
       "MoveRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "afterId" : {
             "type" : "string"
@@ -6913,6 +6922,7 @@
       },
       "PlanRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "points" : {
             "type" : "integer",
@@ -6943,6 +6953,7 @@
       },
       "PreferencesRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "channels" : {
             "type" : "object",
@@ -6990,6 +7001,19 @@
           "type" : {
             "type" : "string",
             "description" : "A URI that names the kind of problem; about:blank for most"
+          }
+        }
+      },
+      "ProjectGroupRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "group" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "role" : {
+            "type" : "string"
           }
         }
       },
@@ -7068,6 +7092,7 @@
       },
       "ReadRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "ids" : {
             "type" : "array",
@@ -7080,6 +7105,7 @@
       },
       "RemoveRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "moveTo" : {
             "type" : "string"
@@ -7087,6 +7113,15 @@
           "version" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }
+      },
+      "RemoveUserRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "confirm" : {
+            "type" : "string"
           }
         }
       },
@@ -7100,6 +7135,7 @@
       },
       "SchemeChoice" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "scheme" : {
             "type" : "string",
@@ -7109,6 +7145,7 @@
       },
       "SchemeRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "admin" : {
             "type" : "array",
@@ -7198,6 +7235,7 @@
       },
       "SearchRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "distinct" : {
             "type" : "string"
@@ -7238,6 +7276,7 @@
       },
       "Sort" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "direction" : {
             "type" : "string"
@@ -7249,6 +7288,7 @@
       },
       "SprintRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "endsOn" : {
             "type" : "string",
@@ -7338,6 +7378,7 @@
       },
       "StatusRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "category" : {
             "type" : "string"
@@ -7397,6 +7438,7 @@
       },
       "TransitionRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "transition" : {
             "type" : "string"
@@ -7424,6 +7466,7 @@
       },
       "WatchRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "username" : {
             "type" : "string"
@@ -7450,6 +7493,7 @@
       },
       "WebhookRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "active" : {
             "type" : "boolean"
@@ -7540,6 +7584,7 @@
       },
       "WorkflowRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "name" : {
             "type" : "string"
@@ -7558,6 +7603,7 @@
       },
       "WorkflowTransitionRequest" : {
         "type" : "object",
+        "additionalProperties" : false,
         "properties" : {
           "code" : {
             "type" : "string"

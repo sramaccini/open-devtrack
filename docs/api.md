@@ -122,7 +122,8 @@ Errors are Problems (RFC 9457, `application/problem+json`) with an English `titl
 
 A JSON body is first checked against the schema of its operation in `docs/openapi.json`: a field of the wrong type or
 format gets 400 with the title «The body does not match the API definition» and `code` the keyword of JSON Schema that
-failed (`type`, `format`, `required`). A `null` is a field not given; a field the schema does not name is ignored.
+failed (`type`, `format`, `required`, `additionalProperties`). A `null` is a field not given; a field the schema does
+not name is refused, with its own `path` (send only the fields of the operation, not a record read before).
 
 ```json
 { "type": "about:blank", "title": "Summary is required", "status": 400,

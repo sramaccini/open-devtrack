@@ -20,7 +20,9 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,10 +30,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.MethodParameter;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
@@ -56,6 +61,10 @@ class OpenApiContractTest {
 
     @Autowired
     WebApplicationContext context;
+
+    @Autowired
+    @Qualifier("requestMappingHandlerMapping")
+    RequestMappingHandlerMapping handlers;
 
     @Autowired
     @Qualifier("springSecurityFilterChain")
@@ -131,6 +140,24 @@ class OpenApiContractTest {
             }
         }
         node.forEach(child -> references(api, child, used));
+    }
+
+    /**
+     * The definition names a body by the simple name of its record: two records of the same name in two modules would
+     * become one schema, and a request would be checked against the other's (#23).
+     */
+    @Test
+    void theBodiesHaveNamesOfTheirOwn() {
+        Map<String, Set<String>> bodies = new TreeMap<>();
+        handlers.getHandlerMethods().values().forEach(method -> {
+            for (MethodParameter parameter : method.getMethodParameters()) {
+                if (parameter.hasParameterAnnotation(RequestBody.class)) {
+                    Class<?> type = parameter.getParameterType();
+                    bodies.computeIfAbsent(type.getSimpleName(), name -> new TreeSet<>()).add(type.getName());
+                }
+            }
+        });
+        assertThat(bodies.values()).as("Request bodies with the same name").allMatch(types -> types.size() == 1);
     }
 
     @Test

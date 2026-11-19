@@ -17,13 +17,20 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/projects/{{params.key}}/boards",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "save": {
       "type": "rest",
       "method": "PUT",
       "url": "/api/boards/{{id}}",
-      "body": "{{form}}"
+      "body": {
+        "name": "{{formFields.name}}",
+        "kind": "{{formFields.kind}}",
+        "lane": "{{formFields.lane}}",
+        "columns": "{{formFields.columns}}",
+        "filter": "{{formFields.filter}}",
+        "version": "{{form.version}}"
+      }
     },
     "remove": {
       "type": "rest",
@@ -84,25 +91,31 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/projects/{{params.key}}/sprints",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "saveSprint": {
       "type": "rest",
       "method": "PUT",
       "url": "/api/sprints/{{id}}",
-      "body": "{{form}}"
+      "body": {
+        "name": "{{formFields.name}}",
+        "goal": "{{formFields.goal}}",
+        "startsOn": "{{formFields.startsOn}}",
+        "endsOn": "{{formFields.endsOn}}",
+        "version": "{{form.version}}"
+      }
     },
     "startSprint": {
       "type": "rest",
       "method": "POST",
       "url": "/api/sprints/{{id}}/start",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "completeSprint": {
       "type": "rest",
       "method": "POST",
       "url": "/api/sprints/{{id}}/complete",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "removeSprint": {
       "type": "rest",
@@ -118,7 +131,9 @@
       "type": "rest",
       "method": "PUT",
       "url": "/api/issues/{{params.issue}}/plan",
-      "body": "{{form}}"
+      "body": {
+        "points": "{{formFields.points}}"
+      }
     }
   }
 }

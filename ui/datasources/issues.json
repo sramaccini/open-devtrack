@@ -12,7 +12,7 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/projects/{{params.key}}/issues",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "get": {
       "type": "rest",
@@ -23,7 +23,18 @@
       "type": "rest",
       "method": "PUT",
       "url": "/api/issues/{{params.issue}}",
-      "body": "{{form}}"
+      "body": {
+        "summary": "{{formFields.summary}}",
+        "type": "{{formFields.type}}",
+        "priority": "{{formFields.priority}}",
+        "assignee": "{{formFields.assignee}}",
+        "reviewer": "{{formFields.reviewer}}",
+        "dueOn": "{{formFields.dueOn}}",
+        "labels": "{{formFields.labels}}",
+        "description": "{{formFields.description}}",
+        "custom": "{{formFields.custom}}",
+        "version": "{{form.version}}"
+      }
     },
     "remove": {
       "type": "rest",
@@ -55,13 +66,18 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/issues/{{params.issue}}/comments",
-      "body": "{{form}}"
+      "body": {
+        "body": "{{text}}"
+      }
     },
     "editComment": {
       "type": "rest",
       "method": "PUT",
       "url": "/api/issues/{{params.issue}}/comments/{{id}}",
-      "body": "{{form}}"
+      "body": {
+        "body": "{{text}}",
+        "version": "{{version}}"
+      }
     },
     "removeComment": {
       "type": "rest",
@@ -119,7 +135,7 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/issues/{{params.issue}}/links",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "removeLink": {
       "type": "rest",
@@ -143,7 +159,7 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/issues/{{params.issue}}/watchers",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "unwatch": {
       "type": "rest",

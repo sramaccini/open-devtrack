@@ -22,7 +22,7 @@ import com.logicwarez.opendevtrack.project.ProjectApi.EditProject;
 import com.logicwarez.opendevtrack.project.ProjectApi.MemberRequest;
 import com.logicwarez.opendevtrack.project.ProjectApi.MemberView;
 import com.logicwarez.opendevtrack.project.ProjectApi.ProjectGroupView;
-import com.logicwarez.opendevtrack.project.ProjectApi.GroupRequest;
+import com.logicwarez.opendevtrack.project.ProjectApi.ProjectGroupRequest;
 import com.logicwarez.opendevtrack.project.ProjectApi.ProjectView;
 import com.logicwarez.opendevtrack.project.ProjectApi.SchemeChoice;
 import static com.logicwarez.opendevtrack.shared.ConfigurationChanged.values;
@@ -256,7 +256,7 @@ class ProjectController {
             project = "odt.member.manage")
     @PostMapping("/api/projects/{key}/groups")
     @Transactional
-    ResponseEntity<?> addGroup(@PathVariable String key, @RequestBody GroupRequest request) {
+    ResponseEntity<?> addGroup(@PathVariable String key, @RequestBody ProjectGroupRequest request) {
         Optional<ProjectEntity> found = find(key);
         if (found.isEmpty()) {
             return Problems.notFound(NOT_FOUND);

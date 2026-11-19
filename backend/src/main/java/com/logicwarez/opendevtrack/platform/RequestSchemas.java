@@ -47,9 +47,10 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAd
  *
  * <p>The schemas are those of {@code docs/openapi.json}, in {@code classpath:openapi/requests.json}: the request bodies
  * by {@code "<METHOD> <path>"} and the components they use. {@code OpenApiContractTest} writes and checks both, so they
- * are the same definition. A {@code null} is a field not given, as for the records of the controllers; fields that the
- * schema does not name are let through, because the forms of the screens send the whole record they read (ADR-24,
- * note of 18 November 2026).
+ * are the same definition. A {@code null} is a field not given, as for the records of the controllers (a form sends
+ * its empty fields as {@code null}); a field that the schema does not name is refused with the code
+ * {@code additionalProperties}, since the screens send only the fields of their forms ({@code formFields} of Quadrava
+ * 0.16.0, #23).
  */
 @RestControllerAdvice
 class RequestSchemas extends RequestBodyAdviceAdapter {
@@ -177,8 +178,9 @@ class RequestSchemas extends RequestBodyAdviceAdapter {
         List<Problems.FieldError> errors = new ArrayList<>();
         for (ValidationMessage message : schema.validate(document)) {
             String path = message.getInstanceLocation() == null ? "" : pointer(message.getInstanceLocation().toString());
-            // A missing field is named by the object that lacks it
-            if ("required".equals(message.getType()) && message.getProperty() != null) {
+            // A missing field, or one the schema does not name, gets its own path, not that of its object
+            if (("required".equals(message.getType()) || "additionalProperties".equals(message.getType()))
+                    && message.getProperty() != null) {
                 path = path + "/" + message.getProperty();
             }
             Problems.FieldError error = new Problems.FieldError(path.isEmpty() ? "/" : path, message.getType());

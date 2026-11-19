@@ -22,8 +22,11 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -171,6 +174,55 @@ class OpenApiConfig {
             }));
             unique(api, ids);
         };
+    }
+
+    /**
+     * The request bodies name all their fields (ADR-24 point 9, #23): their objects get
+     * {@code additionalProperties: false}, so {@code RequestSchemas} refuses a field the definition does not name. An
+     * object that says otherwise (a map, as the channels of the preferences) keeps what it says.
+     */
+    @Bean
+    OpenApiCustomizer strictRequests() {
+        return api -> {
+            if (api.getPaths() == null) {
+                return;
+            }
+            Map<String, Schema> components = api.getComponents() == null || api.getComponents().getSchemas() == null
+                    ? Map.of() : api.getComponents().getSchemas();
+            Set<Schema<?>> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+            api.getPaths().values().forEach(item -> item.readOperations().forEach(operation -> {
+                MediaType media = operation.getRequestBody() == null || operation.getRequestBody().getContent() == null
+                        ? null : operation.getRequestBody().getContent().get(JSON);
+                if (media != null) {
+                    strict(media.getSchema(), components, seen);
+                }
+            }));
+        };
+    }
+
+    private static void strict(Schema<?> schema, Map<String, Schema> components, Set<Schema<?>> seen) {
+        if (schema == null || !seen.add(schema)) {
+            return;
+        }
+        if (schema.get$ref() != null) {
+            strict(components.get(schema.get$ref().substring(schema.get$ref().lastIndexOf('/') + 1)), components, seen);
+            return;
+        }
+        if (schema.getProperties() != null) {
+            if (schema.getAdditionalProperties() == null) {
+                schema.setAdditionalProperties(false);
+            }
+            schema.getProperties().values().forEach(p -> strict(p, components, seen));
+        }
+        if (schema.getAdditionalProperties() instanceof Schema<?> values) {
+            strict(values, components, seen);
+        }
+        strict(schema.getItems(), components, seen);
+        for (List<Schema> parts : Arrays.asList(schema.getAllOf(), schema.getAnyOf(), schema.getOneOf())) {
+            if (parts != null) {
+                parts.forEach(p -> strict(p, components, seen));
+            }
+        }
     }
 
     /**

@@ -46,7 +46,7 @@ final class ProjectApi {
     }
 
     /** A group to add to the project, or the new role of one. */
-    record GroupRequest(UUID group, String role) {
+    record ProjectGroupRequest(UUID group, String role) {
     }
 
     record MemberRequest(String username, String role) {

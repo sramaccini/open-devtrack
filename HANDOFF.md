@@ -144,7 +144,7 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    O11, O16 here (threat model, structured logs, data classification, `__Host-SESSION_ID`, the log of refusals,
    `Content-Disposition`), O17–O19 by Quadrava 0.14.0 and 0.15.0 (Q16–Q21). O7 is built on authz-library 2.3.0 (A7: «Your sessions», back-channel logout). The other nine (O4, O5, O6, O9, O10, O12–O15) are in ADR-24, accepted on 18 November
    2026 and built in its order: O6 is accepted, not built (the state Accepted of asvs.md); O15 and O14 are built (`RequestSchemas`, unknown fields
-   ignored until Q22, #23; quota, type by content and clamd for attachments; metrics and alert rules of O12, `docs/operations`; O10, the key in Vault transit); O7 and O12 are done on authz-library 2.4.0; O9 is built on A8 and Quadrava 0.17.0 and 0.18.0 (Q23, Q24):
+   refused since Q22, #23; quota, type by content and clamd for attachments; metrics and alert rules of O12, `docs/operations`; O10, the key in Vault transit); O7 and O12 are done on authz-library 2.4.0; O9 is built on A8 and Quadrava 0.17.0 and 0.18.0 (Q23, Q24):
    a login younger than 15 minutes before the administration (the export of a user included), workflows, schemes, groups, webhooks and tokens. O13 is built: the module `privacy` exports a user's data and removes them
    from a tenant, the name becoming `former-user-<n>` (screen «Your data», row actions of `admin-users`); the tables of
    authz-library wait for A10 (#24). O5 is built: `keycloak/themes/opendevtrack`, the logo and colours of

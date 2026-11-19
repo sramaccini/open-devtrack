@@ -40,7 +40,7 @@ class PrivacyController {
     }
 
     /** {@code confirm}: the user name again, typed by the administrator. */
-    record RemoveRequest(String confirm) {
+    record RemoveUserRequest(String confirm) {
     }
 
     /** The pseudonym that now stands for the user in the data of the tenant. */
@@ -64,7 +64,7 @@ class PrivacyController {
             answer = Removed.class)
     @PostMapping("/api/admin/users/{username}/remove")
     @PreAuthorize(ADMIN)
-    ResponseEntity<?> remove(@PathVariable String username, @RequestBody RemoveRequest request) {
+    ResponseEntity<?> remove(@PathVariable String username, @RequestBody RemoveUserRequest request) {
         if (username.equals(user.username())) {
             return Problems.forbidden("Administrators cannot remove themselves");
         }

@@ -158,6 +158,13 @@ What is there to build on:
      `null` for an empty field. So the check takes a `null` for a field not given, and lets through the fields that
      the schema does not name. `additionalProperties: false` waits for a body with only the fields of the form
      (request Q22 to Quadrava, issue #23).
+   - **Note of 19 November 2026, #23.** Quadrava 0.16.0 has `formFields`. The data sources send `{{formFields}}`
+     when the form is the whole request, otherwise an object that names the fields of the API and takes `version`
+     from the record (an edit needs it, and the forms show fields that are only read). `OpenApiConfig` marks the
+     objects of the request bodies `additionalProperties: false`, so the published definition says it and
+     `RequestSchemas` refuses a field it does not name; a `null` is still a field not given. Making them strict showed
+     two bodies of the same name in two modules (`GroupRequest`, `RemoveRequest`), one schema for both: they are
+     renamed, and `OpenApiContractTest` checks that the bodies have names of their own.
 
 The order of the work, each item one commit with its tests and closing its issue: O15, O14, O12 (metrics and
 alerts), O10, O13, O5, O4 (with the release workflow). O9 and the rate limit of O12 follow A8 and A9. O6 is closed by

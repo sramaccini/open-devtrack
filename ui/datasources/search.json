@@ -44,13 +44,19 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/filters",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "saveFilter": {
       "type": "rest",
       "method": "PUT",
       "url": "/api/filters/{{id}}",
-      "body": "{{form}}"
+      "body": {
+        "name": "{{formFields.name}}",
+        "query": "{{formFields.query}}",
+        "shared": "{{formFields.shared}}",
+        "onDashboard": "{{formFields.onDashboard}}",
+        "version": "{{form.version}}"
+      }
     },
     "removeFilter": {
       "type": "rest",

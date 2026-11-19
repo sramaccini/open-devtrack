@@ -17,13 +17,18 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/projects",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "save": {
       "type": "rest",
       "method": "PUT",
       "url": "/api/projects/{{params.key}}",
-      "body": "{{form}}"
+      "body": {
+        "name": "{{formFields.name}}",
+        "lead": "{{formFields.lead}}",
+        "description": "{{formFields.description}}",
+        "version": "{{form.version}}"
+      }
     },
     "members": {
       "type": "rest",
@@ -34,13 +39,13 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/projects/{{params.key}}/members",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "changeRole": {
       "type": "rest",
       "method": "PUT",
       "url": "/api/projects/{{params.key}}/members/{{username}}",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "removeMember": {
       "type": "rest",
@@ -56,7 +61,7 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/projects/{{params.key}}/workflows",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "removeWorkflow": {
       "type": "rest",
@@ -75,19 +80,25 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/projects/{{params.key}}/field-definitions",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "saveField": {
       "type": "rest",
       "method": "PUT",
       "url": "/api/projects/{{params.key}}/field-definitions/{{fieldKey}}",
-      "body": "{{form}}"
+      "body": {
+        "label": "{{formFields.label}}",
+        "options": "{{formFields.options}}",
+        "requiredIf": "{{formFields.requiredIf}}",
+        "archived": "{{formFields.archived}}",
+        "version": "{{form.version}}"
+      }
     },
     "useScheme": {
       "type": "rest",
       "method": "PUT",
       "url": "/api/projects/{{params.key}}/permission-scheme",
-      "body": "{{form}}"
+      "body": "{{formFields}}"
     },
     "groups": {
       "type": "rest",
@@ -98,7 +109,10 @@
       "type": "rest",
       "method": "POST",
       "url": "/api/projects/{{params.key}}/groups",
-      "body": "{{form}}"
+      "body": {
+        "group": "{{form.group}}",
+        "role": "{{formFields.role}}"
+      }
     },
     "removeGroup": {
       "type": "rest",
