@@ -117,7 +117,7 @@ webhook; the operator of the installation.
 
 | Threat | What stops it | Left |
 | --- | --- | --- |
-| T: a vulnerable or malicious dependency | Versions pinned; OSV-Scanner fails the build on a high one; Dependabot; CodeQL | Images are not signed (O4) |
+| T: a vulnerable or malicious dependency, or an image not built here | Versions pinned; OSV-Scanner fails the build on a high one; Dependabot; CodeQL | The check of the signature at deploy is the installation's (`docs/operations/README.md`) |
 | T, I: logs forged or leaking | Structured JSON logs (escaped values); no Secret logged | |
 | D: abuse that nobody sees | Refusals logged and counted; Prometheus alert rules on refusals, 429s, logins, webhooks and the antivirus (`docs/operations/alerts.yaml`, installation) | |
 

@@ -17,7 +17,7 @@ again at each release.
 | **Accepted** | Not met, and accepted by the maintainer with the reason (ADR-24); reconsidered when the reason changes |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 192 met, 38 met by the installation, 24 not applicable, 2 accepted, 3 open (2 items).
+Level 2 has 259 requirements. Today: 193 met, 38 met by the installation, 24 not applicable, 2 accepted, 2 open (1 items).
 
 ## The installation
 
@@ -94,7 +94,7 @@ What an installation must do for the requirements marked **Install**:
 | 1.11.2 | No unsynchronized shared state in sensitive flows | Met | authz: session in Redis; odt: optimistic versions (`If-Match`) and transactions |
 | 1.12.2 | Uploaded files served as downloads | Met | odt: `Content-Disposition: attachment`, `nosniff` (ADR-14) |
 | 1.14.1 | Segregation of components by trust | Install | Only the runtime published; the back end, the database and Redis on an inner network |
-| 1.14.2 | Signed binaries and trusted deployment | Open | O4: the images are not signed |
+| 1.14.2 | Signed binaries and trusted deployment | Met | odt: `.github/workflows/release.yml` signs the image by digest with cosign (keyless) and attests its SBOM; the check at deploy is the installation's (`docs/operations/README.md`, «Verifying the image») |
 | 1.14.3 | Build warns of insecure components | Met | odt: OSV-Scanner fails CI on high or critical; Dependabot |
 | 1.14.4 | Build verifies a secure deployment | Met | odt: the e2e job deploys the stack and runs the kits, axe-core and ZAP |
 | 1.14.5 | Deployments sandboxed and isolated | Install | Containers on separate networks |
@@ -395,7 +395,6 @@ application.
 
 | Item | Issue | Requirements | Severity | Work |
 | --- | --- | --- | --- | --- |
-| O4 | [#7](https://github.com/sramaccini/open-devtrack/issues/7) | 1.14.2 | Low | Signed images (cosign) and their check at deploy |
 | O9 | [#12](https://github.com/sramaccini/open-devtrack/issues/12) | 3.7.1, 4.3.3 | Medium | Recent login before the administration and the creation of tokens: A8 of authz-library 2.4.0, waiting for Q23 of Quadrava (the runtime asks for the login again) |
 
 Closed:
@@ -417,6 +416,7 @@ Closed:
 - O7 ([#10](https://github.com/sramaccini/open-devtrack/issues/10)): «Your sessions» and back-channel logout (authz-library 2.3.0, A7).
 - O13 ([#16](https://github.com/sramaccini/open-devtrack/issues/16)): export and removal of a user's data, the name replaced by a pseudonym (data.md «Export and removal»); the tables of authz-library wait for A10 ([#24](https://github.com/sramaccini/open-devtrack/issues/24)).
 - O5 ([#8](https://github.com/sramaccini/open-devtrack/issues/8)): the Keycloak theme of the project with a strength meter ([keycloak/README.md](../../keycloak/README.md)).
+- O4 ([#7](https://github.com/sramaccini/open-devtrack/issues/7)): the release workflow signs the image and attests its SBOM; it runs first with the first tag.
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).

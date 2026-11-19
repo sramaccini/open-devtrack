@@ -43,6 +43,9 @@ What is there to build on:
    - `docs/` tells an installation how to check both with `cosign verify` and `cosign verify-attestation`, naming the
      identity of the workflow. A cluster can enforce it (a policy controller); that is the installation's.
    - 1.14.2 becomes Met for the image and Install for the check at deploy.
+   - **Note of 19 November 2026, building it.** `.github/workflows/release.yml` runs on a tag `vX.Y.Z`: the tests, then
+     the image (the version of the tag set in the pom), signed by digest, the SBOM attested and attached to a GitHub
+     release. It runs for the first time with the first tag: until then it is checked by reading only.
 2. **O5, strength meter: a Keycloak theme of the project.**
    - `keycloak/themes/opendevtrack` extends the login theme of Keycloak with:
      - the logo and colours of `brand/`;
