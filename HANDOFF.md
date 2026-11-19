@@ -154,4 +154,9 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    (read:packages) must be set by the maintainer, or the Maven updates fail. Then the documentation, the public
    demo and 1.0: ADR-25, accepted on 19 November 2026 and built in its order (its three open questions are the maintainer's:
    the host of the demo, public registries for authz-library and the Quadrava CLI, the Dependabot secret).
-2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.
+2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
+   Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
+   SQL, as authz-library documents), and `odt.sh publish-ui` publishes `ui/` to `production` with the service account
+   `opendevtrack-publisher`. The guide is in `docs/admin/`, and `e2e/deploy/run.sh` checks it all (workflow
+   `deploy.yml`). Its project is named `opendevtrack-server`, never `opendevtrack` like `stack/`, so the two never
+   share volumes.

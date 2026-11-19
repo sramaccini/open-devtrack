@@ -1,0 +1,49 @@
+name: Installation
+
+# The check of deploy/compose (ADR-25 point 2): the production Compose file with Caddy and Keycloak, an image of the
+# back end built from these sources, the realm template, the first administrator and the screens of ui/, then a
+# login over https (e2e/deploy/run.sh). On each tag, and on main when what it installs changes.
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths:
+      - deploy/**
+      - e2e/deploy/**
+      - keycloak/**
+      - backend/Dockerfile
+      - backend/pom.xml
+      - backend/src/main/resources/application.yml
+      - .github/workflows/deploy.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PACKAGES_TOKEN: ${{ secrets.AUTHZ_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+
+jobs:
+  compose:
+    name: Compose installation (Caddy, Keycloak, first admin, ui/)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install and start
+        run: e2e/deploy/run.sh up
+      - name: Check
+        run: e2e/deploy/run.sh check
+      - name: Logs
+        if: failure()
+        run: |
+          docker compose --project-directory deploy/compose -f deploy/compose/compose.yaml -f e2e/deploy/compose.yaml \
+            --env-file e2e/deploy/.work/.env logs --no-color --tail 300
+      - name: Down
+        if: always()
+        run: e2e/deploy/run.sh down

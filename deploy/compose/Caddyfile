@@ -1,0 +1,26 @@
+# The proxy of deploy/compose (profile proxy): TLS, and one origin for the browser (contracts/bff.yaml of Quadrava).
+# The paths of the BFF go straight to the back end, everything else to the Quadrava runtime: so the back end gets
+# X-Forwarded-Proto https from here and builds its addresses (the login callback, the return page) on https. Caddy
+# takes its certificates from Let's Encrypt for public names (ports 80 and 443 reachable from the internet) and from a
+# local authority of its own for names under .localhost. An installation with its own proxy does the same routing.
+
+{$ODT_HOST}:{$HTTPS_PORT} {
+	# The BFF and the services behind it (the list of the runtime image, docker/runtime/README.md of Quadrava), and the
+	# OpenAPI definition of the public API. /actuator is not here: the health and the metrics are not public.
+	@backend path /bff/* /logout /oauth2/* /login/oauth2/* /api/* /registry/* /authz/* /telemetry/* /v3/api-docs /v3/api-docs/*
+	handle @backend {
+		# Event streams pass as they arrive (the live data sources of Quadrava)
+		reverse_proxy backend:8080 {
+			flush_interval -1
+		}
+	}
+	handle {
+		reverse_proxy runtime:8080
+	}
+}
+
+# Keycloak (profile keycloak), at its own name. Its admin console is reachable here too: an installation can limit
+# /admin/* to the addresses of its administrators with a matcher on remote_ip.
+{$KEYCLOAK_HOST}:{$HTTPS_PORT} {
+	reverse_proxy keycloak:8080
+}

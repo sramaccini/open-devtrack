@@ -1,0 +1,4 @@
+# The settings and secrets of an installation, and its list of breached passwords
+.env
+backend.env
+password-blacklists/

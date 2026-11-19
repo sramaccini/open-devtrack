@@ -17,7 +17,7 @@ What is missing in Quadrava or in authz-library is added there, with their own t
 
 ## Status
 
-Phases **F0–F4 done**: the back end, the `ui/` project and CI are in place, with projects, issues, workflow, comments, attachments, boards, backlog and sprints, search, dashboards and notifications. **F5** is under way: the public API and the webhooks are built. The decisions are ADRs in [docs/](docs/README.md); [HANDOFF.md](HANDOFF.md) has the details and the next steps. The first release, 1.0, is planned for 28 May 2027.
+Phases **F0–F4 done**: the back end, the `ui/` project and CI are in place, with projects, issues, workflow, comments, attachments, boards, backlog and sprints, search, dashboards and notifications. **F5** is under way: the public API and webhooks, the administration and the hardening are built, and the documentation, the public demo and the release follow (ADR-25). The decisions are ADRs in [docs/](docs/README.md); [HANDOFF.md](HANDOFF.md) has the details and the next steps. The first release, 1.0, is planned for 28 May 2027.
 
 | Phase | Content | State |
 | --- | --- | --- |
@@ -26,10 +26,12 @@ Phases **F0–F4 done**: the back end, the `ui/` project and CI are in place, wi
 | F2 | Projects, issues, workflow, comments and attachments | Done (gate M1); also mentions and in-app messages (ADR-13) |
 | F3 | Boards, backlog and sprints | Done (ADR-15) |
 | F4 | Search, dashboards, notifications | Done (gate M3: search load test) |
-| F5 | Public API and webhooks, hardening, 1.0 | Under way: public API and webhooks built (ADR-21); administration (ADR-22) and hardening (ADR-23) accepted |
+| F5 | Public API and webhooks, hardening, 1.0 | Under way: public API and webhooks (ADR-21), administration (ADR-22) and hardening (ADR-23, ADR-24) built; the installation with Compose and the administrator guide (ADR-25) |
 
 ## Documentation
 
+- [docs/admin/](docs/admin/README.md): the administrator guide: installing with [deploy/compose](deploy/compose),
+  the configuration, Keycloak, the Administration area, backups and upgrades.
 - [docs/](docs/README.md): architecture decision records and checks.
 - [brand/](brand/README.md): logo, icons, colours and how to use them.
 - [keycloak/](keycloak/README.md): the login theme of the realm, with the brand and a password strength meter.

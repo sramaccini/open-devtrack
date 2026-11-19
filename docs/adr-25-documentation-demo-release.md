@@ -68,6 +68,15 @@ What there is today:
      `main` when `deploy/` changes.
    - A Helm chart is a 1.x item, built when an installation asks for it. ADR-01's «Compose and Helm» becomes «Compose
      for 1.0».
+   - **Note of 19 November 2026, step 1.** Three changes, made while building it:
+     - The commented examples of Keycloak and of the proxy are services of the Compose file, in the optional profiles
+       `keycloak` and `proxy` (Caddy). An installation that has its own leaves the profile out. The demo uses both,
+       and the CI checks both.
+     - The `check` of `e2e/authz` needs the development users, which an installation does not have. So the CI runs a
+       check of its own, `e2e/deploy/run.sh`. It does what the guide says (a user in Keycloak, `first-admin`,
+       `publish-ui`), then signs in over https and checks the headers, the cookie, the permissions and a project.
+     - The realm template does not enforce OTP by itself: the administrators are given *Configure OTP*
+       (`docs/admin/keycloak.md`).
 3. **A public demo, reset every night, with shared accounts and nothing that leaves it.** The maintainer chooses the
    host and the domain (open question 1). It runs `deploy/compose/` itself, so it also tests the install path, with a
    few demo settings:

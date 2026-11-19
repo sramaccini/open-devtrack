@@ -3,7 +3,8 @@
 The whole application in containers with one command, to try it and review it: the back end built from `backend/`,
 the Quadrava runtime with the screens of `ui/`, Keycloak, PostgreSQL, Redis and a mail catcher, with two sample
 projects. Development only: plain HTTP, the profile `dev` of the back end (development tenants and users), Keycloak
-with its embedded database. It is not a way to install OpenDevTrack.
+with its embedded database. It is not a way to install OpenDevTrack: that is [deploy/compose](../deploy/compose) and
+[docs/admin/installation.md](../docs/admin/installation.md).
 
 ```
 browser ──▶ quadrava-runtime 0.18.0 (:18090) ──/bff /authz /api /registry──▶ backend (profile dev, image from backend/)

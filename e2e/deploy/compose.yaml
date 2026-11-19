@@ -1,0 +1,6 @@
+# Added to deploy/compose by e2e/deploy/run.sh: Keycloak also on a port of the host, so that the curl of the check
+# signs in on http://keycloak:8080 (the issuer the back end checks, with --connect-to) as a browser would.
+services:
+  keycloak:
+    ports:
+      - "${KEYCLOAK_TEST_PORT:-28181}:8080"
