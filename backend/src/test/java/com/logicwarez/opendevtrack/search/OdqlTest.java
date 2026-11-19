@@ -132,7 +132,8 @@ class OdqlTest {
         assertThat(sql("sprint IN openSprints()")).contains(ACTIVE.toString(), PLANNED.toString()).doesNotContain(DONE.toString());
         assertThat(sql("sprint = \"sprint 1\"")).contains(DONE.toString());
         assertThat(sql("sprint IS EMPTY")).contains("\"sprint_id\" is null");
-        assertThat(sql("custom.customer = ACME")).contains("\"custom\" @> jsonb_build_object('customer', 'ACME'::text)");
+        assertThat(sql("custom.customer = ACME")).contains("\"custom\" @> jsonb_build_object('customer', 'ACME'::text)",
+                "\"custom\" @> jsonb_build_object('customer', jsonb_build_array('ACME'::text))");
         assertThat(sql("custom.severity > 2")).contains("jsonb_typeof", "to_jsonb(2::numeric)");
         assertThat(sql("custom.severity = 2")).contains("::numeric");
     }

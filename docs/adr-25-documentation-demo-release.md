@@ -58,7 +58,7 @@ What there is today:
      `e2e/a11y/screenshots.mjs` (`stack/stack.sh screenshots`), with the Playwright that the accessibility check
      already pins, so they can be taken again when the screens change. They are best taken on a stack started empty,
      so that the dates of the samples are recent. Writing the ODQL reference found a defect: `=` and `IN` do not match
-     a choice of a custom field with several choices (#30). The guide says to use `~` until it is fixed.
+     a choice of a custom field with several choices (#30), fixed in the next commit.
 2. **One way to install for 1.0: a production Compose file; Helm only when asked.**
    - `deploy/compose/` contains:
      - a `compose.yaml` with the back end image of the release (by digest), the Quadrava runtime of the pinned version,

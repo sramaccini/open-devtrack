@@ -330,7 +330,9 @@ modules; `POST /api/search/reindex` (admin of the tenant) rebuilds the rows of t
   parentheses and
   `ORDER BY` (also `rank`). Functions `currentUser()` and `openSprints()`; dates as `2026-11-01`, `today` or `-7d`,
   `-2w`, `-1m`, `-1y` in the zone `odt.reporting.zone` (UTC by default). Status names are accepted in English and
-  Italian as well as their ids. Hand-written parser and compiler to jOOQ conditions: values are always bound.
+  Italian as well as their ids. On a custom field, `=` and `IN` match the value or, for a field with several choices
+  (an array), one of its choices, with two containment conditions on the GIN index of `custom`. Hand-written parser
+  and compiler to jOOQ conditions: values are always bound.
 - `POST /api/search` takes the request of the `serverDataTable` of Quadrava (query, page, size up to 100, sort, column
   filters, groups, distinct values) and answers in its shape; only the projects the user is a member of are searched
   (all for the admin of the tenant). A wrong query is a 400 Problem with `position` (1-based) and `expected`.

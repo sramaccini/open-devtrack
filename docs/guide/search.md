@@ -130,14 +130,13 @@ project, the one of the backlog.
 ```
 custom.customer = "ACME"
 custom.estimate_days > 3
-custom.tier IN (gold, silver)
+custom.platforms IN (ios, android)
 custom.due_review <= 2026-12-31
-custom.platforms ~ ios
 ```
 
-A date is compared as text, which keeps the order of dates written as `2026-12-31`. A field with several choices is
-searched with `~`, as in the last line: `=` and `IN` do not find a choice among several yet
-([#30](https://github.com/sramaccini/open-devtrack/issues/30)).
+A field with several choices matches when one of its choices is the value, as `labels` does: `custom.platforms = ios`
+finds the issues with iOS among their platforms, and `!=` those without it. A date is compared as text, which keeps
+the order of dates written as `2026-12-31`.
 
 ### Examples
 

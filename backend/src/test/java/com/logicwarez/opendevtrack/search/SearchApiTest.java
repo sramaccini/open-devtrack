@@ -85,7 +85,8 @@ class SearchApiTest {
     void setUp() throws Exception {
         mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(security).build();
         TestInfrastructure.awaitListeners(jdbc);
-        jdbc.execute("TRUNCATE odt_project.project, odt_access.project_member, odt_issue.issue, odt_agile.issue_plan, "
+        jdbc.execute("TRUNCATE odt_project.project, odt_access.project_member, odt_issue.issue, "
+                + "odt_issue.field_definition, odt_agile.issue_plan, "
                 + "odt_agile.sprint, odt_agile.sprint_issue, odt_agile.board, odt_agile.board_column, "
                 + "odt_search.issue_doc, odt_search.filter CASCADE");
         for (String project : List.of("ODT", "WEB")) {
@@ -195,6 +196,28 @@ class SearchApiTest {
 
         mvc.perform(as(delete("/api/issues/ODT-2"), mario)).andExpect(status().isNoContent());
         await(() -> docs() == 4);
+    }
+
+    @Test
+    void customFieldsAreSearchedAlsoByOneOfSeveralChoices() throws Exception {
+        for (String field : List.of("""
+                {"key":"platforms","label":"Platforms","type":"multiselect","options":"web\\nandroid\\nios"}""", """
+                {"key":"customer","label":"Customer","type":"text"}""")) {
+            mvc.perform(as(post("/api/projects/ODT/field-definitions"), mario).content(field))
+                    .andExpect(status().isCreated());
+        }
+        issue(mario, "ODT", """
+                {"summary":"Push messages","type":"story","custom":{"platforms":["ios","android"],"customer":"ACME"}}""");
+        issue(mario, "ODT", """
+                {"summary":"Web push","type":"story","custom":{"platforms":["web"]}}""");
+        await(() -> docs() == 7);
+        assertThat(keys(mario, "custom.platforms = ios")).containsExactly("ODT-4");
+        assertThat(keys(mario, "custom.platforms IN (web, android) ORDER BY key")).containsExactly("ODT-4", "ODT-5");
+        assertThat(keys(mario, "project = ODT AND custom.platforms != ios ORDER BY key"))
+                .containsExactly("ODT-1", "ODT-2", "ODT-3", "ODT-5");
+        assertThat(keys(mario, "custom.platforms NOT IN (ios, web) AND custom.platforms IS NOT EMPTY")).isEmpty();
+        assertThat(keys(mario, "custom.platforms ~ andr")).containsExactly("ODT-4");
+        assertThat(keys(mario, "custom.customer = ACME")).containsExactly("ODT-4");
     }
 
     @Test

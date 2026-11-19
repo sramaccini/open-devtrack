@@ -350,8 +350,14 @@ final class OdqlCompiler {
         };
     }
 
+    /**
+     * The value of the field is {@code value}, or one of its choices is (a field with several choices keeps an array:
+     * containment matches an element of an array only when the value is written as an array too).
+     */
     private static Condition customEquals(String key, String value) {
-        Condition asText = condition("{0} @> jsonb_build_object({1}, {2}::text)", CUSTOM, val(key), val(value));
+        Condition asText = condition("{0} @> jsonb_build_object({1}, {2}::text)", CUSTOM, val(key), val(value))
+                .or(condition("{0} @> jsonb_build_object({1}, jsonb_build_array({2}::text))", CUSTOM, val(key),
+                        val(value)));
         if (NUMBER_VALUE.matcher(value).matches()) {
             return asText.or(condition("{0} @> jsonb_build_object({1}, {2}::numeric)", CUSTOM, val(key),
                     val(new BigDecimal(value))));
