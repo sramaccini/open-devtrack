@@ -98,7 +98,7 @@ webhook; the operator of the installation.
 | R: a change to the configuration without a trace | Audit log of the configuration with who and when, 2 years (ADR-22) | |
 | I: the export of another user's data | `/api/me/export` always for the user of the session; the export of another user only with `authz.rbac.manage`, inside the tenant, in the audit log (O13) | |
 | T: removing a user by mistake, or oneself | The row action asks twice, the name typed again is checked by the back end; nobody removes themselves; a user with global roles only by the global admin (authz-library) | Not reversible: the pseudonym keeps no link to the name |
-| S, E: someone at an unattended screen doing administration | The session's timeouts | No recent login asked before administration or token creation (O9) |
+| S, E: someone at an unattended screen doing administration | The session's timeouts; a login younger than 15 minutes before the changes of the administration, the export and removal of a user, workflows, permission schemes, groups, webhooks and personal access tokens (authz-library A8, Quadrava Q23: Keycloak asks the password again) | What the user typed before the new login is lost, the action is done again; the export of another user's data asks no recent login until Q24 (#25) |
 
 ### Screens of `ui/` (registry)
 

@@ -134,6 +134,50 @@ authz:
       enabled: true
       paths: /api/**
       max-requests: ${ODT_SESSION_RATE_LIMIT:600}
+    # A login younger than max-age before the sensitive actions of a browser session (ADR-24 point 4, O9, A8; ASVS
+    # 3.7.1, 4.3.3): an older one gets 401 recent-login-required, and the Quadrava runtime (0.17.0, Q23) sends the user
+    # to /bff/login with max_age, where Keycloak asks for the password again. Requests with a token are not checked.
+    recent-login:
+      max-age: ${ODT_RECENT_LOGIN_MAX_AGE:15m}
+      paths:
+        # The removal of a user's data. Not its export: a download is a link the browser follows, and the runtime turns
+        # a 401 into a new login only for its own calls (request Q24, #25)
+        - POST /api/admin/**
+        - PUT /api/admin/**
+        - PATCH /api/admin/**
+        - DELETE /api/admin/**
+        # The changes of the admin API of authz-library: users, roles, tenants
+        - POST /api/v1/admin/**
+        - PUT /api/v1/admin/**
+        - PATCH /api/v1/admin/**
+        - DELETE /api/v1/admin/**
+        # Permission schemes and groups of the tenant, the groups and the scheme of a project
+        - POST /api/permission-schemes/**
+        - PUT /api/permission-schemes/**
+        - PATCH /api/permission-schemes/**
+        - DELETE /api/permission-schemes/**
+        - POST /api/groups/**
+        - PUT /api/groups/**
+        - PATCH /api/groups/**
+        - DELETE /api/groups/**
+        - POST /api/projects/*/groups/**
+        - PUT /api/projects/*/groups/**
+        - DELETE /api/projects/*/groups/**
+        - PUT /api/projects/*/permission-scheme
+        # Workflows and their schemes
+        - POST /api/projects/*/workflow/**
+        - PUT /api/projects/*/workflow/**
+        - PATCH /api/projects/*/workflow/**
+        - DELETE /api/projects/*/workflow/**
+        - POST /api/projects/*/workflows/**
+        - PUT /api/projects/*/workflows/**
+        - PATCH /api/projects/*/workflows/**
+        - DELETE /api/projects/*/workflows/**
+        # Webhooks: where the events go, and their secrets
+        - POST /api/projects/*/webhooks/**
+        - PUT /api/projects/*/webhooks/**
+        # Personal access tokens
+        - POST /api/v1/tokens
 
 odt:
   secrets:

@@ -17,7 +17,7 @@ again at each release.
 | **Accepted** | Not met, and accepted by the maintainer with the reason (ADR-24); reconsidered when the reason changes |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 193 met, 38 met by the installation, 24 not applicable, 2 accepted, 2 open (1 items).
+Level 2 has 259 requirements. Today: 195 met, 38 met by the installation, 24 not applicable, 2 accepted, 0 open (0 items).
 
 ## The installation
 
@@ -181,7 +181,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 3.5.1 | Users can revoke OAuth tokens | Met | authz: personal access tokens revoked by their owner; kc: account console for clients |
 | 3.5.2 | Session tokens rather than static keys | Met | authz: sessions for people; access tokens or personal tokens with an expiry for tools |
 | 3.5.3 | Stateless tokens signed and checked | Met | authz: Keycloak JWTs checked on their keys (resource server) |
-| 3.7.1 | Valid session or re-authentication for sensitive actions | Open | O9: no step-up before administration or token creation |
+| 3.7.1 | Valid session or re-authentication for sensitive actions | Met | authz: `authz.bff.recent-login` (A8), 15 minutes, on the changes of the administration, workflows, schemes, groups, webhooks and tokens; quadrava 0.17.0 (Q23) opens the login with `max_age` |
 
 ## V4 Access control
 
@@ -195,7 +195,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 4.2.2 | Strong anti-CSRF | Met | authz: CSRF token (`X-XSRF-TOKEN`) and the `Origin` check on writes |
 | 4.3.1 | MFA for administrative interfaces | Install | Keycloak OTP or WebAuthn required for the administrators |
 | 4.3.2 | No directory browsing | Met | quadrava: no listing; odt: no static files |
-| 4.3.3 | Step-up or segregation for high-value actions | Open | O9 |
+| 4.3.3 | Step-up or segregation for high-value actions | Met | As 3.7.1: step-up by a new login in Keycloak |
 
 ## V5 Validation, sanitization and encoding
 
@@ -393,9 +393,8 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 Each is an issue on GitHub, and a new one gets its own; 1.0 ships with none at high severity (ADR-23). Severity is our assessment for this
 application.
 
-| Item | Issue | Requirements | Severity | Work |
-| --- | --- | --- | --- | --- |
-| O9 | [#12](https://github.com/sramaccini/open-devtrack/issues/12) | 3.7.1, 4.3.3 | Medium | Recent login before the administration and the creation of tokens: A8 of authz-library 2.4.0, waiting for Q23 of Quadrava (the runtime asks for the login again) |
+None since 19 November 2026: every requirement of level 2 is met, met by the installation, not applicable or
+accepted. A new one goes in a table here: item, issue, requirements, severity, work.
 
 Closed:
 
@@ -417,6 +416,7 @@ Closed:
 - O13 ([#16](https://github.com/sramaccini/open-devtrack/issues/16)): export and removal of a user's data, the name replaced by a pseudonym (data.md «Export and removal»); the tables of authz-library wait for A10 ([#24](https://github.com/sramaccini/open-devtrack/issues/24)).
 - O5 ([#8](https://github.com/sramaccini/open-devtrack/issues/8)): the Keycloak theme of the project with a strength meter ([keycloak/README.md](../../keycloak/README.md)).
 - O4 ([#7](https://github.com/sramaccini/open-devtrack/issues/7)): the release workflow signs the image and attests its SBOM; it runs first with the first tag.
+- O9 ([#12](https://github.com/sramaccini/open-devtrack/issues/12)): a recent login before the sensitive actions, authz-library 2.4.0 (A8) and Quadrava 0.17.0 (Q23).
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).

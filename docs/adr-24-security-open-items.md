@@ -77,6 +77,13 @@ What is there to build on:
      schemes, groups, workflows) and the creation of personal access tokens and webhooks, with 15 minutes.
    - **The runtime** already sends the user to the login on a 401 and back to the page. If it loses what the user was
      typing, that is a request to Quadrava.
+   - **Note of 19 November 2026, building it.** The runtime looped instead (its guard took the 401 for an expired
+     session): asked as Q23, released in Quadrava 0.17.0, which confirms with the user and opens
+     `/bff/login?max_age=`; what was typed is not kept. `authz.bff.recent-login` in `application.yml` names the
+     paths by method: the changes only, reading stays free. The export of a user's data was marked too, but it is a
+     download, a link the browser follows, and the runtime turns a 401 into a new login only for its own calls: it
+     waits for a download step of Quadrava (Q24, #25). The tests turn the
+     paths off (their sessions have no time of the login) and `RecentLoginTest` turns them on.
 5. **O10, the key outside the back end: an optional plugin, as the attachment stores.**
    - `SecretBox` gets its key operations from a `SecretKeys` interface, with two implementations:
      - `local`, the default and today's behaviour: the key from `ODT_SECRET_KEY`, in memory;
