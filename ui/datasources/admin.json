@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "datasources": "admin",
-  "description": "The administration (ADR-22): users, roles, tenants, the audit of access and the sessions of authz-library; the permission schemes and the groups of OpenDevTrack.",
+  "description": "The administration (ADR-22): users, roles, tenants, the audit of access and the sessions of authz-library; the export and the removal of a user (ADR-24, O13); the permission schemes and the groups of OpenDevTrack.",
   "sources": {
     "users": {
       "type": "rest",
@@ -40,6 +40,14 @@
       "type": "rest",
       "method": "DELETE",
       "url": "/bff/admin/users/{{username}}/sessions"
+    },
+    "removeUser": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/admin/users/{{username}}/remove",
+      "body": {
+        "confirm": "{{confirm}}"
+      }
     },
     "roles": {
       "type": "rest",

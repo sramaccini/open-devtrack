@@ -18,6 +18,9 @@
     },
     "signOut": {
       "ref": "admin/signOut"
+    },
+    "removeUser": {
+      "ref": "admin/removeUser"
     }
   },
   "components": [
@@ -308,6 +311,82 @@
                   "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
                 }
               ]
+            },
+            {
+              "refresh": "users"
+            }
+          ]
+        },
+        {
+          "id": "btn-user-export",
+          "label": "{{ t('privacy.export', 'Export data') }}",
+          "href": "/api/admin/users/{{ row.username }}/export"
+        },
+        {
+          "id": "btn-user-remove",
+          "label": "{{ t('privacy.remove', 'Remove from tenant') }}",
+          "visibleIf": "{{ row.username != user.username }}",
+          "onClick": [
+            {
+              "confirm": "{{ t('privacy.remove_confirm', 'Remove {name} from this tenant? Their name in issues, comments and histories becomes a pseudonym; their messages, preferences, filters, watches and memberships are deleted. What they wrote stays, mentions of them included. Their account in Keycloak stays: delete it there. It cannot be undone.', {'name': row.username}) }}"
+            },
+            {
+              "dialog": {
+                "title": "{{ t('privacy.remove_of', 'Remove {name}', {'name': row.username}) }}",
+                "submitLabel": "{{ t('privacy.remove', 'Remove from tenant') }}",
+                "fields": [
+                  {
+                    "name": "confirm",
+                    "type": "text",
+                    "required": true,
+                    "label": "{{ t('privacy.type_name', 'Type {name} to confirm', {'name': row.username}) }}"
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "removeUser",
+                    "as": "removed",
+                    "args": {
+                      "username": "{{row.username}}",
+                      "confirm": "{{form.confirm}}"
+                    },
+                    "onError": [
+                      {
+                        "if": "{{error.status == 400}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('privacy.name_differs', 'The name typed is not the user name') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "toast": "{{ t('privacy.remove_refused', 'The user cannot be removed: nobody removes themselves, and only the global admin removes a user with a global role') }}"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "if": "{{ can('authz.session.revoke') }}",
+                    "then": [
+                      {
+                        "call": "signOut",
+                        "args": {
+                          "username": "{{row.username}}"
+                        },
+                        "onError": [
+                          {
+                            "toast": "{{ t('privacy.sessions_left', 'Removed, but their sessions could not be ended: end them from Sessions') }}"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "toast": "{{ t('privacy.removed', 'Removed: they are now {pseudonym} in this tenant', {'pseudonym': removed.pseudonym}) }}"
+                  }
+                ]
+              }
             },
             {
               "refresh": "users"

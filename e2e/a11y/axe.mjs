@@ -65,6 +65,7 @@ const screens = [
   ['notification-settings', '/projects/notification-settings'],
   ['webhook-list', `/projects/webhook-list?key=${key}`],
   ['my-sessions', '/projects/my-sessions'],
+  ['my-data', '/projects/my-data'],
 ];
 
 let failed = false;

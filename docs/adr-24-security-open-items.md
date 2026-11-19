@@ -115,6 +115,12 @@ What is there to build on:
        The screen says so.
      - The account in Keycloak is the installation's to delete, and the screen says so too.
    - `docs/security/data.md` lists what is exported and what is removed.
+   - **Note of 18 November 2026, building it.** Each module that keeps user names implements `PersonalData` on its own
+     tables, and a new module `privacy` asks them all (`GET /api/me/export`, `GET /api/admin/users/{username}/export`,
+     `POST /api/admin/users/{username}/remove` with the name typed again). The removal also changes the read models
+     (search, reports), the bodies of the deliveries still kept and the lead of a project, and moves the version of
+     the issues and comments it changes. authz-library keeps the name in `rbac_audit` and the row of the user in
+     `app_user`: asked as A10 (#24), listed in data.md until then.
 8. **O14, attachments.**
    - **Quota per project.** `odt.attachments.project-quota`, unlimited by default. Over it, an upload gets 413 with
      the quota in the problem.
@@ -166,7 +172,8 @@ the update of asvs.md alone.
   export and a removal of a user's data; a quota, a check by content and an antivirus hook for attachments; the
   validation of requests.
 - One new dependency: `micrometer-registry-prometheus`.
-- Two requests to authz-library: A8, a recent login; A9, the rate limit on sessions.
+- Two requests to authz-library: A8, a recent login; A9, the rate limit on sessions. A third came while building it: A10,
+  the removal of a user in its own tables.
 - asvs.md gets the state Accepted, used for 2.4.5 and 2.8.5.
 - When it is built, level 2 has no open requirement left; some are met by the installation, as listed in
   «The installation».

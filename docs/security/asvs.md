@@ -17,7 +17,7 @@ again at each release.
 | **Accepted** | Not met, and accepted by the maintainer with the reason (ADR-24); reconsidered when the reason changes |
 | **Open** | Not met yet: an item of [Open items](#open-items), with its issue |
 
-Level 2 has 259 requirements. Today: 190 met, 38 met by the installation, 24 not applicable, 2 accepted, 5 open (4 items).
+Level 2 has 259 requirements. Today: 191 met, 38 met by the installation, 24 not applicable, 2 accepted, 4 open (3 items).
 
 ## The installation
 
@@ -279,7 +279,7 @@ OpenDevTrack has no login of its own: the users sign in to Keycloak through the 
 | 8.2.2 | No sensitive data in browser storage | Met | quadrava: only preferences (language, last project) in `localStorage` |
 | 8.2.3 | Client data cleared at logout | Met | quadrava: the logout leaves the page (a redirect through the BFF); only the preferences stay |
 | 8.3.1 | No sensitive data in query strings | Met | odt: the ODQL of a search goes in the body; ids only in paths |
-| 8.3.2 | Users can remove or export their data | Open | O13: no export or removal of a user's data on request |
+| 8.3.2 | Users can remove or export their data | Met | odt: `PersonalData` in each module and the module `privacy`: `/api/me/export`, `/api/admin/users/{username}/export`, `/api/admin/users/{username}/remove` (the name becomes `former-user-<n>`); data.md «Export and removal»; the tables of authz-library with A10 (#24) |
 | 8.3.3 | Clear language and consent for personal data | Install | The privacy notice of the installation |
 | 8.3.4 | Sensitive data identified, with a policy | Met | odt: [data.md](data.md), levels, protection and periods; reviewed with each ADR that adds data |
 | 8.3.5 | Access to sensitive data audited | Met | odt: the audit log of the administration (ADR-22) and the history of the issues |
@@ -398,7 +398,6 @@ application.
 | O4 | [#7](https://github.com/sramaccini/open-devtrack/issues/7) | 1.14.2 | Low | Signed images (cosign) and their check at deploy |
 | O5 | [#8](https://github.com/sramaccini/open-devtrack/issues/8) | 2.1.8 | Low | A strength meter in a Keycloak theme of the project |
 | O9 | [#12](https://github.com/sramaccini/open-devtrack/issues/12) | 3.7.1, 4.3.3 | Medium | Recent login before the administration and the creation of tokens: A8 of authz-library 2.4.0, waiting for Q23 of Quadrava (the runtime asks for the login again) |
-| O13 | [#16](https://github.com/sramaccini/open-devtrack/issues/16) | 8.3.2 | Medium | Export and removal of a user's data on request |
 
 Closed:
 
@@ -417,6 +416,7 @@ Closed:
 - O10 ([#13](https://github.com/sramaccini/open-devtrack/issues/13)): the key of the secrets in the transit engine of Vault or OpenBao.
 - O12 ([#15](https://github.com/sramaccini/open-devtrack/issues/15)): metrics and alert rules (`docs/operations`), the rate limit on sessions of authz-library 2.4.0 (A9).
 - O7 ([#10](https://github.com/sramaccini/open-devtrack/issues/10)): «Your sessions» and back-channel logout (authz-library 2.3.0, A7).
+- O13 ([#16](https://github.com/sramaccini/open-devtrack/issues/16)): export and removal of a user's data, the name replaced by a pseudonym (data.md «Export and removal»); the tables of authz-library wait for A10 ([#24](https://github.com/sramaccini/open-devtrack/issues/24)).
 
 Not open: row-level security of PostgreSQL, a second line under the checks of ADR-09 rather than a requirement of the
 standard, left for 1.x with its measures (`docs/search-load.md`).

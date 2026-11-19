@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "my-data",
+  "requires": "odt.project.browse",
+  "components": [
+    {
+      "id": "my-data-intro",
+      "type": "text",
+      "text": "{{ t('privacy.mine_description', 'Everything OpenDevTrack keeps about you in this tenant: your profile, the issues you reported, are assigned or review, your comments and files, your messages, preferences, filters and watches. A JSON file.') }}"
+    },
+    {
+      "id": "my-data-export",
+      "type": "link",
+      "label": "{{ t('privacy.download_mine', 'Download your data') }}",
+      "href": "/api/me/export"
+    },
+    {
+      "id": "my-data-removal",
+      "type": "text",
+      "text": "{{ t('privacy.removal_description', 'To be removed from this tenant, ask its administrator: your name in the work of the projects becomes a pseudonym.') }}"
+    }
+  ]
+}

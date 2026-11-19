@@ -68,7 +68,8 @@
               "workflow.",
               "board.",
               "customfield.",
-              "webhook."
+              "webhook.",
+              "user."
             ],
             "optionKey": "values.config_kind"
           }

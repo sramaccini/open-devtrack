@@ -590,5 +590,21 @@
   "sessions.of_user": "Sessioni di {name}",
   "sessions.of_user_description": "Dove questo utente ha effettuato l'accesso, in questo tenant.",
   "sessions.tenant": "Tenant",
-  "admin.sessions": "Sessioni"
+  "admin.sessions": "Sessioni",
+  "nav.my_data": "I tuoi dati",
+  "privacy.export": "Esporta i dati",
+  "privacy.remove": "Rimuovi dal tenant",
+  "privacy.remove_confirm": "Rimuovere {name} da questo tenant? Il suo nome in issue, commenti e storici diventa uno pseudonimo; messaggi, preferenze, filtri, osservazioni e appartenenze sono cancellati. Ciò che ha scritto resta, menzioni comprese. Il suo account in Keycloak resta: cancellalo lì. Non si può annullare.",
+  "privacy.remove_of": "Rimuovi {name}",
+  "privacy.type_name": "Scrivi {name} per confermare",
+  "privacy.name_differs": "Il nome scritto non è quello dell'utente",
+  "privacy.remove_refused": "L'utente non può essere rimosso: nessuno rimuove sé stesso, e solo l'amministratore globale rimuove un utente con un ruolo globale",
+  "privacy.sessions_left": "Rimosso, ma le sue sessioni non sono state chiuse: chiudile da Sessioni",
+  "privacy.removed": "Rimosso: ora in questo tenant è {pseudonym}",
+  "privacy.mine_description": "Tutto ciò che OpenDevTrack conserva su di te in questo tenant: il profilo, le issue che hai segnalato, che ti sono assegnate o che revisioni, i tuoi commenti e file, i messaggi, le preferenze, i filtri e le osservazioni. Un file JSON.",
+  "privacy.download_mine": "Scarica i tuoi dati",
+  "privacy.removal_description": "Per essere rimosso da questo tenant chiedi al suo amministratore: il tuo nome nel lavoro dei progetti diventa uno pseudonimo.",
+  "values.config_action.user.exported": "Dati di un utente esportati",
+  "values.config_action.user.removed": "Utente rimosso, nome pseudonimizzato",
+  "values.config_kind.user.": "Utenti"
 }

@@ -96,6 +96,8 @@ webhook; the operator of the installation.
 | --- | --- | --- |
 | E: changing one's own roles | Refused by authz-library (403 self-modification) | |
 | R: a change to the configuration without a trace | Audit log of the configuration with who and when, 2 years (ADR-22) | |
+| I: the export of another user's data | `/api/me/export` always for the user of the session; the export of another user only with `authz.rbac.manage`, inside the tenant, in the audit log (O13) | |
+| T: removing a user by mistake, or oneself | The row action asks twice, the name typed again is checked by the back end; nobody removes themselves; a user with global roles only by the global admin (authz-library) | Not reversible: the pseudonym keeps no link to the name |
 | S, E: someone at an unattended screen doing administration | The session's timeouts | No recent login asked before administration or token creation (O9) |
 
 ### Screens of `ui/` (registry)

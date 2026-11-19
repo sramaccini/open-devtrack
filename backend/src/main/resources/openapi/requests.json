@@ -1,5 +1,8 @@
 {
   "requests" : {
+    "POST /api/admin/users/{username}/remove" : {
+      "$ref" : "#/components/schemas/RemoveRequest"
+    },
     "PUT /api/boards/{id}" : {
       "$ref" : "#/components/schemas/BoardRequest"
     },

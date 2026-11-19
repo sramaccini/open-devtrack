@@ -590,5 +590,21 @@
   "sessions.of_user": "Sessions of {name}",
   "sessions.of_user_description": "Where this user is signed in, in this tenant.",
   "sessions.tenant": "Tenant",
-  "admin.sessions": "Sessions"
+  "admin.sessions": "Sessions",
+  "nav.my_data": "Your data",
+  "privacy.export": "Export data",
+  "privacy.remove": "Remove from tenant",
+  "privacy.remove_confirm": "Remove {name} from this tenant? Their name in issues, comments and histories becomes a pseudonym; their messages, preferences, filters, watches and memberships are deleted. What they wrote stays, mentions of them included. Their account in Keycloak stays: delete it there. It cannot be undone.",
+  "privacy.remove_of": "Remove {name}",
+  "privacy.type_name": "Type {name} to confirm",
+  "privacy.name_differs": "The name typed is not the user name",
+  "privacy.remove_refused": "The user cannot be removed: nobody removes themselves, and only the global admin removes a user with a global role",
+  "privacy.sessions_left": "Removed, but their sessions could not be ended: end them from Sessions",
+  "privacy.removed": "Removed: they are now {pseudonym} in this tenant",
+  "privacy.mine_description": "Everything OpenDevTrack keeps about you in this tenant: your profile, the issues you reported, are assigned or review, your comments and files, your messages, preferences, filters and watches. A JSON file.",
+  "privacy.download_mine": "Download your data",
+  "privacy.removal_description": "To be removed from this tenant, ask its administrator: your name in the work of the projects becomes a pseudonym.",
+  "values.config_action.user.exported": "Data of a user exported",
+  "values.config_action.user.removed": "User removed, name pseudonymised",
+  "values.config_kind.user.": "Users"
 }

@@ -87,6 +87,87 @@
         "x-permissions" : [ "odt.project.admin" ]
       }
     },
+    "/api/admin/users/{username}/export" : {
+      "get" : {
+        "operationId" : "privacy.ofUser",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "username",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Everything OpenDevTrack keeps about a user of the tenant, as a JSON file",
+        "tags" : [ "privacy" ]
+      }
+    },
+    "/api/admin/users/{username}/remove" : {
+      "post" : {
+        "operationId" : "privacy.remove",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "username",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RemoveRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Removed"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          },
+          "412" : {
+            "$ref" : "#/components/responses/ChangedMeanwhile"
+          }
+        },
+        "summary" : "Removes a user from the tenant: their name in the work of the projects becomes a pseudonym",
+        "tags" : [ "privacy" ]
+      }
+    },
     "/api/boards" : {
       "get" : {
         "operationId" : "board.mine",
@@ -1912,6 +1993,24 @@
         "tags" : [ "issue" ],
         "x-permissions" : [ "odt.project.browse" ],
         "x-project-permissions" : [ "odt.issue.browse", "odt.issue.edit" ]
+      }
+    },
+    "/api/me/export" : {
+      "get" : {
+        "operationId" : "privacy.mine",
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          }
+        },
+        "summary" : "Everything OpenDevTrack keeps about the signed-in user in this tenant, as a JSON file",
+        "tags" : [ "privacy" ]
       }
     },
     "/api/me/filters" : {
@@ -6988,6 +7087,14 @@
           "version" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }
+      },
+      "Removed" : {
+        "type" : "object",
+        "properties" : {
+          "pseudonym" : {
+            "type" : "string"
           }
         }
       },

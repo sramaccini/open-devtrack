@@ -21,6 +21,13 @@
       "icon": "safety",
       "screen": "my-sessions",
       "requires": "odt.project.browse"
+    },
+    {
+      "id": "my-data",
+      "label": "{{ t('nav.my_data', 'Your data') }}",
+      "icon": "user",
+      "screen": "my-data",
+      "requires": "odt.project.browse"
     }
   ],
   "areas": [
