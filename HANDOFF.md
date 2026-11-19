@@ -152,5 +152,6 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    signed image and its SBOM on a tag (not run yet), checked as `docs/operations/README.md` says. The first manual
    accessibility check runs on the first release candidate. The Dependabot secret `AUTHZ_PACKAGES_TOKEN`
    (read:packages) must be set by the maintainer, or the Maven updates fail. Then the documentation, the public
-   demo and 1.0.
+   demo and 1.0: ADR-25, proposed on 19 November 2026, waits for the maintainer (with its three open questions:
+   the host of the demo, public registries for authz-library and the Quadrava CLI, the Dependabot secret).
 2. Deployment: publish `ui/` to `testing`/`production` with `quadrava publish` and the token of an author.
