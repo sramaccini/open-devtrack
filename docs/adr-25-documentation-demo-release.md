@@ -1,6 +1,6 @@
 # ADR-25: Documentation, public demo and the 1.0 release
 
-Status: Proposed (19 November 2026) — F5
+Status: Accepted (19 November 2026; decided by the maintainer) — F5
 
 ## Context
 
