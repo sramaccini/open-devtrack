@@ -113,6 +113,13 @@ What there is today:
      - Flyway migrations never edited after a release, only added;
      - an upgrade path from every 1.x to the next.
    - The maintainer sets `AUTHZ_PACKAGES_TOKEN` for Dependabot before the first candidate (open question 3).
+   - **Note of 19 November 2026, step 2.** Built as written, with three details:
+     - `release.yml` calls `deploy.yml` before it publishes anything. A path filter does not decide on a tag, so
+       `deploy.yml` itself runs only on `main`.
+     - The archive also carries the licence, NOTICE, TRADEMARKS and the changelog, and its `.env.example` names the
+       image of the release by digest.
+     - The ZAP baseline of the checklist is the signed-in one of `e2e/authz` on the tag. The scan against
+       `deploy/compose` is the demo's, before it opens.
 5. **Order of the work, one commit each.**
    1. the administrator guide with `deploy/compose/` and its CI;
    2. the release candidates in `release.yml`, `docs/release.md` and `CHANGELOG.md`;

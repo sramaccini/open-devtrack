@@ -38,8 +38,14 @@ What it needs:
 
 - A host with Docker and Compose, two DNS names (for example `tracker.example.org` and `login.example.org`), and
   ports 80 and 443 reachable from the internet for the certificates.
-- The files of the release: `deploy/`, `ui/`, `keycloak/` and `brand/` with the same layout as the repository, for
-  example a checkout of its tag.
+- The files of the release: the archive `opendevtrack-<tag>.tar.gz` of its GitHub release
+  ([release.md](../release.md)), checked against its `.sha256`. It holds `deploy/`, `ui/`, `keycloak/` and `brand/`
+  with the layout of the repository, and its `.env.example` already names the image of the release by digest. A
+  checkout of the tag works too.
+
+  ```bash
+  sha256sum -c opendevtrack-v1.0.0.tar.gz.sha256 && tar -xzf opendevtrack-v1.0.0.tar.gz && cd opendevtrack-v1.0.0
+  ```
 - A GitHub token with `read:packages`. The Quadrava CLI that publishes `ui/` is on GitHub Packages, which asks for a
   token also to read ([#29](https://github.com/sramaccini/open-devtrack/issues/29)).
 

@@ -26,10 +26,11 @@ Phases **F0–F4 done**: the back end, the `ui/` project and CI are in place, wi
 | F2 | Projects, issues, workflow, comments and attachments | Done (gate M1); also mentions and in-app messages (ADR-13) |
 | F3 | Boards, backlog and sprints | Done (ADR-15) |
 | F4 | Search, dashboards, notifications | Done (gate M3: search load test) |
-| F5 | Public API and webhooks, hardening, 1.0 | Under way: public API and webhooks (ADR-21), administration (ADR-22) and hardening (ADR-23, ADR-24) built; the installation with Compose and the administrator guide (ADR-25) |
+| F5 | Public API and webhooks, hardening, 1.0 | Under way: public API and webhooks (ADR-21), administration (ADR-22) and hardening (ADR-23, ADR-24) built; the installation with Compose, the administrator guide and the release candidates (ADR-25) |
 
 ## Documentation
 
+- [CHANGELOG.md](CHANGELOG.md) and [docs/release.md](docs/release.md): what changes in each release, and how one is made.
 - [docs/admin/](docs/admin/README.md): the administrator guide: installing with [deploy/compose](deploy/compose),
   the configuration, Keycloak, the Administration area, backups and upgrades.
 - [docs/](docs/README.md): architecture decision records and checks.

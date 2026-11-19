@@ -2,12 +2,13 @@ name: Installation
 
 # The check of deploy/compose (ADR-25 point 2): the production Compose file with Caddy and Keycloak, an image of the
 # back end built from these sources, the realm template, the first administrator and the screens of ui/, then a
-# login over https (e2e/deploy/run.sh). On each tag, and on main when what it installs changes.
+# login over https (e2e/deploy/run.sh). On main when what it installs changes, and for each tag from release.yml,
+# before anything is published.
 
 on:
+  workflow_call:
   push:
     branches: [main]
-    tags: ['v*']
     paths:
       - deploy/**
       - e2e/deploy/**

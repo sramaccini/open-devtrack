@@ -153,7 +153,10 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    accessibility check runs on the first release candidate. The Dependabot secret `AUTHZ_PACKAGES_TOKEN`
    (read:packages) must be set by the maintainer, or the Maven updates fail. Then the documentation, the public
    demo and 1.0: ADR-25, accepted on 19 November 2026 and built in its order (its three open questions are the maintainer's:
-   the host of the demo, public registries for authz-library and the Quadrava CLI, the Dependabot secret).
+   the host of the demo, public registries for authz-library and the Quadrava CLI, the Dependabot secret). Step 1
+   (`deploy/compose`, `docs/admin`) and step 2 are done: tags `vX.Y.Z-rc.N` are candidates, `release.yml` checks the
+   installation first and attaches the archive of `deploy/`, `ui/`, `keycloak/` and `brand/`, and `docs/release.md`
+   holds the checklist and what 1.0 promises, with `CHANGELOG.md`. Next: step 3, the user guide in `docs/guide/`.
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
    SQL, as authz-library documents), and `odt.sh publish-ui` publishes `ui/` to `production` with the service account
