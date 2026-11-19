@@ -176,10 +176,16 @@ class PrivacyApiTest {
                 "odt_reporting.issue_state WHERE assignee = 'rosa'",
                 "odt_access.project_member WHERE 'rosa' IN (username, granted_by)",
                 "odt_audit.admin_event WHERE (before::text || after::text) LIKE '%\"rosa\"%'",
-                "authz.user_role ur JOIN authz.app_user u ON u.id = ur.user_id WHERE u.username = 'rosa' "
-                        + "AND ur.tenant_id = 'ALPHA'")) {
+                // authz-library (A10): with no role left in any tenant she is deleted, and its audit names the pseudonym
+                "authz.app_user WHERE username = 'rosa'",
+                "authz.rbac_audit WHERE tenant_id = 'ALPHA' AND ('rosa' IN (actor, target) OR "
+                        + "(coalesce(before_state::text, '') || coalesce(after_state::text, '')) LIKE '%\"rosa\"%')")) {
             assertThat(jdbc.queryForObject("SELECT count(*) FROM " + where, Integer.class)).as(where).isZero();
         }
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM authz.rbac_audit WHERE action = 'USER_FORGOTTEN' "
+                + "AND target = ? AND tenant_id = 'ALPHA'", Integer.class, pseudonym)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM authz.rbac_audit WHERE action = 'USER_ROLES_REPLACED' "
+                + "AND target = ? AND tenant_id = 'ALPHA'", Integer.class, pseudonym)).isPositive();
         mvc.perform(as(get("/api/admin/users/rosa/export"), mario))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.profile").value(nullValue()))

@@ -70,6 +70,10 @@ module `privacy` asks them all, in one transaction for a removal.
   tenant» asks twice, then ends the user's sessions). Refused for the administrator themselves, and by authz-library
   for a user with global roles unless the administrator is global. In one transaction:
   - the user loses every role in the tenant (authz-library);
+  - in the RBAC audit of the tenant (authz-library 2.6.0, A10) the name becomes the pseudonym, as actor, target and
+    in the values; with no role left in any tenant the user is deleted from `authz` (their email and personal
+    access tokens), and the name leaves the entries without a tenant too; authz-library logs `USER_FORGOTTEN`.
+    A tenant administrator does not delete a user that a global administrator deactivated: that row stays;
   - deleted: their messages, mails not sent yet, preferences, saved filters, watches, mentions, memberships of
     projects and groups;
   - the name becomes the pseudonym `former-user-<n>` of the tenant (a counter, without a record of who it was) as
@@ -82,7 +86,6 @@ module `privacy` asks them all, in one transaction for a removal.
   - The texts they wrote, and their name inside a text (a mention, a filter of a board): project data, the project's
     to edit. The screen says so.
   - Outside the tables of OpenDevTrack: the account in Keycloak (the installation removes it there); the row of the
-    user and the RBAC audit in `authz` (authz-library: [#24](https://github.com/sramaccini/open-devtrack/issues/24),
-    request A10); mails already sent; bodies already delivered to webhook receivers; the logs of the installation,
+    user in `authz` while they have roles in another tenant (the pseudonym of each tenant is its own); mails already sent; bodies already delivered to webhook receivers; the logs of the installation,
     within their own period.
   - An export asked after the removal is logged under the name the administrator typed.

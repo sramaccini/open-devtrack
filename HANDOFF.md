@@ -10,7 +10,7 @@ Quadrava and authz-library, and the ADRs say where.
 
 - Repository github.com/sramaccini/open-devtrack, branch `main`: licence MPL-2.0 with CLA, contribution rules and
   project rules as Quadrava (ADR-05). Decisions D1–D9 and ADR-10 accepted, in `docs/`.
-- `backend/`: the monolith on authz-library 2.4.0, split into the Spring Modulith modules of the plan
+- `backend/`: the monolith on authz-library 2.6.0, split into the Spring Modulith modules of the plan
   (`ModularityTests`: `verify()` and the module documentation). The `odt.*` permission catalogue is a repeatable
   Flyway migration of the RBAC schema (ADR-07); the dev profile adds tenants, users and the UI author/approver roles.
 - Module `uiregistry` (ADR-03): `contracts/registry.yaml` 0.7.0, adapted from the Quadrava reference registry
@@ -147,7 +147,7 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    refused since Q22, #23; quota, type by content and clamd for attachments; metrics and alert rules of O12, `docs/operations`; O10, the key in Vault transit); O7 and O12 are done on authz-library 2.4.0; O9 is built on A8 and Quadrava 0.17.0 and 0.18.0 (Q23, Q24):
    a login younger than 15 minutes before the administration (the export of a user included), workflows, schemes, groups, webhooks and tokens. O13 is built: the module `privacy` exports a user's data and removes them
    from a tenant, the name becoming `former-user-<n>` (screen «Your data», row actions of `admin-users`); the tables of
-   authz-library wait for A10 (#24). O5 is built: `keycloak/themes/opendevtrack`, the logo and colours of
+   authz-library too since 2.6.0 (A10, #24). O5 is built: `keycloak/themes/opendevtrack`, the logo and colours of
    `brand/` and a strength meter on the login pages, used by the realm of `e2e/authz` and `stack`. O4 is built: `.github/workflows/release.yml` publishes the
    signed image and its SBOM on a tag (not run yet), checked as `docs/operations/README.md` says. The first manual
    accessibility check runs on the first release candidate. The Dependabot secret `AUTHZ_PACKAGES_TOKEN`

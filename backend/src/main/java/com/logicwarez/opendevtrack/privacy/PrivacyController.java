@@ -73,7 +73,7 @@ class PrivacyController {
                     List.of(new Problems.FieldError("/confirm", "confirm")));
         }
         try {
-            return ResponseEntity.ok(new Removed(privacy.remove(username, privacy.known(username))));
+            return ResponseEntity.ok(new Removed(privacy.remove(username)));
         } catch (AdminProblem problem) {
             // authz-library refuses, for example, a user with global roles to the administrator of a tenant
             return Problems.of(problem.status(), "The user cannot be removed: " + problem.getMessage());

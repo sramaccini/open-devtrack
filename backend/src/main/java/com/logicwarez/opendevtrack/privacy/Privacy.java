@@ -7,7 +7,6 @@ package com.logicwarez.opendevtrack.privacy;
 import static com.logicwarez.opendevtrack.shared.ConfigurationChanged.values;
 
 import com.logicwarez.authz.rbac.admin.AdminApi.RoleAssignmentRequest;
-import com.logicwarez.authz.rbac.admin.AdminProblem;
 import com.logicwarez.authz.rbac.admin.AdminScope;
 import com.logicwarez.authz.rbac.admin.RbacAdminService;
 import com.logicwarez.opendevtrack.identity.TenantUsers;
@@ -81,36 +80,24 @@ class Privacy {
     }
 
     /**
-     * Whether authz-library knows the user, active or not: a name it does not know (a user removed from it before,
-     * whose name is still in the data) is only pseudonymised. Outside a transaction, so that its 404 marks none.
-     */
-    boolean known(String username) {
-        try {
-            rbac.user(AdminScope.of(user.session()), username);
-            return true;
-        } catch (AdminProblem problem) {
-            if ("not-found".equals(problem.code())) {
-                return false;
-            }
-            throw problem;
-        }
-    }
-
-    /**
-     * Removes the user from the tenant: out of its roles in authz-library first (which refuses the administrator
-     * themselves and a user with global roles), then out of the data of every module. Returns the pseudonym.
+     * Removes the user from the tenant, all in one transaction: out of their roles in authz-library first (which
+     * refuses the administrator themselves and a user with global roles), then their name becomes the pseudonym in the
+     * audit of authz-library, which also deletes the user when they have no role left in any tenant (A10), and in the
+     * data of every module. A name authz-library does not know (a user removed from it before, whose name is still in
+     * the data) is only pseudonymised. Returns the pseudonym.
      */
     @Transactional
-    String remove(String username, boolean known) {
-        if (known) {
-            rbac.replaceUserRoles(AdminScope.of(user.session()), user.tenantId(), username,
-                    new RoleAssignmentRequest(List.of()));
+    String remove(String username) {
+        AdminScope scope = AdminScope.of(user.session());
+        if (rbac.findUser(scope, username).isPresent()) {
+            rbac.replaceUserRoles(scope, user.tenantId(), username, new RoleAssignmentRequest(List.of()));
         }
         Subject subject = subject(username);
         String pseudonym = "former-user-" + jdbc.queryForObject("""
                 INSERT INTO odt_privacy.pseudonym_counter (tenant_id, last) VALUES (?, 1)
                 ON CONFLICT (tenant_id) DO UPDATE SET last = odt_privacy.pseudonym_counter.last + 1
                 RETURNING last""", Long.class, subject.tenantId());
+        rbac.forgetUser(scope, subject.tenantId(), username, pseudonym);
         modules.forEach(module -> module.forget(subject, pseudonym));
         // The log names the pseudonym only: the name of the user is what has just been removed
         log.tenant("user.removed", pseudonym, null, values("pseudonym", pseudonym));

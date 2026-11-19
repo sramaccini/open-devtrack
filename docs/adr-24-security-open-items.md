@@ -135,6 +135,9 @@ What is there to build on:
      (search, reports), the bodies of the deliveries still kept and the lead of a project, and moves the version of
      the issues and comments it changes. authz-library keeps the name in `rbac_audit` and the row of the user in
      `app_user`: asked as A10 (#24), listed in data.md until then.
+   - **Note of 19 November 2026, #24.** authz-library 2.6.0 has A10: `Privacy.remove` calls `forgetUser` with the
+     same pseudonym after the roles are gone, in the same transaction, and `findUser`, which throws nothing for a name
+     it does not know, takes the place of the check made outside the transaction.
 8. **O14, attachments.**
    - **Quota per project.** `odt.attachments.project-quota`, unlimited by default. Over it, an upload gets 413 with
      the quota in the problem.
