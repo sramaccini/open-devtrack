@@ -10,8 +10,11 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +23,9 @@ import org.springframework.stereotype.Component;
  * only to public addresses. Loopback, private, link-local (the metadata of the clouds), shared, multicast and reserved
  * ranges are refused, when the webhook is saved and again before each delivery, since the DNS can change.
  * {@code odt.webhooks.allow-private} (development and tests) allows them, and {@code http}.
+ * {@code odt.webhooks.allowed-hosts} (ADR-25), a list of host names separated by commas, narrows that further when it
+ * is not empty: only those hosts, compared without case, and still only at public addresses. The public demo allows
+ * only its own echo, so that its visitors cannot use it to send requests to other hosts.
  */
 @Component
 class Addresses {
@@ -27,9 +33,15 @@ class Addresses {
     static final int MAX_URL = 2000;
 
     private final boolean allowPrivate;
+    private final Set<String> allowedHosts;
 
-    Addresses(@Value("${odt.webhooks.allow-private:false}") boolean allowPrivate) {
+    Addresses(@Value("${odt.webhooks.allow-private:false}") boolean allowPrivate,
+            @Value("${odt.webhooks.allowed-hosts:}") String allowedHosts) {
         this.allowPrivate = allowPrivate;
+        this.allowedHosts = Arrays.stream(allowedHosts.split(","))
+                .map(host -> host.strip().toLowerCase(Locale.ROOT))
+                .filter(host -> !host.isEmpty())
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     /** Why the URL is refused, as the {@code code} of the field: {@code url} or {@code address}; empty if allowed. */
@@ -45,6 +57,9 @@ class Addresses {
         if (url.length() > MAX_URL || !schemeAllowed || uri.getHost() == null || uri.getRawUserInfo() != null
                 || uri.getRawFragment() != null) {
             return Optional.of("url");
+        }
+        if (!allowedHosts.isEmpty() && !allowedHosts.contains(uri.getHost().toLowerCase(Locale.ROOT))) {
+            return Optional.of("address");
         }
         if (allowPrivate) {
             return Optional.empty();

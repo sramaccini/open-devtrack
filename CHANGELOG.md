@@ -24,7 +24,8 @@ The first release, 1.0.0, planned for 28 May 2027. What it holds, by area:
 - **Notifications**: in-app messages and mail, instant or as a daily digest, with preferences per user (ADR-13,
   ADR-18).
 - **Public API and webhooks**: the REST API with its OpenAPI 3.1 definition, Keycloak tokens, service accounts and
-  personal access tokens; webhooks per project signed as Standard Webhooks (ADR-21).
+  personal access tokens; webhooks per project signed as Standard Webhooks (ADR-21), only to public addresses, and
+  to a list of hosts with `ODT_WEBHOOKS_ALLOWED_HOSTS` (ADR-25).
 - **Administration**: users, roles, tenants, sessions, groups, permission schemes, and the audit log of the
   configuration (ADR-22).
 - **Privacy**: the export of a user's data, and their removal with a pseudonym (ADR-24).

@@ -16,7 +16,7 @@ The admins of a project manage its webhooks from «Webhooks» on the screen of t
 | Field | What |
 | --- | --- |
 | Name | Unique in the project |
-| Address | An `https` address on the internet, for example `https://chat.example.org/hooks/123`. Addresses of private networks are refused |
+| Address | An `https` address on the internet, for example `https://chat.example.org/hooks/123`. Addresses of private networks are refused, and an installation can also allow only some hosts (in the public demo, only its echo) |
 | Events | What it is told about: issue created, changed or deleted, comment posted, attachment added or removed, sprint started or completed. «All events» also takes those added in later versions |
 
 

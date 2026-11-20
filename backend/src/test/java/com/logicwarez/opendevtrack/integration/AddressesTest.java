@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 /** Where a webhook may post (ADR-21, B12): only public addresses over https, unless private ones are allowed. */
 class AddressesTest {
 
-    private final Addresses strict = new Addresses(false);
+    private final Addresses strict = new Addresses(false, "");
 
     @Test
     void privateAndSpecialAddressesAreRefused() {
@@ -36,9 +36,22 @@ class AddressesTest {
 
     @Test
     void privateAddressesAndHttpWhenAllowed() {
-        Addresses development = new Addresses(true);
+        Addresses development = new Addresses(true, "");
         assertThat(development.refuse("http://127.0.0.1:8080/hook")).isEmpty();
         assertThat(development.refuse("http://echo:8080/hook")).isEmpty();
         assertThat(development.refuse("ftp://127.0.0.1/hook")).isEqualTo(Optional.of("url"));
+    }
+
+    @Test
+    void allowedHostsNarrowThePublicAddresses() {
+        Addresses demo = new Addresses(false, " 8.8.8.8 , 10.0.0.1,");
+        assertThat(demo.refuse("https://8.8.8.8/hook")).isEmpty();
+        assertThat(demo.refuse("https://9.9.9.9/hook")).contains("address");
+        assertThat(demo.refuse("https://10.0.0.1/hook")).as("still a private address").contains("address");
+        assertThat(demo.refuse("http://8.8.8.8/hook")).contains("url");
+
+        Addresses development = new Addresses(true, "echo");
+        assertThat(development.refuse("http://ECHO:8080/hook")).isEmpty();
+        assertThat(development.refuse("http://other:8080/hook")).contains("address");
     }
 }

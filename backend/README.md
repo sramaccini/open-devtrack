@@ -402,6 +402,8 @@ Vault (`vault write -f transit/keys/opendevtrack/rotate`): older versions still 
 `Addresses` refuses an address that is not `https`, has credentials or a fragment, or resolves to a loopback,
 private, link-local, shared, multicast or reserved address (the metadata of the clouds too), when it is saved and
 again before each attempt. `odt.webhooks.allow-private` (`ODT_WEBHOOKS_ALLOW_PRIVATE`, off by default) allows `http`
-and those addresses, for a receiver on the same network: on in the stack and in the e2e environment. Between the check
+and those addresses, for a receiver on the same network: on in the stack and in the e2e environment.
+`odt.webhooks.allowed-hosts` (`ODT_WEBHOOKS_ALLOWED_HOSTS`, empty by default) narrows the hosts to a list, compared
+without case and checked before the addresses: the public demo allows only its echo (ADR-25). Between the check
 and the connection the name is resolved again by the HTTP client, so a DNS answer that changes in that instant is not
 caught (DNS rebinding): a resolver or an egress proxy of the installation closes it.

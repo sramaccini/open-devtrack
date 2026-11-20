@@ -244,6 +244,9 @@ odt:
     # Outgoing webhooks (ADR-21, B): only https to public addresses. A development environment with a receiver on
     # its own network allows http and private addresses with ODT_WEBHOOKS_ALLOW_PRIVATE=true.
     allow-private: ${ODT_WEBHOOKS_ALLOW_PRIVATE:false}
+    # Only these hosts, separated by commas, still at public addresses (ADR-25): the public demo allows only its echo.
+    # Empty, the default, means every public host.
+    allowed-hosts: ${ODT_WEBHOOKS_ALLOWED_HOSTS:}
     # How often the deliveries that are due are posted
     delay: ${ODT_WEBHOOKS_DELAY:PT15S}
   uiregistry:

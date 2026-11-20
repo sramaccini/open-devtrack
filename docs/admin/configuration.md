@@ -31,6 +31,7 @@ the same way, in capitals with `_` (`spring.mail.host` is `SPRING_MAIL_HOST`). I
 | `ODT_REPORTING_ZONE` | Time zone of the days of the reports and of the dates of search | `UTC` |
 | `ODT_AUDIT_RETENTION` | How long the audit log of the administration is kept | `P730D` |
 | `ODT_WEBHOOKS_ALLOW_PRIVATE` | Webhooks also over http and to private addresses. For development only | `false` |
+| `ODT_WEBHOOKS_ALLOWED_HOSTS` | Webhooks only to these host names, separated by commas, still at public addresses. The public demo allows only its echo | empty: every public host |
 | `ODT_WEBHOOKS_DELAY` | How often due webhook deliveries are sent | `PT15S` |
 
 ### Mail
