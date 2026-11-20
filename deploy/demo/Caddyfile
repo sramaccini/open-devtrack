@@ -1,0 +1,15 @@
+# The proxy of the public demo: the sites of deploy/compose/Caddyfile as they are, and the echo of the webhooks at
+# its own public name. The echo takes only POST, as a webhook sends, so that it is not a page that repeats what it
+# is given.
+
+import /etc/caddy/odt.Caddyfile
+
+{$ECHO_HOST}:{$HTTPS_PORT} {
+	@post method POST
+	handle @post {
+		reverse_proxy echo:8080
+	}
+	handle {
+		respond "The receiver of the webhooks of the OpenDevTrack demo: it takes only POST." 405
+	}
+}

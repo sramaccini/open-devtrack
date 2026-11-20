@@ -1,0 +1,31 @@
+# The public demo (ADR-25 point 3), on top of deploy/compose: deploy/demo/demo.sh adds this file with
+# ODT_COMPOSE_FILES. The relative paths are those of deploy/compose, the project directory.
+services:
+  backend:
+    environment:
+      # Webhooks only to the echo of the demo, so that visitors cannot use it to send requests to other hosts
+      ODT_WEBHOOKS_ALLOWED_HOSTS: ${ECHO_HOST:?set in .env for the demo}
+      # Mail only to the Mailpit of the demo, whose page is not published: no message leaves the host
+      SPRING_MAIL_HOST: mailpit
+      SPRING_MAIL_PORT: "1025"
+      ODT_MAIL_FROM: OpenDevTrack demo <demo@${ODT_HOST}>
+      ODT_ATTACHMENTS_PROJECT_QUOTA: 10MB
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    restart: unless-stopped
+
+  # The receiver of the webhooks, at its public name through Caddy: it prints each request in its log
+  # (demo.sh hooks) and answers with what it got.
+  echo:
+    image: mendhak/http-https-echo:34
+    restart: unless-stopped
+    environment:
+      LOG_IGNORE_PATH: /healthz
+
+  proxy:
+    environment:
+      ECHO_HOST: ${ECHO_HOST}
+    volumes:
+      - ../demo/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./Caddyfile:/etc/caddy/odt.Caddyfile:ro

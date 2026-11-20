@@ -101,6 +101,22 @@ What there is today:
    - It uses TLS, the default profile (never `dev`), the ZAP baseline before the first opening, and the same alerts as
      `docs/operations`. The page of the demo states that everything is erased every night and that nothing private
      should be entered.
+   - **Note of 20 November 2026, step 4.** `ODT_WEBHOOKS_ALLOWED_HOSTS` is built, and so is everything of the
+     demo that does not need its host, in `deploy/demo/`:
+     - a Compose file on top of `deploy/compose`, with Mailpit, the echo behind Caddy (`POST` only) and the demo
+       settings;
+     - `demo.sh` with `setup`, the nightly `reset` and `upgrade`;
+     - the page of the demo.
+
+     Three details:
+     - The sample projects are not restored from an image. `reset` puts back a base snapshot with only the users, the
+       roles and the published screens, then adds the samples again through the API. That way their dates stay
+       relative to the day. The samples moved from `stack/stack.sh` to `stack/samples.sh`, which both use.
+     - The three users are `mario.rossi` (admin of the sample projects), `anna.bianchi` (member) and `giulia.verdi`
+       (admin of the tenant).
+     - Failed logins do not lock an account in the demo, since the passwords are public.
+
+     The deployment, the ZAP scan and the alerts wait for the host (#28).
 4. **1.0 is released through release candidates, with a written checklist.**
    - `release.yml` also accepts `vX.Y.Z-rc.N`. A candidate publishes its image, signature and SBOM like a release,
      with the same tags, but as a pre-release: it never moves `X.Y` or `latest`.

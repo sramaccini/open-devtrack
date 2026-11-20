@@ -51,7 +51,8 @@ Ports: `FRONT_PORT` (18090), `KEYCLOAK_PORT` (18180), `APP_PORT` (18080, the bac
 ## The sample projects
 
 Added by `up` when the project `WEB` is not there (`seed` does it alone), as `mario.rossi`, with dates relative to the
-day of the seed:
+day of the seed. They are written in `samples.sh`, which the public demo also uses for its nightly reset
+([deploy/demo](../deploy/demo/README.md)):
 
 - **WEB, Website relaunch** (anna.bianchi developer): an epic, stories, bugs and tasks with priorities, labels,
   assignees, reviewers and due dates, some overdue; issues in progress and done, a link, comments with a mention;
