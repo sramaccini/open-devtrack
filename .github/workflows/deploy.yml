@@ -35,7 +35,7 @@ jobs:
     name: Compose installation (Caddy, Keycloak, first admin, ui/)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Install and start
         run: e2e/deploy/run.sh up
       - name: Check
