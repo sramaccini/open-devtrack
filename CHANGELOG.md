@@ -8,7 +8,9 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
-The first release, 1.0.0, planned for 28 May 2027. What it holds, by area:
+## [1.0.0-rc.1] - 2026-11-23
+
+The first candidate of the first release, 1.0.0, planned for 28 May 2027. What it holds, by area:
 
 ### Added
 
