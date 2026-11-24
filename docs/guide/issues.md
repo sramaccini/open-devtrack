@@ -40,7 +40,7 @@ of its workflow ([Workflows](workflows.md)).
 
 ## An issue
 
-![An issue, with its next steps and comments](images/issue-detail.png)
+![An issue: its tabs General, Planning and Next steps, and its comments below](images/issue-detail.png)
 
 The screen of an issue has three tabs at the top:
 
