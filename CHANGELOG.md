@@ -8,6 +8,32 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+## [1.0.0-rc.3] - 2026-11-24
+
+The third candidate: the screens on Quadrava 0.20.0, which answers the manual accessibility check of rc.2.
+
+### Changed
+
+- Quadrava 0.20.0 (runtime image and CLI).
+
+### Accessibility
+
+- Tables by keyboard: the titles of the sortable columns are buttons, and each column filter is a button named after
+  its column, whose panel opens with Enter and closes with Escape (Q31).
+- A focus ring in the colours of the theme on every control, and the focus back on the button that opened a dialog
+  when it closes (Q32).
+- Names and states for screen readers: the selection checkboxes are named, required fields and errors are announced
+  with their field, the close button of dialogs is translated, and the browser tab names the screen («Backlog ·
+  OpenDevTrack») (Q33).
+- The dark theme keeps the colours of the brand, with no text below 4.5:1 on the screens checked (Q34).
+- Still open, asked to Quadrava: the badges of the cards of a board in the dark theme (Q35), and remembering the chosen
+  theme across visits (Q36) ([docs/accessibility.md](docs/accessibility.md)).
+
+### Upgrading
+
+From 1.0.0-rc.2: put the digest of the new image in `.env`, then `./odt.sh up` and `./odt.sh publish-ui`
+([upgrades-and-backups.md](docs/admin/upgrades-and-backups.md)). No change of data and no new setting.
+
 ## [1.0.0-rc.2] - 2026-11-24
 
 The second candidate: the backlog as a table, the screens on Quadrava 0.19.1, and the result of the manual
