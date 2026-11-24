@@ -163,10 +163,21 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    `v1.0.0-rc.1`, which was tagged first so that the demo runs a published image. The signed-in ZAP baseline found
    no medium or high alert, and the reset runs from root's crontab at 03:30 UTC. Its alerts come from an external
    monitor (healthchecks.io) that mails the maintainer: `deploy/demo/watch.sh` every 5 minutes and the result of the
-   reset (deploy/demo/README.md, «Alerts»). Next: the rest of the checklist of rc.1 (step 5).
+   reset (deploy/demo/README.md, «Alerts»).
    ADR-26, accepted and built on 24 November 2026: the backlog is a search table grouped by sprint. Quadrava 0.19.0
    (Q26 to Q29) and 0.19.1 (Q30) are adopted: the issue form in flow, an icon on every button, the bulk «Move to
    sprint…» of the backlog, light group and selected rows.
+   Step 5, the checklist of the candidates (docs/release.md), on 24 November 2026:
+   - rc.1: the archive installs (downloaded, its SHA-256 checked, the same files as the tag, `e2e/deploy/run.sh` of
+     the tag run from the unpacked archive with the release image by digest: all checks passed). No upgrade to test,
+     it is the first release. The manual accessibility check fails on four requests to Quadrava, Q31 to Q34 (#37 to
+     #40, docs/accessibility.md); its screen reader lines still need NVDA or VoiceOver.
+   - `v1.0.0-rc.2` tagged on 5a7afd5 (CI and CodeQL green, CHANGELOG written), its workflow green, image
+     @sha256:52d602d3… with its signature and SBOM verified by cosign. The demo is upgraded to it with
+     `demo.sh upgrade` (checkout of the tag, new digest in `.env`, a copy of the old one in /root), which is the
+     upgrade from rc.1 on the data of the demo; `watch.sh` reports ok. Signing in to the demo and opening an issue, a
+     board and a dashboard is the maintainer's.
+   Next: the screen reader lines, the ZAP baseline on rc.2, and the requests Q31 to Q34 when Quadrava releases them.
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
    SQL, as authz-library documents), and `odt.sh publish-ui` publishes `ui/` to `production` with the service account
