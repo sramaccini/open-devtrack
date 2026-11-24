@@ -109,18 +109,20 @@
                 {
                   "id": "issue-form",
                   "type": "form",
-                  "columns": 4,
+                  "layout": "flow",
                   "source": "issue",
                   "fields": [
                     {
                       "name": "key",
                       "type": "text",
+                      "width": "xs",
                       "label": "{{ t('issues.key', 'Key') }}",
                       "readOnlyIf": "{{true}}"
                     },
                     {
                       "name": "status",
                       "type": "select",
+                      "width": "s",
                       "label": "{{ t('issues.status', 'Status') }}",
                       "options": [
                         "todo",
@@ -133,21 +135,23 @@
                     {
                       "name": "reporter",
                       "type": "text",
+                      "width": "m",
                       "label": "{{ t('issues.reporter', 'Reporter') }}",
                       "readOnlyIf": "{{true}}"
                     },
                     {
                       "name": "summary",
                       "type": "text",
+                      "width": "l",
                       "label": "{{ t('issues.summary', 'Summary') }}",
                       "required": true,
                       "maxLength": 255,
-                      "readOnlyIf": "{{!form._perm.edit}}",
-                      "span": 2
+                      "readOnlyIf": "{{!form._perm.edit}}"
                     },
                     {
                       "name": "type",
                       "type": "select",
+                      "width": "s",
                       "label": "{{ t('issues.type', 'Type') }}",
                       "options": [
                         "task",
@@ -162,6 +166,7 @@
                     {
                       "name": "priority",
                       "type": "select",
+                      "width": "s",
                       "label": "{{ t('issues.priority', 'Priority') }}",
                       "options": [
                         "lowest",
@@ -177,6 +182,7 @@
                     {
                       "name": "assignee",
                       "type": "lookup",
+                      "width": "m",
                       "label": "{{ t('issues.assignee', 'Assignee') }}",
                       "tooltip": "{{ t('issues.assignee_help', 'A member of the project') }}",
                       "readOnlyIf": "{{!form._perm.edit}}",
@@ -190,6 +196,7 @@
                     {
                       "name": "reviewer",
                       "type": "lookup",
+                      "width": "m",
                       "label": "{{ t('issues.reviewer', 'Reviewer') }}",
                       "tooltip": "{{ t('issues.reviewer_help', 'A member of the project other than the assignee') }}",
                       "lookup": {
@@ -203,6 +210,7 @@
                     {
                       "name": "dueOn",
                       "type": "date",
+                      "width": "s",
                       "label": "{{ t('issues.due_on', 'Due date') }}",
                       "tooltip": "{{ t('issues.due_on_help', 'The day it should be done; past it, and not done, the issue is overdue') }}",
                       "readOnlyIf": "{{!form._perm.edit}}"
@@ -217,16 +225,15 @@
                         "valueField": "name"
                       },
                       "tooltip": "{{ t('issues.labels_help', 'Lower case letters, digits, dots, dashes or underscores; Enter or a comma adds one') }}",
-                      "readOnlyIf": "{{!form._perm.edit}}",
-                      "span": 2
+                      "readOnlyIf": "{{!form._perm.edit}}"
                     },
                     {
                       "name": "description",
                       "type": "richtext",
+                      "width": "full",
                       "label": "{{ t('issues.description', 'Description') }}",
                       "rows": 8,
-                      "readOnlyIf": "{{!form._perm.edit}}",
-                      "span": 4
+                      "readOnlyIf": "{{!form._perm.edit}}"
                     }
                   ],
                   "actions": [
@@ -494,18 +501,20 @@
                       "text": {
                         "name": "text",
                         "type": "text",
+                        "width": "l",
                         "maxLength": 1000,
-                        "readOnlyIf": "{{!form._perm.edit}}",
-                        "span": 2
+                        "readOnlyIf": "{{!form._perm.edit}}"
                       },
                       "number": {
                         "name": "number",
                         "type": "number",
+                        "width": "s",
                         "readOnlyIf": "{{!form._perm.edit}}"
                       },
                       "date": {
                         "name": "date",
                         "type": "date",
+                        "width": "s",
                         "readOnlyIf": "{{!form._perm.edit}}"
                       },
                       "checkbox": {
@@ -516,6 +525,7 @@
                       "select": {
                         "name": "select",
                         "type": "select",
+                        "width": "m",
                         "options": [],
                         "readOnlyIf": "{{!form._perm.edit}}"
                       },
@@ -528,6 +538,7 @@
                       "user": {
                         "name": "user",
                         "type": "lookup",
+                        "width": "m",
                         "lookup": {
                           "source": "assignees",
                           "valueField": "username",

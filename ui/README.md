@@ -27,10 +27,8 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 - **Field widths** (Quadrava 0.13.0): forms use `layout: "flow"` and each field a `width` by what it holds: `xs`
   short codes, keys and estimates; `s` dates, statuses, priorities, types; `m` names, users, choices; `l` titles and
   free text of one line. Descriptions, labels and lists of choices have none and take a line of their own; so do the
-  templates of the custom fields (`fieldsFrom`), by type. One exception for now: the form of `issue-detail` is a grid
-  of 4 columns (`columns`, `span`), so that its description takes the whole width. In a flow form a field on a line of
-  its own stops at 560px in Quadrava 0.18.0. The form goes back to flow when Quadrava lets such a field take the whole
-  line (Q26).
+  templates of the custom fields (`fieldsFrom`), by type. A field without `width` stops at 560px; the description of
+  an issue in `issue-detail` has `width: "full"` (Quadrava 0.19.0, Q26) and takes the whole line.
 - **Issue page**: `issue-detail` has the tabs General (the form and its buttons), Planning and Next steps, in a card
   (a `section` without a title). Below it is a second card, which holds the tabs of the activity: comments,
   attachments, links, watchers, history.
