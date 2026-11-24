@@ -31,6 +31,7 @@ The decisions D1–D9 of the project plan, all accepted by the maintainer on 31 
 | [23](adr-23-hardening.md) | Hardening for 1.0: ASVS level 2 and WCAG 2.2 AA | A requirement list, OSV-Scanner, CodeQL and a ZAP baseline in CI; webhook secrets encrypted; row-level security if the load test allows; axe-core on the main screens and a manual check per release | Accepted |
 | [24](adr-24-security-open-items.md) | The open security items that need a decision (ASVS level 2) | Signed images with the release, a Keycloak theme with a strength meter, pepper and OTP notice accepted, a recent login (A8), a key plugin for Vault transit, rate limit (A9) and Prometheus alerts, export and pseudonymised removal of a user, attachment quota, type by content and clamd hook, requests checked against the OpenAPI | Accepted |
 | [25](adr-25-documentation-demo-release.md) | Documentation, public demo and the 1.0 release | User and administrator guides in Markdown; a production Compose file with a realm template, attached to the release; a public demo reset each night with shared accounts; release candidates and a checklist for 1.0 | Accepted |
+| [26](adr-26-backlog-as-search-table.md) | The backlog as a search table (supersedes the backlog of ADR-15) | The backlog screen is an ODQL query and a `serverDataTable` grouped by sprint; the sprint in the rows, columns and groups of the search; row actions «Move to sprint…», «To the top», «To the bottom»; the order by drag stays on the boards; bulk moves with Q28 | Proposed |
 
 ## Requests to the dependencies
 
