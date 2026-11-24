@@ -8,6 +8,46 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+## [1.0.0-rc.2] - 2026-11-24
+
+The second candidate: the backlog as a table, the screens on Quadrava 0.19.1, and the result of the manual
+accessibility check of rc.1.
+
+### Added
+
+- **Backlog**: a search of the issues of the sprints not completed and of the backlog, in a table grouped by sprint,
+  with the query, the sort, the filters and the paging of the search (ADR-26). Each row moves to a sprint, to the top
+  or to the bottom of the order; the chosen rows move to a sprint together. `POST /api/projects/{key}/backlog/plan`
+  plans up to 200 issues at once, all or none.
+- **Search**: the column and the group Sprint.
+- **Screens**: an icon on every button and action; the issue page in tabs (General, Planning, Next steps), its
+  activity in a card of its own, its description across the whole line, its heading with the key of the issue.
+- **Demo**: the public demo at demo.ods.logicwarez.com, with alerts through an external monitor
+  (`deploy/demo`).
+
+### Changed
+
+- Quadrava 0.19.1 (runtime image and CLI): light group rows and selected rows in the tables, the forwarded headers of
+  a proxy with `QUADRAVA_TRUST_FORWARDED` ([installation](docs/admin/installation.md)).
+- A change of plan of an issue is in the search index when the move answers, so the backlog shows it at once.
+
+### Removed
+
+- `GET /api/projects/{key}/backlog/cards`, the cards of the backlog board, replaced by the search (ADR-26). The
+  candidates come before the promise of 1.x on the API ([docs/api.md](docs/api.md)).
+
+### Accessibility
+
+The manual check of rc.1 ([docs/accessibility.md](docs/accessibility.md)) fails on points that are in the components
+of Quadrava and are asked there: the sorting and the filters of the tables by keyboard (Q31), the focus ring and the
+focus after a dialog (Q32), names and states for screen readers (Q33) and the colours of the dark theme (Q34). The
+light theme, reflow at 320 px, the board and the backlog by keyboard pass.
+
+### Upgrading
+
+From 1.0.0-rc.1: put the digest of the new image in `.env`, then `./odt.sh up` and `./odt.sh publish-ui`
+([upgrades-and-backups.md](docs/admin/upgrades-and-backups.md)). No change of data and no new setting.
+
 ## [1.0.0-rc.1] - 2026-11-23
 
 The first candidate of the first release, 1.0.0, planned for 28 May 2027. What it holds, by area:
