@@ -31,9 +31,9 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   of 4 columns (`columns`, `span`), so that its description takes the whole width. In a flow form a field on a line of
   its own stops at 560px in Quadrava 0.18.0. The form goes back to flow when Quadrava lets such a field take the whole
   line (Q26).
-- **Issue page**: `issue-detail` has the tabs General (the form and its buttons), Planning and Next steps. Below them
-  is a `section` without a title, a card, which holds the tabs of the activity: comments, attachments, links,
-  watchers, history.
+- **Issue page**: `issue-detail` has the tabs General (the form and its buttons), Planning and Next steps, in a card
+  (a `section` without a title). Below it is a second card, which holds the tabs of the activity: comments,
+  attachments, links, watchers, history.
 - **Validation**: `quadrava validate ui` (the Quadrava CLI, in CI) checks the documents as the runtime reads them:
   schemas, references to data sources, CEL expressions, themes and catalogues. In the back end, `SchemaValidationTest`
   checks them with the validator of the registry and `UiCataloguesTest` that every `t('key')` is in both catalogues.

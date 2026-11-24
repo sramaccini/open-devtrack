@@ -42,7 +42,7 @@ of its workflow ([Workflows](workflows.md)).
 
 ![An issue: its tabs General, Planning and Next steps, and its comments below](images/issue-detail.png)
 
-The screen of an issue has three tabs at the top:
+The screen of an issue has two boxes. The first has three tabs:
 
 - **General**: its fields, which the developers and admins change and save with «Save». If someone else saved the
   issue in the meantime, saving says so: reload it and make the change again, so that no change is lost. Below the
@@ -58,7 +58,7 @@ The screen of an issue has three tabs at the top:
 - **Next steps**: the transitions of the workflow that can run now, each with the status it leads to. «Move» runs
   one. A transition with a condition that is not met is not listed.
 
-Below them, in a box, are the tabs «Comments», «Attachments», «Links», «Watchers» and «History».
+The second, below it, has the tabs «Comments», «Attachments», «Links», «Watchers» and «History».
 
 ### Comments and mentions
 
