@@ -89,7 +89,7 @@ With NVDA and Firefox (Windows) or VoiceOver and Safari (macOS):
 
 | Release | Date | Result |
 | --- | --- | --- |
-| 1.0.0-rc.1 | 24 November 2026 | Failed: four requests to Quadrava (Q31 to Q34); one issue here, #41, fixed; the screen reader lines are not done yet. Details below |
+| 1.0.0-rc.1 | 24 November 2026 | Failed: four requests to Quadrava (Q31 to Q34); one issue here, #41, fixed; the screen reader lines are not done yet. Details below. With Quadrava 0.20.0 Q31 to Q34 pass; the badges of the board in the dark theme remain (Q35) |
 
 #### 1.0.0-rc.1, 24 November 2026
 
@@ -132,6 +132,25 @@ Contrast and colour:
   the active tab and the processing tags are NG-ZORRO blue (white on them 4.20:1, the tags 4.1:1) and danger buttons
   2.31:1.
 - Passed: statuses, priorities and the cards of the board always have a text.
+
+#### Quadrava 0.20.0, 24 November 2026
+
+The failed lines checked again on `main` with Quadrava 0.20.0, which releases Q31 to Q34, in the development stack, in
+Italian and in both themes:
+
+- Passed, Q31: the titles of the sortable columns are buttons (Enter sorts, `aria-sort` follows) and each filter is a
+  button «Filter <column>»; Enter opens its panel with the focus on its field, Escape closes it with the focus back.
+- Passed, Q32: a teal ring (`--lc-focus-ring`, #0F766E) on buttons, links, sorts and filters; after Escape the focus is
+  back on the «Sposta nello sprint…» that opened the dialog.
+- Passed, Q33: the selection checkboxes are named («Select WEB-2», «Select the visible rows»), the three required
+  fields of a new issue carry `aria-required`, an error is linked to its field (`aria-describedby`, `aria-invalid`),
+  the close button of a dialog is «Chiudi», and the browser tab reads «Backlog · OpenDevTrack».
+- Passed, Q34: the dark theme has its own colours and background, and no text below 4.5:1 on ten screens (dashboard,
+  projects, a project, issues, an issue, a new issue, backlog, search, webhooks, notification settings).
+- Failed, **Q35** (#42): on the board in the dark theme the badges of the cards (type, priority) are white on the light
+  text colours of the theme, 2.56:1 and 2.77:1; in the light theme they pass.
+- Found along the way, **Q36** (#43): the chosen theme is not remembered, so a reload or the next sign-in shows the
+  light theme again.
 
 ## Where a problem goes
 

@@ -18,7 +18,7 @@ if (!answer.ok) {
 }
 const { access_token: token } = await answer.json();
 
-const cli = spawnSync('npx', ['--yes', '@sramaccini/quadrava-cli@0.19.1', 'publish', 'ui',
+const cli = spawnSync('npx', ['--yes', '@sramaccini/quadrava-cli@0.20.0', 'publish', 'ui',
   '--registry', 'http://backend:8080', '--app', 'opendevtrack', '--env', 'production'],
   { stdio: 'inherit', env: { ...process.env, QUADRAVA_TOKEN: token } });
 process.exit(cli.status ?? 1);
