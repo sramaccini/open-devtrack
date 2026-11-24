@@ -42,22 +42,23 @@ of its workflow ([Workflows](workflows.md)).
 
 ![An issue, with its next steps and comments](images/issue-detail.png)
 
-The screen of an issue has, from the top:
+The screen of an issue has three tabs at the top:
 
-- **its fields**, which the developers and admins change and save with «Save». If someone else saved the issue in
-  the meantime, saving says so: reload it and make the change again, so that no change is lost;
-- **the buttons**:
+- **General**: its fields, which the developers and admins change and save with «Save». If someone else saved the
+  issue in the meantime, saving says so: reload it and make the change again, so that no change is lost. Below the
+  fields are the buttons:
   - «Link»: link it to another issue;
   - «Watch» or «Stop watching»;
   - «Add watcher»;
   - «All issues»;
   - «Delete»: for the admins of the project. Deleting cannot be undone, and the comments, attachments and links of
-    the issue go with it;
+    the issue go with it.
 - **Planning**: its story points (0 to 999, empty when not estimated) and the sprint it is planned in. «Save» saves
-  them;
+  them.
 - **Next steps**: the transitions of the workflow that can run now, each with the status it leads to. «Move» runs
-  one. A transition with a condition that is not met is not listed;
-- **the tabs** «Comments», «Attachments», «Links», «Watchers» and «History».
+  one. A transition with a condition that is not met is not listed.
+
+Below them, in a box, are the tabs «Comments», «Attachments», «Links», «Watchers» and «History».
 
 ### Comments and mentions
 

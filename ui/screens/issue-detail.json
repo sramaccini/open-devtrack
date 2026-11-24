@@ -95,822 +95,249 @@
   },
   "components": [
     {
-      "id": "issue-form",
-      "type": "form",
-      "layout": "flow",
-      "source": "issue",
-      "fields": [
-        {
-          "name": "key",
-          "type": "text",
-          "label": "{{ t('issues.key', 'Key') }}",
-          "width": "xs",
-          "readOnlyIf": "{{true}}"
-        },
-        {
-          "name": "status",
-          "type": "select",
-          "label": "{{ t('issues.status', 'Status') }}",
-          "width": "s",
-          "options": [
-            "todo",
-            "in_progress",
-            "done"
-          ],
-          "optionKey": "values.status",
-          "readOnlyIf": "{{true}}"
-        },
-        {
-          "name": "reporter",
-          "type": "text",
-          "label": "{{ t('issues.reporter', 'Reporter') }}",
-          "width": "m",
-          "readOnlyIf": "{{true}}"
-        },
-        {
-          "name": "summary",
-          "type": "text",
-          "label": "{{ t('issues.summary', 'Summary') }}",
-          "width": "l",
-          "required": true,
-          "maxLength": 255,
-          "readOnlyIf": "{{!form._perm.edit}}"
-        },
-        {
-          "name": "type",
-          "type": "select",
-          "label": "{{ t('issues.type', 'Type') }}",
-          "width": "s",
-          "options": [
-            "task",
-            "bug",
-            "story",
-            "epic"
-          ],
-          "optionKey": "values.issue_type",
-          "required": true,
-          "readOnlyIf": "{{!form._perm.edit}}"
-        },
-        {
-          "name": "priority",
-          "type": "select",
-          "label": "{{ t('issues.priority', 'Priority') }}",
-          "width": "s",
-          "options": [
-            "lowest",
-            "low",
-            "medium",
-            "high",
-            "highest"
-          ],
-          "optionKey": "values.priority",
-          "required": true,
-          "readOnlyIf": "{{!form._perm.edit}}"
-        },
-        {
-          "name": "assignee",
-          "type": "lookup",
-          "label": "{{ t('issues.assignee', 'Assignee') }}",
-          "width": "m",
-          "tooltip": "{{ t('issues.assignee_help', 'A member of the project') }}",
-          "readOnlyIf": "{{!form._perm.edit}}",
-          "lookup": {
-            "source": "assignees",
-            "valueField": "username",
-            "labelField": "username",
-            "minChars": 0
-          }
-        },
-        {
-          "name": "reviewer",
-          "type": "lookup",
-          "label": "{{ t('issues.reviewer', 'Reviewer') }}",
-          "width": "m",
-          "tooltip": "{{ t('issues.reviewer_help', 'A member of the project other than the assignee') }}",
-          "lookup": {
-            "source": "assignees",
-            "valueField": "username",
-            "labelField": "username",
-            "minChars": 0
-          },
-          "readOnlyIf": "{{!form._perm.edit}}"
-        },
-        {
-          "name": "dueOn",
-          "type": "date",
-          "label": "{{ t('issues.due_on', 'Due date') }}",
-          "width": "s",
-          "tooltip": "{{ t('issues.due_on_help', 'The day it should be done; past it, and not done, the issue is overdue') }}",
-          "readOnlyIf": "{{!form._perm.edit}}"
-        },
-        {
-          "name": "labels",
-          "type": "tags",
-          "label": "{{ t('issues.labels', 'Labels') }}",
-          "maxItems": 20,
-          "suggest": {
-            "source": "labels",
-            "valueField": "name"
-          },
-          "tooltip": "{{ t('issues.labels_help', 'Lower case letters, digits, dots, dashes or underscores; Enter or a comma adds one') }}",
-          "readOnlyIf": "{{!form._perm.edit}}"
-        },
-        {
-          "name": "description",
-          "type": "richtext",
-          "label": "{{ t('issues.description', 'Description') }}",
-          "rows": 8,
-          "readOnlyIf": "{{!form._perm.edit}}"
-        }
-      ],
-      "actions": [
-        {
-          "id": "btn-save",
-          "label": "{{ t('common.save', 'Save') }}",
-          "visibleIf": "{{form._perm.edit}}",
-          "onClick": [
-            {
-              "call": "save",
-              "onError": [
-                {
-                  "if": "{{error.fields > 0}}",
-                  "then": [
-                    {
-                      "toast": "{{ t('common.check_fields', 'Check the highlighted fields') }}"
-                    }
-                  ],
-                  "else": [
-                    {
-                      "if": "{{error.status == 412}}",
-                      "then": [
-                        {
-                          "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
-                        }
-                      ],
-                      "else": [
-                        {
-                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "refresh": "issue"
-            },
-            {
-              "refresh": "history"
-            },
-            {
-              "refresh": "transitions"
-            },
-            {
-              "refresh": "fields"
-            },
-            {
-              "toast": "{{ t('common.saved', 'Saved') }}"
-            }
-          ]
-        },
-        {
-          "id": "btn-link",
-          "label": "{{ t('issues.add_link', 'Link') }}",
-          "visibleIf": "{{form._perm.edit}}",
-          "onClick": [
-            {
-              "dialog": {
-                "title": "{{ t('issues.add_link_title', 'Link to another issue') }}",
-                "submitLabel": "{{ t('issues.add_link', 'Link') }}",
-                "initial": {
-                  "relation": "relates"
-                },
-                "fields": [
-                  {
-                    "name": "relation",
-                    "type": "select",
-                    "label": "{{ t('issues.relation', 'Relation') }}",
-                    "required": true,
-                    "options": [
-                      "blocks",
-                      "blocked_by",
-                      "relates",
-                      "duplicates",
-                      "duplicated_by"
-                    ],
-                    "optionKey": "values.relation"
-                  },
-                  {
-                    "name": "issue",
-                    "type": "lookup",
-                    "label": "{{ t('issues.linked_issue', 'Issue') }}",
-                    "tooltip": "{{ t('issues.linked_issue_help', 'Its key or words of its summary') }}",
-                    "required": true,
-                    "lookup": {
-                      "source": "linkCandidates",
-                      "valueField": "key",
-                      "labelField": "label",
-                      "minChars": 0
-                    }
-                  }
-                ],
-                "onSubmit": [
-                  {
-                    "call": "addLink",
-                    "onError": [
-                      {
-                        "if": "{{error.status == 409}}",
-                        "then": [
-                          {
-                            "toast": "{{ t('issues.already_linked', 'The issues are already linked this way') }}"
-                          }
-                        ],
-                        "else": [
-                          {
-                            "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "refresh": "links"
-            },
-            {
-              "refresh": "history"
-            }
-          ]
-        },
-        {
-          "id": "btn-watch",
-          "label": "{{ t('issues.watch', 'Watch') }}",
-          "visibleIf": "{{!form.watching}}",
-          "onClick": [
-            {
-              "call": "watch",
-              "onError": [
-                {
-                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                }
-              ]
-            },
-            {
-              "refresh": "issue"
-            },
-            {
-              "refresh": "watchers"
-            },
-            {
-              "toast": "{{ t('issues.watching', 'You are watching this issue') }}"
-            }
-          ]
-        },
-        {
-          "id": "btn-unwatch",
-          "label": "{{ t('issues.unwatch', 'Stop watching') }}",
-          "visibleIf": "{{form.watching}}",
-          "onClick": [
-            {
-              "call": "unwatch",
-              "args": {
-                "username": "me"
-              },
-              "onError": [
-                {
-                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                }
-              ]
-            },
-            {
-              "refresh": "issue"
-            },
-            {
-              "refresh": "watchers"
-            },
-            {
-              "toast": "{{ t('issues.not_watching', 'You are no longer watching this issue') }}"
-            }
-          ]
-        },
-        {
-          "id": "btn-add-watcher",
-          "label": "{{ t('issues.add_watcher', 'Add watcher') }}",
-          "visibleIf": "{{form._perm.edit}}",
-          "onClick": [
-            {
-              "dialog": {
-                "title": "{{ t('issues.add_watcher', 'Add watcher') }}",
-                "submitLabel": "{{ t('projects.add', 'Add') }}",
-                "fields": [
-                  {
-                    "name": "username",
-                    "type": "lookup",
-                    "label": "{{ t('issues.watcher', 'User') }}",
-                    "tooltip": "{{ t('issues.assignee_help', 'A member of the project') }}",
-                    "required": true,
-                    "lookup": {
-                      "source": "assignees",
-                      "valueField": "username",
-                      "labelField": "username",
-                      "minChars": 0
-                    }
-                  }
-                ],
-                "onSubmit": [
-                  {
-                    "call": "addWatcher",
-                    "onError": [
-                      {
-                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "refresh": "watchers"
-            },
-            {
-              "refresh": "issue"
-            }
-          ]
-        },
-        {
-          "id": "btn-back",
-          "label": "{{ t('issues.all', 'All issues') }}",
-          "onClick": [
-            {
-              "navigate": "issue-list",
-              "params": {
-                "key": "{{params.key}}"
-              }
-            }
-          ]
-        },
-        {
-          "id": "btn-delete",
-          "label": "{{ t('issues.delete', 'Delete') }}",
-          "visibleIf": "{{form._perm.delete}}",
-          "onClick": [
-            {
-              "confirm": "{{ t('issues.delete_confirm', 'Delete {key}? It cannot be undone.', {'key': form.key}) }}"
-            },
-            {
-              "call": "remove",
-              "onError": [
-                {
-                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                }
-              ]
-            },
-            {
-              "toast": "{{ t('issues.deleted', 'Issue deleted') }}"
-            },
-            {
-              "navigate": "issue-list",
-              "params": {
-                "key": "{{params.key}}"
-              }
-            }
-          ]
-        }
-      ],
-      "fieldsFrom": {
-        "source": "fields",
-        "into": "custom",
-        "nameField": "key",
-        "types": {
-          "text": {
-            "name": "text",
-            "type": "text",
-            "width": "l",
-            "maxLength": 1000,
-            "readOnlyIf": "{{!form._perm.edit}}"
-          },
-          "number": {
-            "name": "number",
-            "type": "number",
-            "width": "s",
-            "readOnlyIf": "{{!form._perm.edit}}"
-          },
-          "date": {
-            "name": "date",
-            "type": "date",
-            "width": "s",
-            "readOnlyIf": "{{!form._perm.edit}}"
-          },
-          "checkbox": {
-            "name": "checkbox",
-            "type": "checkbox",
-            "readOnlyIf": "{{!form._perm.edit}}"
-          },
-          "select": {
-            "name": "select",
-            "type": "select",
-            "width": "m",
-            "options": [],
-            "readOnlyIf": "{{!form._perm.edit}}"
-          },
-          "multiselect": {
-            "name": "multiselect",
-            "type": "multiselect",
-            "options": [],
-            "readOnlyIf": "{{!form._perm.edit}}"
-          },
-          "user": {
-            "name": "user",
-            "type": "lookup",
-            "width": "m",
-            "lookup": {
-              "source": "assignees",
-              "valueField": "username",
-              "labelField": "username",
-              "minChars": 0
-            },
-            "readOnlyIf": "{{!form._perm.edit}}"
-          }
-        }
-      }
-    },
-    {
-      "id": "plan-title",
-      "type": "text",
-      "style": "heading",
-      "text": "{{ t('agile.planning', 'Planning') }}"
-    },
-    {
-      "id": "plan-form",
-      "type": "form",
-      "layout": "flow",
-      "source": "plan",
-      "fields": [
-        {
-          "name": "points",
-          "type": "number",
-          "label": "{{ t('agile.points', 'Story points') }}",
-          "width": "xs",
-          "readOnlyIf": "{{!form._perm.edit}}",
-          "tooltip": "{{ t('agile.points_help', 'From 0 to 999; empty when not estimated') }}"
-        },
-        {
-          "name": "sprint",
-          "type": "text",
-          "label": "{{ t('agile.sprint', 'Sprint') }}",
-          "width": "m",
-          "readOnlyIf": "{{true}}",
-          "tooltip": "{{ t('agile.sprint_help', 'Planned from the backlog of the project; empty for the backlog') }}"
-        }
-      ],
-      "actions": [
-        {
-          "id": "btn-save-plan",
-          "label": "{{ t('common.save', 'Save') }}",
-          "visibleIf": "{{form._perm.edit}}",
-          "onClick": [
-            {
-              "call": "savePlan",
-              "onError": [
-                {
-                  "if": "{{error.status == 400}}",
-                  "then": [
-                    {
-                      "toast": "{{ t('agile.points_invalid', 'The story points are from 0 to 999') }}"
-                    }
-                  ],
-                  "else": [
-                    {
-                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "refresh": "plan"
-            },
-            {
-              "toast": "{{ t('common.saved', 'Saved') }}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "workflow-title",
-      "type": "text",
-      "style": "heading",
-      "text": "{{ t('issues.next_steps', 'Next steps') }}"
-    },
-    {
-      "id": "transition-table",
-      "type": "table",
-      "source": "transitions",
-      "columns": [
-        {
-          "field": "code",
-          "label": "{{ t('issues.transition', 'Transition') }}",
-          "valueKey": "values.transition"
-        },
-        {
-          "field": "to",
-          "label": "{{ t('issues.to_status', 'To status') }}",
-          "valueKey": "values.status"
-        }
-      ],
-      "rowActions": [
-        {
-          "id": "btn-move",
-          "label": "{{ t('issues.move', 'Move') }}",
-          "onClick": [
-            {
-              "call": "move",
-              "args": {
-                "transition": "{{row.code}}",
-                "version": "{{row.version}}"
-              },
-              "onError": [
-                {
-                  "if": "{{error.status == 409}}",
-                  "then": [
-                    {
-                      "toast": "{{ t('issues.conditions_not_met', 'The conditions of this step are not met') }}"
-                    }
-                  ],
-                  "else": [
-                    {
-                      "if": "{{error.status == 412}}",
-                      "then": [
-                        {
-                          "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
-                        }
-                      ],
-                      "else": [
-                        {
-                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "refresh": "issue"
-            },
-            {
-              "refresh": "transitions"
-            },
-            {
-              "refresh": "history"
-            },
-            {
-              "toast": "{{ t('issues.moved', 'Status changed') }}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "issue-tabs",
+      "id": "issue-main-tabs",
       "type": "tabs",
       "tabs": [
         {
-          "id": "tab-comments",
-          "label": "{{ t('issues.comments', 'Comments') }}",
+          "id": "tab-general",
+          "label": "{{ t('issues.general', 'General') }}",
           "components": [
             {
-              "id": "comment-thread",
-              "type": "comments",
-              "source": "comments",
-              "textField": "body",
-              "authorField": "author",
-              "dateField": "createdAt",
-              "postIf": "{{ data.issue._perm.comment }}",
-              "mentions": {
-                "source": "assignees",
-                "valueField": "username",
-                "labelField": "username"
-              },
-              "onPost": [
+              "id": "issue-form",
+              "type": "form",
+              "columns": 4,
+              "source": "issue",
+              "fields": [
                 {
-                  "call": "postComment",
-                  "onError": [
-                    {
-                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                    }
-                  ]
+                  "name": "key",
+                  "type": "text",
+                  "label": "{{ t('issues.key', 'Key') }}",
+                  "readOnlyIf": "{{true}}"
                 },
                 {
-                  "refresh": "comments"
-                }
-              ],
-              "editIf": "{{ row._perm.edit }}",
-              "onEdit": [
+                  "name": "status",
+                  "type": "select",
+                  "label": "{{ t('issues.status', 'Status') }}",
+                  "options": [
+                    "todo",
+                    "in_progress",
+                    "done"
+                  ],
+                  "optionKey": "values.status",
+                  "readOnlyIf": "{{true}}"
+                },
                 {
-                  "call": "updateComment",
-                  "args": {
-                    "id": "{{row.id}}"
+                  "name": "reporter",
+                  "type": "text",
+                  "label": "{{ t('issues.reporter', 'Reporter') }}",
+                  "readOnlyIf": "{{true}}"
+                },
+                {
+                  "name": "summary",
+                  "type": "text",
+                  "label": "{{ t('issues.summary', 'Summary') }}",
+                  "required": true,
+                  "maxLength": 255,
+                  "readOnlyIf": "{{!form._perm.edit}}",
+                  "span": 2
+                },
+                {
+                  "name": "type",
+                  "type": "select",
+                  "label": "{{ t('issues.type', 'Type') }}",
+                  "options": [
+                    "task",
+                    "bug",
+                    "story",
+                    "epic"
+                  ],
+                  "optionKey": "values.issue_type",
+                  "required": true,
+                  "readOnlyIf": "{{!form._perm.edit}}"
+                },
+                {
+                  "name": "priority",
+                  "type": "select",
+                  "label": "{{ t('issues.priority', 'Priority') }}",
+                  "options": [
+                    "lowest",
+                    "low",
+                    "medium",
+                    "high",
+                    "highest"
+                  ],
+                  "optionKey": "values.priority",
+                  "required": true,
+                  "readOnlyIf": "{{!form._perm.edit}}"
+                },
+                {
+                  "name": "assignee",
+                  "type": "lookup",
+                  "label": "{{ t('issues.assignee', 'Assignee') }}",
+                  "tooltip": "{{ t('issues.assignee_help', 'A member of the project') }}",
+                  "readOnlyIf": "{{!form._perm.edit}}",
+                  "lookup": {
+                    "source": "assignees",
+                    "valueField": "username",
+                    "labelField": "username",
+                    "minChars": 0
+                  }
+                },
+                {
+                  "name": "reviewer",
+                  "type": "lookup",
+                  "label": "{{ t('issues.reviewer', 'Reviewer') }}",
+                  "tooltip": "{{ t('issues.reviewer_help', 'A member of the project other than the assignee') }}",
+                  "lookup": {
+                    "source": "assignees",
+                    "valueField": "username",
+                    "labelField": "username",
+                    "minChars": 0
                   },
-                  "onError": [
-                    {
-                      "if": "{{error.status == 412}}",
-                      "then": [
-                        {
-                          "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
-                        }
-                      ],
-                      "else": [
-                        {
-                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                        }
-                      ]
-                    }
-                  ]
+                  "readOnlyIf": "{{!form._perm.edit}}"
                 },
                 {
-                  "refresh": "comments"
-                }
-              ],
-              "deleteIf": "{{ row._perm.delete }}",
-              "onDelete": [
-                {
-                  "confirm": "{{ t('issues.delete_comment_confirm', 'Delete this comment?') }}"
+                  "name": "dueOn",
+                  "type": "date",
+                  "label": "{{ t('issues.due_on', 'Due date') }}",
+                  "tooltip": "{{ t('issues.due_on_help', 'The day it should be done; past it, and not done, the issue is overdue') }}",
+                  "readOnlyIf": "{{!form._perm.edit}}"
                 },
                 {
-                  "call": "removeComment",
-                  "args": {
-                    "id": "{{row.id}}"
+                  "name": "labels",
+                  "type": "tags",
+                  "label": "{{ t('issues.labels', 'Labels') }}",
+                  "maxItems": 20,
+                  "suggest": {
+                    "source": "labels",
+                    "valueField": "name"
                   },
-                  "onError": [
-                    {
-                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                    }
-                  ]
+                  "tooltip": "{{ t('issues.labels_help', 'Lower case letters, digits, dots, dashes or underscores; Enter or a comma adds one') }}",
+                  "readOnlyIf": "{{!form._perm.edit}}",
+                  "span": 2
                 },
                 {
-                  "refresh": "comments"
+                  "name": "description",
+                  "type": "richtext",
+                  "label": "{{ t('issues.description', 'Description') }}",
+                  "rows": 8,
+                  "readOnlyIf": "{{!form._perm.edit}}",
+                  "span": 4
                 }
               ],
-              "editedField": "edited"
-            }
-          ]
-        },
-        {
-          "id": "tab-attachments",
-          "label": "{{ t('issues.attachments', 'Attachments') }}",
-          "components": [
-            {
-              "id": "attachment-upload",
-              "type": "input",
-              "visibleIf": "{{ data.issue._perm.attach }}",
-              "field": {
-                "name": "attachment",
-                "type": "file",
-                "label": "{{ t('issues.attach_file', 'Attach a file') }}",
-                "upload": "uploadAttachment",
-                "maxSizeKb": 25600
-              },
-              "onChange": [
+              "actions": [
                 {
-                  "refresh": "attachments"
-                },
-                {
-                  "refresh": "history"
-                }
-              ]
-            },
-            {
-              "id": "attachment-limit-note",
-              "type": "text",
-              "visibleIf": "{{ data.issue._perm.attach }}",
-              "text": "{{ t('issues.attachment_limit', 'Up to 25 MB per file') }}"
-            },
-            {
-              "id": "attachment-table",
-              "type": "table",
-              "source": "attachments",
-              "columns": [
-                {
-                  "field": "filename",
-                  "label": "{{ t('issues.attachment_name', 'File') }}",
-                  "href": "/api/issues/{{ params.issue }}/attachments/{{ row.id }}/content",
-                  "tooltip": "{{ t('issues.attachment_download', 'Download') }}"
-                },
-                {
-                  "field": "size",
-                  "label": "{{ t('issues.attachment_size', 'Size (bytes)') }}",
-                  "format": "number",
-                  "decimals": 0
-                },
-                {
-                  "field": "uploadedBy",
-                  "label": "{{ t('issues.attachment_by', 'Added by') }}"
-                },
-                {
-                  "field": "uploadedAt",
-                  "label": "{{ t('issues.attachment_at', 'When') }}",
-                  "format": "datetime"
-                }
-              ],
-              "rowActions": [
-                {
-                  "id": "btn-remove-attachment",
-                  "label": "{{ t('issues.remove_link', 'Remove') }}",
-                  "visibleIf": "{{row._perm.delete}}",
+                  "id": "btn-save",
+                  "label": "{{ t('common.save', 'Save') }}",
+                  "visibleIf": "{{form._perm.edit}}",
                   "onClick": [
                     {
-                      "confirm": "{{ t('issues.remove_attachment_confirm', 'Remove {name}?', {'name': row.filename}) }}"
-                    },
-                    {
-                      "call": "removeAttachment",
-                      "args": {
-                        "id": "{{row.id}}"
-                      },
+                      "call": "save",
                       "onError": [
                         {
-                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                          "if": "{{error.fields > 0}}",
+                          "then": [
+                            {
+                              "toast": "{{ t('common.check_fields', 'Check the highlighted fields') }}"
+                            }
+                          ],
+                          "else": [
+                            {
+                              "if": "{{error.status == 412}}",
+                              "then": [
+                                {
+                                  "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                }
+                              ],
+                              "else": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
+                            }
+                          ]
                         }
                       ]
                     },
                     {
-                      "refresh": "attachments"
+                      "refresh": "issue"
                     },
                     {
                       "refresh": "history"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "tab-links",
-          "label": "{{ t('issues.links', 'Links') }}",
-          "components": [
-            {
-              "id": "link-table",
-              "type": "table",
-              "source": "links",
-              "columns": [
-                {
-                  "field": "relation",
-                  "label": "{{ t('issues.relation', 'Relation') }}",
-                  "valueKey": "values.relation"
-                },
-                {
-                  "field": "key",
-                  "label": "{{ t('issues.key', 'Key') }}",
-                  "onClick": [
-                    {
-                      "navigate": "issue-detail",
-                      "params": {
-                        "key": "{{row.project}}",
-                        "issue": "{{row.key}}"
-                      }
-                    }
-                  ]
-                },
-                {
-                  "field": "summary",
-                  "label": "{{ t('issues.summary', 'Summary') }}"
-                },
-                {
-                  "field": "status",
-                  "label": "{{ t('issues.status', 'Status') }}",
-                  "format": "badge",
-                  "badges": {
-                    "todo": "neutral",
-                    "in_progress": "primary",
-                    "done": "success"
-                  },
-                  "valueKey": "values.status"
-                }
-              ],
-              "rowActions": [
-                {
-                  "id": "btn-remove-link",
-                  "label": "{{ t('issues.remove_link', 'Remove') }}",
-                  "visibleIf": "{{row._perm.delete}}",
-                  "onClick": [
-                    {
-                      "confirm": "{{ t('issues.remove_link_confirm', 'Remove the link to {key}?', {'key': row.key}) }}"
                     },
                     {
-                      "call": "removeLink",
-                      "args": {
-                        "id": "{{row.id}}"
-                      },
-                      "onError": [
-                        {
-                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                        }
-                      ]
+                      "refresh": "transitions"
+                    },
+                    {
+                      "refresh": "fields"
+                    },
+                    {
+                      "toast": "{{ t('common.saved', 'Saved') }}"
+                    }
+                  ]
+                },
+                {
+                  "id": "btn-link",
+                  "label": "{{ t('issues.add_link', 'Link') }}",
+                  "visibleIf": "{{form._perm.edit}}",
+                  "onClick": [
+                    {
+                      "dialog": {
+                        "title": "{{ t('issues.add_link_title', 'Link to another issue') }}",
+                        "submitLabel": "{{ t('issues.add_link', 'Link') }}",
+                        "initial": {
+                          "relation": "relates"
+                        },
+                        "fields": [
+                          {
+                            "name": "relation",
+                            "type": "select",
+                            "label": "{{ t('issues.relation', 'Relation') }}",
+                            "required": true,
+                            "options": [
+                              "blocks",
+                              "blocked_by",
+                              "relates",
+                              "duplicates",
+                              "duplicated_by"
+                            ],
+                            "optionKey": "values.relation"
+                          },
+                          {
+                            "name": "issue",
+                            "type": "lookup",
+                            "label": "{{ t('issues.linked_issue', 'Issue') }}",
+                            "tooltip": "{{ t('issues.linked_issue_help', 'Its key or words of its summary') }}",
+                            "required": true,
+                            "lookup": {
+                              "source": "linkCandidates",
+                              "valueField": "key",
+                              "labelField": "label",
+                              "minChars": 0
+                            }
+                          }
+                        ],
+                        "onSubmit": [
+                          {
+                            "call": "addLink",
+                            "onError": [
+                              {
+                                "if": "{{error.status == 409}}",
+                                "then": [
+                                  {
+                                    "toast": "{{ t('issues.already_linked', 'The issues are already linked this way') }}"
+                                  }
+                                ],
+                                "else": [
+                                  {
+                                    "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
                     },
                     {
                       "refresh": "links"
@@ -919,40 +346,40 @@
                       "refresh": "history"
                     }
                   ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "tab-watchers",
-          "label": "{{ t('issues.watchers', 'Watchers') }}",
-          "components": [
-            {
-              "id": "watcher-table",
-              "type": "table",
-              "source": "watchers",
-              "columns": [
-                {
-                  "field": "username",
-                  "label": "{{ t('issues.watcher', 'User') }}"
                 },
                 {
-                  "field": "since",
-                  "label": "{{ t('issues.since', 'Since') }}",
-                  "format": "datetime"
-                }
-              ],
-              "rowActions": [
+                  "id": "btn-watch",
+                  "label": "{{ t('issues.watch', 'Watch') }}",
+                  "visibleIf": "{{!form.watching}}",
+                  "onClick": [
+                    {
+                      "call": "watch",
+                      "onError": [
+                        {
+                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                        }
+                      ]
+                    },
+                    {
+                      "refresh": "issue"
+                    },
+                    {
+                      "refresh": "watchers"
+                    },
+                    {
+                      "toast": "{{ t('issues.watching', 'You are watching this issue') }}"
+                    }
+                  ]
+                },
                 {
-                  "id": "btn-remove-watcher",
-                  "label": "{{ t('issues.remove_link', 'Remove') }}",
-                  "visibleIf": "{{row._perm.delete}}",
+                  "id": "btn-unwatch",
+                  "label": "{{ t('issues.unwatch', 'Stop watching') }}",
+                  "visibleIf": "{{form.watching}}",
                   "onClick": [
                     {
                       "call": "unwatch",
                       "args": {
-                        "username": "{{row.username}}"
+                        "username": "me"
                       },
                       "onError": [
                         {
@@ -961,10 +388,211 @@
                       ]
                     },
                     {
+                      "refresh": "issue"
+                    },
+                    {
+                      "refresh": "watchers"
+                    },
+                    {
+                      "toast": "{{ t('issues.not_watching', 'You are no longer watching this issue') }}"
+                    }
+                  ]
+                },
+                {
+                  "id": "btn-add-watcher",
+                  "label": "{{ t('issues.add_watcher', 'Add watcher') }}",
+                  "visibleIf": "{{form._perm.edit}}",
+                  "onClick": [
+                    {
+                      "dialog": {
+                        "title": "{{ t('issues.add_watcher', 'Add watcher') }}",
+                        "submitLabel": "{{ t('projects.add', 'Add') }}",
+                        "fields": [
+                          {
+                            "name": "username",
+                            "type": "lookup",
+                            "label": "{{ t('issues.watcher', 'User') }}",
+                            "tooltip": "{{ t('issues.assignee_help', 'A member of the project') }}",
+                            "required": true,
+                            "lookup": {
+                              "source": "assignees",
+                              "valueField": "username",
+                              "labelField": "username",
+                              "minChars": 0
+                            }
+                          }
+                        ],
+                        "onSubmit": [
+                          {
+                            "call": "addWatcher",
+                            "onError": [
+                              {
+                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
                       "refresh": "watchers"
                     },
                     {
                       "refresh": "issue"
+                    }
+                  ]
+                },
+                {
+                  "id": "btn-back",
+                  "label": "{{ t('issues.all', 'All issues') }}",
+                  "onClick": [
+                    {
+                      "navigate": "issue-list",
+                      "params": {
+                        "key": "{{params.key}}"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "btn-delete",
+                  "label": "{{ t('issues.delete', 'Delete') }}",
+                  "visibleIf": "{{form._perm.delete}}",
+                  "onClick": [
+                    {
+                      "confirm": "{{ t('issues.delete_confirm', 'Delete {key}? It cannot be undone.', {'key': form.key}) }}"
+                    },
+                    {
+                      "call": "remove",
+                      "onError": [
+                        {
+                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                        }
+                      ]
+                    },
+                    {
+                      "toast": "{{ t('issues.deleted', 'Issue deleted') }}"
+                    },
+                    {
+                      "navigate": "issue-list",
+                      "params": {
+                        "key": "{{params.key}}"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "fieldsFrom": {
+                "source": "fields",
+                "into": "custom",
+                "nameField": "key",
+                "types": {
+                  "text": {
+                    "name": "text",
+                    "type": "text",
+                    "maxLength": 1000,
+                    "readOnlyIf": "{{!form._perm.edit}}",
+                    "span": 2
+                  },
+                  "number": {
+                    "name": "number",
+                    "type": "number",
+                    "readOnlyIf": "{{!form._perm.edit}}"
+                  },
+                  "date": {
+                    "name": "date",
+                    "type": "date",
+                    "readOnlyIf": "{{!form._perm.edit}}"
+                  },
+                  "checkbox": {
+                    "name": "checkbox",
+                    "type": "checkbox",
+                    "readOnlyIf": "{{!form._perm.edit}}"
+                  },
+                  "select": {
+                    "name": "select",
+                    "type": "select",
+                    "options": [],
+                    "readOnlyIf": "{{!form._perm.edit}}"
+                  },
+                  "multiselect": {
+                    "name": "multiselect",
+                    "type": "multiselect",
+                    "options": [],
+                    "readOnlyIf": "{{!form._perm.edit}}"
+                  },
+                  "user": {
+                    "name": "user",
+                    "type": "lookup",
+                    "lookup": {
+                      "source": "assignees",
+                      "valueField": "username",
+                      "labelField": "username",
+                      "minChars": 0
+                    },
+                    "readOnlyIf": "{{!form._perm.edit}}"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "tab-planning",
+          "label": "{{ t('agile.planning', 'Planning') }}",
+          "components": [
+            {
+              "id": "plan-form",
+              "type": "form",
+              "layout": "flow",
+              "source": "plan",
+              "fields": [
+                {
+                  "name": "points",
+                  "type": "number",
+                  "label": "{{ t('agile.points', 'Story points') }}",
+                  "width": "xs",
+                  "readOnlyIf": "{{!form._perm.edit}}",
+                  "tooltip": "{{ t('agile.points_help', 'From 0 to 999; empty when not estimated') }}"
+                },
+                {
+                  "name": "sprint",
+                  "type": "text",
+                  "label": "{{ t('agile.sprint', 'Sprint') }}",
+                  "width": "m",
+                  "readOnlyIf": "{{true}}",
+                  "tooltip": "{{ t('agile.sprint_help', 'Planned from the backlog of the project; empty for the backlog') }}"
+                }
+              ],
+              "actions": [
+                {
+                  "id": "btn-save-plan",
+                  "label": "{{ t('common.save', 'Save') }}",
+                  "visibleIf": "{{form._perm.edit}}",
+                  "onClick": [
+                    {
+                      "call": "savePlan",
+                      "onError": [
+                        {
+                          "if": "{{error.status == 400}}",
+                          "then": [
+                            {
+                              "toast": "{{ t('agile.points_invalid', 'The story points are from 0 to 999') }}"
+                            }
+                          ],
+                          "else": [
+                            {
+                              "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "refresh": "plan"
+                    },
+                    {
+                      "toast": "{{ t('common.saved', 'Saved') }}"
                     }
                   ]
                 }
@@ -973,35 +601,415 @@
           ]
         },
         {
-          "id": "tab-history",
-          "label": "{{ t('issues.history', 'History') }}",
+          "id": "tab-next-steps",
+          "label": "{{ t('issues.next_steps', 'Next steps') }}",
           "components": [
             {
-              "id": "history-table",
+              "id": "transition-table",
               "type": "table",
-              "source": "history",
+              "source": "transitions",
               "columns": [
                 {
-                  "field": "at",
-                  "label": "{{ t('issues.when', 'When') }}",
-                  "format": "datetime"
-                },
-                {
-                  "field": "author",
-                  "label": "{{ t('issues.author', 'Author') }}"
-                },
-                {
-                  "field": "field",
-                  "label": "{{ t('issues.field', 'Field') }}",
-                  "valueKey": "values.issue_field"
-                },
-                {
-                  "field": "from",
-                  "label": "{{ t('issues.from', 'From') }}"
+                  "field": "code",
+                  "label": "{{ t('issues.transition', 'Transition') }}",
+                  "valueKey": "values.transition"
                 },
                 {
                   "field": "to",
-                  "label": "{{ t('issues.to', 'To') }}"
+                  "label": "{{ t('issues.to_status', 'To status') }}",
+                  "valueKey": "values.status"
+                }
+              ],
+              "rowActions": [
+                {
+                  "id": "btn-move",
+                  "label": "{{ t('issues.move', 'Move') }}",
+                  "onClick": [
+                    {
+                      "call": "move",
+                      "args": {
+                        "transition": "{{row.code}}",
+                        "version": "{{row.version}}"
+                      },
+                      "onError": [
+                        {
+                          "if": "{{error.status == 409}}",
+                          "then": [
+                            {
+                              "toast": "{{ t('issues.conditions_not_met', 'The conditions of this step are not met') }}"
+                            }
+                          ],
+                          "else": [
+                            {
+                              "if": "{{error.status == 412}}",
+                              "then": [
+                                {
+                                  "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                }
+                              ],
+                              "else": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "refresh": "issue"
+                    },
+                    {
+                      "refresh": "transitions"
+                    },
+                    {
+                      "refresh": "history"
+                    },
+                    {
+                      "toast": "{{ t('issues.moved', 'Status changed') }}"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "issue-activity",
+      "type": "section",
+      "components": [
+        {
+          "id": "issue-tabs",
+          "type": "tabs",
+          "tabs": [
+            {
+              "id": "tab-comments",
+              "label": "{{ t('issues.comments', 'Comments') }}",
+              "components": [
+                {
+                  "id": "comment-thread",
+                  "type": "comments",
+                  "source": "comments",
+                  "textField": "body",
+                  "authorField": "author",
+                  "dateField": "createdAt",
+                  "postIf": "{{ data.issue._perm.comment }}",
+                  "mentions": {
+                    "source": "assignees",
+                    "valueField": "username",
+                    "labelField": "username"
+                  },
+                  "onPost": [
+                    {
+                      "call": "postComment",
+                      "onError": [
+                        {
+                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                        }
+                      ]
+                    },
+                    {
+                      "refresh": "comments"
+                    }
+                  ],
+                  "editIf": "{{ row._perm.edit }}",
+                  "onEdit": [
+                    {
+                      "call": "updateComment",
+                      "args": {
+                        "id": "{{row.id}}"
+                      },
+                      "onError": [
+                        {
+                          "if": "{{error.status == 412}}",
+                          "then": [
+                            {
+                              "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                            }
+                          ],
+                          "else": [
+                            {
+                              "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "refresh": "comments"
+                    }
+                  ],
+                  "deleteIf": "{{ row._perm.delete }}",
+                  "onDelete": [
+                    {
+                      "confirm": "{{ t('issues.delete_comment_confirm', 'Delete this comment?') }}"
+                    },
+                    {
+                      "call": "removeComment",
+                      "args": {
+                        "id": "{{row.id}}"
+                      },
+                      "onError": [
+                        {
+                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                        }
+                      ]
+                    },
+                    {
+                      "refresh": "comments"
+                    }
+                  ],
+                  "editedField": "edited"
+                }
+              ]
+            },
+            {
+              "id": "tab-attachments",
+              "label": "{{ t('issues.attachments', 'Attachments') }}",
+              "components": [
+                {
+                  "id": "attachment-upload",
+                  "type": "input",
+                  "visibleIf": "{{ data.issue._perm.attach }}",
+                  "field": {
+                    "name": "attachment",
+                    "type": "file",
+                    "label": "{{ t('issues.attach_file', 'Attach a file') }}",
+                    "upload": "uploadAttachment",
+                    "maxSizeKb": 25600
+                  },
+                  "onChange": [
+                    {
+                      "refresh": "attachments"
+                    },
+                    {
+                      "refresh": "history"
+                    }
+                  ]
+                },
+                {
+                  "id": "attachment-limit-note",
+                  "type": "text",
+                  "visibleIf": "{{ data.issue._perm.attach }}",
+                  "text": "{{ t('issues.attachment_limit', 'Up to 25 MB per file') }}"
+                },
+                {
+                  "id": "attachment-table",
+                  "type": "table",
+                  "source": "attachments",
+                  "columns": [
+                    {
+                      "field": "filename",
+                      "label": "{{ t('issues.attachment_name', 'File') }}",
+                      "href": "/api/issues/{{ params.issue }}/attachments/{{ row.id }}/content",
+                      "tooltip": "{{ t('issues.attachment_download', 'Download') }}"
+                    },
+                    {
+                      "field": "size",
+                      "label": "{{ t('issues.attachment_size', 'Size (bytes)') }}",
+                      "format": "number",
+                      "decimals": 0
+                    },
+                    {
+                      "field": "uploadedBy",
+                      "label": "{{ t('issues.attachment_by', 'Added by') }}"
+                    },
+                    {
+                      "field": "uploadedAt",
+                      "label": "{{ t('issues.attachment_at', 'When') }}",
+                      "format": "datetime"
+                    }
+                  ],
+                  "rowActions": [
+                    {
+                      "id": "btn-remove-attachment",
+                      "label": "{{ t('issues.remove_link', 'Remove') }}",
+                      "visibleIf": "{{row._perm.delete}}",
+                      "onClick": [
+                        {
+                          "confirm": "{{ t('issues.remove_attachment_confirm', 'Remove {name}?', {'name': row.filename}) }}"
+                        },
+                        {
+                          "call": "removeAttachment",
+                          "args": {
+                            "id": "{{row.id}}"
+                          },
+                          "onError": [
+                            {
+                              "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                            }
+                          ]
+                        },
+                        {
+                          "refresh": "attachments"
+                        },
+                        {
+                          "refresh": "history"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "tab-links",
+              "label": "{{ t('issues.links', 'Links') }}",
+              "components": [
+                {
+                  "id": "link-table",
+                  "type": "table",
+                  "source": "links",
+                  "columns": [
+                    {
+                      "field": "relation",
+                      "label": "{{ t('issues.relation', 'Relation') }}",
+                      "valueKey": "values.relation"
+                    },
+                    {
+                      "field": "key",
+                      "label": "{{ t('issues.key', 'Key') }}",
+                      "onClick": [
+                        {
+                          "navigate": "issue-detail",
+                          "params": {
+                            "key": "{{row.project}}",
+                            "issue": "{{row.key}}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "field": "summary",
+                      "label": "{{ t('issues.summary', 'Summary') }}"
+                    },
+                    {
+                      "field": "status",
+                      "label": "{{ t('issues.status', 'Status') }}",
+                      "format": "badge",
+                      "badges": {
+                        "todo": "neutral",
+                        "in_progress": "primary",
+                        "done": "success"
+                      },
+                      "valueKey": "values.status"
+                    }
+                  ],
+                  "rowActions": [
+                    {
+                      "id": "btn-remove-link",
+                      "label": "{{ t('issues.remove_link', 'Remove') }}",
+                      "visibleIf": "{{row._perm.delete}}",
+                      "onClick": [
+                        {
+                          "confirm": "{{ t('issues.remove_link_confirm', 'Remove the link to {key}?', {'key': row.key}) }}"
+                        },
+                        {
+                          "call": "removeLink",
+                          "args": {
+                            "id": "{{row.id}}"
+                          },
+                          "onError": [
+                            {
+                              "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                            }
+                          ]
+                        },
+                        {
+                          "refresh": "links"
+                        },
+                        {
+                          "refresh": "history"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "tab-watchers",
+              "label": "{{ t('issues.watchers', 'Watchers') }}",
+              "components": [
+                {
+                  "id": "watcher-table",
+                  "type": "table",
+                  "source": "watchers",
+                  "columns": [
+                    {
+                      "field": "username",
+                      "label": "{{ t('issues.watcher', 'User') }}"
+                    },
+                    {
+                      "field": "since",
+                      "label": "{{ t('issues.since', 'Since') }}",
+                      "format": "datetime"
+                    }
+                  ],
+                  "rowActions": [
+                    {
+                      "id": "btn-remove-watcher",
+                      "label": "{{ t('issues.remove_link', 'Remove') }}",
+                      "visibleIf": "{{row._perm.delete}}",
+                      "onClick": [
+                        {
+                          "call": "unwatch",
+                          "args": {
+                            "username": "{{row.username}}"
+                          },
+                          "onError": [
+                            {
+                              "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                            }
+                          ]
+                        },
+                        {
+                          "refresh": "watchers"
+                        },
+                        {
+                          "refresh": "issue"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "tab-history",
+              "label": "{{ t('issues.history', 'History') }}",
+              "components": [
+                {
+                  "id": "history-table",
+                  "type": "table",
+                  "source": "history",
+                  "columns": [
+                    {
+                      "field": "at",
+                      "label": "{{ t('issues.when', 'When') }}",
+                      "format": "datetime"
+                    },
+                    {
+                      "field": "author",
+                      "label": "{{ t('issues.author', 'Author') }}"
+                    },
+                    {
+                      "field": "field",
+                      "label": "{{ t('issues.field', 'Field') }}",
+                      "valueKey": "values.issue_field"
+                    },
+                    {
+                      "field": "from",
+                      "label": "{{ t('issues.from', 'From') }}"
+                    },
+                    {
+                      "field": "to",
+                      "label": "{{ t('issues.to', 'To') }}"
+                    }
+                  ]
                 }
               ]
             }
