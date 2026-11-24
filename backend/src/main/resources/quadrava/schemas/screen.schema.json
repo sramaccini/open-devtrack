@@ -440,6 +440,10 @@
         "tooltip": {
           "type": "string",
           "description": "Help text shown on mouse hover or with the focus. Text only (never HTML); it can contain {{ }}."
+        },
+        "icon": {
+          "$ref": "#/$defs/icon",
+          "description": "Icon shown before the text of the action, from the built-in set (for example save, edit, delete, plus); the text stays. An unknown name shows no icon."
         }
       }
     },
@@ -475,7 +479,8 @@
           "type": "string",
           "pattern": "^/(?!/)",
           "description": "Relative path of the application that the action opens, with the row in `row`, for example a download: /api/issues/{{ params.issue }}/attachments/{{ row.id }}/content. The values of {{ }} are encoded, so they cannot add segments; an address that does not resolve to a path of the same origin opens nothing."
-        }
+        },
+        "icon": true
       },
       "oneOf": [
         {
@@ -891,9 +896,10 @@
             "xs",
             "s",
             "m",
-            "l"
+            "l",
+            "full"
           ],
-          "description": "Width of the input: xs (about 8 characters: postcodes, quantities), s (about 16: dates, amounts, codes), m (about 32: names, emails), l (about 48: addresses). The input never exceeds its cell or the screen; the theme can change the sizes (--lc-field-width-xs … -l). Without it the input takes the whole cell, or in a form with layout flow a whole line."
+          "description": "Width of the input: xs (about 8 characters: postcodes, quantities), s (about 16: dates, amounts, codes), m (about 32: names, emails), l (about 48: addresses), full (the whole line, with no limit: long texts such as a description). The input never exceeds its cell or the screen; the theme can change the sizes (--lc-field-width-xs … -l). Without it the input takes the whole cell, or in a form with layout flow a whole line, at most 560px wide."
         },
         "fields": {
           "type": "array",
@@ -1401,6 +1407,10 @@
                   "$ref": "#/$defs/step"
                 },
                 "description": "Steps run on click, in order (call, set, navigate, refresh…). The button stays busy until they finish."
+              },
+              "icon": {
+                "$ref": "#/$defs/icon",
+                "description": "Icon shown before the text of the button, from the built-in set (for example save, edit, delete, plus); the text stays. An unknown name shows no icon."
               }
             }
           }
@@ -2276,6 +2286,31 @@
               "refreshable": {
                 "type": "boolean",
                 "description": "«Refresh» button in the table footer, on the left (pages are on the right): it reloads the data source like the refresh step. Absent if false or not given."
+              },
+              "selection": {
+                "type": "object",
+                "required": [
+                  "bind"
+                ],
+                "additionalProperties": false,
+                "description": "Row selection: the keys of the chosen rows are in the `bind` state; bulk actions see the whole rows in `selection`. The selection stays across pages, sorting, groups and open groups, and is emptied when the filters change.",
+                "properties": {
+                  "bind": {
+                    "$ref": "#/$defs/statePath",
+                    "description": "State that receives the keys of the chosen rows."
+                  },
+                  "key": {
+                    "type": "string",
+                    "description": "Field that identifies the row (id if absent)."
+                  }
+                }
+              },
+              "bulkActions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/action"
+                },
+                "description": "Actions on the selected rows, above the table, with the count of the chosen rows and a button that empties the selection. Expressions see `selection` (list of the chosen rows, also those of other pages)."
               }
             }
           }
@@ -4657,6 +4692,11 @@
           "additionalProperties": false
         }
       ]
+    },
+    "icon": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Name of an icon of the built-in set (for example save, edit, delete, plus). An unknown name shows no icon."
     }
   }
 }

@@ -13,7 +13,7 @@ browser ──https──▶ Keycloak (login) ◀── OIDC, back-channel logou
 - **Back end**: the image `ghcr.io/sramaccini/opendevtrack-backend` of a release, signed, with its SBOM
   ([operations](../operations/README.md), «Verifying the image»). It holds the API, the BFF of the browser (login,
   session, CSRF), the registry of the screen definitions, and creates its schemas at each start (Flyway).
-- **Quadrava runtime**: `ghcr.io/sramaccini/quadrava-runtime` at the version the release pins (0.18.0). It serves the
+- **Quadrava runtime**: `ghcr.io/sramaccini/quadrava-runtime` at the version the release pins (0.19.0). It serves the
   pages and loads the screens of `ui/` from the registry of the back end.
 - **Proxy**: ends TLS and gives the browser one origin. The paths of the BFF go to the back end and everything else to
   the runtime, so the back end sees `X-Forwarded-Proto: https` and builds its addresses on https.
@@ -145,6 +145,7 @@ The same parts in another platform, a Kubernetes cluster for example (a Helm cha
 - The realm, the first administrator and the screens as above: the SQL of `odt.sh first-admin` and the script
   `publish-ui.mjs` work against any PostgreSQL and registry.
 
-The runtime can also forward the BFF itself, with `QUADRAVA_BFF_URL`. In Quadrava 0.18.0 it then sets
-`X-Forwarded-Proto` to the scheme of its own connection, which is `http` behind a TLS terminator, so route the BFF
-from the proxy as above.
+The runtime can also forward the BFF itself, with `QUADRAVA_BFF_URL`. It then sets `X-Forwarded-Proto` to the scheme
+of its own connection, which is `http` behind a TLS terminator, unless `QUADRAVA_TRUST_FORWARDED=true` (Quadrava
+0.19.0) passes on the `X-Forwarded-Proto` and `X-Forwarded-Host` of the proxy in front. `deploy/compose` routes the
+BFF from the proxy, as above, and does not need it.
