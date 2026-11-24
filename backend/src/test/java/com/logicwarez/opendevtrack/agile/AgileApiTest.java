@@ -242,6 +242,42 @@ class AgileApiTest {
     }
 
     @Test
+    void theChosenIssuesGoToASprintTogether() throws Exception {
+        String body = mvc.perform(as(post("/api/projects/ODT/sprints"), luisa).content("{}"))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+        String sprint = JsonPath.read(body, "$.id");
+        mvc.perform(as(post("/api/projects"), mario).content("{\"key\":\"WEB\",\"name\":\"Web\"}"))
+                .andExpect(status().isCreated());
+        mvc.perform(as(post("/api/projects/WEB/issues"), mario).content("{\"summary\":\"Elsewhere\"}"))
+                .andExpect(status().isCreated());
+        String plan = "/api/projects/ODT/backlog/plan";
+        mvc.perform(as(post(plan), luisa).content("{\"issues\":[\"ODT-2\",\"ODT-4\",\"ODT-2\"],\"column\":\"" + sprint + "\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.moved").value(2));
+        String rows = backlog(paola);
+        assertThat(JsonPath.<List<String>>read(rows, "$.items[?(@.sprint == 'ODT Sprint 1')].key"))
+                .containsExactly("ODT-2", "ODT-4");
+        // All or none: an issue of another project, an unknown sprint, a viewer, nothing chosen.
+        mvc.perform(as(post(plan), luisa).content("{\"issues\":[\"ODT-1\",\"WEB-1\"],\"column\":\"" + sprint + "\"}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(as(post(plan), luisa).content("{\"issues\":[\"ODT-1\"],\"column\":\"nowhere\"}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(as(post(plan), paola).content("{\"issues\":[\"ODT-1\"],\"column\":\"backlog\"}"))
+                .andExpect(status().isForbidden());
+        mvc.perform(as(post(plan), luisa).content("{\"issues\":[],\"column\":\"backlog\"}"))
+                .andExpect(status().isBadRequest());
+        assertThat(JsonPath.<List<String>>read(backlog(paola), "$.items[?(@.sprint == 'ODT Sprint 1')].key"))
+                .containsExactly("ODT-2", "ODT-4");
+        // Back to the backlog: only those in a sprint count as moved.
+        mvc.perform(as(post(plan), luisa).content("{\"issues\":[\"ODT-1\",\"ODT-2\",\"ODT-4\"],\"column\":\"backlog\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.moved").value(2));
+        assertThat(JsonPath.<List<String>>read(backlog(paola), "$.items[*].sprint")).containsOnly("Backlog");
+        mvc.perform(as(post("/api/projects/ODT/backlog/plan"), ugo).content("{\"issues\":[\"ODT-1\"],\"column\":\"backlog\"}"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void theAdminsManageTheBoards() throws Exception {
         String scrum = """
                 {"name":"Team","kind":"scrum","lane":"assignee","columns":"Open: todo\\nDoing: in_progress | 2\\nDone: done"}""";

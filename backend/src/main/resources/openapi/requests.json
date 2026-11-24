@@ -66,6 +66,9 @@
     "POST /api/projects/{key}/backlog/cards/{issueKey}/move" : {
       "$ref" : "#/components/schemas/MoveRequest"
     },
+    "POST /api/projects/{key}/backlog/plan" : {
+      "$ref" : "#/components/schemas/PlanManyRequest"
+    },
     "POST /api/projects/{key}/boards" : {
       "$ref" : "#/components/schemas/BoardRequest"
     },
@@ -425,6 +428,21 @@
           },
           "to" : {
             "type" : "string"
+          }
+        }
+      },
+      "PlanManyRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "column" : {
+            "type" : "string"
+          },
+          "issues" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },

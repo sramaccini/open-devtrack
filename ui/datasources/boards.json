@@ -67,6 +67,11 @@
       "method": "GET",
       "url": "/api/projects/{{row.project}}/backlog/columns"
     },
+    "projectColumns": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/backlog/columns"
+    },
     "backlogPlan": {
       "type": "rest",
       "method": "POST",
@@ -74,6 +79,15 @@
       "body": {
         "column": "{{column}}",
         "to": "{{to}}"
+      }
+    },
+    "backlogPlanMany": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{project}}/backlog/plan",
+      "body": {
+        "issues": "{{issues}}",
+        "column": "{{column}}"
       }
     },
     "sprints": {

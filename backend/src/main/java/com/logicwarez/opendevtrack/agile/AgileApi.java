@@ -50,6 +50,13 @@ final class AgileApi {
     record MoveRequest(String column, String beforeId, String afterId, String to) {
     }
 
+    /**
+     * Issues of the project chosen in the backlog, all into one sprint not completed or back to the backlog
+     * ({@code column}, as in {@link MoveRequest}): the bulk action of ADR-26, decision 7.
+     */
+    record PlanManyRequest(List<String> issues, String column) {
+    }
+
     record SprintRow(String id, String name, String goal, String state, LocalDate startsOn, LocalDate endsOn,
                      Instant startedAt, Instant completedAt, int issues, int points, long version,
                      @JsonProperty("_perm") Map<String, Boolean> perm) {

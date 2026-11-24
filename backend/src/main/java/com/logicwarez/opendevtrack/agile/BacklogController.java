@@ -6,6 +6,7 @@ package com.logicwarez.opendevtrack.agile;
 
 import com.logicwarez.opendevtrack.agile.AgileApi.ColumnRow;
 import com.logicwarez.opendevtrack.agile.AgileApi.MoveRequest;
+import com.logicwarez.opendevtrack.agile.AgileApi.PlanManyRequest;
 import com.logicwarez.opendevtrack.agile.AgileApi.PlanRequest;
 import com.logicwarez.opendevtrack.agile.AgileApi.PlanView;
 import com.logicwarez.opendevtrack.agile.Scopes.Scope;
@@ -45,6 +46,8 @@ class BacklogController {
 
     static final String BACKLOG = "backlog";
     static final Set<String> ENDS = Set.of("top", "bottom");
+    /** The most issues planned at once: a page of the backlog table is 50. */
+    static final int MANY = 200;
 
     private final Scopes scopes;
     private final Plans plans;
@@ -126,6 +129,50 @@ class BacklogController {
             plans.place(plan, neighbour(request.beforeId(), scope.get()), neighbour(request.afterId(), scope.get()));
         }
         return ResponseEntity.ok(Map.of("column", column));
+    }
+
+    /** The rows chosen in the backlog, into one sprint or back to the backlog: all of them, or none. */
+    @ApiDoc(value = "Moves issues of the project to a sprint not completed or to the backlog",
+            answer = Map.class, project = "odt.sprint.manage")
+    @PostMapping("/api/projects/{key}/backlog/plan")
+    @Transactional
+    ResponseEntity<?> planMany(@PathVariable String key, @RequestBody PlanManyRequest request) {
+        Optional<Scope> scope = member(key);
+        if (scope.isEmpty()) {
+            return notVisible(key);
+        }
+        if (!scope.get().can(Scopes.SPRINTS)) {
+            return Problems.forbidden("Only a developer or an admin of the project plans the sprints");
+        }
+        List<String> keys = request.issues() == null ? List.of() : request.issues().stream().distinct().toList();
+        if (keys.isEmpty() || keys.size() > MANY) {
+            return Problems.badRequest("From 1 to " + MANY + " issues are planned at once");
+        }
+        Map<String, SprintEntity> open = plans.open(scope.get().projectId()).stream()
+                .collect(Collectors.toMap(s -> s.id().toString(), Function.identity()));
+        String column = request.column() == null ? "" : request.column();
+        if (!column.equals(BACKLOG) && !open.containsKey(column)) {
+            return Problems.badRequest("No sprint not completed with this id in the project");
+        }
+        List<IssueRef> chosen = new ArrayList<>();
+        for (String issueKey : keys) {
+            Optional<IssueRef> issue = issue(issueKey, scope.get());
+            if (issue.isEmpty()) {
+                return Problems.badRequest("The issue " + issueKey + " is not in the project " + key);
+            }
+            chosen.add(issue.get());
+        }
+        SprintEntity to = open.get(column);
+        Instant now = Instant.now();
+        int moved = 0;
+        for (IssueRef issue : chosen) {
+            PlanEntity plan = plans.plan(issue.id(), scope.get().projectId());
+            if (!Objects.equals(plan.sprintId(), to == null ? null : to.id())) {
+                plans.sprint(plan, to, now);
+                moved++;
+            }
+        }
+        return ResponseEntity.ok(Map.of("column", column, "moved", moved));
     }
 
     /** The plan of an issue: its story points and its sprint not completed. */

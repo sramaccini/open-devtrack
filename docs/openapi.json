@@ -2709,6 +2709,58 @@
         "x-project-permissions" : [ "odt.issue.browse" ]
       }
     },
+    "/api/projects/{key}/backlog/plan" : {
+      "post" : {
+        "operationId" : "backlog.planMany",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PlanManyRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : { }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Moves issues of the project to a sprint not completed or to the backlog",
+        "tags" : [ "agile" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.sprint.manage" ]
+      }
+    },
     "/api/projects/{key}/boards" : {
       "get" : {
         "operationId" : "board.list",
@@ -6879,6 +6931,21 @@
           },
           "value" : {
             "type" : "string"
+          }
+        }
+      },
+      "PlanManyRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "column" : {
+            "type" : "string"
+          },
+          "issues" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },

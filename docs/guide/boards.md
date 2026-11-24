@@ -64,6 +64,10 @@ Each row has three actions, for developers and admins:
 - **Move to sprint…**: pick a sprint not completed of the project, or «Backlog» to take the issue out of its sprint.
 - **To the top** and **To the bottom**: the issue goes first or last in the order of the project.
 
+To plan several issues at once, tick their rows (also on other pages and in other groups) and use **Move to sprint…**
+above the table: they all go into the sprint you pick, or back to the backlog. It works on the issues of the project of
+the backlog; with rows of other projects chosen, it stays off.
+
 To put an issue between two others, drag its card on a board: a board and the backlog share the one order of the
 project.
 

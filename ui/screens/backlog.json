@@ -37,8 +37,14 @@
     "planColumns": {
       "ref": "boards/planColumns"
     },
+    "projectColumns": {
+      "ref": "boards/projectColumns"
+    },
     "backlogPlan": {
       "ref": "boards/backlogPlan"
+    },
+    "backlogPlanMany": {
+      "ref": "boards/backlogPlanMany"
     }
   },
   "components": [
@@ -181,7 +187,7 @@
     {
       "id": "backlog-help",
       "type": "alert",
-      "text": "{{ t('agile.backlog_help', 'The issues of the sprints not completed and of the backlog, in the order of the project, grouped by sprint. Change the query as in the search; move an issue with the actions of its row. The order by drag is on the boards.') }}"
+      "text": "{{ t('agile.backlog_help', 'The issues of the sprints not completed and of the backlog, in the order of the project, grouped by sprint. Change the query as in the search; move an issue with the actions of its row, or the chosen ones together with «Move to sprint…» above the table. The order by drag is on the boards.') }}"
     },
     {
       "id": "backlog-query",
@@ -297,6 +303,68 @@
           "sortable": true,
           "filter": "select",
           "groupable": true
+        }
+      ],
+      "selection": {
+        "bind": "state.chosen",
+        "key": "key"
+      },
+      "bulkActions": [
+        {
+          "id": "btn-plan-issues",
+          "label": "{{ t('agile.move_to_sprint', 'Move to sprint…') }}",
+          "icon": "move",
+          "enabledIf": "{{ size(selection) > 0 && selection.all(r, r.project == params.key && r._perm.plan) }}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('agile.move_chosen_title', 'Move {count} issues to a sprint', { 'count': size(selection) }) }}",
+                "submitLabel": "{{ t('agile.move', 'Move') }}",
+                "fields": [
+                  {
+                    "name": "column",
+                    "type": "lookup",
+                    "label": "{{ t('agile.sprint', 'Sprint') }}",
+                    "tooltip": "{{ t('agile.move_to_sprint_help', 'A sprint not completed of the project, or the backlog') }}",
+                    "required": true,
+                    "lookup": {
+                      "source": "projectColumns",
+                      "valueField": "value",
+                      "labelField": "label",
+                      "minChars": 0
+                    }
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "backlogPlanMany",
+                    "args": {
+                      "project": "{{params.key}}",
+                      "issues": "{{ selection.map(r, r.key) }}",
+                      "column": "{{form.column}}"
+                    },
+                    "onError": [
+                      {
+                        "toast": "{{ t('agile.plan_failed', 'The issue could not be planned') }}"
+                      }
+                    ]
+                  },
+                  {
+                    "set": {
+                      "path": "state.chosen",
+                      "value": []
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "issues"
+            },
+            {
+              "refresh": "sprints"
+            }
+          ]
         }
       ],
       "rowActions": [

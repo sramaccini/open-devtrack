@@ -20,7 +20,7 @@ What exists today:
 - `POST /api/search` answers rows without the sprint: `sprint` is neither a column (`Searches.COLUMNS`) nor a group
   (`GROUPS`), and the rows carry no permission.
 - The `serverDataTable` of Quadrava 0.18.0 has a source, sortable, filterable and groupable columns, `groupBy`,
-  paging and row actions; it has no row selection and no bulk actions (the plain `table` has both).
+  paging and row actions; it has no row selection and no bulk actions (the plain `table` has both; 0.19.0 adds them, Q28).
 - A move on a board already writes the one rank of the project (ADR-15, decision 1): the boards and the backlog never
   disagree on the order.
 
@@ -55,7 +55,8 @@ What exists today:
    issues, unchanged.
 7. **Moving many issues at once** needs selection and bulk actions on the `serverDataTable`: requested from Quadrava as
    Q28. Until it is released, issues are planned one by one; with Q28, a bulk «Move to sprint…» on the selected
-   rows.
+   rows. (Built with Quadrava 0.19.0: `POST /api/projects/{key}/backlog/plan` moves up to 200 issues of the project
+   in one transaction, all or none.)
 
 ## Alternatives considered
 

@@ -164,8 +164,9 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    no medium or high alert, and the reset runs from root's crontab at 03:30 UTC. Its alerts come from an external
    monitor (healthchecks.io) that mails the maintainer: `deploy/demo/watch.sh` every 5 minutes and the result of the
    reset (deploy/demo/README.md, «Alerts»). Next: the rest of the checklist of rc.1 (step 5).
-   ADR-26, accepted and built on 24 November 2026: the backlog is a search table grouped by sprint (Q28 for bulk
-   moves, Q29 for the colour of the group rows).
+   ADR-26, accepted and built on 24 November 2026: the backlog is a search table grouped by sprint. Quadrava 0.19.0
+   (Q26 to Q29) is adopted: the issue form in flow, an icon on every button, the bulk «Move to sprint…» of the
+   backlog, light group rows.
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
    SQL, as authz-library documents), and `odt.sh publish-ui` publishes `ui/` to `production` with the service account
