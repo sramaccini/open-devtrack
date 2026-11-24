@@ -14,14 +14,14 @@ Quadrava and authz-library, and the ADRs say where.
   (`ModularityTests`: `verify()` and the module documentation). The `odt.*` permission catalogue is a repeatable
   Flyway migration of the RBAC schema (ADR-07); the dev profile adds tenants, users and the UI author/approver roles.
 - Module `uiregistry` (ADR-03): `contracts/registry.yaml` 0.7.0, adapted from the Quadrava reference registry
-  (commit 9fa1916, contract 0.6.0), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.19.0 in the classpath.
+  (commit 9fa1916, contract 0.6.0), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.19.1 in the classpath.
   The browser uses the session; tools use Keycloak access tokens of `opendevtrack-tools` on `/registry/**`
   (the bearer access of authz-library, A4).
 - `ui/`: the Quadrava project, with the main navigation, home and projects placeholder screens, themes `odt-light` and
-  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.19.0 checks it (`quadrava validate`) and publishes it
+  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.19.1 checks it (`quadrava validate`) and publishes it
   (`quadrava publish`) to any environment: no environment is protected (ADR-12).
 - End-to-end check (`docs/check-authz-end-to-end.md`): Quadrava kits bff 13/13 with and without a session, authz 11/11,
-  registry 24/24 (`--protected-env none`), tenant switch kept across logins, `ui/` served by the runtime 0.19.0 from the
+  registry 24/24 (`--protected-env none`), tenant switch kept across logins, `ui/` served by the runtime 0.19.1 from the
   registry. Quadrava 0.5.0 adopted on 4 November 2026 (from 0.2.1: same schemas, registry contract 0.7), 0.6.0 on 5
   November (tab title and icons from the theme, shell texts built in: Q3 and Q4), 0.7.0 on 5 November (theme and
   language in the settings dialog of the user menu; the message bell of ADR-22), 0.8.0 on 6 November (`data.<name>` in the expressions: Q9), 0.9.0 on 6 November (links from the rows, Q10;
@@ -165,8 +165,8 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    monitor (healthchecks.io) that mails the maintainer: `deploy/demo/watch.sh` every 5 minutes and the result of the
    reset (deploy/demo/README.md, «Alerts»). Next: the rest of the checklist of rc.1 (step 5).
    ADR-26, accepted and built on 24 November 2026: the backlog is a search table grouped by sprint. Quadrava 0.19.0
-   (Q26 to Q29) is adopted: the issue form in flow, an icon on every button, the bulk «Move to sprint…» of the
-   backlog, light group rows.
+   (Q26 to Q29) and 0.19.1 (Q30) are adopted: the issue form in flow, an icon on every button, the bulk «Move to
+   sprint…» of the backlog, light group and selected rows.
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
    SQL, as authz-library documents), and `odt.sh publish-ui` publishes `ui/` to `production` with the service account
