@@ -63,8 +63,12 @@ realm() {
   log "the realm opendevtrack with the settings of the demo"
   kcadm config credentials --server http://localhost:8080 --realm master --user "${KEYCLOAK_ADMIN:-admin}" \
     --password "$KEYCLOAK_ADMIN_PASSWORD" > /dev/null
-  kcadm update realms/opendevtrack -s resetPasswordAllowed=false -s bruteForceProtected=false \
-    -s 'displayNameHtml=OpenDevTrack demo: everything is erased every night, enter nothing private'
+  kcadm update realms/opendevtrack -s resetPasswordAllowed=false -s bruteForceProtected=false
+  # The notice as the title of the login form: the theme shows the logo in place of the name of the realm
+  kcadm create realms/opendevtrack/localization/en \
+    -b '{"loginAccountTitle":"Demo: everything is erased every night, enter nothing private"}'
+  kcadm create realms/opendevtrack/localization/it \
+    -b '{"loginAccountTitle":"Demo: tutto viene cancellato ogni notte, non inserire nulla di privato"}'
   local action client id
   for action in $(kcadm get authentication/required-actions -r opendevtrack --fields alias --format csv --noquotes); do
     kcadm update "authentication/required-actions/$action" -r opendevtrack -s enabled=false -s defaultAction=false

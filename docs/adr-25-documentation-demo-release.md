@@ -117,6 +117,14 @@ What there is today:
      - Failed logins do not lock an account in the demo, since the passwords are public.
 
      The deployment, the ZAP scan and the alerts wait for the host (#28).
+   - **Note of 24 November 2026, step 4 deployed.** The demo runs at https://demo.ods.logicwarez.com, on a KVM VPS
+     with 2 vCPU and 6 GB. Two changes to the plan:
+     - `v1.0.0-rc.1` was tagged before the deployment, so that the demo runs a published, signed image by digest.
+       Step 5 starts from it.
+     - The theme shows the logo in place of the name of the realm, so the notice of the demo is the title of the
+       login form, set in the realm's translations.
+
+     The alerts are not set up yet: the maintainer chooses where they go.
 4. **1.0 is released through release candidates, with a written checklist.**
    - `release.yml` also accepts `vX.Y.Z-rc.N`. A candidate publishes its image, signature and SBOM like a release,
      with the same tags, but as a pre-release: it never moves `X.Y` or `latest`.

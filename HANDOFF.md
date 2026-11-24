@@ -158,9 +158,11 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    installation first and attaches the archive of `deploy/`, `ui/`, `keycloak/` and `brand/`, and `docs/release.md`
    holds the checklist and what 1.0 promises, with `CHANGELOG.md`. Step 3 is done: the user guide in `docs/guide/`,
    one page per area with the full ODQL reference, its images taken by `stack/stack.sh screenshots`. Step 4 is
-   built as far as it can be without a host: `ODT_WEBHOOKS_ALLOWED_HOSTS` and `deploy/demo/` (compose file, `demo.sh`
-   with setup, nightly reset and upgrade, the page of the demo). Next: its deployment, ZAP scan and alerts once its host
-   exists (#28), then step 5.
+   done: `ODT_WEBHOOKS_ALLOWED_HOSTS` and `deploy/demo/` (compose file, `demo.sh` with setup, nightly reset and
+   upgrade, the page of the demo), deployed on 24 November 2026 at https://demo.ods.logicwarez.com from
+   `v1.0.0-rc.1`, which was tagged first so that the demo runs a published image. The signed-in ZAP baseline found
+   no medium or high alert, and the reset runs from root's crontab at 03:30 UTC. The alerts of `docs/operations` are
+   not set up yet: the maintainer chooses where they go. Next: the rest of the checklist of rc.1 (step 5).
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
    SQL, as authz-library documents), and `odt.sh publish-ui` publishes `ui/` to `production` with the service account

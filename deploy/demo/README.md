@@ -1,6 +1,7 @@
 # The public demo
 
-A public instance of OpenDevTrack for trying it without installing anything (ADR-25 point 3). **Everything in it is
+A public instance of OpenDevTrack for trying it without installing anything (ADR-25 point 3), at
+https://demo.ods.logicwarez.com. **Everything in it is
 erased every night: enter nothing private.** The accounts are shared, so anything written there is seen by every
 visitor.
 
@@ -51,7 +52,9 @@ What the host needs:
    - its secrets generated on the host;
    - `ECHO_HOST=` the third name.
 
-   The secret key, `ODT_SECRET_KEY`, comes from this file and never leaves the host.
+   The secret key, `ODT_SECRET_KEY`, comes from this file and never leaves the host. The list of breached passwords
+   goes into `deploy/compose/password-blacklists/breached-passwords.txt`, as the guide says: Keycloak does not start
+   without it. The demo uses the 100,000 passwords of `100k-most-used-passwords-NCSC.txt` of SecLists, in lower case.
 2. `deploy/demo/demo.sh setup`, once. It starts the containers, then:
    - sets the realm for the demo, as above;
    - creates the three users in Keycloak and the tenant `DEMO` with their roles;

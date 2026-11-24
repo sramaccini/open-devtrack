@@ -19,6 +19,8 @@ What is missing in Quadrava or in authz-library is added there, with their own t
 
 Phases **F0–F4 done**: the back end, the `ui/` project and CI are in place, with projects, issues, workflow, comments, attachments, boards, backlog and sprints, search, dashboards and notifications. **F5** is under way: the public API and webhooks, the administration and the hardening are built, and the documentation, the public demo and the release follow (ADR-25). The decisions are ADRs in [docs/](docs/README.md); [HANDOFF.md](HANDOFF.md) has the details and the next steps. The first release, 1.0, is planned for 28 May 2027.
 
+To try it without installing anything, open the public demo at https://demo.ods.logicwarez.com. Its shared accounts are listed in [deploy/demo](deploy/demo/README.md), and everything in it is erased every night.
+
 | Phase | Content | State |
 | --- | --- | --- |
 | F0 | Decisions D1–D9, end-to-end check of authz-library, development environment | Done |
