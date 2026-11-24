@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "screen": "issue-detail",
-  "title": "{{ t('issues.issue', 'Issue') }}",
+  "title": "{{ t('issues.issue_title', 'Issue {key}', {'key': params.issue}) }}",
   "requires": "odt.project.browse",
   "dataSources": {
     "issue": {

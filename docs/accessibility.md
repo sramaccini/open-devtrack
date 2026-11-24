@@ -89,7 +89,7 @@ With NVDA and Firefox (Windows) or VoiceOver and Safari (macOS):
 
 | Release | Date | Result |
 | --- | --- | --- |
-| 1.0.0-rc.1 | 24 November 2026 | Failed: four requests to Quadrava (Q31 to Q34) and one issue here (#41); the screen reader lines are not done yet. Details below |
+| 1.0.0-rc.1 | 24 November 2026 | Failed: four requests to Quadrava (Q31 to Q34); one issue here, #41, fixed; the screen reader lines are not done yet. Details below |
 
 #### 1.0.0-rc.1, 24 November 2026
 
@@ -119,8 +119,8 @@ Screen reader (checked from the accessibility tree; NVDA or VoiceOver still to d
   state is not exposed and the error is not linked to its field; the close button of a dialog is «Close» in Italian;
   the title of the browser tab never names the screen.
 - Not done: editing an issue and comments, which need a screen reader to judge.
-- Passed with a remark, #41: the headings form an outline on every screen (H1 the screen, H2 its sections), but the
-  issue page says only «Issue», not which one.
+- Passed: the headings form an outline on every screen (H1 the screen, H2 its sections). The issue page said only
+  «Issue»; since #41 its heading has the key («Issue WEB-4»).
 
 Zoom and reflow: passed. At 320 px the dashboard, the backlog and the issue page have one column and no horizontal
 scroll (the tabs that do not fit go into «⋯»); 200% of 1280 px is wider than that.

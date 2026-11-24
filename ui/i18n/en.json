@@ -42,7 +42,7 @@
   "common.saving_failed": "Saving failed",
   "common.changed_meanwhile": "Someone else changed it in the meantime: reload and try again",
   "issues.title": "Issues",
-  "issues.issue": "Issue",
+  "issues.issue_title": "Issue {key}",
   "issues.new": "New issue",
   "issues.create": "Create issue",
   "issues.created": "Issue created",

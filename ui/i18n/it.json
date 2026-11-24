@@ -42,7 +42,7 @@
   "common.saving_failed": "Salvataggio non riuscito",
   "common.changed_meanwhile": "Qualcun altro lo ha modificato nel frattempo: ricarica e riprova",
   "issues.title": "Issue",
-  "issues.issue": "Issue",
+  "issues.issue_title": "Issue {key}",
   "issues.new": "Nuova issue",
   "issues.create": "Crea issue",
   "issues.created": "Issue creata",
