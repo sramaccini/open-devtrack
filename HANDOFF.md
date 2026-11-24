@@ -161,8 +161,9 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    done: `ODT_WEBHOOKS_ALLOWED_HOSTS` and `deploy/demo/` (compose file, `demo.sh` with setup, nightly reset and
    upgrade, the page of the demo), deployed on 24 November 2026 at https://demo.ods.logicwarez.com from
    `v1.0.0-rc.1`, which was tagged first so that the demo runs a published image. The signed-in ZAP baseline found
-   no medium or high alert, and the reset runs from root's crontab at 03:30 UTC. The alerts of `docs/operations` are
-   not set up yet: the maintainer chooses where they go. Next: the rest of the checklist of rc.1 (step 5).
+   no medium or high alert, and the reset runs from root's crontab at 03:30 UTC. Its alerts come from an external
+   monitor (healthchecks.io) that mails the maintainer: `deploy/demo/watch.sh` every 5 minutes and the result of the
+   reset (deploy/demo/README.md, «Alerts»). Next: the rest of the checklist of rc.1 (step 5).
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
    SQL, as authz-library documents), and `odt.sh publish-ui` publishes `ui/` to `production` with the service account

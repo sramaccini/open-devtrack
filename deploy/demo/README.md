@@ -61,12 +61,12 @@ What the host needs:
    - publishes `ui/`;
    - takes the base snapshot into `deploy/demo/.work/`;
    - adds the sample projects.
-3. The ZAP baseline against the demo before it opens (`e2e/zap`), and the alerts of
-   [docs/operations](../../docs/operations/README.md).
-4. The nightly reset, in the crontab of the user that runs Docker:
+3. The ZAP baseline against the demo before it opens (`e2e/zap`), and the alerts (below).
+4. The nightly reset and the watch, in the crontab of the user that runs Docker:
 
    ```
    30 3 * * * /opt/open-devtrack/deploy/demo/demo.sh reset >> /var/log/odt-demo.log 2>&1
+   */5 * * * * /opt/open-devtrack/deploy/demo/watch.sh >> /var/log/odt-demo-watch.log 2>&1
    ```
 
 5. At each release:
@@ -76,3 +76,17 @@ What the host needs:
      new base snapshot and adds the sample projects.
 
 `demo.sh hooks` shows what the echo received.
+
+## Alerts
+
+The demo has no Prometheus: the metrics and rules of [docs/operations](../../docs/operations/README.md) are for an
+installation with real users. Its alerts come from an external monitor that mails the maintainer, so they also come
+when the host itself is down. It is [healthchecks.io](https://healthchecks.io), or a service compatible with it, with
+two checks whose ping addresses go into `.env`:
+
+- `WATCH_PING_URL`: a check with a period of 5 minutes, for [`watch.sh`](watch.sh). Every 5 minutes it checks the
+  front, the back end through the BFF, Keycloak and the echo, the containers, the certificates (14 days left), the
+  disk (85%) and the memory. It reports a success, or a failure with its reasons, and no report at all means the host
+  is down.
+- `RESET_PING_URL`: a check with the schedule of the reset (`30 3 * * *`, UTC), for `demo.sh reset`, which reports
+  its exit code when it ends.

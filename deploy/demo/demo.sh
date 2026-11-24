@@ -138,6 +138,13 @@ restore() {
 # end then restarts (deploy/compose/compose.yaml): up waits a second time.
 up() { "$odt" up || { log "the back end was not ready yet: waiting again"; "$odt" up; }; }
 
+# The nightly reset reports its exit code to the external monitor, as watch.sh does, when RESET_PING_URL is set
+ping_reset() {
+  local code=$?
+  [ -z "${RESET_PING_URL:-}" ] || curl -fsS -m 10 --retry 3 -o /dev/null "$RESET_PING_URL/$code" ||
+    echo "the monitor did not take the result of the reset" >&2
+}
+
 samples() {
   mkdir -p "$work"
   seed
@@ -157,6 +164,7 @@ case "${1:-}" in
     samples
     log "ready: $front" ;;
   reset)
+    trap ping_reset EXIT
     restore
     up
     samples

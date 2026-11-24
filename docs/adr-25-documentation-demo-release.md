@@ -124,7 +124,10 @@ What there is today:
      - The theme shows the logo in place of the name of the realm, so the notice of the demo is the title of the
        login form, set in the realm's translations.
 
-     The alerts are not set up yet: the maintainer chooses where they go.
+     The alerts of the demo are not the Prometheus rules of `docs/operations`, which are made for an installation
+     with real users. An external monitor (healthchecks.io) mails the maintainer. `deploy/demo/watch.sh` reports to it
+     every 5 minutes, and the nightly reset reports its exit code. When the host is down, the missing report raises
+     the alert (#31).
 4. **1.0 is released through release candidates, with a written checklist.**
    - `release.yml` also accepts `vX.Y.Z-rc.N`. A candidate publishes its image, signature and SBOM like a release,
      with the same tags, but as a pre-release: it never moves `X.Y` or `latest`.
