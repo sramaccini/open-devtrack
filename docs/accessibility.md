@@ -1,4 +1,4 @@
-| backlog | 0 | 0 | || issue-detail | 0 | 0 | || issue-list | 0 | 0 | || project-detail | 0 | 0 | |# Accessibility, WCAG 2.2 AA
+# Accessibility, WCAG 2.2 AA
 
 What ADR-23 asks for accessibility: an automated check in CI and a manual check at each release. Most of what a user
 meets is drawn by the components of Quadrava (NG-ZORRO). OpenDevTrack controls its screens: labels, headings, the order
