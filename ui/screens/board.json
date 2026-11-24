@@ -60,6 +60,7 @@
         {
           "id": "btn-backlog",
           "label": "{{ t('agile.backlog', 'Backlog') }}",
+          "icon": "external",
           "onClick": [
             {
               "navigate": "backlog",
@@ -72,6 +73,7 @@
         {
           "id": "btn-issues",
           "label": "{{ t('issues.title', 'Issues') }}",
+          "icon": "external",
           "onClick": [
             {
               "navigate": "issue-list",

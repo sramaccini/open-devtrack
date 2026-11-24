@@ -33,6 +33,7 @@
       "id": "btn-add-webhook",
       "type": "button",
       "label": "{{ t('webhooks.new', 'New webhook') }}",
+      "icon": "plus",
       "onClick": [
         {
           "dialog": {
@@ -222,6 +223,7 @@
         {
           "id": "btn-open-webhook",
           "label": "{{ t('webhooks.deliveries', 'Deliveries') }}",
+          "icon": "external",
           "onClick": [
             {
               "navigate": "webhook-detail",
@@ -235,6 +237,7 @@
         {
           "id": "btn-edit-webhook",
           "label": "{{ t('projects.edit_field', 'Edit') }}",
+          "icon": "edit",
           "visibleIf": "{{row._perm.edit}}",
           "onClick": [
             {
@@ -346,6 +349,7 @@
         {
           "id": "btn-ping-webhook",
           "label": "{{ t('webhooks.ping', 'Send a test') }}",
+          "icon": "play",
           "visibleIf": "{{row._perm.edit}}",
           "onClick": [
             {
@@ -370,6 +374,7 @@
         {
           "id": "btn-rotate-webhook",
           "label": "{{ t('webhooks.rotate', 'New secret') }}",
+          "icon": "reload",
           "visibleIf": "{{row._perm.edit}}",
           "onClick": [
             {
@@ -415,6 +420,7 @@
         {
           "id": "btn-remove-webhook",
           "label": "{{ t('projects.remove', 'Remove') }}",
+          "icon": "delete",
           "visibleIf": "{{row._perm.remove}}",
           "onClick": [
             {

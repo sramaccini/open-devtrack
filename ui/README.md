@@ -29,6 +29,12 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   free text of one line. Descriptions, labels and lists of choices have none and take a line of their own; so do the
   templates of the custom fields (`fieldsFrom`), by type. A field without `width` stops at 560px; the description of
   an issue in `issue-detail` has `width: "full"` (Quadrava 0.19.0, Q26) and takes the whole line.
+- **Icons** (Quadrava 0.19.0, Q27): every button and action has an `icon` before its text, by what it does: `plus`
+  creates, `user-add` adds a person or a group, `edit` changes, `delete` removes, `save` saves, `move` plans or
+  reorders, `play` starts or sends a test, `check` completes or turns on, `close` signs out or turns off, `link`,
+  `eye` and `eye-invisible` for links and watching, `download` exports, `reload` delivers again or renews a secret,
+  `filter` and `search` for filters and the search, `settings` for the project, `back` to the page above, `external`
+  to another page.
 - **Issue page**: `issue-detail` has the tabs General (the form and its buttons), Planning and Next steps, in a card
   (a `section` without a title). Below it is a second card, which holds the tabs of the activity: comments,
   attachments, links, watchers, history.

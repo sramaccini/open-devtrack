@@ -80,6 +80,7 @@
         {
           "id": "btn-save-workflow",
           "label": "{{ t('common.save', 'Save') }}",
+          "icon": "save",
           "visibleIf": "{{form._perm.edit}}",
           "onClick": [
             {
@@ -121,6 +122,7 @@
         {
           "id": "btn-add-status",
           "label": "{{ t('projects.add_status', 'New status') }}",
+          "icon": "plus",
           "visibleIf": "{{form._perm.edit}}",
           "onClick": [
             {
@@ -207,6 +209,7 @@
         {
           "id": "btn-add-transition",
           "label": "{{ t('projects.add_transition', 'New transition') }}",
+          "icon": "plus",
           "visibleIf": "{{form._perm.edit}}",
           "onClick": [
             {
@@ -295,6 +298,7 @@
         {
           "id": "btn-project",
           "label": "{{ t('projects.project', 'Project') }}",
+          "icon": "back",
           "onClick": [
             {
               "navigate": "project-detail",
@@ -340,6 +344,7 @@
         {
           "id": "btn-edit-status",
           "label": "{{ t('common.edit', 'Edit') }}",
+          "icon": "edit",
           "visibleIf": "{{row._perm.edit}}",
           "onClick": [
             {
@@ -424,6 +429,7 @@
         {
           "id": "btn-remove-status",
           "label": "{{ t('projects.remove', 'Remove') }}",
+          "icon": "delete",
           "visibleIf": "{{row._perm.edit}}",
           "onClick": [
             {
@@ -534,6 +540,7 @@
         {
           "id": "btn-edit-transition",
           "label": "{{ t('common.edit', 'Edit') }}",
+          "icon": "edit",
           "visibleIf": "{{row._perm.edit}}",
           "onClick": [
             {
@@ -629,6 +636,7 @@
         {
           "id": "btn-remove-transition",
           "label": "{{ t('projects.remove', 'Remove') }}",
+          "icon": "delete",
           "visibleIf": "{{row._perm.edit}}",
           "onClick": [
             {

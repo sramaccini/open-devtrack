@@ -36,6 +36,7 @@
       "id": "btn-add-group-member",
       "type": "button",
       "label": "{{ t('admin.add_group_member', 'Add member') }}",
+      "icon": "user-add",
       "onClick": [
         {
           "dialog": {
@@ -105,6 +106,7 @@
         {
           "id": "btn-remove-group-member",
           "label": "{{ t('common.remove', 'Remove') }}",
+          "icon": "delete",
           "visibleIf": "{{row._perm.remove}}",
           "onClick": [
             {

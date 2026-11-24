@@ -27,6 +27,7 @@
       "id": "btn-add-scheme",
       "type": "button",
       "label": "{{ t('admin.add_scheme', 'New scheme') }}",
+      "icon": "plus",
       "onClick": [
         {
           "dialog": {
@@ -124,6 +125,7 @@
         {
           "id": "btn-edit-scheme",
           "label": "{{ t('projects.edit_field', 'Edit') }}",
+          "icon": "edit",
           "visibleIf": "{{row._perm.edit}}",
           "onClick": [
             {
@@ -250,6 +252,7 @@
         {
           "id": "btn-remove-scheme",
           "label": "{{ t('common.remove', 'Remove') }}",
+          "icon": "delete",
           "visibleIf": "{{row._perm.remove}}",
           "onClick": [
             {

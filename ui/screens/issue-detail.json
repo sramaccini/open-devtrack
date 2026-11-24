@@ -240,6 +240,7 @@
                     {
                       "id": "btn-save",
                       "label": "{{ t('common.save', 'Save') }}",
+                      "icon": "save",
                       "visibleIf": "{{form._perm.edit}}",
                       "onClick": [
                         {
@@ -290,6 +291,7 @@
                     {
                       "id": "btn-link",
                       "label": "{{ t('issues.add_link', 'Link') }}",
+                      "icon": "link",
                       "visibleIf": "{{form._perm.edit}}",
                       "onClick": [
                         {
@@ -361,6 +363,7 @@
                     {
                       "id": "btn-watch",
                       "label": "{{ t('issues.watch', 'Watch') }}",
+                      "icon": "eye",
                       "visibleIf": "{{!form.watching}}",
                       "onClick": [
                         {
@@ -385,6 +388,7 @@
                     {
                       "id": "btn-unwatch",
                       "label": "{{ t('issues.unwatch', 'Stop watching') }}",
+                      "icon": "eye-invisible",
                       "visibleIf": "{{form.watching}}",
                       "onClick": [
                         {
@@ -412,6 +416,7 @@
                     {
                       "id": "btn-add-watcher",
                       "label": "{{ t('issues.add_watcher', 'Add watcher') }}",
+                      "icon": "user-add",
                       "visibleIf": "{{form._perm.edit}}",
                       "onClick": [
                         {
@@ -456,6 +461,7 @@
                     {
                       "id": "btn-back",
                       "label": "{{ t('issues.all', 'All issues') }}",
+                      "icon": "back",
                       "onClick": [
                         {
                           "navigate": "issue-list",
@@ -468,6 +474,7 @@
                     {
                       "id": "btn-delete",
                       "label": "{{ t('issues.delete', 'Delete') }}",
+                      "icon": "delete",
                       "visibleIf": "{{form._perm.delete}}",
                       "onClick": [
                         {
@@ -583,6 +590,7 @@
                     {
                       "id": "btn-save-plan",
                       "label": "{{ t('common.save', 'Save') }}",
+                      "icon": "save",
                       "visibleIf": "{{form._perm.edit}}",
                       "onClick": [
                         {
@@ -639,6 +647,7 @@
                     {
                       "id": "btn-move",
                       "label": "{{ t('issues.move', 'Move') }}",
+                      "icon": "move",
                       "onClick": [
                         {
                           "call": "move",
@@ -844,6 +853,7 @@
                     {
                       "id": "btn-remove-attachment",
                       "label": "{{ t('issues.remove_link', 'Remove') }}",
+                      "icon": "delete",
                       "visibleIf": "{{row._perm.delete}}",
                       "onClick": [
                         {
@@ -919,6 +929,7 @@
                     {
                       "id": "btn-remove-link",
                       "label": "{{ t('issues.remove_link', 'Remove') }}",
+                      "icon": "delete",
                       "visibleIf": "{{row._perm.delete}}",
                       "onClick": [
                         {
@@ -970,6 +981,7 @@
                     {
                       "id": "btn-remove-watcher",
                       "label": "{{ t('issues.remove_link', 'Remove') }}",
+                      "icon": "delete",
                       "visibleIf": "{{row._perm.delete}}",
                       "onClick": [
                         {

@@ -80,6 +80,7 @@
         {
           "id": "btn-new-sprint",
           "label": "{{ t('agile.new_sprint', 'New sprint') }}",
+          "icon": "plus",
           "visibleIf": "{{form._perm.manageSprints}}",
           "onClick": [
             {
@@ -152,6 +153,7 @@
         {
           "id": "btn-issues",
           "label": "{{ t('issues.title', 'Issues') }}",
+          "icon": "external",
           "onClick": [
             {
               "navigate": "issue-list",
@@ -164,6 +166,7 @@
         {
           "id": "btn-project",
           "label": "{{ t('issues.project_settings', 'Project and members') }}",
+          "icon": "settings",
           "onClick": [
             {
               "navigate": "project-detail",
@@ -300,6 +303,7 @@
         {
           "id": "btn-plan-issue",
           "label": "{{ t('agile.move_to_sprint', 'Move to sprint…') }}",
+          "icon": "move",
           "visibleIf": "{{row._perm.plan}}",
           "onClick": [
             {
@@ -350,6 +354,7 @@
         {
           "id": "btn-issue-top",
           "label": "{{ t('agile.to_top', 'To the top') }}",
+          "icon": "move",
           "visibleIf": "{{row._perm.rank}}",
           "onClick": [
             {
@@ -377,6 +382,7 @@
         {
           "id": "btn-issue-bottom",
           "label": "{{ t('agile.to_bottom', 'To the bottom') }}",
+          "icon": "move",
           "visibleIf": "{{row._perm.rank}}",
           "onClick": [
             {
@@ -455,6 +461,7 @@
         {
           "id": "btn-start-sprint",
           "label": "{{ t('agile.start', 'Start') }}",
+          "icon": "play",
           "visibleIf": "{{row._perm.start}}",
           "onClick": [
             {
@@ -512,6 +519,7 @@
         {
           "id": "btn-complete-sprint",
           "label": "{{ t('agile.complete', 'Complete') }}",
+          "icon": "check",
           "visibleIf": "{{row._perm.complete}}",
           "onClick": [
             {
@@ -560,6 +568,7 @@
         {
           "id": "btn-edit-sprint",
           "label": "{{ t('projects.edit_field', 'Edit') }}",
+          "icon": "edit",
           "visibleIf": "{{row._perm.edit}}",
           "onClick": [
             {
@@ -632,6 +641,7 @@
         {
           "id": "btn-remove-sprint",
           "label": "{{ t('projects.remove', 'Remove') }}",
+          "icon": "delete",
           "visibleIf": "{{row._perm.delete}}",
           "onClick": [
             {

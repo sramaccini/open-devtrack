@@ -48,6 +48,7 @@
         {
           "id": "btn-save-preferences",
           "label": "{{ t('common.save', 'Save') }}",
+          "icon": "save",
           "onClick": [
             {
               "call": "savePreferences",

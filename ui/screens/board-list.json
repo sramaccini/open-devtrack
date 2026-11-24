@@ -36,6 +36,7 @@
         {
           "id": "btn-open-board",
           "label": "{{ t('agile.open', 'Open') }}",
+          "icon": "external",
           "onClick": [
             {
               "navigate": "board",
@@ -48,6 +49,7 @@
         {
           "id": "btn-open-backlog",
           "label": "{{ t('agile.backlog', 'Backlog') }}",
+          "icon": "external",
           "onClick": [
             {
               "navigate": "backlog",

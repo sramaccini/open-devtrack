@@ -50,6 +50,7 @@
         {
           "id": "btn-edit-role",
           "label": "{{ t('projects.edit_field', 'Edit') }}",
+          "icon": "edit",
           "visibleIf": "{{ can('authz.rbac.manageglobal') && !row.system }}",
           "onClick": [
             {

@@ -119,6 +119,7 @@
         {
           "id": "btn-create",
           "label": "{{ t('issues.create', 'Create issue') }}",
+          "icon": "plus",
           "onClick": [
             {
               "call": "create",

@@ -67,6 +67,7 @@
       "id": "btn-save-filter",
       "type": "button",
       "label": "{{ t('search.save_filter', 'Save as filter') }}",
+      "icon": "save",
       "onClick": [
         {
           "dialog": {
@@ -291,6 +292,7 @@
         {
           "id": "btn-use-filter",
           "label": "{{ t('search.use', 'Use') }}",
+          "icon": "filter",
           "onClick": [
             {
               "set": {
@@ -306,6 +308,7 @@
         {
           "id": "btn-edit-filter",
           "label": "{{ t('common.edit', 'Edit') }}",
+          "icon": "edit",
           "visibleIf": "{{row._perm.edit}}",
           "onClick": [
             {
@@ -378,6 +381,7 @@
         {
           "id": "btn-remove-filter",
           "label": "{{ t('common.remove', 'Remove') }}",
+          "icon": "delete",
           "visibleIf": "{{row._perm.edit}}",
           "onClick": [
             {

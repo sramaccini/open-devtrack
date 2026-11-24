@@ -26,6 +26,7 @@
           "id": "btn-new",
           "type": "button",
           "label": "{{ t('projects.new', 'New project') }}",
+          "icon": "plus",
           "visibleIf": "{{can('odt.project.create')}}",
           "onClick": [
             {
@@ -72,6 +73,7 @@
         {
           "id": "btn-issues",
           "label": "{{ t('issues.title', 'Issues') }}",
+          "icon": "external",
           "onClick": [
             {
               "navigate": "issue-list",
@@ -84,6 +86,7 @@
         {
           "id": "btn-open",
           "label": "{{ t('common.open', 'Open') }}",
+          "icon": "external",
           "onClick": [
             {
               "navigate": "project-detail",

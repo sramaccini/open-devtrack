@@ -16,6 +16,7 @@
       "id": "btn-add-tenant",
       "type": "button",
       "label": "{{ t('admin.add_tenant', 'New tenant') }}",
+      "icon": "plus",
       "onClick": [
         {
           "dialog": {

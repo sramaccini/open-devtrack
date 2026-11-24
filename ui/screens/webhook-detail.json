@@ -46,6 +46,7 @@
         {
           "id": "btn-webhooks",
           "label": "{{ t('webhooks.title', 'Webhooks') }}",
+          "icon": "back",
           "onClick": [
             {
               "navigate": "webhook-list",
@@ -123,6 +124,7 @@
         {
           "id": "btn-again",
           "label": "{{ t('webhooks.again', 'Deliver again') }}",
+          "icon": "reload",
           "visibleIf": "{{row.status != 'pending'}}",
           "onClick": [
             {

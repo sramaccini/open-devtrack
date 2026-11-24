@@ -27,6 +27,7 @@
       "id": "btn-add-group",
       "type": "button",
       "label": "{{ t('admin.add_group', 'New group') }}",
+      "icon": "plus",
       "onClick": [
         {
           "dialog": {
@@ -100,6 +101,7 @@
         {
           "id": "btn-open-group",
           "label": "{{ t('admin.open', 'Open') }}",
+          "icon": "external",
           "onClick": [
             {
               "navigate": "admin-group-detail",
@@ -112,6 +114,7 @@
         {
           "id": "btn-edit-group",
           "label": "{{ t('projects.edit_field', 'Edit') }}",
+          "icon": "edit",
           "visibleIf": "{{row._perm.edit}}",
           "onClick": [
             {
@@ -181,6 +184,7 @@
         {
           "id": "btn-remove-group",
           "label": "{{ t('common.remove', 'Remove') }}",
+          "icon": "delete",
           "visibleIf": "{{row._perm.remove}}",
           "onClick": [
             {

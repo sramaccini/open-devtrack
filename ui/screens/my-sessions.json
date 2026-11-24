@@ -23,6 +23,7 @@
       "id": "btn-end-others",
       "type": "button",
       "label": "{{ t('sessions.end_others', 'Sign out everywhere else') }}",
+      "icon": "close",
       "onClick": [
         {
           "confirm": "{{ t('sessions.end_others_confirm', 'End every session but this one?') }}"
@@ -74,6 +75,7 @@
         {
           "id": "btn-end-session",
           "label": "{{ t('sessions.end', 'Sign out') }}",
+          "icon": "close",
           "visibleIf": "{{ !row.current }}",
           "onClick": [
             {

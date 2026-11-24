@@ -36,6 +36,7 @@
       "id": "btn-add-user",
       "type": "button",
       "label": "{{ t('admin.add_user', 'Add user') }}",
+      "icon": "user-add",
       "onClick": [
         {
           "dialog": {
@@ -179,6 +180,7 @@
         {
           "id": "btn-user-roles",
           "label": "{{ t('admin.roles', 'Roles') }}",
+          "icon": "edit",
           "onClick": [
             {
               "dialog": {
@@ -239,6 +241,7 @@
         {
           "id": "btn-user-sessions",
           "label": "{{ t('admin.sessions', 'Sessions') }}",
+          "icon": "external",
           "visibleIf": "{{ can('authz.session.revoke') }}",
           "onClick": [
             {
@@ -252,6 +255,7 @@
         {
           "id": "btn-sign-out",
           "label": "{{ t('admin.sign_out', 'Sign out everywhere') }}",
+          "icon": "close",
           "visibleIf": "{{ can('authz.session.revoke') }}",
           "onClick": [
             {
@@ -276,6 +280,7 @@
         {
           "id": "btn-turn-off",
           "label": "{{ t('admin.turn_off', 'Turn off') }}",
+          "icon": "close",
           "visibleIf": "{{ can('authz.rbac.manageglobal') && row.active }}",
           "onClick": [
             {
@@ -301,6 +306,7 @@
         {
           "id": "btn-turn-on",
           "label": "{{ t('admin.turn_on', 'Turn on') }}",
+          "icon": "check",
           "visibleIf": "{{ can('authz.rbac.manageglobal') && !row.active }}",
           "onClick": [
             {
@@ -323,6 +329,7 @@
         {
           "id": "btn-user-export",
           "label": "{{ t('privacy.export', 'Export data') }}",
+          "icon": "download",
           "onClick": [
             {
               "download": "exportUser",
@@ -336,6 +343,7 @@
         {
           "id": "btn-user-remove",
           "label": "{{ t('privacy.remove', 'Remove from tenant') }}",
+          "icon": "delete",
           "visibleIf": "{{ row.username != user.username }}",
           "onClick": [
             {

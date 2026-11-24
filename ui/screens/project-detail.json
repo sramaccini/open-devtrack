@@ -142,6 +142,7 @@
         {
           "id": "btn-save",
           "label": "{{ t('common.save', 'Save') }}",
+          "icon": "save",
           "visibleIf": "{{form._perm.edit}}",
           "onClick": [
             {
@@ -183,6 +184,7 @@
         {
           "id": "btn-dashboard",
           "label": "{{ t('reports.open_dashboard', 'Dashboard') }}",
+          "icon": "external",
           "onClick": [
             {
               "navigate": "project-dashboard",
@@ -195,6 +197,7 @@
         {
           "id": "btn-add-member",
           "label": "{{ t('projects.add_member', 'Add member') }}",
+          "icon": "user-add",
           "visibleIf": "{{form._perm.manageMembers}}",
           "onClick": [
             {
@@ -253,6 +256,7 @@
         {
           "id": "btn-add-field",
           "label": "{{ t('projects.add_field', 'New field') }}",
+          "icon": "plus",
           "visibleIf": "{{form._perm.edit}}",
           "onClick": [
             {
@@ -349,6 +353,7 @@
         {
           "id": "btn-add-workflow",
           "label": "{{ t('projects.add_workflow', 'New workflow') }}",
+          "icon": "plus",
           "visibleIf": "{{form._perm.edit}}",
           "onClick": [
             {
@@ -396,6 +401,7 @@
         {
           "id": "btn-add-board",
           "label": "{{ t('agile.new_board', 'New board') }}",
+          "icon": "plus",
           "visibleIf": "{{form._perm.edit}}",
           "onClick": [
             {
@@ -479,6 +485,7 @@
         {
           "id": "btn-issues",
           "label": "{{ t('issues.title', 'Issues') }}",
+          "icon": "external",
           "onClick": [
             {
               "navigate": "issue-list",
@@ -491,6 +498,7 @@
         {
           "id": "btn-backlog",
           "label": "{{ t('agile.backlog', 'Backlog') }}",
+          "icon": "external",
           "onClick": [
             {
               "navigate": "backlog",
@@ -503,6 +511,7 @@
         {
           "id": "btn-webhooks",
           "label": "{{ t('webhooks.title', 'Webhooks') }}",
+          "icon": "external",
           "visibleIf": "{{form._perm.edit}}",
           "onClick": [
             {
@@ -519,6 +528,7 @@
       "id": "btn-permission-scheme",
       "type": "button",
       "label": "{{ t('projects.change_scheme', 'Change the permission scheme') }}",
+      "icon": "edit",
       "visibleIf": "{{ data.project != null && data.project._perm.edit }}",
       "onClick": [
         {
@@ -564,6 +574,7 @@
       "id": "btn-project-log",
       "type": "button",
       "label": "{{ t('admin.config_log', 'Administration log') }}",
+      "icon": "external",
       "visibleIf": "{{ data.project != null && data.project._perm.edit }}",
       "onClick": [
         {
@@ -612,6 +623,7 @@
         {
           "id": "btn-open-board",
           "label": "{{ t('agile.open', 'Open') }}",
+          "icon": "external",
           "onClick": [
             {
               "navigate": "board",
@@ -624,6 +636,7 @@
         {
           "id": "btn-edit-board",
           "label": "{{ t('projects.edit_field', 'Edit') }}",
+          "icon": "edit",
           "visibleIf": "{{row._perm.edit}}",
           "onClick": [
             {
@@ -723,6 +736,7 @@
         {
           "id": "btn-remove-board",
           "label": "{{ t('projects.remove', 'Remove') }}",
+          "icon": "delete",
           "visibleIf": "{{row._perm.edit}}",
           "onClick": [
             {
@@ -789,6 +803,7 @@
         {
           "id": "btn-change-role",
           "label": "{{ t('projects.change_role', 'Change role') }}",
+          "icon": "edit",
           "visibleIf": "{{row._perm.change}}",
           "onClick": [
             {
@@ -844,6 +859,7 @@
         {
           "id": "btn-remove",
           "label": "{{ t('projects.remove', 'Remove') }}",
+          "icon": "delete",
           "visibleIf": "{{row._perm.remove}}",
           "onClick": [
             {
@@ -887,6 +903,7 @@
       "id": "btn-add-group",
       "type": "button",
       "label": "{{ t('projects.add_group', 'Add group') }}",
+      "icon": "user-add",
       "visibleIf": "{{ data.project != null && data.project._perm.manageMembers }}",
       "onClick": [
         {
@@ -976,6 +993,7 @@
         {
           "id": "btn-change-group-role",
           "label": "{{ t('projects.change_role', 'Change role') }}",
+          "icon": "edit",
           "visibleIf": "{{row._perm.change}}",
           "onClick": [
             {
@@ -1032,6 +1050,7 @@
         {
           "id": "btn-remove-group",
           "label": "{{ t('common.remove', 'Remove') }}",
+          "icon": "delete",
           "visibleIf": "{{row._perm.remove}}",
           "onClick": [
             {
@@ -1110,6 +1129,7 @@
         {
           "id": "btn-open-workflow",
           "label": "{{ t('agile.open', 'Open') }}",
+          "icon": "external",
           "onClick": [
             {
               "navigate": "workflow-detail",
@@ -1123,6 +1143,7 @@
         {
           "id": "btn-remove-workflow",
           "label": "{{ t('projects.remove', 'Remove') }}",
+          "icon": "delete",
           "visibleIf": "{{row._perm.remove}}",
           "onClick": [
             {
@@ -1199,6 +1220,7 @@
         {
           "id": "btn-edit-field",
           "label": "{{ t('projects.edit_field', 'Edit') }}",
+          "icon": "edit",
           "visibleIf": "{{row._perm.edit}}",
           "onClick": [
             {

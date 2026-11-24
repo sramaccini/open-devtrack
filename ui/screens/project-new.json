@@ -49,6 +49,7 @@
         {
           "id": "btn-create",
           "label": "{{ t('projects.create', 'Create project') }}",
+          "icon": "plus",
           "onClick": [
             {
               "call": "create",
