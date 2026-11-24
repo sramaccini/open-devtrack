@@ -89,7 +89,49 @@ With NVDA and Firefox (Windows) or VoiceOver and Safari (macOS):
 
 | Release | Date | Result |
 | --- | --- | --- |
-| 1.0 | | Not done yet: the first manual check is for the first release candidate |
+| 1.0.0-rc.1 | 24 November 2026 | Failed: four requests to Quadrava (Q31 to Q34) and one issue here (#41); the screen reader lines are not done yet. Details below |
+
+#### 1.0.0-rc.1, 24 November 2026
+
+Done on `main` after the tag (commit `109288f`, Quadrava 0.19.1), in the development stack, at 1280 px and 320 px, in
+Italian, with the keyboard of the browser of the desktop app on Windows; the focus order was logged with a `focusin`
+listener and contrast measured on every visible text of the 11 screens against its real background. The next
+candidate repeats it.
+
+Keyboard only:
+
+- Failed, **Q31** (#37): the sorting and the filters of the tables (dashboard, issues, backlog, search) are not
+  reachable; everything else is: the side bar, the forms, the row and bulk actions, the group rows, the tabs (arrows),
+  the dialogs and the menus.
+- Failed, **Q32** (#38): buttons and cell links have only the browser's default focus ring, amber on this machine and
+  2.4:1 on white; the order follows the screen.
+- Failed, **Q32** (#38): dialogs keep the focus inside and close with Escape, but give it to the page instead of the
+  button that opened them. The menus of the board and the search suggestions (Escape closes only the list) pass.
+- Passed: on the board, the «Sposta … in…» button of a card lists the other columns and «Sposta su», «Sposta giù»;
+  Escape gives the focus back to the card.
+- Passed: in the backlog a row goes into a sprint («Sposta nello sprint…», alone or with the selection) and to the top or
+  the bottom by keyboard; the selection checkboxes have no name (Q33).
+- Passed: no skip link, but a `main` landmark and six stops before the content.
+
+Screen reader (checked from the accessibility tree; NVDA or VoiceOver still to do):
+
+- Failed, **Q33** (#39): creating an issue, each field has its label and an error is a `role=alert`, but the required
+  state is not exposed and the error is not linked to its field; the close button of a dialog is «Close» in Italian;
+  the title of the browser tab never names the screen.
+- Not done: editing an issue and comments, which need a screen reader to judge.
+- Passed with a remark, #41: the headings form an outline on every screen (H1 the screen, H2 its sections), but the
+  issue page says only «Issue», not which one.
+
+Zoom and reflow: passed. At 320 px the dashboard, the backlog and the issue page have one column and no horizontal
+scroll (the tabs that do not fit go into «⋯»); 200% of 1280 px is wider than that.
+
+Contrast and colour:
+
+- Light theme: passed, no text below 4.5:1 (3:1 when large) on the 11 screens.
+- Dark theme: failed, **Q34** (#40): the colours of NG-ZORRO's dark stylesheet win over those of the theme, so buttons,
+  the active tab and the processing tags are NG-ZORRO blue (white on them 4.20:1, the tags 4.1:1) and danger buttons
+  2.31:1.
+- Passed: statuses, priorities and the cards of the board always have a text.
 
 ## Where a problem goes
 
