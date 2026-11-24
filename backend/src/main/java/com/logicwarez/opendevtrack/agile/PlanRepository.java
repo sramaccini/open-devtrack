@@ -23,6 +23,14 @@ interface PlanRepository extends JpaRepository<PlanEntity, UUID> {
     @Query("SELECT max(p.rank) FROM PlanEntity p WHERE p.projectId = :projectId")
     Optional<String> last(UUID projectId);
 
+    /** The first key of the order of the project, leaving out the issue that moves. */
+    @Query("SELECT min(p.rank) FROM PlanEntity p WHERE p.projectId = :projectId AND p.issueId <> :except")
+    Optional<String> first(UUID projectId, UUID except);
+
+    /** The last key of the order of the project, leaving out the issue that moves. */
+    @Query("SELECT max(p.rank) FROM PlanEntity p WHERE p.projectId = :projectId AND p.issueId <> :except")
+    Optional<String> last(UUID projectId, UUID except);
+
     /** The first key after {@code rank}, leaving out the issue that moves. */
     @Query("SELECT min(p.rank) FROM PlanEntity p WHERE p.projectId = :projectId AND p.rank > :rank AND p.issueId <> :except")
     Optional<String> next(UUID projectId, String rank, UUID except);

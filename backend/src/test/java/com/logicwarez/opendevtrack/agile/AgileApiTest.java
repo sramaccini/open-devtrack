@@ -107,6 +107,23 @@ class AgileApiTest {
         return JsonPath.read(body, "$[*].key");
     }
 
+    /** The rows of the backlog screen (ADR-26): its query on the search, once the index has the last changes. */
+    private String backlog(SessionAuthentication who) throws Exception {
+        TestInfrastructure.awaitListeners(jdbc);
+        return mvc.perform(as(post("/api/search"), who).content("""
+                        {"query":"project = ODT AND (sprint IN openSprints() OR (sprint IS EMPTY AND category != done)) \
+                        ORDER BY rank"}"""))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+    }
+
+    private static List<String> keys(String rows) {
+        return JsonPath.read(rows, "$.items[*].key");
+    }
+
+    private void to(String url, String end, SessionAuthentication who, int expected) throws Exception {
+        mvc.perform(as(post(url), who).content("{\"to\":\"" + end + "\"}")).andExpect(status().is(expected));
+    }
+
     private void move(String url, String column, String before, String after, SessionAuthentication who, int expected)
             throws Exception {
         String body = "{\"column\":\"" + column + "\",\"beforeId\":" + quoted(before) + ",\"afterId\":" + quoted(after) + "}";
@@ -201,11 +218,27 @@ class AgileApiTest {
         move(cards + "ODT-2/move", "0", "ODT-4", "ODT-3", luisa, 200);
         assertThat(keys("/api/boards/" + board + "/cards", paola)).containsExactly("ODT-4", "ODT-2", "ODT-3", "ODT-1");
         // The backlog shows the same order.
-        assertThat(keys("/api/projects/ODT/backlog/cards", paola)).containsExactly("ODT-4", "ODT-2", "ODT-3", "ODT-1");
+        assertThat(keys(backlog(paola))).containsExactly("ODT-4", "ODT-2", "ODT-3", "ODT-1");
         move(cards + "ODT-1/move", "0", null, "ODT-4", paola, 403);
         // A new issue goes to the bottom.
         mvc.perform(as(post("/api/projects/ODT/issues"), luisa).content("{\"summary\":\"Five\"}")).andExpect(status().isCreated());
         assertThat(keys("/api/boards/" + board + "/cards", paola)).last().isEqualTo("ODT-5");
+    }
+
+    @Test
+    void anIssueGoesToTheTopOrTheBottomOfTheOrder() throws Exception {
+        String backlog = "/api/projects/ODT/backlog/cards/";
+        to(backlog + "ODT-3/move", "top", luisa, 200);
+        to(backlog + "ODT-1/move", "bottom", luisa, 200);
+        to(backlog + "ODT-4/move", "bottom", luisa, 200);
+        String rows = backlog(luisa);
+        assertThat(keys(rows)).containsExactly("ODT-3", "ODT-2", "ODT-1", "ODT-4");
+        // The rows say who may plan and order them: a developer, not a viewer.
+        assertThat(JsonPath.<Boolean>read(rows, "$.items[0]._perm.plan")).isTrue();
+        assertThat(JsonPath.<Boolean>read(rows, "$.items[0]._perm.rank")).isTrue();
+        assertThat(JsonPath.<Boolean>read(backlog(paola), "$.items[0]._perm.rank")).isFalse();
+        to(backlog + "ODT-2/move", "top", paola, 403);
+        to(backlog + "ODT-2/move", "middle", luisa, 400);
     }
 
     @Test
@@ -257,11 +290,12 @@ class AgileApiTest {
         mvc.perform(as(put("/api/issues/ODT-1/plan"), luisa).content("{\"points\":5}")).andExpect(status().isOk());
         mvc.perform(as(put("/api/issues/ODT-1/plan"), luisa).content("{\"points\":1000}")).andExpect(status().isBadRequest());
         mvc.perform(as(put("/api/issues/ODT-1/plan"), paola).content("{\"points\":3}")).andExpect(status().isForbidden());
-        mvc.perform(as(get("/api/projects/ODT/backlog/cards"), paola))
-                .andExpect(jsonPath("$[0].key").value("ODT-3"))
-                .andExpect(jsonPath("$[0].column").value(sprint))
-                .andExpect(jsonPath("$[1].points").value(5))
-                .andExpect(jsonPath("$[2].column").value("backlog"));
+        String planned = backlog(paola);
+        assertThat(keys(planned)).containsExactly("ODT-3", "ODT-1", "ODT-2", "ODT-4");
+        assertThat(JsonPath.<String>read(planned, "$.items[0].sprint")).isEqualTo("ODT Sprint 1");
+        assertThat(JsonPath.<String>read(planned, "$.items[0].sprintState")).isEqualTo("planned");
+        assertThat(JsonPath.<Integer>read(planned, "$.items[1].points")).isEqualTo(5);
+        assertThat(JsonPath.<String>read(planned, "$.items[2].sprint")).isEqualTo("Backlog");
         mvc.perform(as(get("/api/issues/ODT-1/plan"), paola))
                 .andExpect(jsonPath("$.points").value(5))
                 .andExpect(jsonPath("$.sprint").value("ODT Sprint 1"))
@@ -295,9 +329,9 @@ class AgileApiTest {
         assertThat(jdbc.queryForList("SELECT outcome FROM odt_agile.sprint_issue ORDER BY added_at, outcome", String.class))
                 .containsExactly("done", "removed", "carried");
         mvc.perform(as(get("/api/projects/ODT/backlog/columns"), paola)).andExpect(jsonPath("$[0].value").value(next));
-        mvc.perform(as(get("/api/projects/ODT/backlog/cards"), paola))
-                .andExpect(jsonPath("$.length()").value(3))
-                .andExpect(jsonPath("$[?(@.key == 'ODT-2')].column").value(next));
+        String left = backlog(paola);
+        assertThat(keys(left)).containsExactlyInAnyOrder("ODT-2", "ODT-3", "ODT-4");
+        assertThat(JsonPath.<List<String>>read(left, "$.items[?(@.key == 'ODT-2')].sprint")).containsExactly("ODT Sprint 2");
         mvc.perform(as(get("/api/projects/ODT/sprints"), paola))
                 .andExpect(jsonPath("$[0].state").value("planned"))
                 .andExpect(jsonPath("$[0]._perm.start").value(false))
@@ -313,7 +347,8 @@ class AgileApiTest {
         String board = board();
         mvc.perform(as(get("/api/boards/" + board), ugo)).andExpect(status().isNotFound());
         mvc.perform(as(get("/api/boards/" + board + "/cards"), ugo)).andExpect(status().isNotFound());
-        mvc.perform(as(get("/api/projects/ODT/backlog/cards"), ugo)).andExpect(status().isNotFound());
+        mvc.perform(as(post("/api/projects/ODT/backlog/cards/ODT-1/move"), ugo).content("{\"to\":\"top\"}"))
+                .andExpect(status().isNotFound());
         mvc.perform(as(get("/api/projects/ODT/sprints"), ugo)).andExpect(status().isNotFound());
         mvc.perform(as(get("/api/issues/ODT-1/plan"), ugo)).andExpect(status().isNotFound());
         mvc.perform(as(get("/api/boards"), ugo)).andExpect(jsonPath("$.length()").value(0));

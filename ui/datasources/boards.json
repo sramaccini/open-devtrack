@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "datasources": "boards",
-  "description": "Boards, backlog and sprints of the projects (module agile, ADR-15).",
+  "description": "Boards, backlog and sprints of the projects (module agile, ADR-15, ADR-26).",
   "sources": {
     "mine": {
       "type": "rest",
@@ -62,24 +62,18 @@
         "afterId": "{{afterId}}"
       }
     },
-    "backlogColumns": {
+    "planColumns": {
       "type": "rest",
       "method": "GET",
-      "url": "/api/projects/{{params.key}}/backlog/columns"
+      "url": "/api/projects/{{row.project}}/backlog/columns"
     },
-    "backlogCards": {
-      "type": "rest",
-      "method": "GET",
-      "url": "/api/projects/{{params.key}}/backlog/cards"
-    },
-    "backlogMove": {
+    "backlogPlan": {
       "type": "rest",
       "method": "POST",
-      "url": "/api/projects/{{params.key}}/backlog/cards/{{key}}/move",
+      "url": "/api/projects/{{project}}/backlog/cards/{{key}}/move",
       "body": {
-        "column": "{{to}}",
-        "beforeId": "{{beforeId}}",
-        "afterId": "{{afterId}}"
+        "column": "{{column}}",
+        "to": "{{to}}"
       }
     },
     "sprints": {

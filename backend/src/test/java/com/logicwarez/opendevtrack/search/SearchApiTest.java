@@ -193,6 +193,25 @@ class SearchApiTest {
         assertThat(keys(mario, "sprint IN openSprints()")).containsExactly("ODT-3");
         assertThat(keys(mario, "sprint = \"" + sprintName + "\"")).containsExactly("ODT-3");
         assertThat(keys(mario, "project = ODT AND sprint IS EMPTY ORDER BY rank")).containsExactly("ODT-1", "ODT-2");
+        // The sprint as a column, a group in its order and a sort (ADR-26): the issues in no sprint are the backlog.
+        mvc.perform(as(post("/api/search"), mario).content("{\"query\":\"project = ODT\",\"groupBy\":[\"sprint\"]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.groups[0].value").value(sprintName))
+                .andExpect(jsonPath("$.groups[0].count").value(1))
+                .andExpect(jsonPath("$.groups[1].value").value("Backlog"))
+                .andExpect(jsonPath("$.groups[1].count").value(2));
+        mvc.perform(as(post("/api/search"), mario).content("""
+                        {"query":"project = ODT","groupBy":["sprint"],"groupPath":[{"field":"sprint","value":"Backlog"}]}"""))
+                .andExpect(jsonPath("$.items.length()").value(2));
+        mvc.perform(as(post("/api/search"), luisa).content("""
+                        {"query":"project = ODT","sort":{"field":"sprint","direction":"asc"}}"""))
+                .andExpect(jsonPath("$.items[0].key").value("ODT-3"))
+                .andExpect(jsonPath("$.items[0].sprint").value(sprintName))
+                .andExpect(jsonPath("$.items[0].sprintState").value("planned"))
+                .andExpect(jsonPath("$.items[0]._perm.plan").value(true))
+                .andExpect(jsonPath("$.items[1].sprint").value("Backlog"));
+        mvc.perform(as(post("/api/search"), mario).content("{\"query\":\"project = ODT\",\"distinct\":\"sprint\"}"))
+                .andExpect(jsonPath("$.values").value(org.hamcrest.Matchers.containsInAnyOrder(sprintName, "Backlog")));
 
         mvc.perform(as(delete("/api/issues/ODT-2"), mario)).andExpect(status().isNoContent());
         await(() -> docs() == 4);

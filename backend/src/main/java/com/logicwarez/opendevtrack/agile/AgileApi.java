@@ -42,8 +42,12 @@ final class AgileApi {
                    List<String> labels, Integer points, String column, @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
-    /** A card dropped on {@code column}, between the cards {@code beforeId} and {@code afterId} (issue keys). */
-    record MoveRequest(String column, String beforeId, String afterId) {
+    /**
+     * A card dropped on {@code column}, between the cards {@code beforeId} and {@code afterId} (issue keys). In the
+     * backlog, {@code to} instead puts the issue first ({@code top}) or last ({@code bottom}) in the order of its
+     * project (ADR-26); {@code column} is then optional.
+     */
+    record MoveRequest(String column, String beforeId, String afterId, String to) {
     }
 
     record SprintRow(String id, String name, String goal, String state, LocalDate startsOn, LocalDate endsOn,

@@ -4,7 +4,6 @@
  */
 package com.logicwarez.opendevtrack.agile;
 
-import com.logicwarez.opendevtrack.agile.AgileApi.CardRow;
 import com.logicwarez.opendevtrack.agile.AgileApi.ColumnRow;
 import com.logicwarez.opendevtrack.agile.AgileApi.MoveRequest;
 import com.logicwarez.opendevtrack.agile.AgileApi.PlanRequest;
@@ -21,7 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
@@ -35,11 +33,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The backlog of a project (ADR-15): a kanban whose columns are the sprints not completed, the active one first, and
- * the backlog last. A card dropped on another column goes into that sprint, or back to the backlog
- * ({@code odt.sprint.manage}); dropped between two cards it changes place in the one order of the project
- * ({@code odt.issue.edit}). The backlog holds the issues not done and in no sprint. Here also the plan of one issue:
- * its sprint and its story points.
+ * The planning of a project (ADR-15, ADR-26). The backlog screen is a search: its rows go into a sprint not completed,
+ * or back to the backlog ({@code odt.sprint.manage}), chosen among the columns here (the active sprint first, then the
+ * planned ones, the backlog last); they also go to the top or the bottom of the one order of the project, or between
+ * two issues ({@code odt.issue.edit}). Here also the plan of one issue: its sprint and its story points.
  */
 @RestController
 @Transactional(readOnly = true)
@@ -47,20 +44,19 @@ import org.springframework.web.bind.annotation.RestController;
 class BacklogController {
 
     static final String BACKLOG = "backlog";
+    static final Set<String> ENDS = Set.of("top", "bottom");
 
     private final Scopes scopes;
     private final Plans plans;
-    private final Cards cards;
     private final Issues issues;
     private final PlanRepository planRepository;
     private final SprintRepository sprints;
     private final Texts texts;
 
-    BacklogController(Scopes scopes, Plans plans, Cards cards, Issues issues, PlanRepository planRepository,
+    BacklogController(Scopes scopes, Plans plans, Issues issues, PlanRepository planRepository,
                       SprintRepository sprints, Texts texts) {
         this.scopes = scopes;
         this.plans = plans;
-        this.cards = cards;
         this.issues = issues;
         this.planRepository = planRepository;
         this.sprints = sprints;
@@ -83,25 +79,8 @@ class BacklogController {
         return ResponseEntity.ok(rows);
     }
 
-    @ApiDoc(value = "The issues of the backlog and of the sprints not completed, in their order",
-            answer = CardRow.class, list = true, project = "odt.issue.browse")
-    @GetMapping("/api/projects/{key}/backlog/cards")
-    ResponseEntity<?> cards(@PathVariable String key) {
-        Optional<Scope> scope = member(key);
-        if (scope.isEmpty()) {
-            return notVisible(key);
-        }
-        Set<UUID> open = plans.open(scope.get().projectId()).stream().map(SprintEntity::id).collect(Collectors.toSet());
-        Set<String> done = cards.done(scope.get().projectId());
-        Map<String, Boolean> perm = Map.of("move", scope.get().can(Scopes.SPRINTS) || scope.get().can(Scopes.RANK));
-        List<CardRow> rows = cards.ranked(scope.get().project()).stream()
-                .filter(p -> p.sprintId() != null ? open.contains(p.sprintId()) : !done.contains(p.issue().status()))
-                .map(p -> p.card(p.sprintId() != null ? p.sprintId().toString() : BACKLOG, perm)).toList();
-        return ResponseEntity.ok(rows);
-    }
-
-    /** A card dropped on a sprint or on the backlog, between two cards. */
-    @ApiDoc(value = "Moves an issue to a sprint or the backlog, or between two others",
+    /** A card dropped on a sprint or on the backlog, between two cards; or an issue sent to the top or the bottom. */
+    @ApiDoc(value = "Moves an issue to a sprint or the backlog, between two others, or to the top or the bottom",
             answer = Map.class, project = {"odt.sprint.manage", "odt.issue.edit"})
     @PostMapping("/api/projects/{key}/backlog/cards/{issueKey}/move")
     @Transactional
@@ -113,6 +92,16 @@ class BacklogController {
         Optional<IssueRef> issue = issue(issueKey, scope.get());
         if (issue.isEmpty()) {
             return Problems.notFound("Issue not found");
+        }
+        if (present(request.to())) {
+            if (!ENDS.contains(request.to())) {
+                return Problems.badRequest("An issue moves to the top or the bottom");
+            }
+            if (!scope.get().can(Scopes.RANK)) {
+                return Problems.forbidden("Only a developer or an admin of the project changes the order of the issues");
+            }
+            plans.end(plans.plan(issue.get().id(), scope.get().projectId()), request.to().equals("top"));
+            return ResponseEntity.ok(Map.of("to", request.to()));
         }
         Map<String, SprintEntity> open = plans.open(scope.get().projectId()).stream()
                 .collect(Collectors.toMap(s -> s.id().toString(), Function.identity()));

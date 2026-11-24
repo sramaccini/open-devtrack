@@ -2609,47 +2609,6 @@
         "x-project-permissions" : [ "odt.project.edit" ]
       }
     },
-    "/api/projects/{key}/backlog/cards" : {
-      "get" : {
-        "operationId" : "backlog.cards",
-        "parameters" : [ {
-          "in" : "path",
-          "name" : "key",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/CardRow"
-                  }
-                }
-              }
-            },
-            "description" : "OK"
-          },
-          "401" : {
-            "$ref" : "#/components/responses/Unauthorized"
-          },
-          "403" : {
-            "$ref" : "#/components/responses/Forbidden"
-          },
-          "404" : {
-            "$ref" : "#/components/responses/NotFound"
-          }
-        },
-        "summary" : "The issues of the backlog and of the sprints not completed, in their order",
-        "tags" : [ "agile" ],
-        "x-permissions" : [ "odt.project.browse" ],
-        "x-project-permissions" : [ "odt.issue.browse" ]
-      }
-    },
     "/api/projects/{key}/backlog/cards/{issueKey}/move" : {
       "post" : {
         "operationId" : "backlog.move",
@@ -2703,7 +2662,7 @@
             "$ref" : "#/components/responses/NotFound"
           }
         },
-        "summary" : "Moves an issue to a sprint or the backlog, or between two others",
+        "summary" : "Moves an issue to a sprint or the backlog, between two others, or to the top or the bottom",
         "tags" : [ "agile" ],
         "x-permissions" : [ "odt.project.browse" ],
         "x-project-permissions" : [ "odt.sprint.manage", "odt.issue.edit" ]
@@ -6905,6 +6864,9 @@
             "type" : "string"
           },
           "column" : {
+            "type" : "string"
+          },
+          "to" : {
             "type" : "string"
           }
         }

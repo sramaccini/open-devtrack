@@ -1,6 +1,6 @@
 # ADR-26: The backlog as a search table
 
-Status: Proposed (24 November 2026) — F5
+Status: Accepted (24 November 2026; decided by the maintainer) — F5
 
 ## Context
 
@@ -28,8 +28,9 @@ What exists today:
 
 1. **The `backlog` screen is a search.** On top, the query field of the search screen (suggestions and check of
    ADR-16), filled with
-   `project = KEY AND (sprint IN openSprints() OR sprint IS EMPTY) AND category != done ORDER BY rank`: the issues of
-   the active and planned sprints and of the backlog, in their order. The user changes it freely, as in the search;
+   `project = KEY AND (sprint IN openSprints() OR (sprint IS EMPTY AND category != done)) ORDER BY rank`: the issues
+   of the active and planned sprints (done ones too, as the kanban showed them) and those not done of the backlog, in
+   their order. The user changes it freely, as in the search;
    the screen does not add hidden conditions.
 2. **A `serverDataTable` on `/api/search`, grouped by sprint.** The columns of the search (key, type, summary, status,
    priority, assignee, points, due) plus **Sprint**; the table opens grouped by sprint, so each sprint and the backlog
@@ -72,8 +73,11 @@ What exists today:
 ## Consequences
 
 - `search`: `sprint` and `sprintState` in the rows, `sprint` in `COLUMNS` and `GROUPS`, `_perm` on the rows; tests and
-  `docs/openapi.json`.
-- `agile`: `to` (`top`, `bottom`) in the move of the backlog; later the removal of the backlog columns and cards.
+  `docs/openapi.json`. Found in the build: the index is written after the commit (ADR-16), so a table refreshed right
+  after a move showed the old order; a change of plan is now also written to the index before the commit of the move,
+  in its transaction (the listener after the commit writes the same row again).
+- `agile`: `to` (`top`, `bottom`) in the move of the backlog; the cards of the backlog kanban removed with it, its
+  columns kept for the dialog «Move to sprint…».
 - `ui/`: `backlog.json` rewritten (query, table, row actions, sprints), texts in English and Italian; the guide
   (`docs/guide/`) and its images updated.
 - ADR-15, decision 6 and the alternative it rejected, are superseded for the backlog by this ADR; the rest of ADR-15

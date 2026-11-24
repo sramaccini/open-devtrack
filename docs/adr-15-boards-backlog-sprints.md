@@ -1,6 +1,6 @@
 # ADR-15: Boards, backlog and sprints
 
-Status: Accepted (6 November 2026; decided by the maintainer) — F3
+Status: Accepted (6 November 2026; decided by the maintainer) — F3. The backlog screen (decision 6) is superseded by ADR-26.
 
 ## Context
 

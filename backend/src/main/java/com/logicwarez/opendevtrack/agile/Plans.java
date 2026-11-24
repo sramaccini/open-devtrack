@@ -95,6 +95,19 @@ class Plans {
         planned(plan);
     }
 
+    /** Puts the issue first ({@code top}) or last in the order of its project (ADR-26). */
+    void end(PlanEntity plan, boolean top) {
+        plans.lock(plan.projectId());
+        Optional<String> edge = top ? plans.first(plan.projectId(), plan.issueId())
+                : plans.last(plan.projectId(), plan.issueId());
+        if (edge.isEmpty()) {
+            return;
+        }
+        plan.rank(top ? Rank.before(edge.get()) : Rank.after(edge.get()));
+        plans.saveAndFlush(plan);
+        planned(plan);
+    }
+
     /** Moves the issue into a sprint (none: the backlog), and keeps what the active sprint holds. */
     void sprint(PlanEntity plan, SprintEntity sprint, Instant now) {
         UUID to = sprint == null ? null : sprint.id();

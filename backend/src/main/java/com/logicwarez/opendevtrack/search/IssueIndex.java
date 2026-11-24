@@ -56,13 +56,17 @@ import org.jooq.impl.SQLDataType;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Keeps {@code odt_search.issue_doc} (ADR-16). Each event only says which issue changed: the index reads the issue, its
  * plan and the category of its status again and writes the whole row, so events handled out of order or twice leave
  * the same row. Listeners run after the commit, each in its own transaction, from the Event Publication Registry; the
- * rebuilds of one issue take turns on an advisory lock.
+ * rebuilds of one issue take turns on an advisory lock. A change of plan is also written before the commit of the move,
+ * in its transaction, so that the backlog table (ADR-26) shows a move as soon as it is refreshed; the listener after the
+ * commit writes the same row again.
  */
 @Component
 class IssueIndex {
@@ -97,6 +101,12 @@ class IssueIndex {
 
     @ApplicationModuleListener
     void on(IssuePlanned event) {
+        index(event.issueId());
+    }
+
+    /** The same change of plan in the transaction of the move, before its commit (ADR-26). */
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    void planned(IssuePlanned event) {
         index(event.issueId());
     }
 

@@ -25,14 +25,20 @@
     "removeSprint": {
       "ref": "boards/removeSprint"
     },
-    "columns": {
-      "ref": "boards/backlogColumns"
+    "issues": {
+      "ref": "search/search"
     },
-    "cards": {
-      "ref": "boards/backlogCards"
+    "check": {
+      "ref": "search/check"
     },
-    "move": {
-      "ref": "boards/backlogMove"
+    "words": {
+      "ref": "search/words"
+    },
+    "planColumns": {
+      "ref": "boards/planColumns"
+    },
+    "backlogPlan": {
+      "ref": "boards/backlogPlan"
     }
   },
   "components": [
@@ -140,9 +146,6 @@
             },
             {
               "refresh": "sprints"
-            },
-            {
-              "refresh": "columns"
             }
           ]
         },
@@ -175,73 +178,228 @@
     {
       "id": "backlog-help",
       "type": "alert",
-      "text": "{{ t('agile.backlog_help', 'Drag an issue onto a sprint to plan it, or up and down to change its place in the order of the project.') }}"
+      "text": "{{ t('agile.backlog_help', 'The issues of the sprints not completed and of the backlog, in the order of the project, grouped by sprint. Change the query as in the search; move an issue with the actions of its row. The order by drag is on the boards.') }}"
     },
     {
-      "id": "backlog-kanban",
-      "type": "kanban",
-      "source": "cards",
-      "columnField": "column",
-      "titleField": "summary",
-      "descriptionField": "key",
-      "keyField": "key",
-      "avatarField": "assignee",
-      "badges": [
-        {
-          "field": "type",
-          "valueKey": "values.issue_type"
+      "id": "backlog-query",
+      "type": "input",
+      "bind": "state.query",
+      "default": "{{ 'project = ' + params.key + ' AND (sprint IN openSprints() OR (sprint IS EMPTY AND category != done)) ORDER BY rank' }}",
+      "field": {
+        "name": "query",
+        "type": "text",
+        "label": "{{ t('search.query', 'Query') }}",
+        "maxLength": 2000,
+        "suggest": {
+          "source": "words",
+          "valueField": "insert",
+          "labelField": "label",
+          "descriptionField": "example",
+          "minChars": 0
         },
-        {
-          "field": "status",
-          "valueKey": "values.status"
-        }
-      ],
-      "footerFields": [
-        {
-          "field": "points",
-          "label": "{{ t('agile.points_short', 'Points') }}"
-        }
-      ],
-      "columnsFrom": {
-        "source": "columns",
-        "valueField": "value",
-        "labelField": "label",
-        "toneField": "tone"
+        "validation": [
+          {
+            "remote": "check"
+          }
+        ]
       },
-      "reorder": true,
-      "moveIf": "{{ row._perm.move }}",
-      "onMove": [
+      "onChange": [
         {
-          "call": "move",
-          "args": {
-            "key": "{{row.key}}",
-            "to": "{{to}}",
-            "beforeId": "{{beforeId}}",
-            "afterId": "{{afterId}}"
-          },
-          "onError": [
+          "refresh": "issues"
+        }
+      ]
+    },
+    {
+      "id": "backlog-issues",
+      "type": "serverDataTable",
+      "source": "issues",
+      "pageSize": 50,
+      "groupBy": [
+        "sprint"
+      ],
+      "refreshable": true,
+      "columns": [
+        {
+          "field": "key",
+          "label": "{{ t('issues.key', 'Key') }}",
+          "sortable": true,
+          "filter": "text",
+          "onClick": [
             {
-              "toast": "{{ t('agile.move_failed', 'The card could not be moved') }}"
-            },
-            {
-              "refresh": "cards"
+              "navigate": "issue-detail",
+              "params": {
+                "key": "{{row.project}}",
+                "issue": "{{row.key}}"
+              }
             }
           ]
         },
         {
-          "refresh": "cards"
+          "field": "type",
+          "label": "{{ t('issues.type', 'Type') }}",
+          "valueKey": "values.issue_type",
+          "sortable": true,
+          "filter": "select",
+          "groupable": true
         },
         {
-          "refresh": "sprints"
+          "field": "summary",
+          "label": "{{ t('issues.summary', 'Summary') }}",
+          "sortable": true,
+          "filter": "text"
+        },
+        {
+          "field": "status",
+          "label": "{{ t('issues.status', 'Status') }}",
+          "format": "badge",
+          "badges": {
+            "todo": "neutral",
+            "in_progress": "primary",
+            "done": "success"
+          },
+          "valueKey": "values.status",
+          "sortable": true,
+          "filter": "select",
+          "groupable": true
+        },
+        {
+          "field": "priority",
+          "label": "{{ t('issues.priority', 'Priority') }}",
+          "format": "badge",
+          "badges": {
+            "high": "danger",
+            "highest": "danger"
+          },
+          "valueKey": "values.priority",
+          "sortable": true,
+          "filter": "select",
+          "groupable": true
+        },
+        {
+          "field": "assignee",
+          "label": "{{ t('issues.assignee', 'Assignee') }}",
+          "sortable": true,
+          "filter": "select",
+          "groupable": true
+        },
+        {
+          "field": "points",
+          "label": "{{ t('agile.points_short', 'Points') }}",
+          "sortable": true,
+          "filter": "number"
+        },
+        {
+          "field": "sprint",
+          "label": "{{ t('agile.sprint', 'Sprint') }}",
+          "sortable": true,
+          "filter": "select",
+          "groupable": true
         }
       ],
-      "onOpen": [
+      "rowActions": [
         {
-          "navigate": "issue-detail",
-          "params": {
-            "key": "{{params.key}}",
-            "issue": "{{row.key}}"
-          }
+          "id": "btn-plan-issue",
+          "label": "{{ t('agile.move_to_sprint', 'Move to sprint…') }}",
+          "visibleIf": "{{row._perm.plan}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('agile.move_to_sprint_title', 'Move {key} to a sprint', {'key': row.key}) }}",
+                "submitLabel": "{{ t('agile.move', 'Move') }}",
+                "fields": [
+                  {
+                    "name": "column",
+                    "type": "lookup",
+                    "label": "{{ t('agile.sprint', 'Sprint') }}",
+                    "tooltip": "{{ t('agile.move_to_sprint_help', 'A sprint not completed of the project, or the backlog') }}",
+                    "required": true,
+                    "lookup": {
+                      "source": "planColumns",
+                      "valueField": "value",
+                      "labelField": "label",
+                      "minChars": 0
+                    }
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "backlogPlan",
+                    "args": {
+                      "project": "{{row.project}}",
+                      "key": "{{row.key}}",
+                      "column": "{{form.column}}",
+                      "to": null
+                    },
+                    "onError": [
+                      {
+                        "toast": "{{ t('agile.plan_failed', 'The issue could not be moved') }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "issues"
+            },
+            {
+              "refresh": "sprints"
+            }
+          ]
+        },
+        {
+          "id": "btn-issue-top",
+          "label": "{{ t('agile.to_top', 'To the top') }}",
+          "visibleIf": "{{row._perm.rank}}",
+          "onClick": [
+            {
+              "call": "backlogPlan",
+              "args": {
+                "project": "{{row.project}}",
+                "key": "{{row.key}}",
+                "column": null,
+                "to": "top"
+              },
+              "onError": [
+                {
+                  "toast": "{{ t('agile.plan_failed', 'The issue could not be moved') }}"
+                }
+              ]
+            },
+            {
+              "refresh": "issues"
+            },
+            {
+              "refresh": "sprints"
+            }
+          ]
+        },
+        {
+          "id": "btn-issue-bottom",
+          "label": "{{ t('agile.to_bottom', 'To the bottom') }}",
+          "visibleIf": "{{row._perm.rank}}",
+          "onClick": [
+            {
+              "call": "backlogPlan",
+              "args": {
+                "project": "{{row.project}}",
+                "key": "{{row.key}}",
+                "column": null,
+                "to": "bottom"
+              },
+              "onError": [
+                {
+                  "toast": "{{ t('agile.plan_failed', 'The issue could not be moved') }}"
+                }
+              ]
+            },
+            {
+              "refresh": "issues"
+            },
+            {
+              "refresh": "sprints"
+            }
+          ]
         }
       ]
     },
@@ -348,9 +506,6 @@
             },
             {
               "refresh": "sprints"
-            },
-            {
-              "refresh": "columns"
             }
           ]
         },
@@ -398,10 +553,7 @@
               "refresh": "sprints"
             },
             {
-              "refresh": "columns"
-            },
-            {
-              "refresh": "cards"
+              "refresh": "issues"
             }
           ]
         },
@@ -474,9 +626,6 @@
             },
             {
               "refresh": "sprints"
-            },
-            {
-              "refresh": "columns"
             }
           ]
         },
@@ -503,10 +652,7 @@
               "refresh": "sprints"
             },
             {
-              "refresh": "columns"
-            },
-            {
-              "refresh": "cards"
+              "refresh": "issues"
             }
           ]
         }

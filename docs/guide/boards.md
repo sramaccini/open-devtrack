@@ -47,13 +47,25 @@ the summary opens the issue. Moving cards needs the role of developer or admin.
 
 ## The backlog
 
-![The backlog, with the active sprint, the next one and the issues not planned](images/backlog.png)
+![The backlog, a table of the issues grouped by sprint](images/backlog.png)
 
-«Backlog» (from the issues or from the project) shows one column for each sprint not completed, the active one first,
-and then the backlog: the issues not done that are in no sprint.
+«Backlog» (from the issues or from the project) is a search ([Search](search.md)) that opens with the query
 
-- Dragging an issue onto a sprint plans it in that sprint, and dragging it onto the backlog takes it out.
-- Dragging it up or down changes its place in the order of the project.
+```
+project = WEB AND (sprint IN openSprints() OR (sprint IS EMPTY AND category != done)) ORDER BY rank
+```
+
+the issues of the sprints not completed, and those not done that are in no sprint, in the order of the project. The
+table groups them by sprint: the active sprint first, then the planned ones, then the backlog. Change the query, sort,
+filter and group as in the search; «Group by» without «Sprint» shows the plain order.
+
+Each row has three actions, for developers and admins:
+
+- **Move to sprint…**: pick a sprint not completed of the project, or «Backlog» to take the issue out of its sprint.
+- **To the top** and **To the bottom**: the issue goes first or last in the order of the project.
+
+To put an issue between two others, drag its card on a board: a board and the backlog share the one order of the
+project.
 
 The story points and the sprint of an issue are also set on the issue, under «Planning».
 

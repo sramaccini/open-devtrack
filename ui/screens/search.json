@@ -227,6 +227,13 @@
           "filter": "number"
         },
         {
+          "field": "sprint",
+          "label": "{{ t('agile.sprint', 'Sprint') }}",
+          "sortable": true,
+          "filter": "select",
+          "groupable": true
+        },
+        {
           "field": "updated",
           "label": "{{ t('issues.updated', 'Updated') }}",
           "format": "datetime",

@@ -422,6 +422,9 @@
           },
           "column" : {
             "type" : "string"
+          },
+          "to" : {
+            "type" : "string"
           }
         }
       },

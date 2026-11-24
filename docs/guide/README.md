@@ -11,7 +11,7 @@ The screens come in English and Italian, and this guide uses their English label
 | [Projects and members](projects.md) | Projects, their members and roles, groups, permission schemes |
 | [Issues](issues.md) | Issues, custom fields, comments and mentions, attachments, links, watchers, history |
 | [Workflows](workflows.md) | Statuses, transitions and their conditions, one workflow per issue type |
-| [Boards, backlog and sprints](boards.md) | Kanban and scrum boards, the backlog, planning and completing sprints |
+| [Boards, backlog and sprints](boards.md) | Kanban and scrum boards, the backlog as a table by sprint, planning and completing sprints |
 | [Search and ODQL](search.md) | The search screen, saved filters and the full reference of the query language |
 | [Dashboards and reports](dashboards.md) | Your dashboard, the dashboard of a project and its charts |
 | [Notifications](notifications.md) | The bell, mail at once or in a daily summary, and your choices |

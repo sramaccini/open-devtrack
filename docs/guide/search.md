@@ -12,7 +12,8 @@ The same language filters boards ([Boards](boards.md#boards)) and makes the save
   priorities, users, labels, sprints, projects). It checks the query, and when something is wrong it says where and
   what it expected.
 - **The results**: the issues found, 100 at most per page. A key opens the issue. The headers sort and filter the
-  results, and «Group by» groups them, on top of the query.
+  results, and «Group by» groups them, on top of the query. The column «Sprint» shows the sprint of each issue, or
+  «Backlog» for none; grouped by it, the sprints come in their order: active, planned, completed.
 - **Save as filter**: keep the query with a name ([below](#saved-filters)).
 
 A search finds only the issues of the projects you are a member of. The admins of the projects search all the
