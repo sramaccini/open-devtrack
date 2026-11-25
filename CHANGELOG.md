@@ -8,6 +8,10 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+## [1.0.0-rc.7] - 2026-11-25
+
+The seventh candidate: cards that change row on a board, on Quadrava 0.22.0.
+
 ### Added
 
 - **Boards**: on a board with lanes by assignee, priority or type, a card moved to another row changes that field of
@@ -17,6 +21,11 @@ The entries are written by hand at each release from the commits ([docs/release.
 ### Changed
 
 - Quadrava 0.22.0 (runtime image and CLI).
+
+### Upgrading
+
+From 1.0.0-rc.6: put the digest of the new image in `.env`, then `./odt.sh up` and `./odt.sh publish-ui`
+([upgrades-and-backups.md](docs/admin/upgrades-and-backups.md)). No change of data and no new setting.
 
 ## [1.0.0-rc.6] - 2026-11-25
 
