@@ -8,6 +8,16 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+### Added
+
+- **Boards**: on a board with lanes by assignee, priority or type, a card moved to another row changes that field of
+  its issue, after a confirmation, with the rules of the issue form and in one change with the transition of its
+  column (Q38). `POST /api/boards/{id}/cards/{issueKey}/move` takes `lane`.
+
+### Changed
+
+- Quadrava 0.22.0 (runtime image and CLI).
+
 ## [1.0.0-rc.6] - 2026-11-25
 
 The sixth candidate: the project page in tabs and breadcrumbs on every page, on Quadrava 0.21.0. The tag

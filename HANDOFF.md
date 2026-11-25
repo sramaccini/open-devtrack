@@ -14,14 +14,14 @@ Quadrava and authz-library, and the ADRs say where.
   (`ModularityTests`: `verify()` and the module documentation). The `odt.*` permission catalogue is a repeatable
   Flyway migration of the RBAC schema (ADR-07); the dev profile adds tenants, users and the UI author/approver roles.
 - Module `uiregistry` (ADR-03): `contracts/registry.yaml` 0.7.0, adapted from the Quadrava reference registry
-  (commit 9fa1916, contract 0.6.0), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.21.0 in the classpath.
+  (commit 9fa1916, contract 0.6.0), on PostgreSQL (`odt_uiregistry`), validated with the schemas of Quadrava 0.22.0 in the classpath.
   The browser uses the session; tools use Keycloak access tokens of `opendevtrack-tools` on `/registry/**`
   (the bearer access of authz-library, A4).
 - `ui/`: the Quadrava project, with the main navigation, home and projects placeholder screens, themes `odt-light` and
-  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.21.0 checks it (`quadrava validate`) and publishes it
+  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.22.0 checks it (`quadrava validate`) and publishes it
   (`quadrava publish`) to any environment: no environment is protected (ADR-12).
 - End-to-end check (`docs/check-authz-end-to-end.md`): Quadrava kits bff 13/13 with and without a session, authz 11/11,
-  registry 24/24 (`--protected-env none`), tenant switch kept across logins, `ui/` served by the runtime 0.21.0 from the
+  registry 24/24 (`--protected-env none`), tenant switch kept across logins, `ui/` served by the runtime 0.22.0 from the
   registry. Quadrava 0.5.0 adopted on 4 November 2026 (from 0.2.1: same schemas, registry contract 0.7), 0.6.0 on 5
   November (tab title and icons from the theme, shell texts built in: Q3 and Q4), 0.7.0 on 5 November (theme and
   language in the settings dialog of the user menu; the message bell of ADR-22), 0.8.0 on 6 November (`data.<name>` in the expressions: Q9), 0.9.0 on 6 November (links from the rows, Q10;
@@ -195,10 +195,10 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
      SBOM verified by cosign. The demo is upgraded to it (old `.env` in /root/odt-demo-env.rc4.bak); `watch.sh` ok.
    - A card moved to another lane of a board changes the assignee, the priority or the type of its issue (25
      November 2026): the back end takes `lane` in the move of a card and applies it with the rules of the issue form
-     (`issue/IssueEditor`, shared with `IssueController`), in one change with the transition of the column. The board
-     cannot drag a card to another row yet: asked to Quadrava as Q38 (#46); then `board.json` asks for confirmation
-     («The assignee will be changed to …») and sends the lane.
-   Next: Q38 on the board; the screen reader lines and the ZAP baseline on the current candidate.
+     (`issue/IssueEditor`, shared with `IssueController`), in one change with the transition of the column.
+     Quadrava 0.22.0 adopted (Q38, #46): `board.json` lets a card change row, by drag or from its «Move» menu, after a
+     confirmation («The assignee will be changed to …»).
+   Next: the screen reader lines and the ZAP baseline on the current candidate.
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
    SQL, as authz-library documents), and `odt.sh publish-ui` publishes `ui/` to `production` with the service account

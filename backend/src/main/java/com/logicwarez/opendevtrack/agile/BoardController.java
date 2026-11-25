@@ -271,7 +271,8 @@ class BoardController {
             }
             shown = shown.stream().filter(p -> matches.keys().contains(p.issue().key())).toList();
         }
-        Map<String, Boolean> perm = Map.of("move", canMove(scope));
+        // lane: the card may go to another lane, which changes a field of its issue.
+        Map<String, Boolean> perm = Map.of("move", canMove(scope), "lane", scope.can(Scopes.RANK));
         List<CardRow> rows = shown.stream().filter(p -> columnOf.containsKey(p.issue().status()))
                 .map(p -> p.card(columnOf.get(p.issue().status()), perm)).toList();
         if (board.lane().equals("assignee")) {

@@ -59,7 +59,8 @@
       "body": {
         "column": "{{to}}",
         "beforeId": "{{beforeId}}",
-        "afterId": "{{afterId}}"
+        "afterId": "{{afterId}}",
+        "lane": "{{lane}}"
       }
     },
     "planColumns": {

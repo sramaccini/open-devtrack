@@ -2910,7 +2910,7 @@
               },
               "laneField": {
                 "type": "string",
-                "description": "Field of the row that decides the swimlane (for example the assignee): the board is divided into horizontal lanes that can be collapsed. A card moves only within its lane. It can be an expression that returns the name of the field, for example {{ state.groupBy }}, so one board can be grouped in several ways; an empty text or null gives the board without lanes, an error a board with no cards."
+                "description": "Field of the row that decides the swimlane (for example the assignee): the board is divided into horizontal lanes that can be collapsed. A card moves only within its lane, unless moveAcrossLanes. It can be an expression that returns the name of the field, for example {{ state.groupBy }}, so one board can be grouped in several ways; an empty text or null gives the board without lanes, an error a board with no cards."
               },
               "lanes": {
                 "anyOf": [
@@ -2947,9 +2947,13 @@
                 "type": "boolean",
                 "description": "Cards can also change place within their column: they are dropped between other cards, or moved up and down from the «Move» menu, and onMove runs for these moves too (false if absent: only moves to another column)."
               },
+              "moveAcrossLanes": {
+                "type": "boolean",
+                "description": "With laneField, a card can also be moved to another lane, which changes its value of the lane field: it is dropped in any cell of the board, or moved with the «Move to row» group of the «Move» menu, which keeps the column (false if absent: only within its lane)."
+              },
               "moveIf": {
                 "$ref": "#/$defs/expression",
-                "description": "Condition for moving a card (it sees the row in row), for example a permission."
+                "description": "Condition for moving a card (it sees the row in row), for example a permission. With lanes it also sees the lane of the card in fromLane and fromLaneLabel and the target one in lane and laneLabel: equal to those of the card when deciding whether the card moves at all, those of each other lane with moveAcrossLanes, for example {{ lane == fromLane || can('issues.issue.assign') }}."
               },
               "onMove": {
                 "type": "array",
@@ -2957,7 +2961,7 @@
                 "items": {
                   "$ref": "#/$defs/step"
                 },
-                "description": "Steps that move a card (usually call and refresh): they see the row in row, the starting column in from, the target one in to, and the keys (keyField) of the cards that will be before and after it in beforeId and afterId (null at the ends of the column)."
+                "description": "Steps that move a card (usually call and refresh): they see the row in row, the starting column in from, the target one in to, and the keys (keyField) of the cards that will be before and after it in beforeId and afterId (null at the ends of the column). With lanes they also see the starting lane in fromLane and fromLaneLabel and the target one in lane and laneLabel (the value is null for the lane of the cards without a value, and for the board without lanes). The card changes place only with the reloaded data: if a confirm is cancelled or a call fails it stays where it was."
               },
               "onOpen": {
                 "type": "array",
@@ -2970,6 +2974,9 @@
             },
             "dependentRequired": {
               "lanes": [
+                "laneField"
+              ],
+              "moveAcrossLanes": [
                 "laneField"
               ]
             },

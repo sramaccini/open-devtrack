@@ -148,15 +148,49 @@
       "laneField": "{{ data.board != null && data.board.lane != 'none' ? data.board.lane : '' }}",
       "lanes": "{{ data.board != null && data.board.lane == 'priority' ? [{'value': 'highest', 'label': t('values.priority.highest', 'Highest')}, {'value': 'high', 'label': t('values.priority.high', 'High')}, {'value': 'medium', 'label': t('values.priority.medium', 'Medium')}, {'value': 'low', 'label': t('values.priority.low', 'Low')}, {'value': 'lowest', 'label': t('values.priority.lowest', 'Lowest')}] : data.board != null && data.board.lane == 'type' ? [{'value': 'epic', 'label': t('values.issue_type.epic', 'Epic')}, {'value': 'story', 'label': t('values.issue_type.story', 'Story')}, {'value': 'task', 'label': t('values.issue_type.task', 'Task')}, {'value': 'bug', 'label': t('values.issue_type.bug', 'Bug')}] : [] }}",
       "reorder": true,
-      "moveIf": "{{ row._perm.move }}",
+      "moveAcrossLanes": true,
+      "moveIf": "{{ row._perm.move && (lane == fromLane || row._perm.lane) }}",
       "onMove": [
+        {
+          "if": "{{ lane != fromLane && data.board.lane == 'assignee' && lane == null }}",
+          "then": [
+            {
+              "confirm": "{{ t('agile.confirm_unassign', 'The assignee will be removed. Move the card?') }}"
+            }
+          ]
+        },
+        {
+          "if": "{{ lane != fromLane && data.board.lane == 'assignee' && lane != null }}",
+          "then": [
+            {
+              "confirm": "{{ t('agile.confirm_assignee', 'The assignee will be changed to {lane}. Move the card?', {'lane': laneLabel}) }}"
+            }
+          ]
+        },
+        {
+          "if": "{{ lane != fromLane && data.board.lane == 'priority' }}",
+          "then": [
+            {
+              "confirm": "{{ t('agile.confirm_priority', 'The priority will be changed to {lane}. Move the card?', {'lane': laneLabel}) }}"
+            }
+          ]
+        },
+        {
+          "if": "{{ lane != fromLane && data.board.lane == 'type' }}",
+          "then": [
+            {
+              "confirm": "{{ t('agile.confirm_type', 'The type will be changed to {lane}. Move the card?', {'lane': laneLabel}) }}"
+            }
+          ]
+        },
         {
           "call": "move",
           "args": {
             "key": "{{row.key}}",
             "to": "{{to}}",
             "beforeId": "{{beforeId}}",
-            "afterId": "{{afterId}}"
+            "afterId": "{{afterId}}",
+            "lane": "{{ lane == fromLane ? null : lane == null ? '' : lane }}"
           },
           "onError": [
             {
@@ -168,7 +202,7 @@
               ],
               "else": [
                 {
-                  "toast": "{{ t('agile.move_failed', 'The card could not be moved') }}"
+                  "toast": "{{ error.status == 400 ? t('agile.lane_refused', 'The issue cannot take this value: change it from the issue') : t('agile.move_failed', 'The card could not be moved') }}"
                 }
               ]
             },

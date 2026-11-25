@@ -41,6 +41,12 @@ that shows each user their own cards. The board says when it has a filter.
   that column and can run now. When none can, the card goes back and the board says why
   ([Workflows](workflows.md#conditions)).
 - **Up or down in its column**: the issue changes its place in the order of the project.
+- **To another row**, on a board with lanes by assignee, priority or type: the issue takes the assignee, the priority
+  or the type of that row («No group» takes the assignee away). The board asks first, for example «The assignee will
+  be changed to luisa. Move the card?»; the change follows the rules of the issue form (an assignee who is a member and
+  not the reviewer, the custom fields a new type requires) and, when the card also goes to another column, the
+  transition sees the issue as changed: either both happen or neither. The «Move» menu of a card has the other rows
+  under «Move to row».
 
 A card shows the summary, the key, the type and priority, the story points and the initial of the assignee. Clicking
 the summary opens the issue. Moving cards needs the role of developer or admin.
