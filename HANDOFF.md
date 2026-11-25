@@ -198,7 +198,10 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
      (`issue/IssueEditor`, shared with `IssueController`), in one change with the transition of the column.
      Quadrava 0.22.0 adopted (Q38, #46): `board.json` lets a card change row, by drag or from its «Move» menu, after a
      confirmation («The assignee will be changed to …»).
-   Next: the screen reader lines and the ZAP baseline on the current candidate.
+   - `v1.0.0-rc.7` tagged on 4deb6f9 with Quadrava 0.22.0: its installation job failed on Maven Central 429 again (the
+     image build downloads everything, #47) and passed on rerun; image @sha256:db6fed81… with its signature and SBOM
+     verified by cosign. The demo is upgraded to it (old `.env` in /root/odt-demo-env.rc6.bak); `watch.sh` ok.
+   Next: #47 (Maven Central in the image build); the screen reader lines and the ZAP baseline on the current candidate.
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
    SQL, as authz-library documents), and `odt.sh publish-ui` publishes `ui/` to `production` with the service account
