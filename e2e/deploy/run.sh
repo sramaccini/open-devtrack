@@ -79,7 +79,14 @@ image() {
   printf '<settings><servers><server><id>authz-library</id><username>token</username><password>%s</password></server></servers></settings>\n' \
     "$PACKAGES_TOKEN" > "$work/maven-settings.xml"
   umask 022
-  docker build -q --secret id=maven-settings,src="$work/maven-settings.xml" -t opendevtrack-backend:deploy-check "$root/backend"
+  # The output of the build goes to a file and is shown only when the build fails, with the messages of Maven
+  # (issue #44: `docker build -q` printed nothing but the failed step).
+  if ! docker build --progress=plain --secret id=maven-settings,src="$work/maven-settings.xml" \
+      -t opendevtrack-backend:deploy-check "$root/backend" > "$work/image-build.log" 2>&1; then
+    echo "the build of the image failed; the end of its output ($work/image-build.log):" >&2
+    tail -n 120 "$work/image-build.log" >&2
+    return 1
+  fi
 }
 
 kcadm() {
