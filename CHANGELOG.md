@@ -8,6 +8,24 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+## [1.0.0-rc.5] - 2026-11-25
+
+The fifth candidate: the project page in tabs and breadcrumbs on every page, on Quadrava 0.21.0.
+
+### Changed
+
+- **Project page**: in tabs, as the issue page: General, Boards, Members, Groups, Workflows and Custom fields. The
+  buttons that add to a part («New board», «Add member», «Add group», «New workflow», «New field») are in its tab,
+  and the description takes the whole line.
+- **Breadcrumbs**: every page shows its path above the title, for example Projects › WEB › Issues › WEB-4, and each
+  step before the last one leads back to its page (Q37).
+- Quadrava 0.21.0 (runtime image and CLI).
+
+### Upgrading
+
+From 1.0.0-rc.4: put the digest of the new image in `.env`, then `./odt.sh up` and `./odt.sh publish-ui`
+([upgrades-and-backups.md](docs/admin/upgrades-and-backups.md)). No change of data and no new setting.
+
 ## [1.0.0-rc.4] - 2026-11-25
 
 The fourth candidate: the screens on Quadrava 0.20.1, which closes the two accessibility points left open by rc.3.
