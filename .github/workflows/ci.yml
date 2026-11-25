@@ -47,16 +47,29 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
-          cache: maven
           server-id: authz-library
           server-username: PACKAGES_USER
           server-password: PACKAGES_TOKEN
+      # The Maven repository of CI (#47): this job saves it, with what the build, the tests and the plugins of the other
+      # jobs need; the other jobs and the release only restore it, so a job that needs less never saves a partial copy
+      - uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-${{ hashFiles('backend/pom.xml') }}
+          restore-keys: maven-${{ runner.os }}-
       # ModularityTests, the registry with its schemas and the ui/ documents; RegistryApiTest on PostgreSQL and Redis
       # with Testcontainers (Docker of the runner)
       - name: Build and test
         env:
           PACKAGES_USER: ${{ github.actor }}
         run: mvn -B -f backend/pom.xml verify
+      # The plugins that the other jobs and the release run by name, so that the saved repository has them too
+      - name: Plugins of the other jobs
+        env:
+          PACKAGES_USER: ${{ github.actor }}
+        run: |
+          mvn -B -q -f backend/pom.xml org.cyclonedx:cyclonedx-maven-plugin:2.9.1:makeAggregateBom -DoutputFormat=json -DoutputName=bom
+          mvn -B -q -f backend/pom.xml versions:help
 
   dependencies:
     name: Dependencies (OSV-Scanner)
@@ -67,10 +80,15 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
-          cache: maven
           server-id: authz-library
           server-username: PACKAGES_USER
           server-password: PACKAGES_TOKEN
+      # The Maven repository that the back end job of ci.yml saves (#47)
+      - uses: actions/cache/restore@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-${{ hashFiles('backend/pom.xml') }}
+          restore-keys: maven-${{ runner.os }}-
       - uses: actions/setup-node@v5
         with:
           node-version: '24'
@@ -105,10 +123,15 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
-          cache: maven
           server-id: authz-library
           server-username: PACKAGES_USER
           server-password: PACKAGES_TOKEN
+      # The Maven repository that the back end job of ci.yml saves (#47)
+      - uses: actions/cache/restore@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-${{ hashFiles('backend/pom.xml') }}
+          restore-keys: maven-${{ runner.os }}-
       - uses: actions/setup-node@v5
         with:
           node-version: '24'

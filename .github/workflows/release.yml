@@ -37,10 +37,15 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
-          cache: maven
           server-id: authz-library
           server-username: PACKAGES_USER
           server-password: PACKAGES_TOKEN
+      # The Maven repository that the back end job of ci.yml saves (#47)
+      - uses: actions/cache/restore@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-${{ hashFiles('backend/pom.xml') }}
+          restore-keys: maven-${{ runner.os }}-
       - name: Build and test
         env:
           PACKAGES_USER: ${{ github.actor }}
@@ -70,10 +75,15 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
-          cache: maven
           server-id: authz-library
           server-username: PACKAGES_USER
           server-password: PACKAGES_TOKEN
+      # The Maven repository that the back end job of ci.yml saves (#47)
+      - uses: actions/cache/restore@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-${{ hashFiles('backend/pom.xml') }}
+          restore-keys: maven-${{ runner.os }}-
       - name: Version of the tag in the pom
         env:
           PACKAGES_USER: ${{ github.actor }}
@@ -83,7 +93,7 @@ jobs:
         env:
           PACKAGES_USER: ${{ github.actor }}
         run: mvn -B -q -f backend/pom.xml org.cyclonedx:cyclonedx-maven-plugin:2.9.1:makeAggregateBom -DoutputFormat=json -DoutputName=bom
-      # The jar of the tag is built here, with the Maven repository that setup-java restores, and the image takes it
+      # The jar of the tag is built here, with the Maven repository that CI saves, and the image takes it
       # (build context "dist"): Maven in Docker would download every dependency from Maven Central again, which
       # answers 429 to the runners (#47)
       - name: Jar of the back end

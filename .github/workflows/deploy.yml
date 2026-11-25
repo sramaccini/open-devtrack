@@ -36,16 +36,21 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      # The jar is built here, with the Maven repository that setup-java restores, and the image takes it: Maven in
+      # The jar is built here, with the Maven repository that CI saves, and the image takes it: Maven in
       # Docker would download every dependency from Maven Central again, which answers 429 to the runners (#47)
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '25'
-          cache: maven
           server-id: authz-library
           server-username: PACKAGES_USER
           server-password: PACKAGES_TOKEN
+      # The Maven repository that the back end job of ci.yml saves (#47)
+      - uses: actions/cache/restore@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-${{ hashFiles('backend/pom.xml') }}
+          restore-keys: maven-${{ runner.os }}-
       - name: Jar of the back end
         env:
           PACKAGES_USER: ${{ github.actor }}

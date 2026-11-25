@@ -201,8 +201,9 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    - `v1.0.0-rc.7` tagged on 4deb6f9 with Quadrava 0.22.0: its installation job failed on Maven Central 429 again (the
      image build downloads everything, #47) and passed on rerun; image @sha256:db6fed81… with its signature and SBOM
      verified by cosign. The demo is upgraded to it (old `.env` in /root/odt-demo-env.rc6.bak); `watch.sh` ok.
-   - #47: `deploy.yml` and `release.yml` build the jar with the Maven repository of setup-java and the image takes it
-     (`backend/Dockerfile`, `JAR=prebuilt` and the build context `dist`); Maven no longer runs in Docker in CI.
+   - #47: `deploy.yml` and `release.yml` build the jar with the Maven repository that the back end job of CI
+     saves (the other jobs only restore it: setup-java had kept the partial copy of the first job to end) and the image
+     takes it (`backend/Dockerfile`, `JAR=prebuilt` and the build context `dist`); Maven no longer runs in Docker in CI.
    Next: the screen reader lines and the ZAP baseline on the current candidate.
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
