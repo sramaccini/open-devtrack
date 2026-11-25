@@ -35,10 +35,10 @@ jobs:
     name: Compose installation (Caddy, Keycloak, first admin, ui/)
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       # The jar is built here, with the Maven repository that setup-java restores, and the image takes it: Maven in
       # Docker would download every dependency from Maven Central again, which answers 429 to the runners (#47)
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '25'
