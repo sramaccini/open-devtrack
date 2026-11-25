@@ -207,8 +207,9 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    - `v1.0.0-rc.8` tagged on 968705c with Quadrava 0.22.1 (the menus of the dark theme in place on a scrolled page)
      and the image built from the jar of #47: green at the first run; image @sha256:269102b4… with its signature and
      SBOM verified by cosign. The demo is upgraded to it (old `.env` in /root/odt-demo-env.rc7.bak); `watch.sh` ok.
-   Next: #48 (the back end starting before Keycloak in `odt.sh up`); the screen reader lines and the ZAP baseline on
-   the current candidate.
+   - #48 (e06c544): the healthcheck of Keycloak in `deploy/compose` asks the discovery of the realm, so the back end no
+     longer starts while Keycloak answers 503 and `./odt.sh up` no longer fails for it; on main, not yet in a candidate.
+   Next: the screen reader lines and the ZAP baseline on the current candidate.
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
    SQL, as authz-library documents), and `odt.sh publish-ui` publishes `ui/` to `production` with the service account
