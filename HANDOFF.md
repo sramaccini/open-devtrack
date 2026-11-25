@@ -179,11 +179,14 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
      board and a dashboard is the maintainer's.
    - Quadrava 0.20.0 adopted (Q31 to Q34): the failed lines pass on `main`; the badges of the board stay below
      4.5:1 in the dark theme (Q35, #42), and the chosen theme is forgotten on reload (Q36, #43).
-   - `v1.0.0-rc.3` tagged on c3eaa7d with Quadrava 0.20.0: its workflow green (the installation job rerun once, a
-     failed Maven download in the image build), image @sha256:e5d19cf0… with its signature and SBOM verified by
+   - `v1.0.0-rc.3` tagged on c3eaa7d with Quadrava 0.20.0: its workflow green (the installation job rerun once: its image
+     build failed for a reason the log hides, #44), image @sha256:e5d19cf0… with its signature and SBOM verified by
      cosign. The demo is upgraded to it the same way (old `.env` in /root/odt-demo-env.rc2.bak); `watch.sh` ok.
    - Quadrava 0.20.1 adopted on 25 November 2026 (Q35, Q36): the badges of the board read in the dark theme, and the
      chosen theme stays after a reload.
+   - `v1.0.0-rc.4` tagged on 3a7b36a with Quadrava 0.20.1: its workflow green after the installation job was rerun
+     once, as for rc.3 (its log hides why it failed, #44), image @sha256:078b7fca… with its signature and SBOM verified
+     by cosign. The demo is upgraded to it (old `.env` in /root/odt-demo-env.rc3.bak); `watch.sh` ok.
    Next: the screen reader lines and the ZAP baseline on the current candidate.
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
