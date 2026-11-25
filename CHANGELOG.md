@@ -8,6 +8,11 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+## [1.0.0-rc.8] - 2026-11-25
+
+The eighth candidate: the menus of the dark theme in place, on Quadrava 0.22.1, and an image built without Maven
+Central in Docker.
+
 ### Changed
 
 - The image of the back end is built from the jar that the release builds with Maven outside Docker, with its
