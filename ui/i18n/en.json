@@ -22,6 +22,7 @@
   "projects.key_taken": "A project with this key already exists",
   "projects.lead_not_member": "Check the fields: the lead must be a member of the project",
   "projects.members": "Members",
+  "projects.general": "General",
   "projects.add_member": "Add member",
   "projects.add": "Add",
   "projects.user": "User",

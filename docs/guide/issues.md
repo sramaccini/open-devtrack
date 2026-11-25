@@ -114,7 +114,7 @@ creation, its links and its attachments.
 
 ## Custom fields
 
-The admins of a project add fields of its own to its issues, in the table **Custom fields** of the project («New
+The admins of a project add fields of its own to its issues, in the tab **Custom fields** of the project («New
 field»):
 
 | Field | What |

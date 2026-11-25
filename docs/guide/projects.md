@@ -20,15 +20,19 @@ Whoever creates a project becomes its lead and its admin.
 
 ## A project
 
-![A project, with its boards, members, groups, workflows and custom fields](images/project-detail.png)
+![A project, on its tab General](images/project-detail.png)
 
-The screen of a project has its fields (name, lead, description, permission scheme), the buttons that lead to the
-rest, and then one table for each part of the project:
+The screen of a project is in tabs. **General** has its fields (name, lead, description, permission scheme) and the
+buttons that lead to the rest:
 
 - «Dashboard»: the charts of the project ([Dashboards and reports](dashboards.md));
 - «Issues» and «Backlog»: the work ([Issues](issues.md), [Boards, backlog and sprints](boards.md));
 - «Webhooks»: what other systems are told ([The public API and webhooks](api.md));
-- «Administration log»: who changed what in the configuration of the project, for its admins;
+- «Change the permission scheme» and «Administration log»: who changed what in the configuration of the project, for
+  its admins.
+
+Each other tab is one part of the project, with the button that adds to it:
+
 - **Boards**: «New board», then «Open», «Edit» and «Remove» on each one ([Boards](boards.md#boards));
 - **Members** and **Groups**: below;
 - **Workflows**: «New workflow», and «Open» on each one ([Workflows](workflows.md));

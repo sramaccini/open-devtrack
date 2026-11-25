@@ -38,6 +38,9 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 - **Issue page**: `issue-detail` has the tabs General (the form and its buttons), Planning and Next steps, in a card
   (a `section` without a title). Below it is a second card, which holds the tabs of the activity: comments,
   attachments, links, watchers, history.
+- **Project page**: `project-detail` has the tabs General (the form, its buttons and those of the permission scheme
+  and the administration log), Boards, Members, Groups, Workflows and Custom fields, in a card (a `section` without a
+  title). Each of the last five has the button that adds to it above its table; the label of the tab is its heading.
 - **Validation**: `quadrava validate ui` (the Quadrava CLI, in CI) checks the documents as the runtime reads them:
   schemas, references to data sources, CEL expressions, themes and catalogues. In the back end, `SchemaValidationTest`
   checks them with the validator of the registry and `UiCataloguesTest` that every `t('key')` is in both catalogues.
@@ -96,9 +99,9 @@ The title of the tab is `brand.name` of the active theme and its icons are `bran
 
 ## Workflow
 
-The Workflows section of `project-detail` (ADR-20, B) lists the workflows of the project (name, default, the issue
-types each one serves, how many statuses and transitions), with New workflow among the buttons of the project (a copy
-of the default), Open and Remove (only a workflow that serves no type, not the default). `workflow-detail` (params
+The Workflows tab of `project-detail` (ADR-20, B) lists the workflows of the project (name, default, the issue
+types each one serves, how many statuses and transitions), with New workflow above the table (a copy of the
+default), Open and Remove (only a workflow that serves no type, not the default). `workflow-detail` (params
 `key`, `workflow`; data sources `workflows/*`) shows one: its name and the issue types it serves (read-only for the
 default, which serves the types no other workflow maps), saved together; then a table of the statuses (position,
 status, category, how many issues of its types) and one of the transitions (from, to, condition), with New status and

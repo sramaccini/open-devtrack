@@ -8,7 +8,7 @@ sprints. The boards show the work by status.
 ![A scrum board, with lanes by priority](images/board-scrum.png)
 
 Projects › Boards lists the boards of your projects. A project has at least one board, and its admins add others in
-the table **Boards** of the project («New board»):
+the tab **Boards** of the project («New board»):
 
 | Field | What |
 | --- | --- |

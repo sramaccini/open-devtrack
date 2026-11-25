@@ -22,6 +22,7 @@
   "projects.key_taken": "Esiste già un progetto con questa chiave",
   "projects.lead_not_member": "Controlla i campi: il responsabile deve essere un membro del progetto",
   "projects.members": "Membri",
+  "projects.general": "Generale",
   "projects.add_member": "Aggiungi membro",
   "projects.add": "Aggiungi",
   "projects.user": "Utente",

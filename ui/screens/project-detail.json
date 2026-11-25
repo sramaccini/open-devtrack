@@ -79,93 +79,501 @@
   },
   "components": [
     {
-      "id": "project-form",
-      "type": "form",
-      "layout": "flow",
-      "source": "project",
-      "fields": [
+      "id": "project-main",
+      "type": "section",
+      "components": [
         {
-          "name": "key",
-          "type": "text",
-          "label": "{{ t('projects.key', 'Key') }}",
-          "width": "xs",
-          "readOnlyIf": "{{true}}"
-        },
-        {
-          "name": "name",
-          "type": "text",
-          "label": "{{ t('projects.name', 'Name') }}",
-          "width": "m",
-          "required": true,
-          "maxLength": 100,
-          "readOnlyIf": "{{!form._perm.edit}}"
-        },
-        {
-          "name": "lead",
-          "type": "text",
-          "label": "{{ t('projects.lead', 'Lead') }}",
-          "width": "m",
-          "required": true,
-          "readOnlyIf": "{{!form._perm.edit}}",
-          "tooltip": "{{ t('projects.lead_help', 'A member of the project') }}"
-        },
-        {
-          "name": "role",
-          "type": "select",
-          "label": "{{ t('projects.my_role', 'My role') }}",
-          "width": "s",
-          "options": [
-            "viewer",
-            "developer",
-            "admin"
-          ],
-          "optionKey": "values.role",
-          "readOnlyIf": "{{true}}"
-        },
-        {
-          "name": "permissionSchemeName",
-          "type": "text",
-          "label": "{{ t('projects.scheme', 'Permission scheme') }}",
-          "width": "m",
-          "readOnlyIf": "{{true}}",
-          "tooltip": "{{ t('projects.scheme_help', 'What each project role gives here; the admin of the workspace defines the schemes') }}"
-        },
-        {
-          "name": "description",
-          "type": "textarea",
-          "label": "{{ t('projects.description', 'Description') }}",
-          "maxLength": 2000,
-          "readOnlyIf": "{{!form._perm.edit}}"
-        }
-      ],
-      "actions": [
-        {
-          "id": "btn-save",
-          "label": "{{ t('common.save', 'Save') }}",
-          "icon": "save",
-          "visibleIf": "{{form._perm.edit}}",
-          "onClick": [
+          "id": "project-tabs",
+          "type": "tabs",
+          "tabs": [
             {
-              "call": "save",
-              "onError": [
+              "id": "tab-general",
+              "label": "{{ t('projects.general', 'General') }}",
+              "components": [
                 {
-                  "if": "{{error.status == 412}}",
-                  "then": [
+                  "id": "project-form",
+                  "type": "form",
+                  "layout": "flow",
+                  "source": "project",
+                  "fields": [
                     {
-                      "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                      "name": "key",
+                      "type": "text",
+                      "label": "{{ t('projects.key', 'Key') }}",
+                      "width": "xs",
+                      "readOnlyIf": "{{true}}"
+                    },
+                    {
+                      "name": "name",
+                      "type": "text",
+                      "label": "{{ t('projects.name', 'Name') }}",
+                      "width": "m",
+                      "required": true,
+                      "maxLength": 100,
+                      "readOnlyIf": "{{!form._perm.edit}}"
+                    },
+                    {
+                      "name": "lead",
+                      "type": "text",
+                      "label": "{{ t('projects.lead', 'Lead') }}",
+                      "width": "m",
+                      "required": true,
+                      "readOnlyIf": "{{!form._perm.edit}}",
+                      "tooltip": "{{ t('projects.lead_help', 'A member of the project') }}"
+                    },
+                    {
+                      "name": "role",
+                      "type": "select",
+                      "label": "{{ t('projects.my_role', 'My role') }}",
+                      "width": "s",
+                      "options": [
+                        "viewer",
+                        "developer",
+                        "admin"
+                      ],
+                      "optionKey": "values.role",
+                      "readOnlyIf": "{{true}}"
+                    },
+                    {
+                      "name": "permissionSchemeName",
+                      "type": "text",
+                      "label": "{{ t('projects.scheme', 'Permission scheme') }}",
+                      "width": "m",
+                      "readOnlyIf": "{{true}}",
+                      "tooltip": "{{ t('projects.scheme_help', 'What each project role gives here; the admin of the workspace defines the schemes') }}"
+                    },
+                    {
+                      "name": "description",
+                      "type": "textarea",
+                      "label": "{{ t('projects.description', 'Description') }}",
+                      "maxLength": 2000,
+                      "readOnlyIf": "{{!form._perm.edit}}"
                     }
                   ],
-                  "else": [
+                  "actions": [
                     {
-                      "if": "{{error.status == 400}}",
-                      "then": [
+                      "id": "btn-save",
+                      "label": "{{ t('common.save', 'Save') }}",
+                      "icon": "save",
+                      "visibleIf": "{{form._perm.edit}}",
+                      "onClick": [
                         {
-                          "toast": "{{ t('projects.lead_not_member', 'Check the fields: the lead must be a member of the project') }}"
+                          "call": "save",
+                          "onError": [
+                            {
+                              "if": "{{error.status == 412}}",
+                              "then": [
+                                {
+                                  "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                }
+                              ],
+                              "else": [
+                                {
+                                  "if": "{{error.status == 400}}",
+                                  "then": [
+                                    {
+                                      "toast": "{{ t('projects.lead_not_member', 'Check the fields: the lead must be a member of the project') }}"
+                                    }
+                                  ],
+                                  "else": [
+                                    {
+                                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "refresh": "project"
+                        },
+                        {
+                          "toast": "{{ t('common.saved', 'Saved') }}"
                         }
-                      ],
-                      "else": [
+                      ]
+                    },
+                    {
+                      "id": "btn-dashboard",
+                      "label": "{{ t('reports.open_dashboard', 'Dashboard') }}",
+                      "icon": "external",
+                      "onClick": [
                         {
-                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                          "navigate": "project-dashboard",
+                          "params": {
+                            "key": "{{form.key}}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "btn-issues",
+                      "label": "{{ t('issues.title', 'Issues') }}",
+                      "icon": "external",
+                      "onClick": [
+                        {
+                          "navigate": "issue-list",
+                          "params": {
+                            "key": "{{form.key}}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "btn-backlog",
+                      "label": "{{ t('agile.backlog', 'Backlog') }}",
+                      "icon": "external",
+                      "onClick": [
+                        {
+                          "navigate": "backlog",
+                          "params": {
+                            "key": "{{form.key}}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "btn-webhooks",
+                      "label": "{{ t('webhooks.title', 'Webhooks') }}",
+                      "icon": "external",
+                      "visibleIf": "{{form._perm.edit}}",
+                      "onClick": [
+                        {
+                          "navigate": "webhook-list",
+                          "params": {
+                            "key": "{{form.key}}"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "btn-permission-scheme",
+                  "type": "button",
+                  "label": "{{ t('projects.change_scheme', 'Change the permission scheme') }}",
+                  "icon": "edit",
+                  "visibleIf": "{{ data.project != null && data.project._perm.edit }}",
+                  "onClick": [
+                    {
+                      "dialog": {
+                        "title": "{{ t('projects.pick_scheme', 'Permission scheme of the project') }}",
+                        "submitLabel": "{{ t('common.save', 'Save') }}",
+                        "initial": {
+                          "scheme": "{{data.project.permissionScheme}}"
+                        },
+                        "fields": [
+                          {
+                            "name": "scheme",
+                            "type": "lookup",
+                            "label": "{{ t('projects.scheme', 'Permission scheme') }}",
+                            "required": true,
+                            "lookup": {
+                              "source": "schemes",
+                              "valueField": "id",
+                              "labelField": "name",
+                              "minChars": 0
+                            },
+                            "tooltip": "{{ t('projects.scheme_pick_help', 'The schemes of the workspace, in Administration') }}"
+                          }
+                        ],
+                        "onSubmit": [
+                          {
+                            "call": "useScheme",
+                            "onError": [
+                              {
+                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "refresh": "project"
+                    }
+                  ]
+                },
+                {
+                  "id": "btn-project-log",
+                  "type": "button",
+                  "label": "{{ t('admin.config_log', 'Administration log') }}",
+                  "icon": "external",
+                  "visibleIf": "{{ data.project != null && data.project._perm.edit }}",
+                  "onClick": [
+                    {
+                      "navigate": "project-log",
+                      "params": {
+                        "key": "{{data.project.key}}"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "tab-boards",
+              "label": "{{ t('agile.boards', 'Boards') }}",
+              "components": [
+                {
+                  "id": "btn-add-board",
+                  "type": "button",
+                  "label": "{{ t('agile.new_board', 'New board') }}",
+                  "icon": "plus",
+                  "visibleIf": "{{ data.project != null && data.project._perm.edit }}",
+                  "onClick": [
+                    {
+                      "dialog": {
+                        "title": "{{ t('agile.new_board', 'New board') }}",
+                        "submitLabel": "{{ t('projects.add', 'Add') }}",
+                        "initial": {
+                          "kind": "kanban",
+                          "lane": "none"
+                        },
+                        "fields": [
+                          {
+                            "name": "name",
+                            "type": "text",
+                            "label": "{{ t('agile.board_name', 'Board') }}",
+                            "required": true,
+                            "maxLength": 100
+                          },
+                          {
+                            "name": "kind",
+                            "type": "select",
+                            "label": "{{ t('agile.kind', 'Kind') }}",
+                            "options": [
+                              "kanban",
+                              "scrum"
+                            ],
+                            "optionKey": "values.board_kind",
+                            "required": true,
+                            "tooltip": "{{ t('agile.kind_help', 'Scrum: the issues of the active sprint; kanban: every issue') }}"
+                          },
+                          {
+                            "name": "lane",
+                            "type": "select",
+                            "label": "{{ t('agile.lanes', 'Lanes by') }}",
+                            "options": [
+                              "none",
+                              "assignee",
+                              "priority",
+                              "type"
+                            ],
+                            "optionKey": "values.board_lane",
+                            "required": true
+                          },
+                          {
+                            "name": "columns",
+                            "type": "textarea",
+                            "label": "{{ t('agile.columns', 'Columns') }}",
+                            "rows": 5,
+                            "tooltip": "{{ t('agile.columns_help', 'One per line, Name: status, status | limit, for example Doing: in_progress | 3; empty for one column per status') }}"
+                          },
+                          {
+                            "name": "filter",
+                            "type": "textarea",
+                            "label": "{{ t('agile.board_filter', 'Filter') }}",
+                            "rows": 2,
+                            "tooltip": "{{ t('agile.board_filter_help', 'An ODQL query, for example labels = payments or assignee = currentUser(): only the issues it finds are cards; empty for every issue') }}",
+                            "validation": [
+                              {
+                                "remote": "check"
+                              }
+                            ]
+                          }
+                        ],
+                        "onSubmit": [
+                          {
+                            "call": "createBoard",
+                            "onError": [
+                              {
+                                "toast": "{{ t('agile.board_invalid', 'Check the columns: each holds statuses of the workflow, each status in one column') }}"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "refresh": "boards"
+                    }
+                  ]
+                },
+                {
+                  "id": "board-table",
+                  "type": "table",
+                  "source": "boards",
+                  "columns": [
+                    {
+                      "field": "name",
+                      "label": "{{ t('agile.board_name', 'Board') }}"
+                    },
+                    {
+                      "field": "kind",
+                      "label": "{{ t('agile.kind', 'Kind') }}",
+                      "valueKey": "values.board_kind"
+                    },
+                    {
+                      "field": "lane",
+                      "label": "{{ t('agile.lanes', 'Lanes by') }}",
+                      "valueKey": "values.board_lane"
+                    },
+                    {
+                      "field": "filter",
+                      "label": "{{ t('agile.board_filter', 'Filter') }}"
+                    },
+                    {
+                      "field": "columns",
+                      "label": "{{ t('agile.columns', 'Columns') }}"
+                    }
+                  ],
+                  "rowActions": [
+                    {
+                      "id": "btn-open-board",
+                      "label": "{{ t('agile.open', 'Open') }}",
+                      "icon": "external",
+                      "onClick": [
+                        {
+                          "navigate": "board",
+                          "params": {
+                            "board": "{{row.id}}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "btn-edit-board",
+                      "label": "{{ t('projects.edit_field', 'Edit') }}",
+                      "icon": "edit",
+                      "visibleIf": "{{row._perm.edit}}",
+                      "onClick": [
+                        {
+                          "dialog": {
+                            "title": "{{ t('agile.edit_board', 'Edit the board') }}",
+                            "submitLabel": "{{ t('common.save', 'Save') }}",
+                            "initial": {
+                              "name": "{{row.name}}",
+                              "kind": "{{row.kind}}",
+                              "lane": "{{row.lane}}",
+                              "columns": "{{row.columns}}",
+                              "filter": "{{ row.filter == null ? '' : row.filter }}",
+                              "version": "{{row.version}}"
+                            },
+                            "fields": [
+                              {
+                                "name": "name",
+                                "type": "text",
+                                "label": "{{ t('agile.board_name', 'Board') }}",
+                                "required": true,
+                                "maxLength": 100
+                              },
+                              {
+                                "name": "kind",
+                                "type": "select",
+                                "label": "{{ t('agile.kind', 'Kind') }}",
+                                "options": [
+                                  "kanban",
+                                  "scrum"
+                                ],
+                                "optionKey": "values.board_kind",
+                                "required": true
+                              },
+                              {
+                                "name": "lane",
+                                "type": "select",
+                                "label": "{{ t('agile.lanes', 'Lanes by') }}",
+                                "options": [
+                                  "none",
+                                  "assignee",
+                                  "priority",
+                                  "type"
+                                ],
+                                "optionKey": "values.board_lane",
+                                "required": true
+                              },
+                              {
+                                "name": "columns",
+                                "type": "textarea",
+                                "label": "{{ t('agile.columns', 'Columns') }}",
+                                "rows": 5,
+                                "tooltip": "{{ t('agile.columns_help', 'One per line, Name: status, status | limit, for example Doing: in_progress | 3; empty for one column per status') }}"
+                              },
+                              {
+                                "name": "filter",
+                                "type": "textarea",
+                                "label": "{{ t('agile.board_filter', 'Filter') }}",
+                                "rows": 2,
+                                "tooltip": "{{ t('agile.board_filter_help', 'An ODQL query, for example labels = payments or assignee = currentUser(): only the issues it finds are cards; empty for every issue') }}",
+                                "validation": [
+                                  {
+                                    "remote": "check"
+                                  }
+                                ]
+                              }
+                            ],
+                            "onSubmit": [
+                              {
+                                "call": "saveBoard",
+                                "args": {
+                                  "id": "{{row.id}}"
+                                },
+                                "onError": [
+                                  {
+                                    "if": "{{error.status == 412}}",
+                                    "then": [
+                                      {
+                                        "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                      }
+                                    ],
+                                    "else": [
+                                      {
+                                        "toast": "{{ t('agile.board_invalid', 'Check the columns: each holds statuses of the workflow, each status in one column') }}"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "refresh": "boards"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "btn-remove-board",
+                      "label": "{{ t('projects.remove', 'Remove') }}",
+                      "icon": "delete",
+                      "visibleIf": "{{row._perm.edit}}",
+                      "onClick": [
+                        {
+                          "confirm": "{{ t('agile.remove_board_confirm', 'Remove the board {name}? The issues stay.', {'name': row.name}) }}"
+                        },
+                        {
+                          "call": "removeBoard",
+                          "args": {
+                            "id": "{{row.id}}"
+                          },
+                          "onError": [
+                            {
+                              "if": "{{error.status == 409}}",
+                              "then": [
+                                {
+                                  "toast": "{{ t('agile.last_board', 'A project keeps at least one board') }}"
+                                }
+                              ],
+                              "else": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "refresh": "boards"
                         }
                       ]
                     }
@@ -174,1123 +582,242 @@
               ]
             },
             {
-              "refresh": "project"
-            },
-            {
-              "toast": "{{ t('common.saved', 'Saved') }}"
-            }
-          ]
-        },
-        {
-          "id": "btn-dashboard",
-          "label": "{{ t('reports.open_dashboard', 'Dashboard') }}",
-          "icon": "external",
-          "onClick": [
-            {
-              "navigate": "project-dashboard",
-              "params": {
-                "key": "{{form.key}}"
-              }
-            }
-          ]
-        },
-        {
-          "id": "btn-add-member",
-          "label": "{{ t('projects.add_member', 'Add member') }}",
-          "icon": "user-add",
-          "visibleIf": "{{form._perm.manageMembers}}",
-          "onClick": [
-            {
-              "dialog": {
-                "title": "{{ t('projects.add_member', 'Add member') }}",
-                "submitLabel": "{{ t('projects.add', 'Add') }}",
-                "initial": {
-                  "role": "developer"
-                },
-                "fields": [
-                  {
-                    "name": "username",
-                    "type": "lookup",
-                    "label": "{{ t('projects.user', 'User') }}",
-                    "required": true,
-                    "lookup": {
-                      "source": "users",
-                      "valueField": "username",
-                      "labelField": "username",
-                      "minChars": 1
-                    }
-                  },
-                  {
-                    "name": "role",
-                    "type": "select",
-                    "label": "{{ t('projects.role', 'Role') }}",
-                    "options": [
-                      "viewer",
-                      "developer",
-                      "admin"
-                    ],
-                    "optionKey": "values.role",
-                    "required": true
-                  }
-                ],
-                "onSubmit": [
-                  {
-                    "call": "addMember",
-                    "onError": [
-                      {
-                        "toast": "{{ t('projects.member_failed', 'The member could not be added') }}"
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "refresh": "members"
-            },
-            {
-              "toast": "{{ t('projects.member_added', 'Member added') }}"
-            }
-          ]
-        },
-        {
-          "id": "btn-add-field",
-          "label": "{{ t('projects.add_field', 'New field') }}",
-          "icon": "plus",
-          "visibleIf": "{{form._perm.edit}}",
-          "onClick": [
-            {
-              "dialog": {
-                "title": "{{ t('projects.add_field', 'New field') }}",
-                "submitLabel": "{{ t('projects.add', 'Add') }}",
-                "initial": {
-                  "type": "text"
-                },
-                "fields": [
-                  {
-                    "name": "key",
-                    "type": "text",
-                    "label": "{{ t('projects.field_key', 'Key') }}",
-                    "required": true,
-                    "pattern": "^[a-z][a-z0-9_]{0,39}$",
-                    "tooltip": "{{ t('projects.field_key_help', 'Lower-case letters, digits and _, from a letter; it does not change') }}"
-                  },
-                  {
-                    "name": "type",
-                    "type": "select",
-                    "label": "{{ t('projects.field_type', 'Type') }}",
-                    "required": true,
-                    "options": [
-                      "text",
-                      "number",
-                      "date",
-                      "checkbox",
-                      "select",
-                      "multiselect",
-                      "user"
-                    ],
-                    "optionKey": "values.field_type"
-                  },
-                  {
-                    "name": "label",
-                    "type": "text",
-                    "label": "{{ t('projects.field_label', 'Label') }}",
-                    "required": true,
-                    "maxLength": 100
-                  },
-                  {
-                    "name": "options",
-                    "type": "textarea",
-                    "label": "{{ t('projects.field_options', 'Options') }}",
-                    "rows": 4,
-                    "tooltip": "{{ t('projects.field_options_help', 'For select and multiselect: one per line, value or value: Label') }}"
-                  },
-                  {
-                    "name": "requiredIf",
-                    "type": "text",
-                    "label": "{{ t('projects.field_required_if', 'Required when') }}",
-                    "maxLength": 1000,
-                    "tooltip": "{{ t('projects.field_required_if_help', 'A CEL expression on issue and user, for example issue.type == \"bug\"; true for always, empty for never') }}"
-                  }
-                ],
-                "onSubmit": [
-                  {
-                    "call": "addField",
-                    "onError": [
-                      {
-                        "if": "{{error.status == 400}}",
-                        "then": [
+              "id": "tab-members",
+              "label": "{{ t('projects.members', 'Members') }}",
+              "components": [
+                {
+                  "id": "btn-add-member",
+                  "type": "button",
+                  "label": "{{ t('projects.add_member', 'Add member') }}",
+                  "icon": "user-add",
+                  "visibleIf": "{{ data.project != null && data.project._perm.manageMembers }}",
+                  "onClick": [
+                    {
+                      "dialog": {
+                        "title": "{{ t('projects.add_member', 'Add member') }}",
+                        "submitLabel": "{{ t('projects.add', 'Add') }}",
+                        "initial": {
+                          "role": "developer"
+                        },
+                        "fields": [
                           {
-                            "toast": "{{ t('projects.field_invalid', 'Check the key, the options and the rule') }}"
+                            "name": "username",
+                            "type": "lookup",
+                            "label": "{{ t('projects.user', 'User') }}",
+                            "required": true,
+                            "lookup": {
+                              "source": "users",
+                              "valueField": "username",
+                              "labelField": "username",
+                              "minChars": 1
+                            }
+                          },
+                          {
+                            "name": "role",
+                            "type": "select",
+                            "label": "{{ t('projects.role', 'Role') }}",
+                            "options": [
+                              "viewer",
+                              "developer",
+                              "admin"
+                            ],
+                            "optionKey": "values.role",
+                            "required": true
                           }
                         ],
-                        "else": [
+                        "onSubmit": [
                           {
-                            "if": "{{error.status == 409}}",
-                            "then": [
+                            "call": "addMember",
+                            "onError": [
                               {
-                                "toast": "{{ t('projects.field_exists', 'The project already has a field with this key') }}"
-                              }
-                            ],
-                            "else": [
-                              {
-                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                "toast": "{{ t('projects.member_failed', 'The member could not be added') }}"
                               }
                             ]
                           }
                         ]
                       }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "refresh": "fieldDefinitions"
-            }
-          ]
-        },
-        {
-          "id": "btn-add-workflow",
-          "label": "{{ t('projects.add_workflow', 'New workflow') }}",
-          "icon": "plus",
-          "visibleIf": "{{form._perm.edit}}",
-          "onClick": [
-            {
-              "dialog": {
-                "title": "{{ t('projects.add_workflow', 'New workflow') }}",
-                "submitLabel": "{{ t('common.add', 'Add') }}",
-                "fields": [
-                  {
-                    "name": "name",
-                    "type": "text",
-                    "label": "{{ t('projects.workflow_name', 'Name') }}",
-                    "required": true,
-                    "maxLength": 100,
-                    "tooltip": "{{ t('projects.workflow_name_help', 'A copy of the default workflow, with this name') }}"
-                  }
-                ],
-                "onSubmit": [
-                  {
-                    "call": "addWorkflow",
-                    "as": "created",
-                    "onError": [
-                      {
-                        "if": "{{error.status == 409}}",
-                        "then": [
-                          {
-                            "toast": "{{ t('projects.workflow_exists', 'The project already has a workflow with this name') }}"
-                          }
-                        ],
-                        "else": [
-                          {
-                            "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "refresh": "workflows"
-            }
-          ]
-        },
-        {
-          "id": "btn-add-board",
-          "label": "{{ t('agile.new_board', 'New board') }}",
-          "icon": "plus",
-          "visibleIf": "{{form._perm.edit}}",
-          "onClick": [
-            {
-              "dialog": {
-                "title": "{{ t('agile.new_board', 'New board') }}",
-                "submitLabel": "{{ t('projects.add', 'Add') }}",
-                "initial": {
-                  "kind": "kanban",
-                  "lane": "none"
-                },
-                "fields": [
-                  {
-                    "name": "name",
-                    "type": "text",
-                    "label": "{{ t('agile.board_name', 'Board') }}",
-                    "required": true,
-                    "maxLength": 100
-                  },
-                  {
-                    "name": "kind",
-                    "type": "select",
-                    "label": "{{ t('agile.kind', 'Kind') }}",
-                    "options": [
-                      "kanban",
-                      "scrum"
-                    ],
-                    "optionKey": "values.board_kind",
-                    "required": true,
-                    "tooltip": "{{ t('agile.kind_help', 'Scrum: the issues of the active sprint; kanban: every issue') }}"
-                  },
-                  {
-                    "name": "lane",
-                    "type": "select",
-                    "label": "{{ t('agile.lanes', 'Lanes by') }}",
-                    "options": [
-                      "none",
-                      "assignee",
-                      "priority",
-                      "type"
-                    ],
-                    "optionKey": "values.board_lane",
-                    "required": true
-                  },
-                  {
-                    "name": "columns",
-                    "type": "textarea",
-                    "label": "{{ t('agile.columns', 'Columns') }}",
-                    "rows": 5,
-                    "tooltip": "{{ t('agile.columns_help', 'One per line, Name: status, status | limit, for example Doing: in_progress | 3; empty for one column per status') }}"
-                  },
-                  {
-                    "name": "filter",
-                    "type": "textarea",
-                    "label": "{{ t('agile.board_filter', 'Filter') }}",
-                    "rows": 2,
-                    "tooltip": "{{ t('agile.board_filter_help', 'An ODQL query, for example labels = payments or assignee = currentUser(): only the issues it finds are cards; empty for every issue') }}",
-                    "validation": [
-                      {
-                        "remote": "check"
-                      }
-                    ]
-                  }
-                ],
-                "onSubmit": [
-                  {
-                    "call": "createBoard",
-                    "onError": [
-                      {
-                        "toast": "{{ t('agile.board_invalid', 'Check the columns: each holds statuses of the workflow, each status in one column') }}"
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "refresh": "boards"
-            }
-          ]
-        },
-        {
-          "id": "btn-issues",
-          "label": "{{ t('issues.title', 'Issues') }}",
-          "icon": "external",
-          "onClick": [
-            {
-              "navigate": "issue-list",
-              "params": {
-                "key": "{{form.key}}"
-              }
-            }
-          ]
-        },
-        {
-          "id": "btn-backlog",
-          "label": "{{ t('agile.backlog', 'Backlog') }}",
-          "icon": "external",
-          "onClick": [
-            {
-              "navigate": "backlog",
-              "params": {
-                "key": "{{form.key}}"
-              }
-            }
-          ]
-        },
-        {
-          "id": "btn-webhooks",
-          "label": "{{ t('webhooks.title', 'Webhooks') }}",
-          "icon": "external",
-          "visibleIf": "{{form._perm.edit}}",
-          "onClick": [
-            {
-              "navigate": "webhook-list",
-              "params": {
-                "key": "{{form.key}}"
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "btn-permission-scheme",
-      "type": "button",
-      "label": "{{ t('projects.change_scheme', 'Change the permission scheme') }}",
-      "icon": "edit",
-      "visibleIf": "{{ data.project != null && data.project._perm.edit }}",
-      "onClick": [
-        {
-          "dialog": {
-            "title": "{{ t('projects.pick_scheme', 'Permission scheme of the project') }}",
-            "submitLabel": "{{ t('common.save', 'Save') }}",
-            "initial": {
-              "scheme": "{{data.project.permissionScheme}}"
-            },
-            "fields": [
-              {
-                "name": "scheme",
-                "type": "lookup",
-                "label": "{{ t('projects.scheme', 'Permission scheme') }}",
-                "required": true,
-                "lookup": {
-                  "source": "schemes",
-                  "valueField": "id",
-                  "labelField": "name",
-                  "minChars": 0
-                },
-                "tooltip": "{{ t('projects.scheme_pick_help', 'The schemes of the workspace, in Administration') }}"
-              }
-            ],
-            "onSubmit": [
-              {
-                "call": "useScheme",
-                "onError": [
-                  {
-                    "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "refresh": "project"
-        }
-      ]
-    },
-    {
-      "id": "btn-project-log",
-      "type": "button",
-      "label": "{{ t('admin.config_log', 'Administration log') }}",
-      "icon": "external",
-      "visibleIf": "{{ data.project != null && data.project._perm.edit }}",
-      "onClick": [
-        {
-          "navigate": "project-log",
-          "params": {
-            "key": "{{data.project.key}}"
-          }
-        }
-      ]
-    },
-    {
-      "id": "boards-title",
-      "type": "text",
-      "style": "heading",
-      "text": "{{ t('agile.boards', 'Boards') }}"
-    },
-    {
-      "id": "board-table",
-      "type": "table",
-      "source": "boards",
-      "columns": [
-        {
-          "field": "name",
-          "label": "{{ t('agile.board_name', 'Board') }}"
-        },
-        {
-          "field": "kind",
-          "label": "{{ t('agile.kind', 'Kind') }}",
-          "valueKey": "values.board_kind"
-        },
-        {
-          "field": "lane",
-          "label": "{{ t('agile.lanes', 'Lanes by') }}",
-          "valueKey": "values.board_lane"
-        },
-        {
-          "field": "filter",
-          "label": "{{ t('agile.board_filter', 'Filter') }}"
-        },
-        {
-          "field": "columns",
-          "label": "{{ t('agile.columns', 'Columns') }}"
-        }
-      ],
-      "rowActions": [
-        {
-          "id": "btn-open-board",
-          "label": "{{ t('agile.open', 'Open') }}",
-          "icon": "external",
-          "onClick": [
-            {
-              "navigate": "board",
-              "params": {
-                "board": "{{row.id}}"
-              }
-            }
-          ]
-        },
-        {
-          "id": "btn-edit-board",
-          "label": "{{ t('projects.edit_field', 'Edit') }}",
-          "icon": "edit",
-          "visibleIf": "{{row._perm.edit}}",
-          "onClick": [
-            {
-              "dialog": {
-                "title": "{{ t('agile.edit_board', 'Edit the board') }}",
-                "submitLabel": "{{ t('common.save', 'Save') }}",
-                "initial": {
-                  "name": "{{row.name}}",
-                  "kind": "{{row.kind}}",
-                  "lane": "{{row.lane}}",
-                  "columns": "{{row.columns}}",
-                  "filter": "{{ row.filter == null ? '' : row.filter }}",
-                  "version": "{{row.version}}"
-                },
-                "fields": [
-                  {
-                    "name": "name",
-                    "type": "text",
-                    "label": "{{ t('agile.board_name', 'Board') }}",
-                    "required": true,
-                    "maxLength": 100
-                  },
-                  {
-                    "name": "kind",
-                    "type": "select",
-                    "label": "{{ t('agile.kind', 'Kind') }}",
-                    "options": [
-                      "kanban",
-                      "scrum"
-                    ],
-                    "optionKey": "values.board_kind",
-                    "required": true
-                  },
-                  {
-                    "name": "lane",
-                    "type": "select",
-                    "label": "{{ t('agile.lanes', 'Lanes by') }}",
-                    "options": [
-                      "none",
-                      "assignee",
-                      "priority",
-                      "type"
-                    ],
-                    "optionKey": "values.board_lane",
-                    "required": true
-                  },
-                  {
-                    "name": "columns",
-                    "type": "textarea",
-                    "label": "{{ t('agile.columns', 'Columns') }}",
-                    "rows": 5,
-                    "tooltip": "{{ t('agile.columns_help', 'One per line, Name: status, status | limit, for example Doing: in_progress | 3; empty for one column per status') }}"
-                  },
-                  {
-                    "name": "filter",
-                    "type": "textarea",
-                    "label": "{{ t('agile.board_filter', 'Filter') }}",
-                    "rows": 2,
-                    "tooltip": "{{ t('agile.board_filter_help', 'An ODQL query, for example labels = payments or assignee = currentUser(): only the issues it finds are cards; empty for every issue') }}",
-                    "validation": [
-                      {
-                        "remote": "check"
-                      }
-                    ]
-                  }
-                ],
-                "onSubmit": [
-                  {
-                    "call": "saveBoard",
-                    "args": {
-                      "id": "{{row.id}}"
                     },
-                    "onError": [
-                      {
-                        "if": "{{error.status == 412}}",
-                        "then": [
-                          {
-                            "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
-                          }
-                        ],
-                        "else": [
-                          {
-                            "toast": "{{ t('agile.board_invalid', 'Check the columns: each holds statuses of the workflow, each status in one column') }}"
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "refresh": "boards"
-            }
-          ]
-        },
-        {
-          "id": "btn-remove-board",
-          "label": "{{ t('projects.remove', 'Remove') }}",
-          "icon": "delete",
-          "visibleIf": "{{row._perm.edit}}",
-          "onClick": [
-            {
-              "confirm": "{{ t('agile.remove_board_confirm', 'Remove the board {name}? The issues stay.', {'name': row.name}) }}"
-            },
-            {
-              "call": "removeBoard",
-              "args": {
-                "id": "{{row.id}}"
-              },
-              "onError": [
-                {
-                  "if": "{{error.status == 409}}",
-                  "then": [
                     {
-                      "toast": "{{ t('agile.last_board', 'A project keeps at least one board') }}"
-                    }
-                  ],
-                  "else": [
-                    {
-                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "refresh": "boards"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "members-title",
-      "type": "text",
-      "style": "heading",
-      "text": "{{ t('projects.members', 'Members') }}"
-    },
-    {
-      "id": "member-table",
-      "type": "table",
-      "source": "members",
-      "columns": [
-        {
-          "field": "username",
-          "label": "{{ t('projects.user', 'User') }}"
-        },
-        {
-          "field": "role",
-          "label": "{{ t('projects.role', 'Role') }}",
-          "valueKey": "values.role"
-        },
-        {
-          "field": "groups",
-          "label": "{{ t('projects.through_groups', 'Through groups') }}"
-        },
-        {
-          "field": "grantedBy",
-          "label": "{{ t('projects.granted_by', 'Added by') }}"
-        }
-      ],
-      "rowActions": [
-        {
-          "id": "btn-change-role",
-          "label": "{{ t('projects.change_role', 'Change role') }}",
-          "icon": "edit",
-          "visibleIf": "{{row._perm.change}}",
-          "onClick": [
-            {
-              "dialog": {
-                "title": "{{ t('projects.change_role', 'Change role') }}",
-                "initial": {
-                  "role": "{{row.role}}"
-                },
-                "fields": [
-                  {
-                    "name": "role",
-                    "type": "select",
-                    "label": "{{ t('projects.role', 'Role') }}",
-                    "options": [
-                      "viewer",
-                      "developer",
-                      "admin"
-                    ],
-                    "optionKey": "values.role",
-                    "required": true
-                  }
-                ],
-                "onSubmit": [
-                  {
-                    "call": "changeRole",
-                    "args": {
-                      "username": "{{row.username}}"
+                      "refresh": "members"
                     },
-                    "onError": [
-                      {
-                        "if": "{{error.status == 409}}",
-                        "then": [
-                          {
-                            "toast": "{{ t('projects.last_admin', 'A project keeps at least one admin') }}"
-                          }
-                        ],
-                        "else": [
-                          {
-                            "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "refresh": "members"
-            }
-          ]
-        },
-        {
-          "id": "btn-remove",
-          "label": "{{ t('projects.remove', 'Remove') }}",
-          "icon": "delete",
-          "visibleIf": "{{row._perm.remove}}",
-          "onClick": [
-            {
-              "confirm": "{{ t('projects.remove_confirm', 'Remove {name} from the project?', {'name': row.username}) }}"
-            },
-            {
-              "call": "removeMember",
-              "args": {
-                "username": "{{row.username}}"
-              },
-              "onError": [
-                {
-                  "if": "{{error.status == 409}}",
-                  "then": [
                     {
-                      "toast": "{{ t('projects.last_admin', 'A project keeps at least one admin') }}"
-                    }
-                  ],
-                  "else": [
-                    {
-                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                      "toast": "{{ t('projects.member_added', 'Member added') }}"
                     }
                   ]
-                }
-              ]
-            },
-            {
-              "refresh": "members"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "groups-title",
-      "type": "text",
-      "style": "heading",
-      "text": "{{ t('projects.groups', 'Groups') }}"
-    },
-    {
-      "id": "btn-add-group",
-      "type": "button",
-      "label": "{{ t('projects.add_group', 'Add group') }}",
-      "icon": "user-add",
-      "visibleIf": "{{ data.project != null && data.project._perm.manageMembers }}",
-      "onClick": [
-        {
-          "dialog": {
-            "title": "{{ t('projects.add_group', 'Add group') }}",
-            "submitLabel": "{{ t('projects.add', 'Add') }}",
-            "initial": {
-              "role": "developer"
-            },
-            "fields": [
-              {
-                "name": "group",
-                "type": "lookup",
-                "label": "{{ t('admin.group', 'Group') }}",
-                "required": true,
-                "lookup": {
-                  "source": "groupChoices",
-                  "valueField": "id",
-                  "labelField": "name",
-                  "minChars": 0
                 },
-                "tooltip": "{{ t('projects.group_help', 'The groups of the workspace, in Administration') }}"
-              },
-              {
-                "name": "role",
-                "type": "select",
-                "label": "{{ t('projects.role', 'Role') }}",
-                "options": [
-                  "viewer",
-                  "developer",
-                  "admin"
-                ],
-                "optionKey": "values.role",
-                "required": true
-              }
-            ],
-            "onSubmit": [
-              {
-                "call": "addGroup",
-                "onError": [
-                  {
-                    "if": "{{error.status == 409}}",
-                    "then": [
-                      {
-                        "toast": "{{ t('projects.last_admin', 'A project keeps at least one admin') }}"
-                      }
-                    ],
-                    "else": [
-                      {
-                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "refresh": "groups"
-        },
-        {
-          "refresh": "members"
-        }
-      ]
-    },
-    {
-      "id": "group-table",
-      "type": "table",
-      "source": "groups",
-      "columns": [
-        {
-          "field": "name",
-          "label": "{{ t('admin.group', 'Group') }}"
-        },
-        {
-          "field": "role",
-          "label": "{{ t('projects.role', 'Role') }}",
-          "valueKey": "values.role"
-        },
-        {
-          "field": "grantedBy",
-          "label": "{{ t('projects.granted_by', 'Added by') }}"
-        }
-      ],
-      "rowActions": [
-        {
-          "id": "btn-change-group-role",
-          "label": "{{ t('projects.change_role', 'Change role') }}",
-          "icon": "edit",
-          "visibleIf": "{{row._perm.change}}",
-          "onClick": [
-            {
-              "dialog": {
-                "title": "{{ t('projects.change_role', 'Change role') }}",
-                "initial": {
-                  "group": "{{row.id}}",
-                  "role": "{{row.role}}"
-                },
-                "fields": [
-                  {
-                    "name": "role",
-                    "type": "select",
-                    "label": "{{ t('projects.role', 'Role') }}",
-                    "options": [
-                      "viewer",
-                      "developer",
-                      "admin"
-                    ],
-                    "optionKey": "values.role",
-                    "required": true
-                  }
-                ],
-                "onSubmit": [
-                  {
-                    "call": "addGroup",
-                    "onError": [
-                      {
-                        "if": "{{error.status == 409}}",
-                        "then": [
-                          {
-                            "toast": "{{ t('projects.last_admin', 'A project keeps at least one admin') }}"
-                          }
-                        ],
-                        "else": [
-                          {
-                            "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            },
-            {
-              "refresh": "groups"
-            },
-            {
-              "refresh": "members"
-            }
-          ]
-        },
-        {
-          "id": "btn-remove-group",
-          "label": "{{ t('common.remove', 'Remove') }}",
-          "icon": "delete",
-          "visibleIf": "{{row._perm.remove}}",
-          "onClick": [
-            {
-              "confirm": "{{ t('projects.remove_group', 'Remove the group {name} from the project?', {'name': row.name}) }}"
-            },
-            {
-              "call": "removeGroup",
-              "args": {
-                "group": "{{row.id}}"
-              },
-              "onError": [
                 {
-                  "if": "{{error.status == 409}}",
-                  "then": [
+                  "id": "member-table",
+                  "type": "table",
+                  "source": "members",
+                  "columns": [
                     {
-                      "toast": "{{ t('projects.last_admin', 'A project keeps at least one admin') }}"
-                    }
-                  ],
-                  "else": [
-                    {
-                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "refresh": "groups"
-            },
-            {
-              "refresh": "members"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "workflow-title",
-      "type": "text",
-      "style": "heading",
-      "text": "{{ t('projects.workflows', 'Workflows') }}"
-    },
-    {
-      "id": "workflow-list",
-      "type": "table",
-      "source": "workflows",
-      "columns": [
-        {
-          "field": "name",
-          "label": "{{ t('projects.workflow_name', 'Name') }}"
-        },
-        {
-          "field": "default",
-          "label": "{{ t('projects.workflow_default', 'Default') }}",
-          "format": "badge",
-          "badges": {
-            "true": "primary"
-          },
-          "valueKey": "values.workflow_default"
-        },
-        {
-          "field": "types",
-          "label": "{{ t('projects.workflow_types', 'Issue types') }}",
-          "valueKey": "values.issue_type"
-        },
-        {
-          "field": "statuses",
-          "label": "{{ t('projects.statuses', 'Statuses') }}"
-        },
-        {
-          "field": "transitions",
-          "label": "{{ t('projects.transitions', 'Transitions') }}"
-        }
-      ],
-      "rowActions": [
-        {
-          "id": "btn-open-workflow",
-          "label": "{{ t('agile.open', 'Open') }}",
-          "icon": "external",
-          "onClick": [
-            {
-              "navigate": "workflow-detail",
-              "params": {
-                "key": "{{params.key}}",
-                "workflow": "{{row.id}}"
-              }
-            }
-          ]
-        },
-        {
-          "id": "btn-remove-workflow",
-          "label": "{{ t('projects.remove', 'Remove') }}",
-          "icon": "delete",
-          "visibleIf": "{{row._perm.remove}}",
-          "onClick": [
-            {
-              "confirm": "{{ t('projects.remove_workflow_confirm', 'Remove the workflow {name}? It serves no issue type.', {'name': row.name}) }}"
-            },
-            {
-              "call": "removeWorkflow",
-              "args": {
-                "id": "{{row.id}}",
-                "version": "{{row.version}}"
-              },
-              "onError": [
-                {
-                  "if": "{{error.status == 412}}",
-                  "then": [
-                    {
-                      "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
-                    }
-                  ],
-                  "else": [
-                    {
-                      "toast": "{{ t('projects.workflow_in_use', 'Only a workflow that serves no issue type is removed') }}"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "refresh": "workflows"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "fields-title",
-      "type": "text",
-      "style": "heading",
-      "text": "{{ t('projects.fields', 'Custom fields') }}"
-    },
-    {
-      "id": "field-table",
-      "type": "table",
-      "source": "fieldDefinitions",
-      "columns": [
-        {
-          "field": "key",
-          "label": "{{ t('projects.field_key', 'Key') }}"
-        },
-        {
-          "field": "label",
-          "label": "{{ t('projects.field_label', 'Label') }}"
-        },
-        {
-          "field": "type",
-          "label": "{{ t('projects.field_type', 'Type') }}",
-          "valueKey": "values.field_type"
-        },
-        {
-          "field": "requiredIf",
-          "label": "{{ t('projects.field_required_if', 'Required when') }}"
-        },
-        {
-          "field": "archived",
-          "label": "{{ t('projects.field_archived', 'Archived') }}",
-          "format": "badge",
-          "badges": {
-            "true": "neutral"
-          },
-          "valueKey": "values.archived"
-        }
-      ],
-      "rowActions": [
-        {
-          "id": "btn-edit-field",
-          "label": "{{ t('projects.edit_field', 'Edit') }}",
-          "icon": "edit",
-          "visibleIf": "{{row._perm.edit}}",
-          "onClick": [
-            {
-              "dialog": {
-                "title": "{{ t('projects.edit_field_title', 'Edit field') }}",
-                "submitLabel": "{{ t('common.save', 'Save') }}",
-                "initial": {
-                  "label": "{{row.label}}",
-                  "options": "{{row.options}}",
-                  "requiredIf": "{{row.requiredIf}}",
-                  "archived": "{{row.archived}}",
-                  "version": "{{row.version}}"
-                },
-                "fields": [
-                  {
-                    "name": "label",
-                    "type": "text",
-                    "label": "{{ t('projects.field_label', 'Label') }}",
-                    "required": true,
-                    "maxLength": 100
-                  },
-                  {
-                    "name": "options",
-                    "type": "textarea",
-                    "label": "{{ t('projects.field_options', 'Options') }}",
-                    "rows": 4,
-                    "tooltip": "{{ t('projects.field_options_help', 'For select and multiselect: one per line, value or value: Label') }}"
-                  },
-                  {
-                    "name": "requiredIf",
-                    "type": "text",
-                    "label": "{{ t('projects.field_required_if', 'Required when') }}",
-                    "maxLength": 1000,
-                    "tooltip": "{{ t('projects.field_required_if_help', 'A CEL expression on issue and user, for example issue.type == \"bug\"; true for always, empty for never') }}"
-                  },
-                  {
-                    "name": "archived",
-                    "type": "switch",
-                    "label": "{{ t('projects.field_archived', 'Archived') }}",
-                    "tooltip": "{{ t('projects.field_archived_help', 'Out of the forms; the values stay in the issues') }}"
-                  }
-                ],
-                "onSubmit": [
-                  {
-                    "call": "saveField",
-                    "args": {
-                      "fieldKey": "{{row.key}}"
+                      "field": "username",
+                      "label": "{{ t('projects.user', 'User') }}"
                     },
-                    "onError": [
-                      {
-                        "if": "{{error.status == 412}}",
-                        "then": [
-                          {
-                            "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
-                          }
-                        ],
-                        "else": [
-                          {
-                            "if": "{{error.status == 400}}",
-                            "then": [
+                    {
+                      "field": "role",
+                      "label": "{{ t('projects.role', 'Role') }}",
+                      "valueKey": "values.role"
+                    },
+                    {
+                      "field": "groups",
+                      "label": "{{ t('projects.through_groups', 'Through groups') }}"
+                    },
+                    {
+                      "field": "grantedBy",
+                      "label": "{{ t('projects.granted_by', 'Added by') }}"
+                    }
+                  ],
+                  "rowActions": [
+                    {
+                      "id": "btn-change-role",
+                      "label": "{{ t('projects.change_role', 'Change role') }}",
+                      "icon": "edit",
+                      "visibleIf": "{{row._perm.change}}",
+                      "onClick": [
+                        {
+                          "dialog": {
+                            "title": "{{ t('projects.change_role', 'Change role') }}",
+                            "initial": {
+                              "role": "{{row.role}}"
+                            },
+                            "fields": [
                               {
-                                "toast": "{{ t('projects.field_invalid', 'Check the key, the options and the rule') }}"
+                                "name": "role",
+                                "type": "select",
+                                "label": "{{ t('projects.role', 'Role') }}",
+                                "options": [
+                                  "viewer",
+                                  "developer",
+                                  "admin"
+                                ],
+                                "optionKey": "values.role",
+                                "required": true
                               }
                             ],
-                            "else": [
+                            "onSubmit": [
+                              {
+                                "call": "changeRole",
+                                "args": {
+                                  "username": "{{row.username}}"
+                                },
+                                "onError": [
+                                  {
+                                    "if": "{{error.status == 409}}",
+                                    "then": [
+                                      {
+                                        "toast": "{{ t('projects.last_admin', 'A project keeps at least one admin') }}"
+                                      }
+                                    ],
+                                    "else": [
+                                      {
+                                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "refresh": "members"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "btn-remove",
+                      "label": "{{ t('projects.remove', 'Remove') }}",
+                      "icon": "delete",
+                      "visibleIf": "{{row._perm.remove}}",
+                      "onClick": [
+                        {
+                          "confirm": "{{ t('projects.remove_confirm', 'Remove {name} from the project?', {'name': row.username}) }}"
+                        },
+                        {
+                          "call": "removeMember",
+                          "args": {
+                            "username": "{{row.username}}"
+                          },
+                          "onError": [
+                            {
+                              "if": "{{error.status == 409}}",
+                              "then": [
+                                {
+                                  "toast": "{{ t('projects.last_admin', 'A project keeps at least one admin') }}"
+                                }
+                              ],
+                              "else": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "refresh": "members"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "tab-groups",
+              "label": "{{ t('projects.groups', 'Groups') }}",
+              "components": [
+                {
+                  "id": "btn-add-group",
+                  "type": "button",
+                  "label": "{{ t('projects.add_group', 'Add group') }}",
+                  "icon": "user-add",
+                  "visibleIf": "{{ data.project != null && data.project._perm.manageMembers }}",
+                  "onClick": [
+                    {
+                      "dialog": {
+                        "title": "{{ t('projects.add_group', 'Add group') }}",
+                        "submitLabel": "{{ t('projects.add', 'Add') }}",
+                        "initial": {
+                          "role": "developer"
+                        },
+                        "fields": [
+                          {
+                            "name": "group",
+                            "type": "lookup",
+                            "label": "{{ t('admin.group', 'Group') }}",
+                            "required": true,
+                            "lookup": {
+                              "source": "groupChoices",
+                              "valueField": "id",
+                              "labelField": "name",
+                              "minChars": 0
+                            },
+                            "tooltip": "{{ t('projects.group_help', 'The groups of the workspace, in Administration') }}"
+                          },
+                          {
+                            "name": "role",
+                            "type": "select",
+                            "label": "{{ t('projects.role', 'Role') }}",
+                            "options": [
+                              "viewer",
+                              "developer",
+                              "admin"
+                            ],
+                            "optionKey": "values.role",
+                            "required": true
+                          }
+                        ],
+                        "onSubmit": [
+                          {
+                            "call": "addGroup",
+                            "onError": [
                               {
                                 "if": "{{error.status == 409}}",
                                 "then": [
                                   {
-                                    "toast": "{{ t('projects.field_exists', 'The project already has a field with this key') }}"
+                                    "toast": "{{ t('projects.last_admin', 'A project keeps at least one admin') }}"
                                   }
                                 ],
                                 "else": [
@@ -1303,13 +830,508 @@
                           }
                         ]
                       }
-                    ]
-                  }
-                ]
-              }
+                    },
+                    {
+                      "refresh": "groups"
+                    },
+                    {
+                      "refresh": "members"
+                    }
+                  ]
+                },
+                {
+                  "id": "group-table",
+                  "type": "table",
+                  "source": "groups",
+                  "columns": [
+                    {
+                      "field": "name",
+                      "label": "{{ t('admin.group', 'Group') }}"
+                    },
+                    {
+                      "field": "role",
+                      "label": "{{ t('projects.role', 'Role') }}",
+                      "valueKey": "values.role"
+                    },
+                    {
+                      "field": "grantedBy",
+                      "label": "{{ t('projects.granted_by', 'Added by') }}"
+                    }
+                  ],
+                  "rowActions": [
+                    {
+                      "id": "btn-change-group-role",
+                      "label": "{{ t('projects.change_role', 'Change role') }}",
+                      "icon": "edit",
+                      "visibleIf": "{{row._perm.change}}",
+                      "onClick": [
+                        {
+                          "dialog": {
+                            "title": "{{ t('projects.change_role', 'Change role') }}",
+                            "initial": {
+                              "group": "{{row.id}}",
+                              "role": "{{row.role}}"
+                            },
+                            "fields": [
+                              {
+                                "name": "role",
+                                "type": "select",
+                                "label": "{{ t('projects.role', 'Role') }}",
+                                "options": [
+                                  "viewer",
+                                  "developer",
+                                  "admin"
+                                ],
+                                "optionKey": "values.role",
+                                "required": true
+                              }
+                            ],
+                            "onSubmit": [
+                              {
+                                "call": "addGroup",
+                                "onError": [
+                                  {
+                                    "if": "{{error.status == 409}}",
+                                    "then": [
+                                      {
+                                        "toast": "{{ t('projects.last_admin', 'A project keeps at least one admin') }}"
+                                      }
+                                    ],
+                                    "else": [
+                                      {
+                                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "refresh": "groups"
+                        },
+                        {
+                          "refresh": "members"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "btn-remove-group",
+                      "label": "{{ t('common.remove', 'Remove') }}",
+                      "icon": "delete",
+                      "visibleIf": "{{row._perm.remove}}",
+                      "onClick": [
+                        {
+                          "confirm": "{{ t('projects.remove_group', 'Remove the group {name} from the project?', {'name': row.name}) }}"
+                        },
+                        {
+                          "call": "removeGroup",
+                          "args": {
+                            "group": "{{row.id}}"
+                          },
+                          "onError": [
+                            {
+                              "if": "{{error.status == 409}}",
+                              "then": [
+                                {
+                                  "toast": "{{ t('projects.last_admin', 'A project keeps at least one admin') }}"
+                                }
+                              ],
+                              "else": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "refresh": "groups"
+                        },
+                        {
+                          "refresh": "members"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             },
             {
-              "refresh": "fieldDefinitions"
+              "id": "tab-workflows",
+              "label": "{{ t('projects.workflows', 'Workflows') }}",
+              "components": [
+                {
+                  "id": "btn-add-workflow",
+                  "type": "button",
+                  "label": "{{ t('projects.add_workflow', 'New workflow') }}",
+                  "icon": "plus",
+                  "visibleIf": "{{ data.project != null && data.project._perm.edit }}",
+                  "onClick": [
+                    {
+                      "dialog": {
+                        "title": "{{ t('projects.add_workflow', 'New workflow') }}",
+                        "submitLabel": "{{ t('common.add', 'Add') }}",
+                        "fields": [
+                          {
+                            "name": "name",
+                            "type": "text",
+                            "label": "{{ t('projects.workflow_name', 'Name') }}",
+                            "required": true,
+                            "maxLength": 100,
+                            "tooltip": "{{ t('projects.workflow_name_help', 'A copy of the default workflow, with this name') }}"
+                          }
+                        ],
+                        "onSubmit": [
+                          {
+                            "call": "addWorkflow",
+                            "as": "created",
+                            "onError": [
+                              {
+                                "if": "{{error.status == 409}}",
+                                "then": [
+                                  {
+                                    "toast": "{{ t('projects.workflow_exists', 'The project already has a workflow with this name') }}"
+                                  }
+                                ],
+                                "else": [
+                                  {
+                                    "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "refresh": "workflows"
+                    }
+                  ]
+                },
+                {
+                  "id": "workflow-list",
+                  "type": "table",
+                  "source": "workflows",
+                  "columns": [
+                    {
+                      "field": "name",
+                      "label": "{{ t('projects.workflow_name', 'Name') }}"
+                    },
+                    {
+                      "field": "default",
+                      "label": "{{ t('projects.workflow_default', 'Default') }}",
+                      "format": "badge",
+                      "badges": {
+                        "true": "primary"
+                      },
+                      "valueKey": "values.workflow_default"
+                    },
+                    {
+                      "field": "types",
+                      "label": "{{ t('projects.workflow_types', 'Issue types') }}",
+                      "valueKey": "values.issue_type"
+                    },
+                    {
+                      "field": "statuses",
+                      "label": "{{ t('projects.statuses', 'Statuses') }}"
+                    },
+                    {
+                      "field": "transitions",
+                      "label": "{{ t('projects.transitions', 'Transitions') }}"
+                    }
+                  ],
+                  "rowActions": [
+                    {
+                      "id": "btn-open-workflow",
+                      "label": "{{ t('agile.open', 'Open') }}",
+                      "icon": "external",
+                      "onClick": [
+                        {
+                          "navigate": "workflow-detail",
+                          "params": {
+                            "key": "{{params.key}}",
+                            "workflow": "{{row.id}}"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "btn-remove-workflow",
+                      "label": "{{ t('projects.remove', 'Remove') }}",
+                      "icon": "delete",
+                      "visibleIf": "{{row._perm.remove}}",
+                      "onClick": [
+                        {
+                          "confirm": "{{ t('projects.remove_workflow_confirm', 'Remove the workflow {name}? It serves no issue type.', {'name': row.name}) }}"
+                        },
+                        {
+                          "call": "removeWorkflow",
+                          "args": {
+                            "id": "{{row.id}}",
+                            "version": "{{row.version}}"
+                          },
+                          "onError": [
+                            {
+                              "if": "{{error.status == 412}}",
+                              "then": [
+                                {
+                                  "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                }
+                              ],
+                              "else": [
+                                {
+                                  "toast": "{{ t('projects.workflow_in_use', 'Only a workflow that serves no issue type is removed') }}"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "refresh": "workflows"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "tab-fields",
+              "label": "{{ t('projects.fields', 'Custom fields') }}",
+              "components": [
+                {
+                  "id": "btn-add-field",
+                  "type": "button",
+                  "label": "{{ t('projects.add_field', 'New field') }}",
+                  "icon": "plus",
+                  "visibleIf": "{{ data.project != null && data.project._perm.edit }}",
+                  "onClick": [
+                    {
+                      "dialog": {
+                        "title": "{{ t('projects.add_field', 'New field') }}",
+                        "submitLabel": "{{ t('projects.add', 'Add') }}",
+                        "initial": {
+                          "type": "text"
+                        },
+                        "fields": [
+                          {
+                            "name": "key",
+                            "type": "text",
+                            "label": "{{ t('projects.field_key', 'Key') }}",
+                            "required": true,
+                            "pattern": "^[a-z][a-z0-9_]{0,39}$",
+                            "tooltip": "{{ t('projects.field_key_help', 'Lower-case letters, digits and _, from a letter; it does not change') }}"
+                          },
+                          {
+                            "name": "type",
+                            "type": "select",
+                            "label": "{{ t('projects.field_type', 'Type') }}",
+                            "required": true,
+                            "options": [
+                              "text",
+                              "number",
+                              "date",
+                              "checkbox",
+                              "select",
+                              "multiselect",
+                              "user"
+                            ],
+                            "optionKey": "values.field_type"
+                          },
+                          {
+                            "name": "label",
+                            "type": "text",
+                            "label": "{{ t('projects.field_label', 'Label') }}",
+                            "required": true,
+                            "maxLength": 100
+                          },
+                          {
+                            "name": "options",
+                            "type": "textarea",
+                            "label": "{{ t('projects.field_options', 'Options') }}",
+                            "rows": 4,
+                            "tooltip": "{{ t('projects.field_options_help', 'For select and multiselect: one per line, value or value: Label') }}"
+                          },
+                          {
+                            "name": "requiredIf",
+                            "type": "text",
+                            "label": "{{ t('projects.field_required_if', 'Required when') }}",
+                            "maxLength": 1000,
+                            "tooltip": "{{ t('projects.field_required_if_help', 'A CEL expression on issue and user, for example issue.type == \"bug\"; true for always, empty for never') }}"
+                          }
+                        ],
+                        "onSubmit": [
+                          {
+                            "call": "addField",
+                            "onError": [
+                              {
+                                "if": "{{error.status == 400}}",
+                                "then": [
+                                  {
+                                    "toast": "{{ t('projects.field_invalid', 'Check the key, the options and the rule') }}"
+                                  }
+                                ],
+                                "else": [
+                                  {
+                                    "if": "{{error.status == 409}}",
+                                    "then": [
+                                      {
+                                        "toast": "{{ t('projects.field_exists', 'The project already has a field with this key') }}"
+                                      }
+                                    ],
+                                    "else": [
+                                      {
+                                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "refresh": "fieldDefinitions"
+                    }
+                  ]
+                },
+                {
+                  "id": "field-table",
+                  "type": "table",
+                  "source": "fieldDefinitions",
+                  "columns": [
+                    {
+                      "field": "key",
+                      "label": "{{ t('projects.field_key', 'Key') }}"
+                    },
+                    {
+                      "field": "label",
+                      "label": "{{ t('projects.field_label', 'Label') }}"
+                    },
+                    {
+                      "field": "type",
+                      "label": "{{ t('projects.field_type', 'Type') }}",
+                      "valueKey": "values.field_type"
+                    },
+                    {
+                      "field": "requiredIf",
+                      "label": "{{ t('projects.field_required_if', 'Required when') }}"
+                    },
+                    {
+                      "field": "archived",
+                      "label": "{{ t('projects.field_archived', 'Archived') }}",
+                      "format": "badge",
+                      "badges": {
+                        "true": "neutral"
+                      },
+                      "valueKey": "values.archived"
+                    }
+                  ],
+                  "rowActions": [
+                    {
+                      "id": "btn-edit-field",
+                      "label": "{{ t('projects.edit_field', 'Edit') }}",
+                      "icon": "edit",
+                      "visibleIf": "{{row._perm.edit}}",
+                      "onClick": [
+                        {
+                          "dialog": {
+                            "title": "{{ t('projects.edit_field_title', 'Edit field') }}",
+                            "submitLabel": "{{ t('common.save', 'Save') }}",
+                            "initial": {
+                              "label": "{{row.label}}",
+                              "options": "{{row.options}}",
+                              "requiredIf": "{{row.requiredIf}}",
+                              "archived": "{{row.archived}}",
+                              "version": "{{row.version}}"
+                            },
+                            "fields": [
+                              {
+                                "name": "label",
+                                "type": "text",
+                                "label": "{{ t('projects.field_label', 'Label') }}",
+                                "required": true,
+                                "maxLength": 100
+                              },
+                              {
+                                "name": "options",
+                                "type": "textarea",
+                                "label": "{{ t('projects.field_options', 'Options') }}",
+                                "rows": 4,
+                                "tooltip": "{{ t('projects.field_options_help', 'For select and multiselect: one per line, value or value: Label') }}"
+                              },
+                              {
+                                "name": "requiredIf",
+                                "type": "text",
+                                "label": "{{ t('projects.field_required_if', 'Required when') }}",
+                                "maxLength": 1000,
+                                "tooltip": "{{ t('projects.field_required_if_help', 'A CEL expression on issue and user, for example issue.type == \"bug\"; true for always, empty for never') }}"
+                              },
+                              {
+                                "name": "archived",
+                                "type": "switch",
+                                "label": "{{ t('projects.field_archived', 'Archived') }}",
+                                "tooltip": "{{ t('projects.field_archived_help', 'Out of the forms; the values stay in the issues') }}"
+                              }
+                            ],
+                            "onSubmit": [
+                              {
+                                "call": "saveField",
+                                "args": {
+                                  "fieldKey": "{{row.key}}"
+                                },
+                                "onError": [
+                                  {
+                                    "if": "{{error.status == 412}}",
+                                    "then": [
+                                      {
+                                        "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                      }
+                                    ],
+                                    "else": [
+                                      {
+                                        "if": "{{error.status == 400}}",
+                                        "then": [
+                                          {
+                                            "toast": "{{ t('projects.field_invalid', 'Check the key, the options and the rule') }}"
+                                          }
+                                        ],
+                                        "else": [
+                                          {
+                                            "if": "{{error.status == 409}}",
+                                            "then": [
+                                              {
+                                                "toast": "{{ t('projects.field_exists', 'The project already has a field with this key') }}"
+                                              }
+                                            ],
+                                            "else": [
+                                              {
+                                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "refresh": "fieldDefinitions"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             }
           ]
         }
