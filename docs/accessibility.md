@@ -89,7 +89,7 @@ With NVDA and Firefox (Windows) or VoiceOver and Safari (macOS):
 
 | Release | Date | Result |
 | --- | --- | --- |
-| 1.0.0-rc.1 | 24 November 2026 | Failed: four requests to Quadrava (Q31 to Q34); one issue here, #41, fixed; the screen reader lines are not done yet. Details below. With Quadrava 0.20.0 Q31 to Q34 pass; the badges of the board in the dark theme remain (Q35) |
+| 1.0.0-rc.1 | 24 November 2026 | Failed: four requests to Quadrava (Q31 to Q34); one issue here, #41, fixed; the screen reader lines are not done yet. Details below. With Quadrava 0.20.0 Q31 to Q34 pass; the badges of the board in the dark theme remain (Q35), and pass with 0.20.1 |
 
 #### 1.0.0-rc.1, 24 November 2026
 
@@ -151,6 +151,10 @@ Italian and in both themes:
   text colours of the theme, 2.56:1 and 2.77:1; in the light theme they pass.
 - Found along the way, **Q36** (#43): the chosen theme is not remembered, so a reload or the next sign-in shows the
   light theme again.
+
+With Quadrava 0.20.1, on 25 November 2026: passed, Q35, the badges of the board are black on their fill in the dark
+theme (about 8:1 on the neutral one, 7.6:1 on the danger one) and unchanged in the light theme; passed, Q36, the dark
+theme stays after the page loads again.
 
 ## Where a problem goes
 
