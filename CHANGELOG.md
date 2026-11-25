@@ -8,9 +8,11 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
-## [1.0.0-rc.5] - 2026-11-25
+## [1.0.0-rc.6] - 2026-11-25
 
-The fifth candidate: the project page in tabs and breadcrumbs on every page, on Quadrava 0.21.0.
+The sixth candidate: the project page in tabs and breadcrumbs on every page, on Quadrava 0.21.0. The tag
+`v1.0.0-rc.5` holds the same changes, but its release was never published: its image did not build, because Maven
+Central refused the downloads (429), which this candidate retries longer.
 
 ### Changed
 
@@ -20,6 +22,8 @@ The fifth candidate: the project page in tabs and breadcrumbs on every page, on 
 - **Breadcrumbs**: every page shows its path above the title, for example Projects › WEB › Issues › WEB-4, and each
   step before the last one leads back to its page (Q37).
 - Quadrava 0.21.0 (runtime image and CLI).
+- Building: Maven retries Maven Central eight times, ten seconds apart and growing, when it answers 429 or 503
+  (`backend/.mvn/maven.config`).
 
 ### Upgrading
 
