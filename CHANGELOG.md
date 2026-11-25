@@ -8,6 +8,12 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+### Changed
+
+- The image of the back end is built from the jar that the release builds with Maven outside Docker, with its
+  restored repository: the build in Docker downloaded every dependency from Maven Central again and failed on 429
+  (#47). `backend/Dockerfile` still builds from the sources by default.
+
 ## [1.0.0-rc.7] - 2026-11-25
 
 The seventh candidate: cards that change row on a board, on Quadrava 0.22.0.

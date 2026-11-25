@@ -4,6 +4,12 @@
 # authz-library is read from GitHub Packages: the build takes a Maven settings.xml with the server "authz-library"
 # (backend/README.md) as the BuildKit secret "maven-settings"; it is never copied into a layer.
 #   docker build --secret id=maven-settings,src=<settings.xml> -t opendevtrack-backend backend
+#
+# With a jar already built (CI, issue #47: Maven there runs with the dependencies of actions/setup-java, while the cache
+# mount below is empty on every runner and Maven Central answers 429), the image takes it from the build context
+# "dist", a directory with app.jar, and Maven does not run:
+#   docker build --build-arg JAR=prebuilt --build-context dist=<dir> -t opendevtrack-backend backend
+ARG JAR=build
 
 FROM maven:3.9.11-eclipse-temurin-25 AS build
 WORKDIR /src
@@ -16,10 +22,15 @@ RUN --mount=type=cache,target=/root/.m2/repository \
     mvn -q -B package -DskipTests \
     && cp "$(ls target/opendevtrack-backend-*.jar | grep -vE -- '-(sources|javadoc)\.jar$' | head -1)" /app.jar
 
+FROM scratch AS prebuilt
+COPY --from=dist app.jar /app.jar
+
+FROM ${JAR} AS jar
+
 FROM eclipse-temurin:25-jre
 RUN groupadd --system odt && useradd --system --gid odt --home /app odt
 WORKDIR /app
-COPY --from=build /app.jar app.jar
+COPY --from=jar /app.jar app.jar
 USER odt
 # Structured logs (ASVS 1.7.1, 7.3.1): one JSON object a line in the Elastic Common Schema, which a central log
 # system reads as it is and in which a line break of a logged value stays escaped. A plain run of the jar keeps text.

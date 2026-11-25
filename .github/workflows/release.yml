@@ -83,17 +83,16 @@ jobs:
         env:
           PACKAGES_USER: ${{ github.actor }}
         run: mvn -B -q -f backend/pom.xml org.cyclonedx:cyclonedx-maven-plugin:2.9.1:makeAggregateBom -DoutputFormat=json -DoutputName=bom
-      # The build reads authz-library from GitHub Packages through a BuildKit secret, never stored in a layer
-      - name: Maven settings for the build
+      # The jar of the tag is built here, with the Maven repository that setup-java restores, and the image takes it
+      # (build context "dist"): Maven in Docker would download every dependency from Maven Central again, which
+      # answers 429 to the runners (#47)
+      - name: Jar of the back end
         env:
           PACKAGES_USER: ${{ github.actor }}
         run: |
-          umask 077
-          cat > "$RUNNER_TEMP/settings.xml" <<EOF
-          <settings><servers><server><id>authz-library</id>
-            <username>${PACKAGES_USER}</username><password>${PACKAGES_TOKEN}</password>
-          </server></servers></settings>
-          EOF
+          mvn -B -q -f backend/pom.xml package -DskipTests
+          mkdir -p "$RUNNER_TEMP/dist"
+          cp "$(ls backend/target/opendevtrack-backend-*.jar | grep -vE -- '-(sources|javadoc)\.jar$' | head -1)" "$RUNNER_TEMP/dist/app.jar"
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
@@ -120,11 +119,9 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          secret-files: maven-settings=${{ runner.temp }}/settings.xml
+          build-args: JAR=prebuilt
+          build-contexts: dist=${{ runner.temp }}/dist
           provenance: mode=max
-      - name: Remove the Maven settings
-        if: always()
-        run: rm -f "$RUNNER_TEMP/settings.xml"
       - uses: sigstore/cosign-installer@v3
       # Signed by digest, never by tag: a tag can be moved, the digest is the image
       - name: Sign the image and attest its SBOM

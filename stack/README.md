@@ -65,7 +65,9 @@ have something to show from the first login.
 ## How it is put together
 
 - `backend/Dockerfile`: Maven with Temurin 25 builds the jar (tests skipped: CI runs them), Temurin 25 JRE runs it as
-  a user without privileges. The Maven repository is a BuildKit cache, so later builds download nothing.
+  a user without privileges. The Maven repository is a BuildKit cache, so later builds download nothing. CI builds
+  the jar outside Docker, where its Maven repository is restored, and passes it to the image (`--build-arg
+  JAR=prebuilt --build-context dist=<dir with app.jar>`, #47).
 - The back end shares the network of the Keycloak container (`network_mode: service:keycloak`): there
   `http://localhost:18180` is Keycloak, as in the browser, so the issuer of the tokens and the address the back end
   reads it from are the same without a proxy or a hosts entry. The other containers reach the back end by the alias

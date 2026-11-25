@@ -8,7 +8,8 @@
 #   e2e/deploy/run.sh down    remove the containers and their volumes
 #
 # Needs Docker with Compose, bash, curl and a GitHub token with read:packages (PACKAGES_TOKEN, or the one of
-# npm.pkg.github.com in ~/.npmrc). DEPLOY_IMAGE skips the build and uses that image. Development only: the
+# npm.pkg.github.com in ~/.npmrc). DEPLOY_IMAGE skips the build and uses that image; BACKEND_JAR builds the image
+# from that jar instead of running Maven in Docker. Development only: the
 # certificates are those of the local authority of Caddy, so curl runs with -k.
 set -euo pipefail
 
@@ -79,9 +80,16 @@ image() {
   printf '<settings><servers><server><id>authz-library</id><username>token</username><password>%s</password></server></servers></settings>\n' \
     "$PACKAGES_TOKEN" > "$work/maven-settings.xml"
   umask 022
+  # BACKEND_JAR: a jar already built (CI, issue #47); the image takes it and Maven does not run in Docker
+  local from=()
+  if [ -n "${BACKEND_JAR:-}" ]; then
+    mkdir -p "$work/dist"
+    cp "$BACKEND_JAR" "$work/dist/app.jar"
+    from=(--build-arg JAR=prebuilt --build-context dist="$(host_path "$work/dist")")
+  fi
   # The output of the build goes to a file and is shown only when the build fails, with the messages of Maven
   # (issue #44: `docker build -q` printed nothing but the failed step).
-  if ! docker build --progress=plain --secret id=maven-settings,src="$work/maven-settings.xml" \
+  if ! docker build --progress=plain "${from[@]}" --secret id=maven-settings,src="$work/maven-settings.xml" \
       -t opendevtrack-backend:deploy-check "$root/backend" > "$work/image-build.log" 2>&1; then
     echo "the build of the image failed; the end of its output ($work/image-build.log):" >&2
     tail -n 120 "$work/image-build.log" >&2
