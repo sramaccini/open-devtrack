@@ -189,6 +189,10 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
      by cosign. The demo is upgraded to it (old `.env` in /root/odt-demo-env.rc3.bak); `watch.sh` ok.
    - The project page in tabs, as the issue page (25 November 2026). Quadrava 0.21.0 adopted (Q37): breadcrumbs on
      every screen, declared by the 14 that are not in the menu.
+   - `v1.0.0-rc.5` tagged on 823aa51 but never published: its image did not build, Maven Central answered 429 (the
+     log shows it since #44). Fixed with longer retries (`backend/.mvn/maven.config`), and the same changes went out as
+     `v1.0.0-rc.6` on c5066b0: its workflow green on the first run, image @sha256:33dbb340… with its signature and
+     SBOM verified by cosign. The demo is upgraded to it (old `.env` in /root/odt-demo-env.rc4.bak); `watch.sh` ok.
    Next: the screen reader lines and the ZAP baseline on the current candidate.
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
