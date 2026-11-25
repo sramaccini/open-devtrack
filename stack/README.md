@@ -7,7 +7,7 @@ with its embedded database. It is not a way to install OpenDevTrack: that is [de
 [docs/admin/installation.md](../docs/admin/installation.md).
 
 ```
-browser ──▶ quadrava-runtime 0.22.0 (:18090) ──/bff /authz /api /registry──▶ backend (profile dev, image from backend/)
+browser ──▶ quadrava-runtime 0.22.1 (:18090) ──/bff /authz /api /registry──▶ backend (profile dev, image from backend/)
                                                                                │ in the network of Keycloak
             Keycloak 26.8.0 (:18180, realm opendevtrack) ◀── OIDC, on localhost ┤
             PostgreSQL 18 (volume pgdata) ◀─────────────────────────────────────┤
@@ -75,7 +75,7 @@ have something to show from the first login.
 - The realm and the runtime configuration are those of the end-to-end check (`e2e/authz/realm-opendevtrack.json`,
   `e2e/authz/runtime-config.json`); the brand is mounted from `brand/` as there.
 - `ui/` is published to the environment `development` of the registry by the service `publish` (Node 24 and the
-  Quadrava CLI 0.22.0), with an access token of `mario.rossi` from the tools client.
+  Quadrava CLI 0.22.1), with an access token of `mario.rossi` from the tools client.
 - Keycloak imports the realm only when its container is created: after a change of the realm, `down` then `up`.
 - The API with a token (docs/api.md): the client `opendevtrack-ci` is a service account (client credentials, its
   secret `CI_CLIENT_SECRET` in `.work/.env`), whose user `service-account-opendevtrack-ci` is a member of `ACME`;

@@ -13,6 +13,12 @@ The entries are written by hand at each release from the commits ([docs/release.
 - The image of the back end is built from the jar that the release builds with Maven outside Docker, with its
   restored repository: the build in Docker downloaded every dependency from Maven Central again and failed on 429
   (#47). `backend/Dockerfile` still builds from the sources by default.
+- Quadrava 0.22.1 (runtime image and CLI).
+
+### Fixed
+
+- In the dark theme, menus and drop-downs (the «Move» menu of a card, row actions, column filters) opened above their
+  button, often out of sight, on a scrolled page (Quadrava 0.22.1).
 
 ## [1.0.0-rc.7] - 2026-11-25
 
