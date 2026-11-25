@@ -8,6 +8,26 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+## [1.0.0-rc.4] - 2026-11-25
+
+The fourth candidate: the screens on Quadrava 0.20.1, which closes the two accessibility points left open by rc.3.
+
+### Changed
+
+- Quadrava 0.20.1 (runtime image and CLI).
+- The theme chosen in Settings is remembered by the browser, as the language already was: a reload, a new tab or the
+  next sign-in keep it (Q36).
+
+### Accessibility
+
+- The badges of the cards of a board are readable in the dark theme: their text takes the colour the theme computes
+  for their fill, about 8:1 (Q35) ([docs/accessibility.md](docs/accessibility.md)).
+
+### Upgrading
+
+From 1.0.0-rc.3: put the digest of the new image in `.env`, then `./odt.sh up` and `./odt.sh publish-ui`
+([upgrades-and-backups.md](docs/admin/upgrades-and-backups.md)). No change of data and no new setting.
+
 ## [1.0.0-rc.3] - 2026-11-24
 
 The third candidate: the screens on Quadrava 0.20.0, which answers the manual accessibility check of rc.2.
