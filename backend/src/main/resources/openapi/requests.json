@@ -426,6 +426,9 @@
           "column" : {
             "type" : "string"
           },
+          "lane" : {
+            "type" : "string"
+          },
           "to" : {
             "type" : "string"
           }

@@ -15,11 +15,13 @@ import com.logicwarez.opendevtrack.issue.IssueEvents.FieldChange;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueCreated;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueDeleted;
+import com.logicwarez.opendevtrack.issue.IssueEditor.Fields;
+import com.logicwarez.opendevtrack.issue.IssueEditor.InvalidCustom;
+import com.logicwarez.opendevtrack.issue.IssueEditor.InvalidField;
 import com.logicwarez.opendevtrack.issue.Issues.Found;
 import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
-import com.logicwarez.opendevtrack.platform.Problems.FieldError;
 import com.logicwarez.opendevtrack.project.ProjectRef;
 import com.logicwarez.opendevtrack.project.Projects;
 import com.logicwarez.opendevtrack.workflow.Workflows;
@@ -28,18 +30,12 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Limit;
@@ -76,10 +72,7 @@ import org.springframework.web.bind.annotation.RestController;
 @PreAuthorize("hasAuthority('odt.project.browse')")
 class IssueController {
 
-    private static final Pattern LABEL = Pattern.compile("^[a-z0-9][a-z0-9._-]{0,49}$");
-    private static final int MAX_LABELS = 20;
     private static final int MAX_SUGGESTED = 20;
-    private static final int MAX_DESCRIPTION = 32_000;
     private static final int MAX_LIST = 500;
     private static final String NOT_FOUND = "Issue not found";
     private static final String NOT_A_MEMBER = "Only the members of the project see its issues";
@@ -93,11 +86,13 @@ class IssueController {
     private final Workflows workflows;
     private final WatcherRepository watchers;
     private final CustomFields customFields;
+    private final IssueEditor editor;
     private final Clock clock;
 
     IssueController(IssueRepository issues, Issues finder, Projects projects, ProjectAccess access, CurrentUser user,
                     ApplicationEventPublisher events, Workflows workflows, WatcherRepository watchers,
-                    CustomFields customFields, @Value("${odt.reporting.zone:UTC}") String zone) {
+                    CustomFields customFields, IssueEditor editor, @Value("${odt.reporting.zone:UTC}") String zone) {
+        this.editor = editor;
         this.clock = Clock.system(ZoneId.of(zone));
         this.workflows = workflows;
         this.customFields = customFields;
@@ -170,9 +165,9 @@ class IssueController {
         Fields fields;
         String initial;
         try {
-            fields = fields(project.get(), request, Fields.EMPTY);
+            fields = editor.fields(project.get(), request, Fields.EMPTY);
             initial = workflows.initialStatus(project.get().id(), fields.type().value());
-            checkRequired(project.get(), null, fields, initial, user.username(), permissions);
+            editor.checkRequired(project.get(), null, fields, initial, user.username(), permissions);
         } catch (InvalidField e) {
             return Problems.badRequest(e.getMessage());
         } catch (InvalidCustom e) {
@@ -184,8 +179,8 @@ class IssueController {
         fields.applyTo(issue, now);
         issues.saveAndFlush(issue);
         watchers.watch(issue.id(), issue.reporter(), now);
-        watchAssignee(issue, now);
-        watchReviewer(issue, now);
+        editor.watchAssignee(issue, now);
+        editor.watchReviewer(issue, now);
         events.publishEvent(new IssueCreated(issue.id(), project.get().id(), key(project.get(), issue), user.username(), now,
                 Fields.of(issue).changesFrom(Fields.EMPTY)));
         return ResponseEntity.status(HttpStatus.CREATED).body(view(project.get(), issue, permissions));
@@ -220,14 +215,9 @@ class IssueController {
         if (!permissions.contains("odt.issue.edit")) {
             return Problems.forbidden("Only a developer or an admin of the project edits issues");
         }
-        Fields fields;
-        String status;
+        IssueEditor.Edit edit;
         try {
-            fields = fields(project, request, Fields.of(issue));
-            // A new type may follow another workflow: the status moves there in the same change (ADR-20, B.5).
-            status = fields.type() == issue.type() ? issue.status()
-                    : workflows.statusFor(project.id(), fields.type().value(), issue.status());
-            checkRequired(project, key(project, issue), fields, status, issue.reporter(), permissions);
+            edit = editor.edit(project, issue, request, permissions);
         } catch (InvalidField e) {
             return Problems.badRequest(e.getMessage());
         } catch (InvalidCustom e) {
@@ -236,27 +226,18 @@ class IssueController {
         if (request.version() == null || request.version() != issue.version()) {
             return Problems.changedMeanwhile();
         }
-        List<FieldChange> changes = new ArrayList<>(fields.changesFrom(Fields.of(issue)));
+        List<FieldChange> changes = edit.changes();
         if (changes.isEmpty()) {
             return ResponseEntity.ok(view(project, issue, permissions));
         }
         Instant now = Instant.now();
-        fields.applyTo(issue, now);
-        if (!status.equals(issue.status())) {
-            changes.add(new FieldChange("status", issue.status(), status));
-            issue.moveTo(status, now);
-        }
+        editor.apply(issue, edit, now);
         try {
             issues.saveAndFlush(issue);
         } catch (ObjectOptimisticLockingFailureException e) {
             return Problems.changedMeanwhile();
         }
-        if (changes.stream().anyMatch(c -> c.field().equals("assignee"))) {
-            watchAssignee(issue, now);
-        }
-        if (changes.stream().anyMatch(c -> c.field().equals("reviewer"))) {
-            watchReviewer(issue, now);
-        }
+        editor.watch(issue, changes, now);
         events.publishEvent(new IssueChanged(issue.id(), project.id(), key(project, issue), user.username(), now, changes));
         return ResponseEntity.ok(view(project, issue, permissions));
     }
@@ -365,20 +346,6 @@ class IssueController {
         return ResponseEntity.ok(view(project, issue, permissions));
     }
 
-    /** Whoever is assigned an issue watches it, until they stop. */
-    private void watchAssignee(IssueEntity issue, Instant now) {
-        if (issue.assignee() != null) {
-            watchers.watch(issue.id(), issue.assignee(), now);
-        }
-    }
-
-    /** Whoever is asked to review an issue watches it, as the assignee does (ADR-19). */
-    private void watchReviewer(IssueEntity issue, Instant now) {
-        if (issue.reviewer() != null) {
-            watchers.watch(issue.id(), issue.reviewer(), now);
-        }
-    }
-
     /** Past its due date and not done (ADR-19): the day is in the zone of the reports. */
     static boolean overdue(LocalDate dueOn, String category, LocalDate today) {
         return dueOn != null && dueOn.isBefore(today) && !"done".equals(category);
@@ -387,37 +354,7 @@ class IssueController {
     /** The issue as the guards see it ({@code issue.assignee}, {@code issue.custom.customer}…). */
     static Map<String, Object> guardInput(Found found) {
         IssueEntity i = found.issue();
-        return conditionInput(found.project(), key(found.project(), i), Fields.of(i), i.status(), i.reporter());
-    }
-
-    /** An issue as the conditions see it (ADR-10, ADR-11), also one not saved yet ({@code key} null). */
-    private static Map<String, Object> conditionInput(ProjectRef project, String key, Fields f, String status,
-                                                      String reporter) {
-        Map<String, Object> issue = new HashMap<>();
-        issue.put("key", key);
-        issue.put("project", project.key());
-        issue.put("type", f.type() == null ? null : f.type().value());
-        issue.put("summary", f.summary());
-        issue.put("description", f.description());
-        issue.put("status", status);
-        issue.put("priority", f.priority() == null ? null : f.priority().value());
-        issue.put("assignee", f.assignee());
-        issue.put("reporter", reporter);
-        issue.put("dueOn", f.dueOn() == null ? null : f.dueOn().toString());
-        issue.put("reviewer", f.reviewer());
-        issue.put("labels", f.labels() == null ? List.of() : f.labels());
-        issue.put("custom", f.custom());
-        return issue;
-    }
-
-    /** The custom fields that the issue, as it would be saved, requires and lacks. */
-    private void checkRequired(ProjectRef project, String key, Fields fields, String status, String reporter,
-                               Set<String> permissions) throws InvalidCustom {
-        List<FieldError> missing = customFields.missing(project.id(),
-                conditionInput(project, key, fields, status, reporter), userInput(), permissions);
-        if (!missing.isEmpty()) {
-            throw new InvalidCustom(missing);
-        }
+        return IssueEditor.conditionInput(found.project(), key(found.project(), i), Fields.of(i), i.status(), i.reporter());
     }
 
     private Map<String, Object> userInput() {
@@ -435,131 +372,6 @@ class IssueController {
 
     private Set<String> permissions(ProjectRef project) {
         return access.permissions(project.id(), user.username());
-    }
-
-    /** The fields of a request, checked; type and priority default to task and medium. */
-    private record Fields(IssueType type, String summary, String description, Priority priority, String assignee,
-                          LocalDate dueOn, String reviewer, List<String> labels, Map<String, Object> custom) {
-
-        void applyTo(IssueEntity issue, Instant now) {
-            issue.edit(type, summary, description, priority, assignee, dueOn, reviewer, labels, custom, now);
-        }
-
-        static final Fields EMPTY = new Fields(null, null, null, null, null, null, null, List.of(), Map.of());
-
-        static Fields of(IssueEntity issue) {
-            return new Fields(issue.type(), issue.summary(), issue.description(), issue.priority(), issue.assignee(),
-                    issue.dueOn(), issue.reviewer(), issue.labels(), issue.custom());
-        }
-
-        /** The fields that differ from {@code before}, in the order of the form. */
-        List<FieldChange> changesFrom(Fields before) {
-            List<FieldChange> changes = new ArrayList<>();
-            change(changes, "type", before.type == null ? null : before.type.value(), type == null ? null : type.value());
-            change(changes, "summary", before.summary, summary);
-            change(changes, "priority", before.priority == null ? null : before.priority.value(),
-                    priority == null ? null : priority.value());
-            change(changes, "assignee", before.assignee, assignee);
-            change(changes, "reviewer", before.reviewer, reviewer);
-            change(changes, "due", before.dueOn == null ? null : before.dueOn.toString(),
-                    dueOn == null ? null : dueOn.toString());
-            change(changes, "labels", text(before.labels), text(labels));
-            change(changes, "description", before.description, description);
-            Set<String> keys = new TreeSet<>(before.custom.keySet());
-            keys.addAll(custom.keySet());
-            for (String key : keys) {
-                change(changes, "custom." + key, CustomFields.text(before.custom.get(key)),
-                        CustomFields.text(custom.get(key)));
-            }
-            return changes;
-        }
-
-        private static void change(List<FieldChange> changes, String field, String from, String to) {
-            if (!Objects.equals(from, to)) {
-                changes.add(new FieldChange(field, from, to));
-            }
-        }
-
-        private static String text(List<String> labels) {
-            return labels == null || labels.isEmpty() ? null : String.join(", ", labels);
-        }
-    }
-
-    private static final class InvalidField extends Exception {
-        InvalidField(String message) {
-            super(message);
-        }
-    }
-
-    /** Custom fields that are not valid, with the errors on each (ADR-11). */
-    private static final class InvalidCustom extends Exception {
-        static final String TITLE = "Some custom fields are not valid";
-        private final transient List<FieldError> errors;
-
-        InvalidCustom(List<FieldError> errors) {
-            super(TITLE, null, false, false);
-            this.errors = errors;
-        }
-    }
-
-    /** The fields of a request, checked, on top of {@code before}; without {@code custom} its values stay. */
-    private Fields fields(ProjectRef project, IssueRequest request, Fields before) throws InvalidField, InvalidCustom {
-        IssueType type = request.type() == null ? IssueType.TASK : IssueType.parse(request.type())
-                .orElseThrow(() -> new InvalidField("The type is one of " + String.join(", ", IssueType.names())));
-        Priority priority = request.priority() == null ? Priority.MEDIUM : Priority.parse(request.priority())
-                .orElseThrow(() -> new InvalidField("The priority is one of " + String.join(", ", Priority.names())));
-        if (request.summary() == null || request.summary().isBlank() || request.summary().strip().length() > 255) {
-            throw new InvalidField("The summary is required, at most 255 characters");
-        }
-        if (request.description() != null && request.description().length() > MAX_DESCRIPTION) {
-            throw new InvalidField("The description is at most " + MAX_DESCRIPTION + " characters");
-        }
-        String assignee = blankToNull(request.assignee());
-        if (assignee != null && access.role(project.id(), assignee).isEmpty()) {
-            throw new InvalidField("The assignee must be a member of the project");
-        }
-        String reviewer = blankToNull(request.reviewer());
-        if (reviewer != null && access.role(project.id(), reviewer).isEmpty()) {
-            throw new InvalidField("The reviewer must be a member of the project");
-        }
-        if (reviewer != null && reviewer.equals(assignee)) {
-            throw new InvalidField("The reviewer cannot be the assignee");
-        }
-        LocalDate dueOn;
-        try {
-            dueOn = blankToNull(request.dueOn()) == null ? null : LocalDate.parse(request.dueOn().strip());
-        } catch (DateTimeParseException e) {
-            throw new InvalidField("The due date is a day as YYYY-MM-DD");
-        }
-        Map<String, Object> custom = before.custom();
-        if (request.custom() != null) {
-            CustomFields.Checked checked = customFields.check(project.id(), request.custom(), before.custom());
-            if (!checked.errors().isEmpty()) {
-                throw new InvalidCustom(checked.errors());
-            }
-            custom = checked.values();
-        }
-        return new Fields(type, request.summary().strip(), blankToNull(request.description()), priority, assignee,
-                dueOn, reviewer, labels(request.labels()), custom);
-    }
-
-    /** Labels in lower case, without repetitions, in the order given. */
-    private static List<String> labels(List<String> given) throws InvalidField {
-        if (given == null) {
-            return List.of();
-        }
-        Set<String> labels = new LinkedHashSet<>();
-        for (String label : given) {
-            String l = label == null ? "" : label.strip().toLowerCase(Locale.ROOT);
-            if (!LABEL.matcher(l).matches()) {
-                throw new InvalidField("A label is 1 to 50 letters, digits, dots, dashes or underscores, without spaces");
-            }
-            labels.add(l);
-        }
-        if (labels.size() > MAX_LABELS) {
-            throw new InvalidField("At most " + MAX_LABELS + " labels");
-        }
-        return new ArrayList<>(labels);
     }
 
     private static String blankToNull(String text) {

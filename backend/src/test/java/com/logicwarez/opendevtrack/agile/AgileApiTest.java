@@ -208,6 +208,74 @@ class AgileApiTest {
         move(cards + "ODT-3/move", "1", null, null, luisa, 409);
     }
 
+    /** A kanban board of the project with lanes by {@code lane}, and the path of its cards. */
+    private String laneBoard(String lane) throws Exception {
+        String body = mvc.perform(as(post("/api/projects/ODT/boards"), mario)
+                        .content("{\"name\":\"By " + lane + "\",\"kind\":\"kanban\",\"lane\":\"" + lane + "\"}"))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+        return "/api/boards/" + JsonPath.read(body, "$.id") + "/cards/";
+    }
+
+    private void moveToLane(String url, String column, String lane, SessionAuthentication who, int expected)
+            throws Exception {
+        mvc.perform(as(post(url), who).content("{\"column\":\"" + column + "\",\"lane\":" + quoted(lane) + "}"))
+                .andExpect(status().is(expected));
+    }
+
+    @Test
+    void aMoveToAnotherLaneChangesItsField() throws Exception {
+        String byPriority = laneBoard("priority");
+        moveToLane(byPriority + "ODT-1/move", "0", "high", luisa, 200);
+        mvc.perform(as(get("/api/issues/ODT-1"), paola))
+                .andExpect(jsonPath("$.priority").value("high"))
+                .andExpect(jsonPath("$.status").value("todo"));
+        TestInfrastructure.awaitListeners(jdbc);
+        mvc.perform(as(get("/api/issues/ODT-1/history"), paola)).andExpect(jsonPath("$[0].field").value("priority"));
+        // A value that is not a priority, and a viewer, change nothing.
+        moveToLane(byPriority + "ODT-1/move", "0", "urgent", luisa, 400);
+        moveToLane(byPriority + "ODT-1/move", "0", "low", paola, 403);
+        // The lane the issue is already in changes nothing.
+        moveToLane(byPriority + "ODT-1/move", "0", "high", luisa, 200);
+
+        String byType = laneBoard("type");
+        moveToLane(byType + "ODT-2/move", "0", "bug", luisa, 200);
+        mvc.perform(as(get("/api/issues/ODT-2"), paola)).andExpect(jsonPath("$.type").value("bug"));
+
+        // Lanes by nothing: the lane of the request is not a field.
+        moveToLane("/api/boards/" + board() + "/cards/ODT-3/move", "0", "highest", luisa, 200);
+        mvc.perform(as(get("/api/issues/ODT-3"), paola)).andExpect(jsonPath("$.priority").value("medium"));
+    }
+
+    @Test
+    void aMoveToAnotherAssigneeFollowsTheRulesOfTheIssue() throws Exception {
+        String cards = laneBoard("assignee");
+        moveToLane(cards + "ODT-1/move", "0", "luisa", luisa, 200);
+        mvc.perform(as(get("/api/issues/ODT-1"), paola)).andExpect(jsonPath("$.assignee").value("luisa"));
+        // The new assignee watches the issue, as from the form.
+        mvc.perform(as(get("/api/issues/ODT-1/watchers"), paola)).andExpect(jsonPath("$[?(@.username == 'luisa')]").exists());
+        // The lane of nobody takes the assignee away; one who is not a member is refused.
+        moveToLane(cards + "ODT-1/move", "0", "", luisa, 200);
+        mvc.perform(as(get("/api/issues/ODT-1"), paola)).andExpect(jsonPath("$.assignee").doesNotExist());
+        moveToLane(cards + "ODT-1/move", "0", "ugo", luisa, 400);
+        // The reviewer cannot be the assignee.
+        mvc.perform(as(put("/api/issues/ODT-2"), luisa).content("{\"summary\":\"Two\",\"reviewer\":\"luisa\",\"version\":0}"))
+                .andExpect(status().isOk());
+        moveToLane(cards + "ODT-2/move", "0", "luisa", luisa, 400);
+
+        // Another lane and another column: one change, whose transition sees the new assignee.
+        mvc.perform(as(put("/api/projects/ODT/workflow/transitions/start"), mario)
+                        .content("{\"from\":\"todo\",\"to\":\"in_progress\",\"guard\":\"issue.assignee == 'mario'\",\"version\":0}"))
+                .andExpect(status().isOk());
+        moveToLane(cards + "ODT-3/move", "1", "luisa", luisa, 409);
+        mvc.perform(as(get("/api/issues/ODT-3"), paola))
+                .andExpect(jsonPath("$.assignee").doesNotExist())
+                .andExpect(jsonPath("$.status").value("todo"));
+        moveToLane(cards + "ODT-3/move", "1", "mario", luisa, 200);
+        mvc.perform(as(get("/api/issues/ODT-3"), paola))
+                .andExpect(jsonPath("$.assignee").value("mario"))
+                .andExpect(jsonPath("$.status").value("in_progress"));
+    }
+
     @Test
     void aMoveWithinAColumnChangesTheOrder() throws Exception {
         String board = board();

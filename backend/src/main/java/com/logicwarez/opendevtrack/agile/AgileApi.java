@@ -45,9 +45,10 @@ final class AgileApi {
     /**
      * A card dropped on {@code column}, between the cards {@code beforeId} and {@code afterId} (issue keys). In the
      * backlog, {@code to} instead puts the issue first ({@code top}) or last ({@code bottom}) in the order of its
-     * project (ADR-26); {@code column} is then optional.
+     * project (ADR-26); {@code column} is then optional. On a board with lanes, {@code lane} is the lane the card is
+     * dropped in: the assignee (empty for nobody), the priority or the type it gets; without it the lane stays.
      */
-    record MoveRequest(String column, String beforeId, String afterId, String to) {
+    record MoveRequest(String column, String beforeId, String afterId, String to, String lane) {
     }
 
     /**

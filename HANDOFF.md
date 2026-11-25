@@ -193,7 +193,12 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
      log shows it since #44). Fixed with longer retries (`backend/.mvn/maven.config`), and the same changes went out as
      `v1.0.0-rc.6` on c5066b0: its workflow green on the first run, image @sha256:33dbb340… with its signature and
      SBOM verified by cosign. The demo is upgraded to it (old `.env` in /root/odt-demo-env.rc4.bak); `watch.sh` ok.
-   Next: the screen reader lines and the ZAP baseline on the current candidate.
+   - A card moved to another lane of a board changes the assignee, the priority or the type of its issue (25
+     November 2026): the back end takes `lane` in the move of a card and applies it with the rules of the issue form
+     (`issue/IssueEditor`, shared with `IssueController`), in one change with the transition of the column. The board
+     cannot drag a card to another row yet: asked to Quadrava as Q38 (#46); then `board.json` asks for confirmation
+     («The assignee will be changed to …») and sends the lane.
+   Next: Q38 on the board; the screen reader lines and the ZAP baseline on the current candidate.
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
    SQL, as authz-library documents), and `odt.sh publish-ui` publishes `ui/` to `production` with the service account

@@ -283,7 +283,10 @@ class BoardController {
 
     /**
      * A card dropped on a column, between two cards: to another column it runs a transition (409 when none can run now,
-     * and the card goes back), then it takes its place in the order of the project.
+     * and the card goes back), then it takes its place in the order of the project. With {@code lane}, on a board whose
+     * lanes follow the assignee, the priority or the type, the card was dropped in that lane: the field of the issue
+     * changes with the rules of its form (403 without {@code odt.issue.edit}, 400 when the value is not valid), in the
+     * same change as the transition.
      */
     @ApiDoc(value = "Moves a card: to another column (a transition) or between two others (the order)",
             answer = Map.class, project = {"odt.issue.transition", "odt.issue.edit"})
@@ -304,13 +307,22 @@ class BoardController {
         if (target.isEmpty()) {
             return Problems.badRequest(UNKNOWN_COLUMN);
         }
-        Issues.Move move = issues.moveTo(issueKey, Set.copyOf(target.get().statuses()));
+        String laneField = found.get().board().lane();
+        Issues.Lane lane = request.lane() == null || !Issues.LANE_FIELDS.contains(laneField) ? null
+                : new Issues.Lane(laneField, request.lane());
+        Issues.Move move = issues.moveTo(issueKey, Set.copyOf(target.get().statuses()), lane);
         switch (move.outcome()) {
             case NOT_FOUND -> {
                 return Problems.notFound("Issue not found");
             }
             case NOT_PERMITTED -> {
                 return Problems.forbidden("Only a developer or an admin of the project moves issues");
+            }
+            case NOT_EDITABLE -> {
+                return Problems.forbidden("Only a developer or an admin of the project edits issues");
+            }
+            case INVALID -> {
+                return Problems.badRequest(move.problem());
             }
             case NO_TRANSITION -> {
                 return Problems.conflict("No transition of the workflow leads to this column now");
