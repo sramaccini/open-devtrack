@@ -145,6 +145,7 @@
                     {
                       "name": "description",
                       "type": "textarea",
+                      "width": "full",
                       "label": "{{ t('projects.description', 'Description') }}",
                       "maxLength": 2000,
                       "readOnlyIf": "{{!form._perm.edit}}"

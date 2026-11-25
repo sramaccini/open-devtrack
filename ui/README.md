@@ -27,8 +27,9 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 - **Field widths** (Quadrava 0.13.0): forms use `layout: "flow"` and each field a `width` by what it holds: `xs`
   short codes, keys and estimates; `s` dates, statuses, priorities, types; `m` names, users, choices; `l` titles and
   free text of one line. Descriptions, labels and lists of choices have none and take a line of their own; so do the
-  templates of the custom fields (`fieldsFrom`), by type. A field without `width` stops at 560px; the description of
-  an issue in `issue-detail` has `width: "full"` (Quadrava 0.19.0, Q26) and takes the whole line.
+  templates of the custom fields (`fieldsFrom`), by type. A field without `width` stops at 560px; the descriptions of
+  an issue in `issue-detail` and of a project in `project-detail` have `width: "full"` (Quadrava 0.19.0, Q26) and
+  take the whole line.
 - **Icons** (Quadrava 0.19.0, Q27): every button and action has an `icon` before its text, by what it does: `plus`
   creates, `user-add` adds a person or a group, `edit` changes, `delete` removes, `save` saves, `move` plans or
   reorders, `play` starts or sends a test, `check` completes or turns on, `close` signs out or turns off, `link`,
