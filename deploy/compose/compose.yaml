@@ -50,8 +50,8 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
-      # The back end reads the issuer when it starts; ignored without the profile keycloak. Keycloak can still answer
-      # 503 for a few seconds while it imports the realm: the back end then stops and restart starts it again.
+      # The back end reads the issuer when it starts; ignored without the profile keycloak. Keycloak is healthy once
+      # its realm answers (#48); an external Keycloak that answers 503 stops the back end, and restart starts it again.
       keycloak: { condition: service_healthy, required: false }
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/opendevtrack
@@ -153,8 +153,10 @@ services:
       - ../../keycloak/themes/opendevtrack/login/resources/js:/opt/keycloak/themes/opendevtrack/login/resources/js:ro
       - ../../brand:/opt/keycloak/themes/opendevtrack/login/resources/brand:ro
       - ../../brand/favicon.ico:/opt/keycloak/themes/opendevtrack/login/resources/img/favicon.ico:ro
+    # Healthy when the imported realm answers its discovery, which the back end reads when it starts (#48):
+    # /health/ready of the management port is UP while Keycloak still answers 503 during its bootstrap.
     healthcheck:
-      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && printf 'GET /health/ready HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && printf 'GET /realms/opendevtrack/.well-known/openid-configuration HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && grep -q '^HTTP/1.. 200' <&3"]
       interval: 5s
       start_period: 60s
       retries: 60

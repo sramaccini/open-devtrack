@@ -134,8 +134,8 @@ restore() {
   compose exec -T redis sh -c 'REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli FLUSHALL' > /dev/null
 }
 
-# ./odt.sh up with the demo file. On the first start Keycloak can answer 503 while it imports the realm, and the back
-# end then restarts (deploy/compose/compose.yaml): up waits a second time.
+# ./odt.sh up with the demo file. The back end waits for the realm of Keycloak (#48); should it still stop once, restart
+# starts it again and up waits a second time.
 up() { "$odt" up || { log "the back end was not ready yet: waiting again"; "$odt" up; }; }
 
 # The nightly reset reports its exit code to the external monitor, as watch.sh does, when RESET_PING_URL is set

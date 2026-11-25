@@ -8,6 +8,12 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Installation**: with the profile keycloak, the back end could start while Keycloak still answered 503, stop, and
+  make `./odt.sh up` fail although a restart would have recovered it. Keycloak is now healthy only once its realm
+  answers, and the back end waits for that (#48).
+
 ## [1.0.0-rc.8] - 2026-11-25
 
 The eighth candidate: the menus of the dark theme in place, on Quadrava 0.22.1, and an image built without Maven
