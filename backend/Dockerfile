@@ -7,6 +7,8 @@
 
 FROM maven:3.9.11-eclipse-temurin-25 AS build
 WORKDIR /src
+# .mvn/maven.config: longer retries when Maven Central answers 429 (issue #44)
+COPY .mvn .mvn
 COPY pom.xml .
 COPY src src
 RUN --mount=type=cache,target=/root/.m2/repository \
