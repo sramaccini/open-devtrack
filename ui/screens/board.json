@@ -2,6 +2,22 @@
   "schemaVersion": "1.0",
   "screen": "board",
   "title": "{{ t('agile.board', 'Board') }}",
+  "breadcrumb": [
+    {
+      "label": "{{ t('nav.projects', 'Projects') }}",
+      "navigate": "project-list"
+    },
+    {
+      "label": "{{ has(data.board) ? data.board.project : '' }}",
+      "navigate": "project-detail",
+      "params": {
+        "key": "{{ has(data.board) ? data.board.project : '' }}"
+      }
+    },
+    {
+      "label": "{{ has(data.board) ? data.board.name : '' }}"
+    }
+  ],
   "requires": "odt.project.browse",
   "dataSources": {
     "board": {

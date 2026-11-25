@@ -2,6 +2,18 @@
   "schemaVersion": "1.0",
   "screen": "admin-group-detail",
   "title": "{{ t('admin.group', 'Group') }}",
+  "breadcrumb": [
+    {
+      "label": "{{ t('nav.admin', 'Administration') }}"
+    },
+    {
+      "label": "{{ t('nav.admin_groups', 'Groups') }}",
+      "navigate": "admin-groups"
+    },
+    {
+      "label": "{{ has(data.group) ? data.group.name : '' }}"
+    }
+  ],
   "requires": "odt.project.admin",
   "dataSources": {
     "group": {

@@ -2,6 +2,29 @@
   "schemaVersion": "1.0",
   "screen": "issue-detail",
   "title": "{{ t('issues.issue_title', 'Issue {key}', {'key': params.issue}) }}",
+  "breadcrumb": [
+    {
+      "label": "{{ t('nav.projects', 'Projects') }}",
+      "navigate": "project-list"
+    },
+    {
+      "label": "{{ params.key }}",
+      "navigate": "project-detail",
+      "params": {
+        "key": "{{ params.key }}"
+      }
+    },
+    {
+      "label": "{{ t('issues.title', 'Issues') }}",
+      "navigate": "issue-list",
+      "params": {
+        "key": "{{ params.key }}"
+      }
+    },
+    {
+      "label": "{{ params.issue }}"
+    }
+  ],
   "requires": "odt.project.browse",
   "dataSources": {
     "issue": {

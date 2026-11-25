@@ -2,6 +2,22 @@
   "schemaVersion": "1.0",
   "screen": "webhook-list",
   "title": "{{ t('webhooks.title', 'Webhooks') }}",
+  "breadcrumb": [
+    {
+      "label": "{{ t('nav.projects', 'Projects') }}",
+      "navigate": "project-list"
+    },
+    {
+      "label": "{{ params.key }}",
+      "navigate": "project-detail",
+      "params": {
+        "key": "{{ params.key }}"
+      }
+    },
+    {
+      "label": "{{ t('webhooks.title', 'Webhooks') }}"
+    }
+  ],
   "requires": "odt.project.browse",
   "dataSources": {
     "webhooks": {

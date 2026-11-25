@@ -2,6 +2,22 @@
   "schemaVersion": "1.0",
   "screen": "workflow-detail",
   "title": "{{ t('projects.workflow', 'Workflow') }}",
+  "breadcrumb": [
+    {
+      "label": "{{ t('nav.projects', 'Projects') }}",
+      "navigate": "project-list"
+    },
+    {
+      "label": "{{ params.key }}",
+      "navigate": "project-detail",
+      "params": {
+        "key": "{{ params.key }}"
+      }
+    },
+    {
+      "label": "{{ has(data.workflow) ? data.workflow.name : '' }}"
+    }
+  ],
   "requires": "odt.project.browse",
   "dataSources": {
     "workflow": {

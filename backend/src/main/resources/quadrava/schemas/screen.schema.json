@@ -24,6 +24,14 @@
       "type": "string",
       "description": "Title shown at the top of the screen: plain text or an expression such as {{ t('orders.title', 'Orders') }}. No heading if absent."
     },
+    "breadcrumb": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/breadcrumbItem"
+      },
+      "description": "Path shown above the title, in place of the path in the menu: the last item is the screen itself. Items with navigate are links. Path in the menu (area, groups, item) if absent."
+    },
     "requires": {
       "$ref": "#/$defs/permission",
       "description": "Permission needed to open the screen."
@@ -4697,6 +4705,27 @@
       "type": "string",
       "pattern": "^[a-z][a-z0-9-]*$",
       "description": "Name of an icon of the built-in set (for example save, edit, delete, plus). An unknown name shows no icon."
+    },
+    "breadcrumbItem": {
+      "type": "object",
+      "required": [
+        "label"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Text of the item: plain text or an expression such as {{ t('projects.title', 'Projects') }}. A label that reads a data source uses has(), so that it is empty while the data loads: {{ has(data.project) ? data.project.name : '' }}."
+        },
+        "navigate": {
+          "$ref": "#/$defs/id",
+          "description": "Identifier of the screen the item opens, as in the navigate step. Plain text if absent."
+        },
+        "params": {
+          "type": "object",
+          "description": "Parameters of the screen opened, resolved when the path is drawn, for example { \"key\": \"{{ params.key }}\" }."
+        }
+      }
     }
   }
 }

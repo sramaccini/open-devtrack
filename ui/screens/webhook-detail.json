@@ -2,6 +2,29 @@
   "schemaVersion": "1.0",
   "screen": "webhook-detail",
   "title": "{{ t('webhooks.webhook', 'Webhook') }}",
+  "breadcrumb": [
+    {
+      "label": "{{ t('nav.projects', 'Projects') }}",
+      "navigate": "project-list"
+    },
+    {
+      "label": "{{ params.key }}",
+      "navigate": "project-detail",
+      "params": {
+        "key": "{{ params.key }}"
+      }
+    },
+    {
+      "label": "{{ t('webhooks.title', 'Webhooks') }}",
+      "navigate": "webhook-list",
+      "params": {
+        "key": "{{ params.key }}"
+      }
+    },
+    {
+      "label": "{{ has(data.webhook) ? data.webhook.name : '' }}"
+    }
+  ],
   "requires": "odt.project.browse",
   "dataSources": {
     "webhook": {

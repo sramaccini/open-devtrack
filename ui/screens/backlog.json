@@ -2,6 +2,22 @@
   "schemaVersion": "1.0",
   "screen": "backlog",
   "title": "{{ t('agile.backlog', 'Backlog') }}",
+  "breadcrumb": [
+    {
+      "label": "{{ t('nav.projects', 'Projects') }}",
+      "navigate": "project-list"
+    },
+    {
+      "label": "{{ params.key }}",
+      "navigate": "project-detail",
+      "params": {
+        "key": "{{ params.key }}"
+      }
+    },
+    {
+      "label": "{{ t('agile.backlog', 'Backlog') }}"
+    }
+  ],
   "requires": "odt.project.browse",
   "dataSources": {
     "project": {

@@ -2,6 +2,15 @@
   "schemaVersion": "1.0",
   "screen": "project-detail",
   "title": "{{ t('projects.project', 'Project') }}",
+  "breadcrumb": [
+    {
+      "label": "{{ t('nav.projects', 'Projects') }}",
+      "navigate": "project-list"
+    },
+    {
+      "label": "{{ params.key }}"
+    }
+  ],
   "requires": "odt.project.browse",
   "dataSources": {
     "project": {

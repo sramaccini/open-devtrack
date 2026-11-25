@@ -39,6 +39,8 @@ and settings, and you see the work of one at a time.
   - **Administration**: shown only to administrators ([administrator guide](../admin/administration.md)).
 
   «Search the menu» finds an item by its name, and the arrow next to the logo folds the side bar.
+- **The path** above the title of each page says where you are, for example Projects › WEB › Issues › WEB-4. Each
+  step before the last one leads back to its page.
 - **The bell** shows your messages: mentions, assignments, reviews asked, comments and status changes
   ([Notifications](notifications.md)).
 - **The user menu** (your initial) switches the workspace, opens the settings and signs out. The settings have four

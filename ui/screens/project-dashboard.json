@@ -2,6 +2,22 @@
   "schemaVersion": "1.0",
   "screen": "project-dashboard",
   "title": "{{ t('reports.title', 'Project dashboard') }}",
+  "breadcrumb": [
+    {
+      "label": "{{ t('nav.projects', 'Projects') }}",
+      "navigate": "project-list"
+    },
+    {
+      "label": "{{ params.key }}",
+      "navigate": "project-detail",
+      "params": {
+        "key": "{{ params.key }}"
+      }
+    },
+    {
+      "label": "{{ t('reports.open_dashboard', 'Dashboard') }}"
+    }
+  ],
   "requires": "odt.project.browse",
   "dataSources": {
     "summary": {

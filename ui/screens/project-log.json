@@ -2,6 +2,22 @@
   "schemaVersion": "1.0",
   "screen": "project-log",
   "title": "{{ t('admin.config_log', 'Administration log') }}",
+  "breadcrumb": [
+    {
+      "label": "{{ t('nav.projects', 'Projects') }}",
+      "navigate": "project-list"
+    },
+    {
+      "label": "{{ params.key }}",
+      "navigate": "project-detail",
+      "params": {
+        "key": "{{ params.key }}"
+      }
+    },
+    {
+      "label": "{{ t('admin.config_log', 'Administration log') }}"
+    }
+  ],
   "requires": "odt.project.browse",
   "dataSources": {
     "log": {
