@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "1.0",
+  "theme": "polar",
+  "label": "Polar night",
+  "mode": "dark",
+  "brand": {
+    "name": "OpenDevTrack",
+    "logo": "odt-brand/odt-logo-horizontal-dark.svg",
+    "logoOnDark": "odt-brand/odt-logo-horizontal-dark.svg",
+    "icon": "odt-brand/odt-mark-dark.svg",
+    "icons": {
+      "svg": "odt-brand/odt-favicon.svg",
+      "png32": "odt-brand-png/favicon-32.png",
+      "appleTouch": "odt-brand-png/apple-touch-icon.png"
+    },
+    "height": 32
+  },
+  "tokens": {
+    "colors": {
+      "primary": "#88c0d0",
+      "onPrimary": "#1f2530",
+      "background": "#242933",
+      "surface": "#2e3440",
+      "onSurface": "#eceff4",
+      "mutedText": "#b4bccb",
+      "border": "#434c5e",
+      "danger": "#ef8e96",
+      "success": "#a3be8c",
+      "warning": "#ebcb8b"
+    },
+    "typography": {
+      "fontFamily": "Segoe UI, Roboto, Arial, sans-serif",
+      "baseSize": 15
+    },
+    "shape": {
+      "radius": 6
+    },
+    "density": "comfortable",
+    "layout": {
+      "sider": {
+        "tone": "dark",
+        "background": "#2b303b",
+        "text": "#e5e9f0",
+        "mutedText": "#b4bccb",
+        "activeBackground": "#3b4252",
+        "activeText": "#88c0d0",
+        "border": "#3b4252",
+        "width": 256,
+        "collapsedWidth": 80
+      },
+      "header": {
+        "background": "#2e3440",
+        "text": "#eceff4",
+        "height": 56
+      },
+      "pageHeader": {
+        "background": "#2e3440"
+      },
+      "content": {
+        "padding": 24
+      }
+    }
+  }
+}

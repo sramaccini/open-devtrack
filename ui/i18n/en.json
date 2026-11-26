@@ -2,6 +2,7 @@
   "app.title": "OpenDevTrack",
   "app.theme.odt-light": "OpenDevTrack light",
   "app.theme.odt-dark": "OpenDevTrack dark",
+  "app.theme.polar": "Polar night",
   "nav.home": "Home",
   "nav.overview": "Overview",
   "nav.projects": "Projects",

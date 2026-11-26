@@ -18,7 +18,7 @@ Quadrava and authz-library, and the ADRs say where.
   The browser uses the session; tools use Keycloak access tokens of `opendevtrack-tools` on `/registry/**`
   (the bearer access of authz-library, A4).
 - `ui/`: the Quadrava project, with the main navigation, home and projects placeholder screens, themes `odt-light` and
-  `odt-dark` from `brand/`, English and Italian catalogues. The Quadrava CLI 0.24.0 checks it (`quadrava validate`) and publishes it
+  `odt-dark` from `brand/` and `polar` (the «Polar night» of Quadrava), English and Italian catalogues. The Quadrava CLI 0.24.0 checks it (`quadrava validate`) and publishes it
   (`quadrava publish`) to any environment: no environment is protected (ADR-12).
 - End-to-end check (`docs/check-authz-end-to-end.md`): Quadrava kits bff 13/13 with and without a session, authz 11/11,
   registry 24/24 (`--protected-env none`), tenant switch kept across logins, `ui/` served by the runtime 0.24.0 from the

@@ -10,14 +10,15 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 | `navigation.json` | `navigation/main` | Areas and items of the side bar, with the permission each one requires |
 | `screens/*.json` | `screen/<id>` | One screen per file |
 | `datasources/*.json` | `datasources/<id>` | Data sources shared by screens: `projects` (with members, the workflows and custom field definitions), `workflows` (one workflow, its statuses and transitions), `users`, `issues` (with transitions, comments, attachments, history and custom fields) |
-| `themes/*.json` | `theme/<id>` | `odt-light` (the default) and `odt-dark`, with the palette of [brand/](../brand/README.md) |
+| `themes/*.json` | `theme/<id>` | `odt-light` (the default) and `odt-dark`, with the palette of [brand/](../brand/README.md); `polar` («Polar night»), the dark theme of the Quadrava examples (`examples/themes/polar.json` of v0.24.0) with the logo and icons of `brand/` |
 | `i18n/<lang>.json` | `messages/<lang>` | English and Italian texts, key → text; labels use `t('key', 'English default')` |
 
 ## Rules
 
 - **Brand**: colours from `brand/README.md` (ink `#13233F`, teal text `#0F766E`, `HEAD` `#0D9488`/`#2DD4BF`, background
   `#F8FAFC`/`#0B1220`). The logos are the files of `brand/svg`, served next to the runtime under `odt-brand/`; the themes
-  reference them, they are not copied here.
+  reference them, they are not copied here. `polar` is the one theme with another palette, chosen by the maintainer as
+  an option next to the two of the brand; its logo and icons are those of `brand/`, as in every theme.
 - **Permissions**: an area, item or screen that needs one says so with `requires` (`odt.<resource>.<action>`, ADR-07).
   Global permissions with `can()`; those of a project role with the `_perm` the back end puts on each row and form
   (`/authz/check` also answers them for a `project` or `issue` resource, A1, but `_perm` needs no extra request).

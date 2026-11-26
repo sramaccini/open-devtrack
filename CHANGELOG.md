@@ -24,6 +24,9 @@ The entries are written by hand at each release from the commits ([docs/release.
 - **Issues**: the actions of an issue are two icon buttons next to its status, as in Jira: the eye with the number of
   watchers, highlighted while you watch (watch, stop watching, add a watcher), and «…» (all issues, delete) (#51).
 
+- **Themes**: «Polar night», the dark theme of the Quadrava examples, with the logo of OpenDevTrack; chosen in the
+  settings, next to OpenDevTrack light and dark. An installation lists it in `QUADRAVA_THEMES`.
+
 ### Changed
 
 - **Issues**: the page of an issue is in two columns, as in Jira: summary, description, attachments, linked work

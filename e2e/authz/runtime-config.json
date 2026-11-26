@@ -4,7 +4,7 @@
     "app": "opendevtrack",
     "env": "development",
     "navigation": "main",
-    "themes": ["odt-light", "odt-dark"],
+    "themes": ["odt-light", "odt-dark", "polar"],
     "languages": ["en", "it"],
     "defaultLanguage": "en"
   },

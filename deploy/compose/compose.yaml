@@ -89,7 +89,7 @@ services:
       QUADRAVA_REGISTRY_APP: opendevtrack
       QUADRAVA_REGISTRY_ENV: production
       QUADRAVA_NAVIGATION: main
-      QUADRAVA_THEMES: odt-light,odt-dark
+      QUADRAVA_THEMES: odt-light,odt-dark,polar
       QUADRAVA_LANGUAGES: en,it
       QUADRAVA_DEFAULT_LANGUAGE: en
       QUADRAVA_TENANT_SWITCH_URL: /bff/tenant

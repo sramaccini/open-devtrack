@@ -137,7 +137,7 @@ The same parts in another platform, a Kubernetes cluster for example (a Helm cha
 - The back end with the variables of [configuration.md](configuration.md), and the secrets from the secret store of
   the platform. Its port 8080 is reachable only from the proxy, and the management port only from Prometheus.
 - The runtime with `QUADRAVA_REGISTRY_APP=opendevtrack`, `QUADRAVA_REGISTRY_ENV=production`,
-  `QUADRAVA_NAVIGATION=main`, `QUADRAVA_THEMES=odt-light,odt-dark`, `QUADRAVA_LANGUAGES=en,it`,
+  `QUADRAVA_NAVIGATION=main`, `QUADRAVA_THEMES=odt-light,odt-dark,polar`, `QUADRAVA_LANGUAGES=en,it`,
   `QUADRAVA_TENANT_SWITCH_URL=/bff/tenant` and `QUADRAVA_HSTS`. Mount `brand/svg` at `/usr/share/nginx/html/odt-brand`
   and `brand/png` at `/usr/share/nginx/html/odt-brand-png`.
 - A proxy or ingress with the routing of the Caddyfile. Event streams must not be buffered, and the proxy must set
