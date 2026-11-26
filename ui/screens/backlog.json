@@ -274,6 +274,15 @@
           "filter": "text"
         },
         {
+          "field": "flag",
+          "label": "{{ t('issues.flag', 'Flag') }}",
+          "format": "badge",
+          "badges": {
+            "impediment": "danger"
+          },
+          "valueKey": "values.flag"
+        },
+        {
           "field": "status",
           "label": "{{ t('issues.status', 'Status') }}",
           "format": "badge",

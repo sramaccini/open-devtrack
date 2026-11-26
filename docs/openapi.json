@@ -6501,6 +6501,9 @@
           "column" : {
             "type" : "string"
           },
+          "flag" : {
+            "type" : "string"
+          },
           "key" : {
             "type" : "string"
           },

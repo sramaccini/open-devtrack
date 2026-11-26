@@ -35,6 +35,9 @@ class Cards {
     /** An issue and its plan; {@code plan} is null only for an issue the order does not hold yet. */
     record Planned(IssueSummary issue, PlanEntity plan) {
 
+        /** The flag of a flagged issue on its card. */
+        static final String FLAG = "impediment";
+
         UUID sprintId() {
             return plan == null ? null : plan.sprintId();
         }
@@ -45,7 +48,7 @@ class Cards {
 
         CardRow card(String column, Map<String, Boolean> perm) {
             return new CardRow(issue.key(), issue.summary(), issue.type(), issue.priority(), issue.assignee(), issue.status(),
-                    issue.labels(), points(), column, perm);
+                    issue.labels(), points(), column, issue.flagged() ? FLAG : null, perm);
         }
     }
 

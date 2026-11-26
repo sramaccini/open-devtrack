@@ -118,6 +118,13 @@
       "avatarField": "assignee",
       "badges": [
         {
+          "field": "flag",
+          "valueKey": "values.flag",
+          "tones": {
+            "impediment": "danger"
+          }
+        },
+        {
           "field": "type",
           "valueKey": "values.issue_type"
         },

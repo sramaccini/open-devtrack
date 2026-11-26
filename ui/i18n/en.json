@@ -648,6 +648,8 @@
   "issues.add_vote": "Add vote",
   "issues.remove_vote": "Remove vote",
   "values.issue_field.flagged": "Flagged",
+  "values.flag.impediment": "Flagged",
+  "issues.flag": "Flag",
   "issues.add_comment": "Add comment",
   "issues.votes": "Votes"
 }

@@ -6,6 +6,7 @@ package com.logicwarez.opendevtrack.search;
 
 import static com.logicwarez.opendevtrack.search.Docs.ASSIGNEE;
 import static com.logicwarez.opendevtrack.search.Docs.DUE_ON;
+import static com.logicwarez.opendevtrack.search.Docs.FLAGGED;
 import static com.logicwarez.opendevtrack.search.Docs.CATEGORY;
 import static com.logicwarez.opendevtrack.search.Docs.CREATED_AT;
 import static com.logicwarez.opendevtrack.search.Docs.CUSTOM;
@@ -73,12 +74,15 @@ final class OdqlCompiler {
 
     /** The fields of the language, in the order the suggestions show them. */
     static final List<String> FIELDS = List.of("project", "key", "type", "status", "category", "priority", "assignee",
-            "reviewer", "reporter", "labels", "summary", "text", "created", "updated", "resolved", "due", "sprint", "points",
-            "rank");
+            "reviewer", "reporter", "labels", "flagged", "summary", "text", "created", "updated", "resolved", "due", "sprint",
+            "points", "rank");
 
     static final List<String> TYPES = List.of("task", "bug", "story", "epic");
     static final List<String> PRIORITIES = List.of("lowest", "low", "medium", "high", "highest");
     static final List<String> CATEGORIES = List.of("todo", "in_progress", "done");
+
+    /** The one value of {@code flagged}, as Jira names it. */
+    static final String IMPEDIMENT = "Impediment";
     static final List<String> FUNCTIONS = List.of("currentUser()", "openSprints()");
 
     private static final Pattern RELATIVE = Pattern.compile("^([+-]?)(\\d{1,4})([dwmy])$");
@@ -147,6 +151,10 @@ final class OdqlCompiler {
             case "reviewer" -> text(c, REVIEWER, v -> v);
             case "reporter" -> text(c, REPORTER, v -> v);
             case "labels" -> labels(c);
+            case "flagged" -> text(c, FLAGGED, v -> {
+                oneOf(c, v, List.of("impediment"), "flag");
+                return IMPEDIMENT;
+            });
             case "summary" -> summary(c);
             case "text" -> fullText(c);
             case "created" -> date(c, CREATED_AT);

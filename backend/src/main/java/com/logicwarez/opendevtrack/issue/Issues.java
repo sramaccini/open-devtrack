@@ -89,7 +89,8 @@ public class Issues {
         return issues.findById(issueId).flatMap(i -> projects.byId(i.projectId()).map(p -> new IssueDocument(i.id(),
                 i.tenantId(), p.id(), p.key(), IssueController.key(p, i), i.number(), i.type().value(), i.summary(),
                 i.description(), i.status(), i.priority().value(), i.priority().ordinal() + 1, i.assignee(), i.reporter(),
-                i.dueOn(), i.reviewer(), List.copyOf(i.labels()), new HashMap<>(i.custom()), i.createdAt(), i.updatedAt())));
+                i.dueOn(), i.reviewer(), List.copyOf(i.labels()), new HashMap<>(i.custom()), i.createdAt(), i.updatedAt(),
+                i.flagged())));
     }
 
     /** The identifiers of every issue of the project, in the order of their numbers: to rebuild an index. */
@@ -238,6 +239,6 @@ public class Issues {
 
     private static IssueSummary summary(ProjectRef project, IssueEntity i) {
         return new IssueSummary(i.id(), IssueController.key(project, i), i.number(), i.type().value(), i.summary(), i.status(),
-                i.priority().value(), i.assignee(), i.labels(), i.updatedAt());
+                i.priority().value(), i.assignee(), i.labels(), i.updatedAt(), i.flagged());
     }
 }

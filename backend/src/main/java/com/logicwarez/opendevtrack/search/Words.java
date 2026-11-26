@@ -157,6 +157,7 @@ class Words {
             case "reviewer" -> "reviewer = currentUser()";
             case "reporter" -> "reporter = currentUser()";
             case "labels" -> "labels = backend";
+            case "flagged" -> "flagged IS NOT EMPTY";
             case "summary" -> "summary ~ checkout";
             case "text" -> "text ~ \"coupon code\"";
             case "created" -> "created >= -14d";
@@ -181,6 +182,7 @@ class Words {
             case "type" -> values.addAll(OdqlCompiler.TYPES);
             case "priority" -> values.addAll(OdqlCompiler.PRIORITIES);
             case "category" -> values.addAll(OdqlCompiler.CATEGORIES);
+            case "flagged" -> values.add(OdqlCompiler.IMPEDIMENT);
             case "status" -> visible.forEach(p -> workflows.statuses(p.id()).forEach(s -> values.add(s.code())));
             case "assignee", "reviewer", "reporter" -> {
                 values.add("currentUser()");

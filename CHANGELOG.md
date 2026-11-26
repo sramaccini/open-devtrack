@@ -10,6 +10,8 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Added
 
+- **Boards and search**: a flagged issue has a red «Flagged» label on its card and in the backlog, and the new
+  ODQL field `flagged` (`Impediment` or empty, as in Jira) finds them: `flagged IS NOT EMPTY` (#55).
 - **Issues**: «Clone» in the «…» of an issue, as in Jira: a copy in the same project with its fields, labels and
   custom fields, linked to the original by the new relation «clones» / «is cloned by» (`POST /api/issues/{key}/clone`);
   and «Print», the page without menus and buttons (#55).

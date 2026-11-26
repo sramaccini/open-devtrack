@@ -134,7 +134,8 @@ who is watching it and since when; there developers and admins add a member with
 
 A flag marks an issue as impeded. Developers and admins add it with «Add flag» in the «…» menu: a panel under the menu then
 asks why, to tell the team in a comment; closing it adds no comment. «Remove flag» takes it away. Both are in the history
-of the issue, as «Flagged».
+of the issue, as «Flagged». A flagged issue has a red label on boards and in the backlog, and `flagged IS NOT EMPTY`
+finds them all ([Search](search.md)).
 
 A vote says that you want the issue done. Anyone who sees the issue votes for it once, with the thumb or «Add vote»,
 and takes the vote back the same way or with «Remove vote». As in Jira, the reporter does not vote for their own issue,

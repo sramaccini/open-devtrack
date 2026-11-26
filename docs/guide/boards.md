@@ -48,7 +48,8 @@ that shows each user their own cards. The board says when it has a filter.
   transition sees the issue as changed: either both happen or neither. The «Move» menu of a card has the other rows
   under «Move to row».
 
-A card shows the summary, the key, the type and priority, the story points and the initial of the assignee. Clicking
+A card shows the summary, the key, the type and priority, the story points and the initial of the assignee; a flagged
+issue ([Issues](issues.md#flag-and-votes)) has a red «Flagged» label, also in the backlog. Clicking
 the summary opens the issue. Moving cards needs the role of developer or admin.
 
 ## The backlog

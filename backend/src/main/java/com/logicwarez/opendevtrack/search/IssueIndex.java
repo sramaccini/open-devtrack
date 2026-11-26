@@ -6,6 +6,7 @@ package com.logicwarez.opendevtrack.search;
 
 import static com.logicwarez.opendevtrack.search.Docs.ASSIGNEE;
 import static com.logicwarez.opendevtrack.search.Docs.DUE_ON;
+import static com.logicwarez.opendevtrack.search.Docs.FLAGGED;
 import static com.logicwarez.opendevtrack.search.Docs.CATEGORY;
 import static com.logicwarez.opendevtrack.search.Docs.CREATED_AT;
 import static com.logicwarez.opendevtrack.search.Docs.CUSTOM;
@@ -148,6 +149,7 @@ class IssueIndex {
                 .set(REPORTER, issue.reporter())
                 .set(REVIEWER, issue.reviewer())
                 .set(DUE_ON, issue.dueOn())
+                .set(FLAGGED, issue.flagged() ? OdqlCompiler.IMPEDIMENT : null)
                 .set(LABELS, issue.labels().toArray(String[]::new))
                 .set(SUMMARY, issue.summary())
                 .set(CUSTOM, JSONB.valueOf(json.writeValueAsString(issue.custom())))
@@ -173,6 +175,7 @@ class IssueIndex {
                 .set(ASSIGNEE, issue.assignee())
                 .set(REVIEWER, issue.reviewer())
                 .set(DUE_ON, issue.dueOn())
+                .set(FLAGGED, issue.flagged() ? OdqlCompiler.IMPEDIMENT : null)
                 .set(LABELS, issue.labels().toArray(String[]::new))
                 .set(SUMMARY, issue.summary())
                 .set(CUSTOM, JSONB.valueOf(json.writeValueAsString(issue.custom())))

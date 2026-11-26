@@ -151,7 +151,12 @@ class AgileApiTest {
         assertThat(keys("/api/boards/" + board + "/cards", paola)).containsExactly("ODT-1", "ODT-2", "ODT-3", "ODT-4");
         mvc.perform(as(get("/api/boards/" + board + "/cards"), paola))
                 .andExpect(jsonPath("$[0].column").value("0"))
+                .andExpect(jsonPath("$[0].flag").doesNotExist())
                 .andExpect(jsonPath("$[0]._perm.move").value(false));
+        // A flagged issue says so on its card.
+        mvc.perform(as(put("/api/issues/ODT-1/flag"), luisa)).andExpect(status().isNoContent());
+        mvc.perform(as(get("/api/boards/" + board + "/cards"), paola))
+                .andExpect(jsonPath("$[0].flag").value("impediment"));
         mvc.perform(as(get("/api/boards/" + board), luisa)).andExpect(jsonPath("$._perm.move").value(true));
     }
 

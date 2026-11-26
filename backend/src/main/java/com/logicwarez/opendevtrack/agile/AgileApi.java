@@ -37,9 +37,13 @@ final class AgileApi {
     record ColumnRow(String value, String label, String tone, Integer limit) {
     }
 
-    /** A card of a board or of the backlog; {@code column} is the value of its column. */
+    /**
+     * A card of a board or of the backlog; {@code column} is the value of its column, {@code flag} {@code impediment}
+     * when the issue is flagged, else null (a label of the card shows it).
+     */
     record CardRow(String key, String summary, String type, String priority, String assignee, String status,
-                   List<String> labels, Integer points, String column, @JsonProperty("_perm") Map<String, Boolean> perm) {
+                   List<String> labels, Integer points, String column, String flag,
+                   @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
     /**

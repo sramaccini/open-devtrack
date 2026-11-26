@@ -240,6 +240,22 @@ class SearchApiTest {
     }
 
     @Test
+    void flaggedIssuesAreSearchedAsInJira() throws Exception {
+        mvc.perform(as(put("/api/issues/ODT-2/flag"), mario)).andExpect(status().isNoContent());
+        await(() -> jdbc.queryForObject("SELECT flagged IS NOT NULL FROM odt_search.issue_doc WHERE tenant_id = 'ALPHA'"
+                + " AND issue_key = 'ODT-2'", Boolean.class));
+        assertThat(keys(mario, "flagged = Impediment")).containsExactly("ODT-2");
+        assertThat(keys(mario, "flagged IS NOT EMPTY")).containsExactly("ODT-2");
+        assertThat(keys(mario, "flagged IS EMPTY ORDER BY key")).containsExactly("ODT-1", "ODT-3", "WEB-1");
+        mvc.perform(as(post("/api/search"), mario).content("{\"query\":\"flagged = yes\"}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(as(delete("/api/issues/ODT-2/flag"), mario)).andExpect(status().isNoContent());
+        await(() -> jdbc.queryForObject("SELECT flagged IS NULL FROM odt_search.issue_doc WHERE tenant_id = 'ALPHA'"
+                + " AND issue_key = 'ODT-2'", Boolean.class));
+        assertThat(keys(mario, "flagged IS NOT EMPTY")).isEmpty();
+    }
+
+    @Test
     void dueDatesAndReviewersAreSearched() throws Exception {
         String yesterday = searches.today().minusDays(1).toString();
         int version = JsonPath.read(mvc.perform(as(get("/api/issues/ODT-1"), mario)).andReturn().getResponse()

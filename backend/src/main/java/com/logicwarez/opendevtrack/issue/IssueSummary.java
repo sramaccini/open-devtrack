@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-/** An issue as the boards and the backlog show it (module agile): what goes on a card. */
+/** An issue as the boards and the backlog show it (module agile): what goes on a card, the flag included. */
 public record IssueSummary(UUID id, String key, long number, String type, String summary, String status, String priority,
-                           String assignee, List<String> labels, Instant updatedAt) {
+                           String assignee, List<String> labels, Instant updatedAt, boolean flagged) {
 }

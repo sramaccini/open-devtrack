@@ -68,6 +68,7 @@ An empty query finds every issue. Without `ORDER BY`, the most recently updated 
 | `reviewer` | A user name, or `currentUser()` | `= != IN NOT IN IS EMPTY` |
 | `reporter` | A user name, or `currentUser()` | `= != IN NOT IN IS EMPTY` |
 | `labels` | One of the labels of the issue | `= != IN NOT IN IS EMPTY` |
+| `flagged` | `Impediment` when the issue is flagged, as in Jira, else empty | `= != IN NOT IN IS EMPTY` |
 | `summary` | The summary | `~ !~ = !=` |
 | `text` | The words of the summary, the description and the labels | `~ !~` |
 | `created` | The day it was created | `= != < <= > >= IS EMPTY` |
