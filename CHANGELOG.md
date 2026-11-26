@@ -18,6 +18,8 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Changed
 
+- **Issues**: as in Jira, the reporter of an issue does not vote for it, and the votes of a done issue no longer
+  change (409); `_perm.vote` tells the page, which disables the thumb (#55).
 - **Issues**: the watchers of an issue are in a window, «Watchers» in the menu of the eye, with «Add watcher…»; the
   box of the watchers at the bottom of the right column is gone, as in Jira.
 - **Issues**: the summary and the description fill their box. Under the attachments a dashed area with «Add attachment»

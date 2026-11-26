@@ -103,7 +103,10 @@ class PrivacyApiTest {
                 .andExpect(status().isCreated());
         mvc.perform(as(post("/api/filters"), rosa).content("{\"name\":\"Mine\",\"query\":\"assignee = rosa\"}"))
                 .andExpect(status().isCreated());
-        mvc.perform(as(post("/api/issues/ODT-1/votes"), rosa)).andExpect(status().isNoContent());
+        // The reporter does not vote for her own issue: rosa votes for one of luisa's.
+        mvc.perform(as(post("/api/projects/ODT/issues"), luisa).content("{\"summary\":\"Slow search\"}"))
+                .andExpect(status().isCreated());
+        mvc.perform(as(post("/api/issues/ODT-2/votes"), rosa)).andExpect(status().isNoContent());
         TestInfrastructure.awaitListeners(jdbc);
     }
 
@@ -162,7 +165,7 @@ class PrivacyApiTest {
                 pseudonym)).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT count(*) FROM odt_audit.issue_change WHERE author = ?", Integer.class,
                 pseudonym)).isPositive();
-        assertThat(jdbc.queryForObject("SELECT reporter FROM odt_search.issue_doc", String.class)).isEqualTo(pseudonym);
+        assertThat(jdbc.queryForObject("SELECT reporter FROM odt_search.issue_doc WHERE issue_key = 'ODT-1'", String.class)).isEqualTo(pseudonym);
 
         // Nothing under her name is left, and she is no longer in the tenant
         for (String where : List.of(

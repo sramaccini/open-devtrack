@@ -555,7 +555,8 @@ class IssueController {
                 "transition", permissions.contains("odt.issue.transition"),
                 "comment", permissions.contains("odt.issue.comment"),
                 "attach", permissions.contains("odt.issue.attach"),
-                "clone", permissions.contains("odt.issue.create"));
+                "clone", permissions.contains("odt.issue.create"),
+                "vote", !user.username().equals(i.reporter()) && !FlagAndVoteController.done(workflows, i));
         return new IssueView(key(project, i), project.key(), i.number(), i.type().value(), i.summary(), i.description(),
                 i.status(), i.priority().value(), i.assignee(), i.reporter(), i.dueOn(), i.reviewer(), i.labels(), i.custom(),
                 i.createdAt(), i.updatedAt(), i.version(), watchers.existsByIssueIdAndUsername(i.id(), user.username()),

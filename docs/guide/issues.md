@@ -137,7 +137,8 @@ asks why, to tell the team in a comment; closing it adds no comment. «Remove fl
 of the issue, as «Flagged».
 
 A vote says that you want the issue done. Anyone who sees the issue votes for it once, with the thumb or «Add vote»,
-and takes the vote back the same way or with «Remove vote».
+and takes the vote back the same way or with «Remove vote». As in Jira, the reporter does not vote for their own issue,
+and once the issue is done its votes no longer change: the thumb still shows them, but cannot be pressed.
 
 ### History
 

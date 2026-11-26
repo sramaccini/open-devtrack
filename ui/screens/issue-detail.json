@@ -932,6 +932,7 @@
                       "count": "{{ has(data.issue) ? string(data.issue.votes) : '' }}",
                       "pressed": "{{ false }}",
                       "visibleIf": "{{ has(data.issue) && !data.issue.voted }}",
+                      "enabledIf": "{{ has(data.issue) && data.issue._perm.vote }}",
                       "onClick": [
                         {
                           "call": "vote",
@@ -955,6 +956,7 @@
                       "count": "{{ has(data.issue) ? string(data.issue.votes) : '' }}",
                       "pressed": "{{ has(data.issue) && data.issue.voted }}",
                       "visibleIf": "{{ has(data.issue) && data.issue.voted }}",
+                      "enabledIf": "{{ has(data.issue) && data.issue._perm.vote }}",
                       "onClick": [
                         {
                           "call": "unvote",
@@ -1055,7 +1057,7 @@
                         {
                           "id": "item-vote",
                           "label": "{{ t('issues.add_vote', 'Add vote') }}",
-                          "visibleIf": "{{ has(data.issue) && !data.issue.voted }}",
+                          "visibleIf": "{{ has(data.issue) && !data.issue.voted && data.issue._perm.vote }}",
                           "onClick": [
                             {
                               "call": "vote",
@@ -1074,7 +1076,7 @@
                         {
                           "id": "item-unvote",
                           "label": "{{ t('issues.remove_vote', 'Remove vote') }}",
-                          "visibleIf": "{{ has(data.issue) && data.issue.voted }}",
+                          "visibleIf": "{{ has(data.issue) && data.issue.voted && data.issue._perm.vote }}",
                           "onClick": [
                             {
                               "call": "unvote",

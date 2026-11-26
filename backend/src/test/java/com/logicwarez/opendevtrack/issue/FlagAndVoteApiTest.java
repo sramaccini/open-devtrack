@@ -139,4 +139,25 @@ class FlagAndVoteApiTest {
                 .andExpect(jsonPath("$.votes").value(1))
                 .andExpect(jsonPath("$.voted").value(false));
     }
+
+    @Test
+    void theReporterDoesNotVoteAndTheVotesOfADoneIssueStay() throws Exception {
+        // luisa reported ODT-1
+        mvc.perform(as(post("/api/issues/ODT-1/votes"), luisa)).andExpect(status().isConflict());
+        mvc.perform(as(delete("/api/issues/ODT-1/votes/me"), luisa)).andExpect(status().isConflict());
+        mvc.perform(as(get("/api/issues/ODT-1"), luisa)).andExpect(jsonPath("$._perm.vote").value(false));
+        mvc.perform(as(get("/api/issues/ODT-1"), paola)).andExpect(jsonPath("$._perm.vote").value(true));
+        mvc.perform(as(post("/api/issues/ODT-1/votes"), paola)).andExpect(status().isNoContent());
+
+        mvc.perform(as(post("/api/issues/ODT-1/transitions"), mario).content("{\"transition\":\"start\",\"version\":0}"))
+                .andExpect(status().isOk());
+        mvc.perform(as(post("/api/issues/ODT-1/transitions"), mario).content("{\"transition\":\"finish\",\"version\":1}"))
+                .andExpect(status().isOk());
+        mvc.perform(as(delete("/api/issues/ODT-1/votes/me"), paola)).andExpect(status().isConflict());
+        mvc.perform(as(post("/api/issues/ODT-1/votes"), mario)).andExpect(status().isConflict());
+        mvc.perform(as(get("/api/issues/ODT-1"), paola))
+                .andExpect(jsonPath("$._perm.vote").value(false))
+                .andExpect(jsonPath("$.votes").value(1))
+                .andExpect(jsonPath("$.voted").value(true));
+    }
 }

@@ -11,6 +11,7 @@ import com.logicwarez.opendevtrack.issue.Issues.Found;
 import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
+import com.logicwarez.opendevtrack.workflow.Workflows;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +29,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * The flag and the votes of an issue, as in Jira. Whoever edits the issue flags it as impeded, or removes the flag: a
- * change of the issue, in its history as «Flagged». Whoever sees the issue votes for it once, or takes the vote back.
+ * change of the issue, in its history as «Flagged». Whoever sees the issue votes for it once, or takes the vote back;
+ * as in Jira, not the reporter, and nobody once the issue is done.
  */
 @RestController
 @Transactional(readOnly = true)
@@ -47,15 +49,17 @@ class FlagAndVoteController {
     private final ProjectAccess access;
     private final CurrentUser user;
     private final ApplicationEventPublisher events;
+    private final Workflows workflows;
 
     FlagAndVoteController(Issues finder, IssueRepository issues, VoteRepository votes, ProjectAccess access,
-                          CurrentUser user, ApplicationEventPublisher events) {
+                          CurrentUser user, ApplicationEventPublisher events, Workflows workflows) {
         this.finder = finder;
         this.issues = issues;
         this.votes = votes;
         this.access = access;
         this.user = user;
         this.events = events;
+        this.workflows = workflows;
     }
 
     record VoterView(String username, Instant since) {
@@ -100,6 +104,10 @@ class FlagAndVoteController {
         if (!permissions(found.get()).contains("odt.issue.browse")) {
             return Problems.forbidden(NOT_A_MEMBER);
         }
+        Optional<ResponseEntity<?>> refused = refused(found.get());
+        if (refused.isPresent()) {
+            return refused.get();
+        }
         votes.vote(found.get().issue().id(), user.username(), Instant.now());
         return ResponseEntity.noContent().build();
     }
@@ -114,6 +122,10 @@ class FlagAndVoteController {
         }
         if (!permissions(found.get()).contains("odt.issue.browse")) {
             return Problems.forbidden(NOT_A_MEMBER);
+        }
+        Optional<ResponseEntity<?>> refused = refused(found.get());
+        if (refused.isPresent()) {
+            return refused.get();
         }
         if (votes.unvote(found.get().issue().id(), user.username()) == 0) {
             return Problems.notFound("No vote for the issue");
@@ -144,6 +156,24 @@ class FlagAndVoteController {
                 IssueController.key(found.get().project(), issue), user.username(), now,
                 List.of(new FieldChange("flagged", flagged ? null : IMPEDIMENT, flagged ? IMPEDIMENT : null))));
         return ResponseEntity.noContent().build();
+    }
+
+    /** Why the user cannot vote, or change the vote, for the issue: its reporter, or the issue is done. */
+    private Optional<ResponseEntity<?>> refused(Found found) {
+        IssueEntity issue = found.issue();
+        if (user.username().equals(issue.reporter())) {
+            return Optional.of(Problems.conflict("The reporter does not vote for the issue"));
+        }
+        if (done(workflows, issue)) {
+            return Optional.of(Problems.conflict("The votes of a done issue do not change"));
+        }
+        return Optional.empty();
+    }
+
+    /** Whether the issue is in a status of the category done. */
+    static boolean done(Workflows workflows, IssueEntity issue) {
+        return workflows.statuses(issue.projectId()).stream()
+                .anyMatch(s -> s.code().equals(issue.status()) && "done".equals(s.category()));
     }
 
     private Set<String> permissions(Found found) {
