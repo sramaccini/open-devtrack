@@ -23,7 +23,8 @@ KEYCLOAK_PORT="${KEYCLOAK_PORT:-18180}"
 APP_PORT="${APP_PORT:-18080}"
 FRONT_PORT="${FRONT_PORT:-18090}"
 MAILPIT_PORT="${MAILPIT_PORT:-18025}"
-export KEYCLOAK_PORT APP_PORT FRONT_PORT MAILPIT_PORT
+DB_PORT="${DB_PORT:-15432}"
+export KEYCLOAK_PORT APP_PORT FRONT_PORT MAILPIT_PORT DB_PORT
 
 front="http://localhost:$FRONT_PORT"
 compose=(docker compose -f "$here/compose.yaml" --env-file "$work/.env")
@@ -107,6 +108,7 @@ info() {
   echo "users mario.rossi and anna.bianchi, password: $DEV_USER_PASSWORD"
   echo "API:      http://localhost:$APP_PORT/api (docs/api.md); service account opendevtrack-ci, secret CI_CLIENT_SECRET in stack/.work/.env"
   echo "mails:    http://localhost:$MAILPIT_PORT"
+  echo "database: localhost:$DB_PORT, database and user opendevtrack, password DB_PASSWORD in stack/.work/.env"
   echo "webhooks: http://echo:8080/anything as the address, then stack.sh hooks to see what it got"
   echo "Keycloak: http://localhost:$KEYCLOAK_PORT (admin, password KEYCLOAK_ADMIN_PASSWORD in stack/.work/.env)"
 }

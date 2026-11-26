@@ -46,7 +46,9 @@ address with `ODT_WEBHOOKS_ALLOW_PRIVATE`. The secrets of the webhooks are encry
 generated in `stack/.work/.env` too (also in an `.env` written before it existed).
 
 Ports: `FRONT_PORT` (18090), `KEYCLOAK_PORT` (18180), `APP_PORT` (18080, the back end for tools on the host),
-`MAILPIT_PORT` (18025). They differ from the end-to-end check (`e2e/authz`, 28xxx), so both can run.
+`MAILPIT_PORT` (18025), `DB_PORT` (15432: PostgreSQL for a client on the host such as DBeaver or psql, on 127.0.0.1
+only; database and user `opendevtrack`, password `DB_PASSWORD` in `stack/.work/.env`). They differ from the
+end-to-end check (`e2e/authz`, 28xxx), so both can run.
 
 ## The sample projects
 
