@@ -44,7 +44,8 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   selects confirm on pick, checkboxes on toggle, the fields of `fieldsFrom` alike), each field saved on its own by
   `onSave`. The issue forms call `patchIssue` (`issues/patch`, `PATCH /api/issues/{key}`): only the field that
   changed and the version, or all the custom fields when one of them changed (`field` is then `custom.<key>`);
-  Planning calls `savePlan`. The two menus are `menuButton`s with `display: icon` (Quadrava 0.24.0, Q40): the eye with `count` (the
+  Planning calls `savePlan` for the points and `moveToSprint` (`boards/backlogPlan`, the move of the backlog) for
+  the sprint, a lookup on the columns of the backlog shown when `_perm.plan` (else its name as text). The two menus are `menuButton`s with `display: icon` (Quadrava 0.24.0, Q40): the eye with `count` (the
   watchers) and `pressed` (watching), whose menu has watch or stop and «Watchers», a `view` step with the table of
   the watchers and «Add watcher…», and «…» with Delete in `tone: danger`. The flag
   and the votes are `button`s (Quadrava 0.25.1, Q41): the flag with `tone: danger` and `pressed`, shown only while

@@ -403,7 +403,13 @@ class AgileApiTest {
         mvc.perform(as(get("/api/issues/ODT-1/plan"), paola))
                 .andExpect(jsonPath("$.points").value(5))
                 .andExpect(jsonPath("$.sprint").value("ODT Sprint 1"))
-                .andExpect(jsonPath("$._perm.edit").value(false));
+                .andExpect(jsonPath("$.sprintId").value(sprint))
+                .andExpect(jsonPath("$._perm.edit").value(false))
+                .andExpect(jsonPath("$._perm.plan").value(false));
+        // The value of its column in the backlog, for the sprint chosen on the page of the issue.
+        mvc.perform(as(get("/api/issues/ODT-2/plan"), luisa))
+                .andExpect(jsonPath("$.sprintId").value("backlog"))
+                .andExpect(jsonPath("$._perm.plan").value(true));
 
         // Start: a scrum board shows the sprint; a second sprint cannot start too.
         mvc.perform(as(post("/api/sprints/" + sprint + "/start"), luisa).content("{\"startsOn\":\"2026-11-09\",\"endsOn\":\"2026-11-20\"}"))
@@ -433,6 +439,10 @@ class AgileApiTest {
         assertThat(jdbc.queryForList("SELECT outcome FROM odt_agile.sprint_issue ORDER BY added_at, outcome", String.class))
                 .containsExactly("done", "removed", "carried");
         mvc.perform(as(get("/api/projects/ODT/backlog/columns"), paola)).andExpect(jsonPath("$[0].value").value(next));
+        // Done in a completed sprint: it is in its history, no longer in a plan.
+        mvc.perform(as(get("/api/issues/ODT-1/plan"), luisa))
+                .andExpect(jsonPath("$.sprint").doesNotExist())
+                .andExpect(jsonPath("$.sprintId").value("backlog"));
         String left = backlog(paola);
         assertThat(keys(left)).containsExactlyInAnyOrder("ODT-2", "ODT-3", "ODT-4");
         assertThat(JsonPath.<List<String>>read(left, "$.items[?(@.key == 'ODT-2')].sprint")).containsExactly("ODT Sprint 2");

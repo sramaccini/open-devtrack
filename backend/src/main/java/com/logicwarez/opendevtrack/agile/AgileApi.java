@@ -73,7 +73,12 @@ final class AgileApi {
     record CompleteRequest(String moveTo) {
     }
 
-    record PlanView(Integer points, String sprint, String sprintState, @JsonProperty("_perm") Map<String, Boolean> perm) {
+    /**
+     * The plan of an issue: {@code sprintId} is the value of its column in the backlog (a sprint or {@code backlog}), and
+     * {@code _perm.plan} whether the user may move it to another sprint.
+     */
+    record PlanView(Integer points, String sprint, String sprintState, String sprintId,
+                    @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
     record PlanRequest(Integer points) {

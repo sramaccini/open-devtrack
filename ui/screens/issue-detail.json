@@ -70,6 +70,12 @@
         "points": "{{form.points}}"
       }
     },
+    "sprintColumns": {
+      "ref": "boards/projectColumns"
+    },
+    "moveToSprint": {
+      "ref": "boards/backlogPlan"
+    },
     "attachments": {
       "ref": "issues/attachments"
     },
@@ -1367,23 +1373,58 @@
                       "type": "text",
                       "label": "{{ t('agile.sprint', 'Sprint') }}",
                       "readOnlyIf": "{{true}}",
-                      "tooltip": "{{ t('agile.sprint_help', 'Planned from the backlog of the project; empty for the backlog') }}"
+                      "tooltip": "{{ t('agile.sprint_help', 'Planned from the backlog of the project; empty for the backlog') }}",
+                      "visibleIf": "{{ !form._perm.plan }}"
+                    },
+                    {
+                      "name": "sprintId",
+                      "type": "lookup",
+                      "label": "{{ t('agile.sprint', 'Sprint') }}",
+                      "tooltip": "{{ t('agile.move_to_sprint_help', 'A sprint not completed of the project, or the backlog') }}",
+                      "required": true,
+                      "visibleIf": "{{ form._perm.plan }}",
+                      "lookup": {
+                        "source": "sprintColumns",
+                        "valueField": "value",
+                        "labelField": "label",
+                        "minChars": 0
+                      }
                     }
                   ],
                   "onSave": [
                     {
-                      "call": "savePlan",
-                      "onError": [
+                      "if": "{{ field == 'sprintId' }}",
+                      "then": [
                         {
-                          "if": "{{error.status == 400}}",
-                          "then": [
-                            {
-                              "toast": "{{ t('agile.points_invalid', 'The story points are from 0 to 999') }}"
-                            }
-                          ],
-                          "else": [
+                          "call": "moveToSprint",
+                          "args": {
+                            "project": "{{params.key}}",
+                            "key": "{{params.issue}}",
+                            "column": "{{value}}"
+                          },
+                          "onError": [
                             {
                               "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                            }
+                          ]
+                        }
+                      ],
+                      "else": [
+                        {
+                          "call": "savePlan",
+                          "onError": [
+                            {
+                              "if": "{{error.status == 400}}",
+                              "then": [
+                                {
+                                  "toast": "{{ t('agile.points_invalid', 'The story points are from 0 to 999') }}"
+                                }
+                              ],
+                              "else": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
                             }
                           ]
                         }

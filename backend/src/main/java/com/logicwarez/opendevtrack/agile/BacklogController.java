@@ -218,7 +218,8 @@ class BacklogController {
         Optional<SprintEntity> sprint = plan == null || plan.sprintId() == null ? Optional.empty()
                 : sprints.findById(plan.sprintId());
         return new PlanView(plan == null ? null : plan.points(), sprint.map(SprintEntity::name).orElse(null),
-                sprint.map(SprintEntity::state).orElse(null), Map.of("edit", scope.can(Scopes.RANK)));
+                sprint.map(SprintEntity::state).orElse(null), sprint.map(s -> s.id().toString()).orElse(BACKLOG),
+                Map.of("edit", scope.can(Scopes.RANK), "plan", scope.can(Scopes.SPRINTS)));
     }
 
     private Optional<Scope> member(String key) {

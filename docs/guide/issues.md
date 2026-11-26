@@ -69,10 +69,11 @@ On the right is what describes it:
 - **Details**: its key, type, priority, assignee, reviewer, reporter, due date, labels and custom fields;
 - **Planning**: its story points (0 to 999, empty when not estimated) and the sprint it is planned in.
 
-The fields of Details and the story points are changed in place, like the summary: a click opens one of them. A
-choice from a list (type, priority, assignee, reviewer, a list or a user among the custom fields) is saved as soon as
-it is picked; the other fields are saved with ✓ or Enter; ✕ or Escape cancels; a checkbox is saved when it is ticked.
-The key, the reporter and the sprint only read.
+The fields of Details and Planning are changed in place, like the summary: a click opens one of them. A
+choice from a list (type, priority, assignee, reviewer, sprint, a list or a user among the custom fields) is saved as
+soon as it is picked; the other fields are saved with ✓ or Enter; ✕ or Escape cancels; a checkbox is saved when it is ticked.
+The sprint is one not completed of the project, or the backlog, for whoever plans the sprints. The key and the
+reporter only read.
 
 Each field, or box, saves only itself, and shows the issue again as saved. If someone else saved the issue in the
 meantime, saving says so: reload it and make the change again, so that no change is lost.

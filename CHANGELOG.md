@@ -26,6 +26,8 @@ The entries are written by hand at each release from the commits ([docs/release.
 - **Issues**: the fields of Details and the story points of Planning are changed in place in the same way: a choice
   from a list is saved as soon as it is picked, the others with ✓ or Enter; the «Save» buttons of the two boxes go
   (#54). Each field sends only itself, with `PATCH /api/issues/{key}`.
+- **Issues**: the sprint of an issue is chosen in place under «Planning», among the sprints not completed of the
+  project or the backlog, as in Jira; the plan of an issue in the API also gives `sprintId` and `_perm.plan`.
 - Quadrava 0.28.0 (runtime image and CLI): the drop zone of a file field and the dashed box (Q42, 0.26.0), editing in
   place in a form (Q43, 0.27.0), lookups, selects and checkboxes in place (Q44).
 

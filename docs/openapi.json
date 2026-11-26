@@ -7331,6 +7331,9 @@
           "sprint" : {
             "type" : "string"
           },
+          "sprintId" : {
+            "type" : "string"
+          },
           "sprintState" : {
             "type" : "string"
           }
