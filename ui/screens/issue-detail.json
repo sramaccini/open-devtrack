@@ -742,9 +742,11 @@
                     {
                       "id": "issue-watch",
                       "type": "menuButton",
-                      "label": "{{ t('issues.watchers_count', 'Watchers: {count}', {'count': has(data.watchers) ? string(size(data.watchers)) : '0'}) }}",
+                      "label": "{{ t('issues.watchers', 'Watchers') }}",
                       "icon": "eye",
-                      "tone": "{{ has(data.issue) && data.issue.watching ? 'primary' : 'neutral' }}",
+                      "display": "icon",
+                      "count": "{{ has(data.watchers) ? string(size(data.watchers)) : '' }}",
+                      "pressed": "{{ has(data.issue) && data.issue.watching }}",
                       "items": [
                         {
                           "id": "item-watch",
@@ -851,6 +853,7 @@
                       "type": "menuButton",
                       "label": "{{ t('issues.more_actions', 'More actions') }}",
                       "icon": "more",
+                      "display": "icon",
                       "items": [
                         {
                           "id": "item-back",
@@ -894,7 +897,8 @@
                                 "key": "{{params.key}}"
                               }
                             }
-                          ]
+                          ],
+                          "tone": "danger"
                         }
                       ]
                     }

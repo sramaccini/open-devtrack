@@ -17,8 +17,8 @@ The entries are written by hand at each release from the commits ([docs/release.
   statuses the issue can move to now, each as a coloured badge, and «View workflow», which opens a window with the
   graph of the workflow and the current status outlined (#50). It replaces the box of the next steps; the status is no
   longer a field of the details.
-- **Issues**: the actions of an issue are in two menus next to its status, as in Jira: Watchers (with their number:
-  watch, stop watching, add a watcher) and More actions (all issues, delete) (#51).
+- **Issues**: the actions of an issue are two icon buttons next to its status, as in Jira: the eye with the number of
+  watchers, highlighted while you watch (watch, stop watching, add a watcher), and «…» (all issues, delete) (#51).
 
 ### Changed
 
@@ -26,7 +26,8 @@ The entries are written by hand at each release from the commits ([docs/release.
   items and activity on the left; the status, the actions, details, planning and watchers on the right. The summary
   and the description, and the details, are saved separately.
 - **API**: the transitions of an issue have the `category` of the status they lead to.
-- Quadrava 0.23.0 (runtime image and CLI): the menu button, the window step and the graph (Q39).
+- Quadrava 0.24.0 (runtime image and CLI): the menu button, the window step and the graph (Q39, 0.23.0); icon-only
+  buttons with a count and a pressed state (Q40).
 
 ### Fixed
 

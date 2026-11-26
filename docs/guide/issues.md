@@ -57,9 +57,9 @@ On the right is what describes it:
   Its menu lists the statuses the issue can move to now, as badges: choosing one runs that transition. A transition
   with a condition that is not met is not listed. «View workflow» shows the workflow of the issue as a graph, with
   its statuses, the transitions between them and the current status outlined;
-- next to it, **Watchers** with the number of people watching the issue (highlighted while you watch it): its menu
+- next to it, the eye with the number of people watching the issue, highlighted while you watch it: its menu
   has «Watch» or «Stop watching», and «Add watcher»;
-- **More actions**: «All issues», and «Delete», for the admins of the project. Delete cannot be undone, and the
+- «…», more actions: «All issues», and «Delete», for the admins of the project. Delete cannot be undone, and the
   comments, attachments and links of the issue go with it;
 - **Details**: its key, type, priority, assignee, reviewer, reporter, due date, labels and custom fields,
   saved with their own «Save»;

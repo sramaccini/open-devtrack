@@ -13,7 +13,7 @@ browser ──https──▶ Keycloak (login) ◀── OIDC, back-channel logou
 - **Back end**: the image `ghcr.io/sramaccini/opendevtrack-backend` of a release, signed, with its SBOM
   ([operations](../operations/README.md), «Verifying the image»). It holds the API, the BFF of the browser (login,
   session, CSRF), the registry of the screen definitions, and creates its schemas at each start (Flyway).
-- **Quadrava runtime**: `ghcr.io/sramaccini/quadrava-runtime` at the version the release pins (0.23.0). It serves the
+- **Quadrava runtime**: `ghcr.io/sramaccini/quadrava-runtime` at the version the release pins (0.24.0). It serves the
   pages and loads the screens of `ui/` from the registry of the back end.
 - **Proxy**: ends TLS and gives the browser one origin. The paths of the BFF go to the back end and everything else to
   the runtime, so the back end sees `X-Forwarded-Proto: https` and builds its addresses on https.
