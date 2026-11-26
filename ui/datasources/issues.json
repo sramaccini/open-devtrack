@@ -36,6 +36,12 @@
         "version": "{{form.version}}"
       }
     },
+    "patch": {
+      "type": "rest",
+      "method": "PATCH",
+      "url": "/api/issues/{{params.issue}}",
+      "body": "{{ field.startsWith('custom.') ? dyn({'custom': form.custom, 'version': form.version}) : dyn({string(field): value, 'version': form.version}) }}"
+    },
     "remove": {
       "type": "rest",
       "method": "DELETE",

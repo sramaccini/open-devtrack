@@ -9,6 +9,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -206,6 +207,52 @@ class IssueApiTest {
                 .andExpect(status().isPreconditionFailed());
         mvc.perform(as(put("/api/issues/ODT-1"), mario).content("{\"summary\":\"No version\"}"))
                 .andExpect(status().isPreconditionFailed());
+    }
+
+    @Test
+    void aPatchChangesOnlyTheFieldsItNames() throws Exception {
+        createFirst();
+        // One field: the others keep their values, as when a field of the page is saved on its own.
+        mvc.perform(as(patch("/api/issues/ODT-1"), luisa).content("{\"priority\":\"low\",\"version\":0}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.priority").value("low"))
+                .andExpect(jsonPath("$.summary").value("Login fails"))
+                .andExpect(jsonPath("$.description").value("With **two** tenants"))
+                .andExpect(jsonPath("$.assignee").value("luisa"))
+                .andExpect(jsonPath("$.labels.length()").value(2))
+                .andExpect(jsonPath("$.version").value(1));
+        // Null clears a field that may be empty; the same checks as the full change.
+        mvc.perform(as(patch("/api/issues/ODT-1"), luisa).content("{\"assignee\":null,\"labels\":null,\"version\":1}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.assignee").doesNotExist())
+                .andExpect(jsonPath("$.labels.length()").value(0))
+                .andExpect(jsonPath("$.type").value("bug"));
+        mvc.perform(as(patch("/api/issues/ODT-1"), luisa).content("{\"summary\":\" \",\"version\":2}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(as(patch("/api/issues/ODT-1"), luisa).content("{\"type\":null,\"version\":2}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("The type is required"));
+        mvc.perform(as(patch("/api/issues/ODT-1"), luisa).content("{\"status\":\"done\",\"version\":2}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(as(patch("/api/issues/ODT-1"), luisa).content("{\"labels\":\"ui\",\"version\":2}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(as(patch("/api/issues/ODT-1"), luisa).content("{\"reviewer\":\"ugo\",\"version\":2}"))
+                .andExpect(status().isBadRequest());
+        // From an older version, or without one: someone saved it in the meantime.
+        mvc.perform(as(patch("/api/issues/ODT-1"), mario).content("{\"priority\":\"high\",\"version\":1}"))
+                .andExpect(status().isPreconditionFailed());
+        mvc.perform(as(patch("/api/issues/ODT-1"), mario).content("{\"priority\":\"high\"}"))
+                .andExpect(status().isPreconditionFailed());
+        // A viewer does not change issues; one that does not exist is not found.
+        mvc.perform(as(patch("/api/issues/ODT-1"), paola).content("{\"priority\":\"high\",\"version\":2}"))
+                .andExpect(status().isForbidden());
+        mvc.perform(as(patch("/api/issues/ODT-9"), luisa).content("{\"priority\":\"high\",\"version\":0}"))
+                .andExpect(status().isNotFound());
+        // Only what changed goes in the history.
+        TestInfrastructure.awaitListeners(jdbc);
+        assertThat(jdbc.queryForList("SELECT field FROM odt_audit.issue_change WHERE old_value IS NOT NULL"
+                + " ORDER BY field",
+                String.class)).contains("assignee", "labels", "priority").doesNotContain("summary", "description", "type");
     }
     @Test
     void aDueDateAndAReviewer() throws Exception {

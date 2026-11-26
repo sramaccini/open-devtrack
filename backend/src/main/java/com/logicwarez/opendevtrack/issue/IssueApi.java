@@ -7,8 +7,10 @@ package com.logicwarez.opendevtrack.issue;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /** Requests and answers of {@link IssueController}. */
 final class IssueApi {
@@ -55,6 +57,120 @@ final class IssueApi {
     }
 
     record IssueWorkflowTransition(String code, String from, String to) {
+    }
+
+    /**
+     * Fields of a change of some of them, with the version read: an absent field keeps its value, null clears it (not
+     * the type, the priority or the summary), and the custom fields given leave the others as they are. A class, not a
+     * record, to know which fields were sent: Jackson calls the setter of each field present, null included.
+     */
+    static final class IssuePatch {
+        private final Set<String> given = new HashSet<>();
+        private String type;
+        private String summary;
+        private String description;
+        private String priority;
+        private String assignee;
+        private String dueOn;
+        private String reviewer;
+        private List<String> labels;
+        private Map<String, Object> custom;
+        private Long version;
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+            given.add("type");
+        }
+
+        public String getSummary() {
+            return summary;
+        }
+
+        public void setSummary(String summary) {
+            this.summary = summary;
+            given.add("summary");
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+            given.add("description");
+        }
+
+        public String getPriority() {
+            return priority;
+        }
+
+        public void setPriority(String priority) {
+            this.priority = priority;
+            given.add("priority");
+        }
+
+        public String getAssignee() {
+            return assignee;
+        }
+
+        public void setAssignee(String assignee) {
+            this.assignee = assignee;
+            given.add("assignee");
+        }
+
+        public String getDueOn() {
+            return dueOn;
+        }
+
+        public void setDueOn(String dueOn) {
+            this.dueOn = dueOn;
+            given.add("dueOn");
+        }
+
+        public String getReviewer() {
+            return reviewer;
+        }
+
+        public void setReviewer(String reviewer) {
+            this.reviewer = reviewer;
+            given.add("reviewer");
+        }
+
+        public List<String> getLabels() {
+            return labels;
+        }
+
+        public void setLabels(List<String> labels) {
+            this.labels = labels;
+            given.add("labels");
+        }
+
+        public Map<String, Object> getCustom() {
+            return custom;
+        }
+
+        public void setCustom(Map<String, Object> custom) {
+            this.custom = custom;
+            given.add("custom");
+        }
+
+        public Long getVersion() {
+            return version;
+        }
+
+        public void setVersion(Long version) {
+            this.version = version;
+            given.add("version");
+        }
+
+        /** Whether the body named the field, even as null. */
+        boolean has(String field) {
+            return given.contains(field);
+        }
     }
 
     /** Fields of a new issue or of a change; {@code version} only for a change. */

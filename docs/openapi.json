@@ -1009,6 +1009,58 @@
         "x-permissions" : [ "odt.project.browse" ],
         "x-project-permissions" : [ "odt.issue.browse" ]
       },
+      "patch" : {
+        "operationId" : "issue.patch",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/IssuePatch"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IssueView"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          },
+          "412" : {
+            "$ref" : "#/components/responses/ChangedMeanwhile"
+          }
+        },
+        "summary" : "Changes some fields of an issue",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.edit" ]
+      },
       "put" : {
         "operationId" : "issue.edit",
         "parameters" : [ {
@@ -6812,6 +6864,47 @@
           "projects" : {
             "type" : "integer",
             "format" : "int64"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "IssuePatch" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "assignee" : {
+            "type" : "string"
+          },
+          "custom" : {
+            "type" : "object",
+            "additionalProperties" : { }
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "dueOn" : {
+            "type" : "string"
+          },
+          "labels" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "priority" : {
+            "type" : "string"
+          },
+          "reviewer" : {
+            "type" : "string"
+          },
+          "summary" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
           },
           "version" : {
             "type" : "integer",

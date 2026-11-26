@@ -5,6 +5,7 @@
 package com.logicwarez.opendevtrack.issue;
 
 import com.logicwarez.opendevtrack.access.ProjectAccess;
+import com.logicwarez.opendevtrack.issue.IssueApi.IssuePatch;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueRequest;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueRow;
 import com.logicwarez.opendevtrack.issue.IssueApi.LabelRow;
@@ -34,6 +35,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -49,6 +51,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -79,6 +82,7 @@ class IssueController {
     private static final int MAX_LIST = 500;
     private static final String NOT_FOUND = "Issue not found";
     private static final String NOT_A_MEMBER = "Only the members of the project see its issues";
+    private static final String NOT_AN_EDITOR = "Only a developer or an admin of the project edits issues";
 
     private final IssueRepository issues;
     private final Issues finder;
@@ -214,12 +218,75 @@ class IssueController {
         if (found.isEmpty()) {
             return Problems.notFound(NOT_FOUND);
         }
-        ProjectRef project = found.get().project();
-        IssueEntity issue = found.get().issue();
-        Set<String> permissions = permissions(project);
+        Set<String> permissions = permissions(found.get().project());
         if (!permissions.contains("odt.issue.edit")) {
-            return Problems.forbidden("Only a developer or an admin of the project edits issues");
+            return Problems.forbidden(NOT_AN_EDITOR);
         }
+        return save(found.get(), request, permissions);
+    }
+
+    /**
+     * Changes only the fields named in the body, from the version read with the issue, or 412 if someone saved it in
+     * the meantime: the other fields keep their values, and the custom fields given leave the others as they are. The
+     * checks are those of the full change.
+     */
+    @ApiDoc(value = "Changes some fields of an issue", answer = IssueView.class, project = "odt.issue.edit")
+    @PatchMapping("/api/issues/{issueKey}")
+    @Transactional
+    ResponseEntity<?> patch(@PathVariable String issueKey, @RequestBody IssuePatch body) {
+        Optional<Found> found = find(issueKey);
+        if (found.isEmpty()) {
+            return Problems.notFound(NOT_FOUND);
+        }
+        Set<String> permissions = permissions(found.get().project());
+        if (!permissions.contains("odt.issue.edit")) {
+            return Problems.forbidden(NOT_AN_EDITOR);
+        }
+        IssueRequest request;
+        try {
+            request = patched(found.get().issue(), body);
+        } catch (InvalidField e) {
+            return Problems.badRequest(e.getMessage());
+        }
+        return save(found.get(), request, permissions);
+    }
+
+    /** The issue as it is with the fields of a PATCH on top, as the request of a full change. */
+    private static IssueRequest patched(IssueEntity issue, IssuePatch patch) throws InvalidField {
+        if (patch.has("type") && patch.getType() == null) {
+            throw new InvalidField("The type is required");
+        }
+        if (patch.has("priority") && patch.getPriority() == null) {
+            throw new InvalidField("The priority is required");
+        }
+        Map<String, Object> custom = null;
+        if (patch.has("custom")) {
+            custom = new LinkedHashMap<>(issue.custom());
+            if (patch.getCustom() != null) {
+                custom.putAll(patch.getCustom());
+            }
+        }
+        List<String> labels = issue.labels();
+        if (patch.has("labels")) {
+            labels = patch.getLabels() == null ? List.of() : patch.getLabels();
+        }
+        return new IssueRequest(
+                patch.has("type") ? patch.getType() : issue.type().value(),
+                patch.has("summary") ? patch.getSummary() : issue.summary(),
+                patch.has("description") ? patch.getDescription() : issue.description(),
+                patch.has("priority") ? patch.getPriority() : issue.priority().value(),
+                patch.has("assignee") ? patch.getAssignee() : issue.assignee(),
+                patch.has("dueOn") ? patch.getDueOn() : issue.dueOn() == null ? null : issue.dueOn().toString(),
+                patch.has("reviewer") ? patch.getReviewer() : issue.reviewer(),
+                labels,
+                custom,
+                patch.getVersion());
+    }
+
+    /** Checks a change against the version read with the issue and saves it, with its changelog and its event. */
+    private ResponseEntity<?> save(Found found, IssueRequest request, Set<String> permissions) {
+        ProjectRef project = found.project();
+        IssueEntity issue = found.issue();
         IssueEditor.Edit edit;
         try {
             edit = editor.edit(project, issue, request, permissions);

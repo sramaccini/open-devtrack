@@ -8,6 +8,11 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+### Added
+
+- **API**: `PATCH /api/issues/{key}` changes only the fields it names, with the version read and the same checks as
+  `PUT`; null clears a field, and the custom fields given leave the others as they are.
+
 ### Changed
 
 - **Issues**: the watchers of an issue are in a window, «Watchers» in the menu of the eye, with «Add watcher…»; the
@@ -20,7 +25,7 @@ The entries are written by hand at each release from the commits ([docs/release.
   saved on its own; the «Save» button of the two goes (#53).
 - **Issues**: the fields of Details and the story points of Planning are changed in place in the same way: a choice
   from a list is saved as soon as it is picked, the others with ✓ or Enter; the «Save» buttons of the two boxes go
-  (#54).
+  (#54). Each field sends only itself, with `PATCH /api/issues/{key}`.
 - Quadrava 0.28.0 (runtime image and CLI): the drop zone of a file field and the dashed box (Q42, 0.26.0), editing in
   place in a form (Q43, 0.27.0), lookups, selects and checkboxes in place (Q44).
 

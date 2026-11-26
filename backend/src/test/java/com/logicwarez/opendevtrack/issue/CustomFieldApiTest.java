@@ -9,6 +9,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -162,6 +163,30 @@ class CustomFieldApiTest {
         mvc.perform(as(get("/api/issues/ODT-1/fields"), paola))
                 .andExpect(jsonPath("$[0].required").value(true))
                 .andExpect(jsonPath("$[1].required").value(false));
+    }
+
+    @Test
+    void aPatchOfOneCustomFieldKeepsTheOthers() throws Exception {
+        issue("""
+                {"summary":"Export","custom":{"severity":"low","points":2}}""", 201);
+        mvc.perform(as(patch("/api/issues/ODT-1"), luisa).content("""
+                        {"custom":{"severity":"high"},"version":0}"""))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.custom.severity").value("high"))
+                .andExpect(jsonPath("$.custom.points").value(2));
+        // Null clears that field only; its value is checked as in a full change.
+        mvc.perform(as(patch("/api/issues/ODT-1"), luisa).content("""
+                        {"custom":{"points":null},"version":1}"""))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.custom.points").doesNotExist())
+                .andExpect(jsonPath("$.custom.severity").value("high"));
+        mvc.perform(as(patch("/api/issues/ODT-1"), luisa).content("""
+                        {"custom":{"severity":"blocker"},"version":2}"""))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors[0].path").value("/custom/severity"));
+        mvc.perform(as(patch("/api/issues/ODT-1"), luisa).content("""
+                        {"custom":"high","version":2}"""))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

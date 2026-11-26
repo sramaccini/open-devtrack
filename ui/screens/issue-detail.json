@@ -115,35 +115,8 @@
     "fields": {
       "ref": "issues/fields"
     },
-    "saveContent": {
-      "ref": "issues/save",
-      "body": {
-        "summary": "{{form.summary}}",
-        "type": "{{data.issue.type}}",
-        "priority": "{{data.issue.priority}}",
-        "assignee": "{{data.issue.assignee}}",
-        "reviewer": "{{data.issue.reviewer}}",
-        "dueOn": "{{data.issue.dueOn}}",
-        "labels": "{{data.issue.labels}}",
-        "description": "{{form.description}}",
-        "custom": "{{data.issue.custom}}",
-        "version": "{{form.version}}"
-      }
-    },
-    "saveDetails": {
-      "ref": "issues/save",
-      "body": {
-        "summary": "{{data.issue.summary}}",
-        "type": "{{form.type}}",
-        "priority": "{{form.priority}}",
-        "assignee": "{{form.assignee}}",
-        "reviewer": "{{form.reviewer}}",
-        "dueOn": "{{form.dueOn}}",
-        "labels": "{{form.labels}}",
-        "description": "{{data.issue.description}}",
-        "custom": "{{form.custom}}",
-        "version": "{{form.version}}"
-      }
+    "patchIssue": {
+      "ref": "issues/patch"
     },
     "workflow": {
       "ref": "issues/workflow"
@@ -198,7 +171,7 @@
               ],
               "onSave": [
                 {
-                  "call": "saveContent",
+                  "call": "patchIssue",
                   "onError": [
                     {
                       "if": "{{error.status == 412}}",
@@ -1271,17 +1244,20 @@
                       "text": {
                         "name": "text",
                         "type": "text",
+                        "emptyText": "{{ t('common.none', 'None') }}",
                         "maxLength": 1000,
                         "readOnlyIf": "{{!form._perm.edit}}"
                       },
                       "number": {
                         "name": "number",
                         "type": "number",
+                        "emptyText": "{{ t('common.none', 'None') }}",
                         "readOnlyIf": "{{!form._perm.edit}}"
                       },
                       "date": {
                         "name": "date",
                         "type": "date",
+                        "emptyText": "{{ t('common.none', 'None') }}",
                         "readOnlyIf": "{{!form._perm.edit}}"
                       },
                       "checkbox": {
@@ -1292,18 +1268,21 @@
                       "select": {
                         "name": "select",
                         "type": "select",
+                        "emptyText": "{{ t('common.none', 'None') }}",
                         "options": [],
                         "readOnlyIf": "{{!form._perm.edit}}"
                       },
                       "multiselect": {
                         "name": "multiselect",
                         "type": "multiselect",
+                        "emptyText": "{{ t('common.none', 'None') }}",
                         "options": [],
                         "readOnlyIf": "{{!form._perm.edit}}"
                       },
                       "user": {
                         "name": "user",
                         "type": "lookup",
+                        "emptyText": "{{ t('common.none', 'None') }}",
                         "lookup": {
                           "source": "assignees",
                           "valueField": "username",
@@ -1317,7 +1296,7 @@
                   "columns": 1,
                   "onSave": [
                     {
-                      "call": "saveDetails",
+                      "call": "patchIssue",
                       "onError": [
                         {
                           "if": "{{error.fields > 0}}",

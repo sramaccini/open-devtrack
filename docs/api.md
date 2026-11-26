@@ -91,6 +91,15 @@ curl -s -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/j
   -d '{"summary": "Crash when saving a draft", "type": "bug", "priority": "high", "version": 7}'
 ```
 
+`PUT /api/issues/{key}` sends every field; `PATCH` sends only those that change, with the same checks: an absent field
+keeps its value, `null` clears it (not the type, the priority or the summary; a custom field by its key in
+`custom`), and the custom fields given leave the
+others as they are. The issue page saves each field this way.
+
+```bash
+curl -s -X PATCH -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \n  http://localhost:18080/api/issues/WEB-42 -d '{"assignee": null, "custom": {"customer": "ACME"}, "version": 8}'
+```
+
 Issues change status only through the transitions of their workflow: `GET /api/issues/{key}/transitions`, then
 `POST /api/issues/{key}/transitions` with `{"transition": "start", "version": 7}`. `GET /api/issues/{key}/workflow` gives
 the whole workflow the issue follows, to draw it: its name, the status of the issue, the statuses with their category and

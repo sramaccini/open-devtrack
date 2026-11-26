@@ -24,6 +24,9 @@
     "POST /api/groups/{id}/members" : {
       "$ref" : "#/components/schemas/GroupMemberRequest"
     },
+    "PATCH /api/issues/{issueKey}" : {
+      "$ref" : "#/components/schemas/IssuePatch"
+    },
     "PUT /api/issues/{issueKey}" : {
       "$ref" : "#/components/schemas/IssueRequest"
     },
@@ -345,6 +348,47 @@
           },
           "value" : {
             "type" : "string"
+          }
+        }
+      },
+      "IssuePatch" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "assignee" : {
+            "type" : "string"
+          },
+          "custom" : {
+            "type" : "object",
+            "additionalProperties" : { }
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "dueOn" : {
+            "type" : "string"
+          },
+          "labels" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "priority" : {
+            "type" : "string"
+          },
+          "reviewer" : {
+            "type" : "string"
+          },
+          "summary" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       },
