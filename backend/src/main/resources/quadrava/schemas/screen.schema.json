@@ -1812,7 +1812,7 @@
                   "form",
                   "inline"
                 ],
-                "description": "How the fields are changed: form (the inputs always open, saved by the actions, form if absent) or inline (each field shows its value as text; a click, Enter or Space opens the editor of that field only, which is confirmed or cancelled on its own and runs onSave). Inline applies to text, number, textarea, richtext, select, radio, multiselect, tags, date and datetime fields; the other types are drawn as in a normal form."
+                "description": "How the fields are changed: form (the inputs always open, saved by the actions, form if absent) or inline (each field shows its value as text; a click, Enter or Space opens the editor of that field only, which is confirmed or cancelled on its own and runs onSave). Inline applies to text, number, textarea, richtext, select, radio, multiselect, tags, date, datetime and lookup fields; a select or a lookup opens with its list and is confirmed by choosing a value. Checkboxes and switches stay controls that run onSave at every change and go back if it fails; file, password and repeater fields are drawn as in a normal form."
               },
               "onSave": {
                 "type": "array",

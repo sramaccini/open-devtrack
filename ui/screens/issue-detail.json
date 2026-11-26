@@ -67,7 +67,7 @@
     "savePlan": {
       "ref": "boards/savePlan",
       "body": {
-        "points": "{{ form.points == null || string(form.points) == '' ? dyn(null) : dyn(int(form.points)) }}"
+        "points": "{{form.points}}"
       }
     },
     "attachments": {
@@ -134,14 +134,14 @@
       "ref": "issues/save",
       "body": {
         "summary": "{{data.issue.summary}}",
-        "type": "{{formFields.type}}",
-        "priority": "{{formFields.priority}}",
-        "assignee": "{{formFields.assignee}}",
-        "reviewer": "{{formFields.reviewer}}",
-        "dueOn": "{{formFields.dueOn}}",
-        "labels": "{{formFields.labels}}",
+        "type": "{{form.type}}",
+        "priority": "{{form.priority}}",
+        "assignee": "{{form.assignee}}",
+        "reviewer": "{{form.reviewer}}",
+        "dueOn": "{{form.dueOn}}",
+        "labels": "{{form.labels}}",
         "description": "{{data.issue.description}}",
-        "custom": "{{formFields.custom}}",
+        "custom": "{{form.custom}}",
         "version": "{{form.version}}"
       }
     },
@@ -1170,6 +1170,7 @@
                   "type": "form",
                   "layout": "grid",
                   "source": "issue",
+                  "edit": "inline",
                   "fields": [
                     {
                       "name": "key",
@@ -1210,6 +1211,7 @@
                       "name": "assignee",
                       "type": "lookup",
                       "label": "{{ t('issues.assignee', 'Assignee') }}",
+                      "emptyText": "{{ t('issues.unassigned', 'Unassigned') }}",
                       "tooltip": "{{ t('issues.assignee_help', 'A member of the project') }}",
                       "readOnlyIf": "{{!form._perm.edit}}",
                       "lookup": {
@@ -1223,6 +1225,7 @@
                       "name": "reviewer",
                       "type": "lookup",
                       "label": "{{ t('issues.reviewer', 'Reviewer') }}",
+                      "emptyText": "{{ t('common.none', 'None') }}",
                       "tooltip": "{{ t('issues.reviewer_help', 'A member of the project other than the assignee') }}",
                       "lookup": {
                         "source": "assignees",
@@ -1242,6 +1245,7 @@
                       "name": "dueOn",
                       "type": "date",
                       "label": "{{ t('issues.due_on', 'Due date') }}",
+                      "emptyText": "{{ t('common.none', 'None') }}",
                       "tooltip": "{{ t('issues.due_on_help', 'The day it should be done; past it, and not done, the issue is overdue') }}",
                       "readOnlyIf": "{{!form._perm.edit}}"
                     },
@@ -1249,6 +1253,7 @@
                       "name": "labels",
                       "type": "tags",
                       "label": "{{ t('issues.labels', 'Labels') }}",
+                      "emptyText": "{{ t('common.none', 'None') }}",
                       "maxItems": 20,
                       "suggest": {
                         "source": "labels",
@@ -1256,59 +1261,6 @@
                       },
                       "tooltip": "{{ t('issues.labels_help', 'Lower case letters, digits, dots, dashes or underscores; Enter or a comma adds one') }}",
                       "readOnlyIf": "{{!form._perm.edit}}"
-                    }
-                  ],
-                  "actions": [
-                    {
-                      "id": "btn-save",
-                      "label": "{{ t('common.save', 'Save') }}",
-                      "icon": "save",
-                      "visibleIf": "{{form._perm.edit}}",
-                      "onClick": [
-                        {
-                          "call": "saveDetails",
-                          "onError": [
-                            {
-                              "if": "{{error.fields > 0}}",
-                              "then": [
-                                {
-                                  "toast": "{{ t('common.check_fields', 'Check the highlighted fields') }}"
-                                }
-                              ],
-                              "else": [
-                                {
-                                  "if": "{{error.status == 412}}",
-                                  "then": [
-                                    {
-                                      "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
-                                    }
-                                  ],
-                                  "else": [
-                                    {
-                                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                                    }
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "refresh": "issue"
-                        },
-                        {
-                          "refresh": "history"
-                        },
-                        {
-                          "refresh": "transitions"
-                        },
-                        {
-                          "refresh": "fields"
-                        },
-                        {
-                          "toast": "{{ t('common.saved', 'Saved') }}"
-                        }
-                      ]
                     }
                   ],
                   "fieldsFrom": {
@@ -1362,7 +1314,49 @@
                       }
                     }
                   },
-                  "columns": 1
+                  "columns": 1,
+                  "onSave": [
+                    {
+                      "call": "saveDetails",
+                      "onError": [
+                        {
+                          "if": "{{error.fields > 0}}",
+                          "then": [
+                            {
+                              "toast": "{{ t('common.check_fields', 'Check the highlighted fields') }}"
+                            }
+                          ],
+                          "else": [
+                            {
+                              "if": "{{error.status == 412}}",
+                              "then": [
+                                {
+                                  "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                }
+                              ],
+                              "else": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "refresh": "issue"
+                    },
+                    {
+                      "refresh": "history"
+                    },
+                    {
+                      "refresh": "transitions"
+                    },
+                    {
+                      "refresh": "fields"
+                    }
+                  ]
                 }
               ]
             },
@@ -1385,7 +1379,7 @@
                       "max": 999,
                       "step": 1,
                       "label": "{{ t('agile.points', 'Story points') }}",
-                      "emptyText": "{{ t('agile.points_none', 'None') }}",
+                      "emptyText": "{{ t('common.none', 'None') }}",
                       "readOnlyIf": "{{!form._perm.edit}}",
                       "tooltip": "{{ t('agile.points_help', 'From 0 to 999; empty when not estimated') }}"
                     },

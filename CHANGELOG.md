@@ -18,9 +18,11 @@ The entries are written by hand at each release from the commits ([docs/release.
 - **Issues**: the summary, as a title, and the description read as text and are changed in place, as in Jira: a click
   opens one of them, the summary is confirmed with ✓ or Enter, the description with «Save» or Ctrl+Enter, and each is
   saved on its own; the «Save» button of the two goes (#53).
-- **Issues**: the story points, under «Planning», are changed in place in the same way, with no «Save» (#54).
-- Quadrava 0.27.0 (runtime image and CLI): the drop zone of a file field and the dashed box (Q42, 0.26.0), editing in
-  place in a form (Q43).
+- **Issues**: the fields of Details and the story points of Planning are changed in place in the same way: a choice
+  from a list is saved as soon as it is picked, the others with ✓ or Enter; the «Save» buttons of the two boxes go
+  (#54).
+- Quadrava 0.28.0 (runtime image and CLI): the drop zone of a file field and the dashed box (Q42, 0.26.0), editing in
+  place in a form (Q43, 0.27.0), lookups, selects and checkboxes in place (Q44).
 
 ## [1.0.0-rc.9] - 2026-11-26
 

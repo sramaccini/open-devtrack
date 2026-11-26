@@ -66,12 +66,15 @@ On the right is what describes it:
 - «…», more actions: «Add flag» or «Remove flag», «Add vote» or «Remove vote» ([below](#flag-and-votes)), «All issues»,
   and «Delete», for the admins of the project. Delete cannot be undone, and the
   comments, attachments and links of the issue go with it;
-- **Details**: its key, type, priority, assignee, reviewer, reporter, due date, labels and custom fields,
-  saved with their own «Save»;
-- **Planning**: its story points (0 to 999, empty when not estimated), changed in place like the summary: a click
-  opens them, ✓ or Enter saves them, ✕ or Escape cancels; and the sprint it is planned in.
+- **Details**: its key, type, priority, assignee, reviewer, reporter, due date, labels and custom fields;
+- **Planning**: its story points (0 to 999, empty when not estimated) and the sprint it is planned in.
 
-Each «Save» saves only its own box or field, and shows the issue again as saved. If someone else saved the issue in the
+The fields of Details and the story points are changed in place, like the summary: a click opens one of them. A
+choice from a list (type, priority, assignee, reviewer, a list or a user among the custom fields) is saved as soon as
+it is picked; the other fields are saved with ✓ or Enter; ✕ or Escape cancels; a checkbox is saved when it is ticked.
+The key, the reporter and the sprint only read.
+
+Each field, or box, saves only itself, and shows the issue again as saved. If someone else saved the issue in the
 meantime, saving says so: reload it and make the change again, so that no change is lost.
 
 ### Comments and mentions
