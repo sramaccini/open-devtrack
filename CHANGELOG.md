@@ -8,6 +8,12 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+### Changed
+
+- **Issues**: the page of an issue is in two columns, as in Jira: summary, description, attachments, linked work
+  items and activity on the left; the actions, next steps, details, planning and watchers on the right. The summary
+  and the description, and the details, are saved separately.
+
 ### Fixed
 
 - **Installation**: with the profile keycloak, the back end could start while Keycloak still answered 503, stop, and

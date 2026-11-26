@@ -40,25 +40,31 @@ of its workflow ([Workflows](workflows.md)).
 
 ## An issue
 
-![An issue: its tabs General, Planning and Next steps, and its comments below](images/issue-detail.png)
+![An issue: its summary, description, attachments, links and activity on the left, its details on the right](images/issue-detail.png)
 
-The screen of an issue has two boxes. The first has three tabs:
+The screen of an issue has two columns; on a phone the right one comes below the left one.
 
-- **General**: its fields, which the developers and admins change and save with «Save». If someone else saved the
-  issue in the meantime, saving says so: reload it and make the change again, so that no change is lost. Below the
-  fields are the buttons:
-  - «Link»: link it to another issue;
-  - «Watch» or «Stop watching»;
-  - «Add watcher»;
-  - «All issues»;
-  - «Delete»: for the admins of the project. Deleting cannot be undone, and the comments, attachments and links of
-    the issue go with it.
-- **Planning**: its story points (0 to 999, empty when not estimated) and the sprint it is planned in. «Save» saves
-  them.
+On the left is what the issue says and what happened to it:
+
+- its **summary** and **description**, which the developers and admins change and save with «Save»;
+- **Attachments**: the files of the issue ([below](#attachments));
+- **Linked work items**: the other issues it is linked to; «Link» adds one ([below](#links));
+- **Activity**: its comments and its history.
+
+On the right is what describes it:
+
+- the buttons «Watch» or «Stop watching», «Add watcher», «All issues» and «Delete». Delete is for the admins of the
+  project; it cannot be undone, and the comments, attachments and links of the issue go with it;
 - **Next steps**: the transitions of the workflow that can run now, each with the status it leads to. «Move» runs
-  one. A transition with a condition that is not met is not listed.
+  one. A transition with a condition that is not met is not listed;
+- **Details**: its key, status, type, priority, assignee, reviewer, reporter, due date, labels and custom fields,
+  saved with their own «Save»;
+- **Planning**: its story points (0 to 999, empty when not estimated) and the sprint it is planned in, with their own
+  «Save»;
+- **Watchers**: who is watching it.
 
-The second, below it, has the tabs «Comments», «Attachments», «Links», «Watchers» and «History».
+Each «Save» saves only its own box, and shows the issue again as saved. If someone else saved the issue in the
+meantime, saving says so: reload it and make the change again, so that no change is lost.
 
 ### Comments and mentions
 

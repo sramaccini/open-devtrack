@@ -36,9 +36,11 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   `eye` and `eye-invisible` for links and watching, `download` exports, `reload` delivers again or renews a secret,
   `filter` and `search` for filters and the search, `settings` for the project, `back` to the page above, `external`
   to another page.
-- **Issue page**: `issue-detail` has the tabs General (the form and its buttons), Planning and Next steps, in a card
-  (a `section` without a title). Below it is a second card, which holds the tabs of the activity: comments,
-  attachments, links, watchers, history.
+- **Issue page**: `issue-detail` is a `grid` of 12 columns, as the page of a work item in Jira: on the left (8)
+  the summary and the description, then the sections Attachments, Linked work items and Activity (tabs Comments and
+  History); on the right (4) the buttons, Next steps, Details, Planning and Watchers. Content and Details are two
+  forms on the same `issue`, saved by `saveContent` and `saveDetails`: each sends its own fields and takes the
+  others from `data.issue`, so that a save never empties the other box.
 - **Project page**: `project-detail` has the tabs General (the form, its buttons and those of the permission scheme
   and the administration log), Boards, Members, Groups, Workflows and Custom fields, in a card (a `section` without a
   title). Each of the last five has the button that adds to it above its table; the label of the tab is its heading.
