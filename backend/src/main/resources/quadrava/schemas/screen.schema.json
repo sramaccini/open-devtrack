@@ -240,6 +240,9 @@
           "$ref": "#/$defs/stepView"
         },
         {
+          "$ref": "#/$defs/stepPopover"
+        },
+        {
           "$ref": "#/$defs/stepValidate"
         },
         {
@@ -1425,6 +1428,10 @@
                 "$ref": "#/$defs/icon",
                 "description": "Icon shown before the text of the button, from the built-in set (for example save, edit, delete, plus); with display icon it is shown alone. An unknown name shows no icon."
               },
+              "tone": {
+                "type": "string",
+                "description": "Colour of the button: neutral, primary, success or danger, or an expression that gives one of them. On a toggle (pressed) it is the colour of the pressed state, for example danger for a flag (primary if absent); otherwise it fills the button (a button with text is primary if absent, an icon button neutral). Any other value is neutral."
+              },
               "display": {
                 "enum": [
                   "label",
@@ -1438,7 +1445,7 @@
               },
               "pressed": {
                 "$ref": "#/$defs/expression",
-                "description": "The button is shown as pressed (highlighted, aria-pressed) while the expression is true, for example while the user watches an item. Without it the button is not a toggle."
+                "description": "The button is shown as pressed (highlighted with the colour of tone, aria-pressed) while the expression is true, for example while the user watches an item. Without it the button is not a toggle. A pressed icon is drawn filled when the set has a filled form (flag, like)."
               }
             },
             "allOf": [
@@ -1492,7 +1499,7 @@
               },
               "tone": {
                 "type": "string",
-                "description": "Colour of the button: neutral, primary, success or danger, or an expression that gives one of them (for example the category of the current status). Any other value is neutral (neutral if absent)."
+                "description": "Colour of the button: neutral, primary, success or danger, or an expression that gives one of them (for example the category of the current status). On a toggle (pressed) it is the colour of the pressed state (primary if absent). Any other value is neutral (neutral if absent)."
               },
               "icon": {
                 "$ref": "#/$defs/icon",
@@ -1519,7 +1526,7 @@
               },
               "pressed": {
                 "$ref": "#/$defs/expression",
-                "description": "The button is shown as pressed (highlighted, aria-pressed) while the expression is true, for example while the user watches an item. Without it the button is not a toggle."
+                "description": "The button is shown as pressed (highlighted with the colour of tone, aria-pressed) while the expression is true, for example while the user watches an item. Without it the button is not a toggle. A pressed icon is drawn filled when the set has a filled form (flag, like)."
               }
             },
             "allOf": [
@@ -3666,6 +3673,67 @@
         }
       }
     },
+    "stepPopover": {
+      "type": "object",
+      "required": [
+        "popover"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "popover": {
+          "type": "object",
+          "required": [
+            "title",
+            "fields",
+            "onSubmit"
+          ],
+          "additionalProperties": false,
+          "description": "Small panel with a form, opened under the button that ran the step (or the «…» button of a menu item), for example an optional comment after adding a flag. The onSubmit steps see the values in `form`; if they succeed the panel closes and the sequence goes on. The cross, Esc or a click outside close it and stop the sequence silently. Without a button to point at it opens as a dialog window.",
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "Title of the panel: plain text or an expression."
+            },
+            "icon": {
+              "$ref": "#/$defs/icon",
+              "description": "Icon before the title, from the built-in set (for example flag)."
+            },
+            "tone": {
+              "$ref": "#/$defs/tone",
+              "description": "Colour of the icon: neutral, primary, success or danger (neutral if absent)."
+            },
+            "fields": {
+              "type": "array",
+              "description": "Fields of the form in the panel, as in a form.",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/field"
+              }
+            },
+            "initial": {
+              "type": "object",
+              "description": "Initial values with expressions (for example {\"note\": \"{{ row.note }}\"})."
+            },
+            "submitLabel": {
+              "type": "string",
+              "description": "Text of the button that confirms (Confirm, translated, if absent)."
+            },
+            "submitEnabledIf": {
+              "$ref": "#/$defs/expression",
+              "description": "The confirm button is enabled only while the expression is true; it sees the values in `form`, where an empty field is null (for example {{ isValid('required', form.comment) }} while the comment is empty). Always enabled if absent."
+            },
+            "onSubmit": {
+              "type": "array",
+              "description": "Steps run when the form is confirmed and valid; they see the values as form. The panel closes when they succeed.",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/step"
+              }
+            }
+          }
+        }
+      }
+    },
     "statItem": {
       "type": "object",
       "required": [
@@ -5000,7 +5068,7 @@
     "icon": {
       "type": "string",
       "pattern": "^[a-z][a-z0-9-]*$",
-      "description": "Name of an icon of the built-in set (for example save, edit, delete, plus). An unknown name shows no icon."
+      "description": "Name of an icon of the built-in set (for example save, edit, delete, plus, flag, like). An unknown name shows no icon."
     },
     "breadcrumbItem": {
       "type": "object",

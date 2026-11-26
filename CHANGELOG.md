@@ -11,12 +11,13 @@ The entries are written by hand at each release from the commits ([docs/release.
 ## [1.0.0-rc.9] - 2026-11-26
 
 The ninth candidate: the page of an issue closer to Jira, in two columns, with the status as a button with its
-workflow, the actions as icons, the flag and the votes; the «Polar night» theme; on Quadrava 0.24.0.
+workflow, the actions as icons, the flag and the votes; the «Polar night» theme; on Quadrava 0.25.1.
 
 ### Added
 
 - **Issues**: the flag and the votes of an issue, as in Jira. «Add flag» in the «…» menu marks it as impeded, in its
-  history, and asks for a comment to tell the team why; «Add vote» counts who wants it done. The API has
+  history, shows a red flag next to its status and asks, in a panel, for a comment to tell the team why; the thumb
+  next to the status, or «Add vote», counts who wants it done. The API has
   `PUT`/`DELETE /api/issues/{key}/flag` and `GET`/`POST /api/issues/{key}/votes`, `DELETE …/votes/me`; an issue has
   `flagged`, `votes` and `voted`. The votes are in the export of the personal data and are deleted with the user.
 - **API**: `GET /api/issues/{key}/workflow`, the workflow an issue follows with its statuses and transitions, for the
@@ -38,8 +39,9 @@ workflow, the actions as icons, the flag and the votes; the «Polar night» them
   items and activity on the left; the status, the actions, details, planning and watchers on the right. The summary
   and the description, and the details, are saved separately.
 - **API**: the transitions of an issue have the `category` of the status they lead to.
-- Quadrava 0.24.0 (runtime image and CLI): the menu button, the window step and the graph (Q39, 0.23.0); icon-only
-  buttons with a count and a pressed state (Q40).
+- Quadrava 0.25.1 (runtime image and CLI): the menu button, the window step and the graph (Q39, 0.23.0); icon-only
+  buttons with a count and a pressed state (Q40, 0.24.0); the icons flag and like, a tone on a pressed button and the
+  popover step (Q41).
 
 ### Fixed
 

@@ -57,8 +57,10 @@ On the right is what describes it:
   Its menu lists the statuses the issue can move to now, as badges: choosing one runs that transition. A transition
   with a condition that is not met is not listed. «View workflow» shows the workflow of the issue as a graph, with
   its statuses, the transitions between them and the current status outlined;
-- next to it, the eye with the number of people watching the issue, highlighted while you watch it: its menu
+- next to it, a red flag while the issue is flagged (developers and admins remove the flag with it), then the eye
+  with the number of people watching the issue, highlighted while you watch it: its menu
   has «Watch» or «Stop watching», and «Add watcher»;
+- the thumb with the number of votes, highlighted when you voted: it adds your vote or takes it back;
 - «…», more actions: «Add flag» or «Remove flag», «Add vote» or «Remove vote» ([below](#flag-and-votes)), «All issues»,
   and «Delete», for the admins of the project. Delete cannot be undone, and the
   comments, attachments and links of the issue go with it;
@@ -120,12 +122,12 @@ or remove one.
 
 ### Flag and votes
 
-A flag marks an issue as impeded. Developers and admins add it with «Add flag» in the «…» menu: a window then asks
-why, to tell the team in a comment; closing it adds no comment. «Remove flag» takes it away. Both are in the history
+A flag marks an issue as impeded. Developers and admins add it with «Add flag» in the «…» menu: a panel under the menu then
+asks why, to tell the team in a comment; closing it adds no comment. «Remove flag» takes it away. Both are in the history
 of the issue, as «Flagged».
 
-A vote says that you want the issue done. Anyone who sees the issue votes for it once with «Add vote», and takes the
-vote back with «Remove vote».
+A vote says that you want the issue done. Anyone who sees the issue votes for it once, with the thumb or «Add vote»,
+and takes the vote back the same way or with «Remove vote».
 
 ### History
 

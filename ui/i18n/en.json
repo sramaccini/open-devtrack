@@ -632,9 +632,10 @@
   "issues.add_flag": "Add flag",
   "issues.remove_flag": "Remove flag",
   "issues.flag_added": "Flag added",
-  "issues.flag_why": "Let your team know why this work item has been flagged",
+  "issues.flag_why": "Optional: let your team know why this work item has been flagged",
   "issues.add_vote": "Add vote",
   "issues.remove_vote": "Remove vote",
   "values.issue_field.flagged": "Flagged",
-  "issues.add_comment": "Add comment"
+  "issues.add_comment": "Add comment",
+  "issues.votes": "Votes"
 }

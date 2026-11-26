@@ -156,12 +156,6 @@
     },
     "unvote": {
       "ref": "issues/unvote"
-    },
-    "flagComment": {
-      "ref": "issues/addComment",
-      "body": {
-        "body": "{{formFields.comment}}"
-      }
     }
   },
   "components": [
@@ -758,6 +752,33 @@
                   "gap": "small",
                   "components": [
                     {
+                      "id": "btn-flagged",
+                      "type": "button",
+                      "label": "{{ t('issues.remove_flag', 'Remove flag') }}",
+                      "icon": "flag",
+                      "display": "icon",
+                      "tone": "danger",
+                      "pressed": "{{ has(data.issue) && data.issue.flagged }}",
+                      "visibleIf": "{{ has(data.issue) && data.issue.flagged }}",
+                      "enabledIf": "{{ has(data.issue) && data.issue._perm.edit }}",
+                      "onClick": [
+                        {
+                          "call": "unflag",
+                          "onError": [
+                            {
+                              "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                            }
+                          ]
+                        },
+                        {
+                          "refresh": "issue"
+                        },
+                        {
+                          "refresh": "history"
+                        }
+                      ]
+                    },
+                    {
                       "id": "issue-watch",
                       "type": "menuButton",
                       "label": "{{ t('issues.watchers', 'Watchers') }}",
@@ -867,6 +888,52 @@
                       ]
                     },
                     {
+                      "id": "btn-vote",
+                      "type": "button",
+                      "label": "{{ t('issues.votes', 'Votes') }}",
+                      "icon": "like",
+                      "display": "icon",
+                      "count": "{{ has(data.issue) ? string(data.issue.votes) : '' }}",
+                      "pressed": "{{ false }}",
+                      "visibleIf": "{{ has(data.issue) && !data.issue.voted }}",
+                      "onClick": [
+                        {
+                          "call": "vote",
+                          "onError": [
+                            {
+                              "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                            }
+                          ]
+                        },
+                        {
+                          "refresh": "issue"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "btn-unvote",
+                      "type": "button",
+                      "label": "{{ t('issues.votes', 'Votes') }}",
+                      "icon": "like",
+                      "display": "icon",
+                      "count": "{{ has(data.issue) ? string(data.issue.votes) : '' }}",
+                      "pressed": "{{ has(data.issue) && data.issue.voted }}",
+                      "visibleIf": "{{ has(data.issue) && data.issue.voted }}",
+                      "onClick": [
+                        {
+                          "call": "unvote",
+                          "onError": [
+                            {
+                              "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                            }
+                          ]
+                        },
+                        {
+                          "refresh": "issue"
+                        }
+                      ]
+                    },
+                    {
                       "id": "issue-more",
                       "type": "menuButton",
                       "label": "{{ t('issues.more_actions', 'More actions') }}",
@@ -893,20 +960,25 @@
                               "refresh": "history"
                             },
                             {
-                              "dialog": {
+                              "popover": {
                                 "title": "{{ t('issues.flag_added', 'Flag added') }}",
+                                "icon": "flag",
+                                "tone": "danger",
                                 "fields": [
                                   {
                                     "name": "comment",
                                     "type": "textarea",
-                                    "label": "{{ t('issues.flag_why', 'Let your team know why this work item has been flagged') }}",
-                                    "required": true
+                                    "label": "{{ t('issues.flag_why', 'Optional: let your team know why this work item has been flagged') }}"
                                   }
                                 ],
                                 "submitLabel": "{{ t('issues.add_comment', 'Add comment') }}",
+                                "submitEnabledIf": "{{ isValid('required', form.comment) }}",
                                 "onSubmit": [
                                   {
-                                    "call": "flagComment",
+                                    "call": "addComment",
+                                    "args": {
+                                      "text": "{{ form.comment }}"
+                                    },
                                     "onError": [
                                       {
                                         "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
@@ -919,7 +991,8 @@
                             {
                               "refresh": "comments"
                             }
-                          ]
+                          ],
+                          "icon": "flag"
                         },
                         {
                           "id": "item-unflag",
@@ -940,7 +1013,8 @@
                             {
                               "refresh": "history"
                             }
-                          ]
+                          ],
+                          "icon": "flag"
                         },
                         {
                           "id": "item-vote",
@@ -958,7 +1032,8 @@
                             {
                               "refresh": "issue"
                             }
-                          ]
+                          ],
+                          "icon": "like"
                         },
                         {
                           "id": "item-unvote",
@@ -976,7 +1051,8 @@
                             {
                               "refresh": "issue"
                             }
-                          ]
+                          ],
+                          "icon": "like"
                         },
                         {
                           "divider": true

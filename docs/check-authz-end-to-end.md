@@ -1,12 +1,12 @@
 # End-to-end check of authz-library (F0)
 
 Result on 31 October 2026: **all checks passed**. The OpenDevTrack back end, built on the authz-library 2.0.1
-libraries, talks to the Quadrava runtime 0.24.0 as the contracts of Quadrava ask, with the versions OpenDevTrack targets.
+libraries, talks to the Quadrava runtime 0.25.1 as the contracts of Quadrava ask, with the versions OpenDevTrack targets.
 
 ## What runs
 
 ```
-browser / kits ──▶ quadrava-runtime 0.24.0 (:28090) ──/bff /authz /logout /oauth2──▶ backend/ (:28080, profile dev)
+browser / kits ──▶ quadrava-runtime 0.25.1 (:28090) ──/bff /authz /logout /oauth2──▶ backend/ (:28080, profile dev)
                                                                                     │ authz-bff, authz-session, authz-rbac 2.0.1
                          Keycloak 26.8.0 (:28180, realm opendevtrack) ◀── OIDC ─────┤
                          PostgreSQL 18.6 (:25432) ◀── RBAC schema + odt.* catalogue ┤
@@ -51,7 +51,7 @@ Maven must reach the authz-library packages: see [backend/README.md](../backend/
 | ZAP baseline scan through the runtime, signed in (`run.sh zap`, ADR-23), from F5 | no medium or high alert outside `e2e/zap/allowlist.json` (empty: since Quadrava 0.14.0 the pages carry a CSP, Q18, tightened in 0.15.0, Q21); low: the `XSRF-TOKEN` cookie of authz-library is readable by scripts, as the front end needs, and has no `SameSite` |
 | In the browser: login through the runtime, the user menu | «Spazio di lavoro» with both tenants, GLOBEX selected, 2 permissions |
 
-The kits come from the Quadrava tag `v0.24.0`, the pinned release (downloaded file by file, not cloned); until 0.2.0
+The kits come from the Quadrava tag `v0.25.1`, the pinned release (downloaded file by file, not cloned); until 0.2.0
 they came from `main` at `9fa1916`, since the authorization kit with session cookies was not in `v0.1.0`.
 
 ## Found along the way

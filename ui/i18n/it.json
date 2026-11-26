@@ -632,9 +632,10 @@
   "issues.add_flag": "Aggiungi contrassegno",
   "issues.remove_flag": "Rimuovi contrassegno",
   "issues.flag_added": "Contrassegno aggiunto",
-  "issues.flag_why": "Spiega al team perché questa issue è contrassegnata",
+  "issues.flag_why": "Facoltativo: spiega al team perché questa issue è contrassegnata",
   "issues.add_vote": "Aggiungi voto",
   "issues.remove_vote": "Rimuovi voto",
   "values.issue_field.flagged": "Contrassegnata",
-  "issues.add_comment": "Aggiungi commento"
+  "issues.add_comment": "Aggiungi commento",
+  "issues.votes": "Voti"
 }
