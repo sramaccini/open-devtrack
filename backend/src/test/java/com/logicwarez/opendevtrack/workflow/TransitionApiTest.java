@@ -115,7 +115,8 @@ class TransitionApiTest {
         mvc.perform(as(get("/api/issues/ODT-1/transitions"), luisa))
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].code").value("start"))
-                .andExpect(jsonPath("$[0].to").value("in_progress"));
+                .andExpect(jsonPath("$[0].to").value("in_progress"))
+                .andExpect(jsonPath("$[0].category").value("in_progress"));
         // A viewer sees no transition and cannot run one.
         mvc.perform(as(get("/api/issues/ODT-1/transitions"), paola)).andExpect(jsonPath("$.length()").value(0));
         move(paola, "start", 0, 403);
@@ -147,6 +148,7 @@ class TransitionApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Default"))
                 .andExpect(jsonPath("$.status").value("todo"))
+                .andExpect(jsonPath("$.category").value("todo"))
                 .andExpect(jsonPath("$.statuses[*].code").value(org.hamcrest.Matchers.contains("todo", "in_progress", "done")))
                 .andExpect(jsonPath("$.statuses[1].category").value("in_progress"))
                 .andExpect(jsonPath("$.transitions[*].code").value(org.hamcrest.Matchers.contains("start", "finish", "reopen", "cancel")))
@@ -155,7 +157,8 @@ class TransitionApiTest {
                 .andExpect(jsonPath("$.transitions[3].from").doesNotExist())
                 .andExpect(jsonPath("$.transitions[0].guard").doesNotExist());
         move(luisa, "start", 0, 200);
-        mvc.perform(as(get("/api/issues/ODT-1/workflow"), luisa)).andExpect(jsonPath("$.status").value("in_progress"));
+        mvc.perform(as(get("/api/issues/ODT-1/workflow"), luisa)).andExpect(jsonPath("$.status").value("in_progress"))
+                .andExpect(jsonPath("$.category").value("in_progress"));
         // Another tenant does not see it, nor an issue that does not exist.
         mvc.perform(as(get("/api/issues/ODT-1/workflow"), ugo)).andExpect(status().isNotFound());
         mvc.perform(as(get("/api/issues/ODT-99/workflow"), luisa)).andExpect(status().isNotFound());

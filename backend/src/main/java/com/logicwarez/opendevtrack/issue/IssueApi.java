@@ -31,18 +31,22 @@ final class IssueApi {
                      @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
-    /** A transition that can run now: its code, the status it leads to and the version of the issue to send back. */
-    record TransitionView(String code, String to, long version) {
+    /**
+     * A transition that can run now: its code, the status it leads to and its category (todo, in_progress, done), and the
+     * version of the issue to send back.
+     */
+    record TransitionView(String code, String to, String category, long version) {
     }
 
     record TransitionRequest(String transition, Long version) {
     }
 
     /**
-     * The workflow an issue follows, to draw it: its name, the status of the issue, the statuses in order with their
-     * category, and every transition ({@code from} null when it starts from any status), without their guards.
+     * The workflow an issue follows, to draw it: its name, the status of the issue and its category, the statuses in
+     * order with their category, and every transition ({@code from} null when it starts from any status), without their
+     * guards.
      */
-    record IssueWorkflow(String name, String status, List<IssueWorkflowStatus> statuses,
+    record IssueWorkflow(String name, String status, String category, List<IssueWorkflowStatus> statuses,
                          List<IssueWorkflowTransition> transitions) {
     }
 

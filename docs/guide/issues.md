@@ -53,11 +53,13 @@ On the left is what the issue says and what happened to it:
 
 On the right is what describes it:
 
+- the **status** button at the top, coloured by the category of the status (grey to do, blue in progress, green done).
+  Its menu lists the statuses the issue can move to now, as badges: choosing one runs that transition. A transition
+  with a condition that is not met is not listed. «View workflow» shows the workflow of the issue as a graph, with
+  its statuses, the transitions between them and the current status outlined;
 - the buttons «Watch» or «Stop watching», «Add watcher», «All issues» and «Delete». Delete is for the admins of the
   project; it cannot be undone, and the comments, attachments and links of the issue go with it;
-- **Next steps**: the transitions of the workflow that can run now, each with the status it leads to. «Move» runs
-  one. A transition with a condition that is not met is not listed;
-- **Details**: its key, status, type, priority, assignee, reviewer, reporter, due date, labels and custom fields,
+- **Details**: its key, type, priority, assignee, reviewer, reporter, due date, labels and custom fields,
   saved with their own «Save»;
 - **Planning**: its story points (0 to 999, empty when not estimated) and the sprint it is planned in, with their own
   «Save»;

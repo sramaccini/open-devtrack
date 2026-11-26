@@ -237,6 +237,9 @@
           "$ref": "#/$defs/stepDialog"
         },
         {
+          "$ref": "#/$defs/stepView"
+        },
+        {
           "$ref": "#/$defs/stepValidate"
         },
         {
@@ -1239,6 +1242,7 @@
             "section",
             "text",
             "button",
+            "menuButton",
             "filterBar",
             "table",
             "form",
@@ -1251,6 +1255,7 @@
             "calendar",
             "chart",
             "squareChart",
+            "graph",
             "dataTable",
             "serverDataTable",
             "input",
@@ -1419,6 +1424,47 @@
               "icon": {
                 "$ref": "#/$defs/icon",
                 "description": "Icon shown before the text of the button, from the built-in set (for example save, edit, delete, plus); the text stays. An unknown name shows no icon."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "menuButton"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "label",
+              "items"
+            ],
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "Text of the button, for example the current status; it can contain {{ }}."
+              },
+              "tone": {
+                "type": "string",
+                "description": "Colour of the button: neutral, primary, success or danger, or an expression that gives one of them (for example the category of the current status). Any other value is neutral (neutral if absent)."
+              },
+              "icon": {
+                "$ref": "#/$defs/icon",
+                "description": "Icon shown before the text of the button, from the built-in set; the text stays. An unknown name shows no icon."
+              },
+              "items": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/menuItem"
+                },
+                "description": "Entries of the menu opened by the button, in order: fixed items, items from a data source and dividers. With no item to show, the menu says there is nothing to choose."
               }
             }
           }
@@ -1679,6 +1725,12 @@
                   "$ref": "#/$defs/formRule"
                 },
                 "description": "Rules across fields, checked with those of the fields: each says the fields it checks (fields), and the message goes to them. For example [{ \"after\": \"start\", \"fields\": [\"end\"] }, { \"sameAs\": \"email\", \"fields\": [\"emailConfirm\"] }, { \"atLeastOne\": [\"phone\", \"email\"] }]."
+              },
+              "errorPath": {
+                "type": "string",
+                "maxLength": 200,
+                "pattern": "^(/([^/~]|~[01])*)+$",
+                "description": "Where the values of the form are in the body its actions send, as a JSON Pointer (for example /order when the body is { \"order\": \"{{ form }}\" }, with ~1 for / and ~0 for ~ in a name): the field errors of the service are matched to the fields below it. Absent, the values of the form are the body itself."
               }
             }
           }
@@ -2160,6 +2212,111 @@
           "if": {
             "properties": {
               "type": {
+                "const": "graph"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "source",
+              "nodes",
+              "edges"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "Data source with the nodes and the edges: one answer with both lists (see field), for example a workflow with its statuses and transitions."
+              },
+              "nodes": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Where the nodes are and which fields they use.",
+                "properties": {
+                  "field": {
+                    "type": "string",
+                    "description": "Property of the answer with the list of nodes, for example statuses (the answer itself, or its items, if absent)."
+                  },
+                  "keyField": {
+                    "type": "string",
+                    "description": "Field with the key of a node, which the edges name (id if absent)."
+                  },
+                  "labelField": {
+                    "type": "string",
+                    "description": "Field with the label of a node (name if absent)."
+                  },
+                  "valueKey": {
+                    "type": "string",
+                    "description": "Prefix of the translation keys of the labels: the key is prefix.key, the label is the fallback."
+                  },
+                  "toneField": {
+                    "type": "string",
+                    "description": "Field whose value chooses the colour of a node through tones; with tones absent the value itself is the tone (neutral, primary, success, danger)."
+                  },
+                  "tones": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/$defs/tone"
+                    },
+                    "description": "Colour of the nodes by value of toneField, for example {\"done\": \"success\"}; values not listed are neutral."
+                  }
+                }
+              },
+              "edges": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "Where the edges are and which fields they use.",
+                "properties": {
+                  "field": {
+                    "type": "string",
+                    "description": "Property of the answer with the list of edges, for example transitions."
+                  },
+                  "fromField": {
+                    "type": "string",
+                    "description": "Field with the key of the node the edge starts from (from if absent); an empty value means from any node."
+                  },
+                  "toField": {
+                    "type": "string",
+                    "description": "Field with the key of the node the edge leads to (to if absent)."
+                  },
+                  "labelField": {
+                    "type": "string",
+                    "description": "Field with the label of the edge, for example the name of the transition (no labels if absent)."
+                  }
+                }
+              },
+              "highlight": {
+                "type": "string",
+                "description": "Key of the node to highlight, usually an expression, for example the current status of an issue."
+              },
+              "start": {
+                "type": "string",
+                "description": "Key of the node where the graph starts: it goes first and is marked as the start (the nodes without incoming edges if absent)."
+              },
+              "edgeLabels": {
+                "type": "boolean",
+                "description": "Whether the labels of the edges are shown at first; the user can switch them on and off (true if absent)."
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 160,
+                "maximum": 800,
+                "description": "Height of the drawing area in pixels (360 if absent); a larger graph scrolls inside it."
+              },
+              "caption": {
+                "type": "string",
+                "description": "Caption under the graph, plain text or an expression; also the name of the drawing for screen readers."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
                 "const": "dataTable"
               }
             },
@@ -2363,6 +2520,12 @@
                 "type": "string",
                 "pattern": "^[A-Za-z][A-Za-z0-9-]*$",
                 "description": "Validation group: the step { \"validate\": \"<group>\" } checks the fields of the same group together."
+              },
+              "errorPath": {
+                "type": "string",
+                "maxLength": 200,
+                "pattern": "^(/([^/~]|~[01])*)+$",
+                "description": "Where the value of the field is in the body of the calls started outside a form, as a JSON Pointer (for example /customer/address/city, with ~1 for / and ~0 for ~ in a name): the field errors of the service with this path go to the field, as do those with a slash and the field name."
               }
             }
           }
@@ -3372,6 +3535,52 @@
               "items": {
                 "$ref": "#/$defs/step"
               }
+            }
+          }
+        }
+      }
+    },
+    "stepView": {
+      "type": "object",
+      "required": [
+        "view"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "type": "object",
+          "required": [
+            "title",
+            "components"
+          ],
+          "additionalProperties": false,
+          "description": "Window that shows components: tables, details, charts, buttons… They read the data sources and the state of the screen and see the variables of the place where the step runs (row, item, form). The sequence goes on when the user closes the window.",
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "Title of the window: plain text or an expression."
+            },
+            "size": {
+              "type": "string",
+              "enum": [
+                "small",
+                "medium",
+                "large",
+                "full"
+              ],
+              "description": "Width of the window: small 520 px, medium 720 px, large 960 px, full almost the whole screen (medium if absent)."
+            },
+            "components": {
+              "type": "array",
+              "minItems": 1,
+              "description": "Components shown in the window, as in a screen.",
+              "items": {
+                "$ref": "#/$defs/node"
+              }
+            },
+            "closeLabel": {
+              "type": "string",
+              "description": "Text of the button that closes the window (Close, translated, if absent)."
             }
           }
         }
@@ -4733,6 +4942,119 @@
           "description": "Parameters of the screen opened, resolved when the path is drawn, for example { \"key\": \"{{ params.key }}\" }."
         }
       }
+    },
+    "menuItem": {
+      "description": "An entry of the menu of a menuButton: an item with its own steps, the items made from the rows of a data source, or a divider.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "label",
+            "onClick"
+          ],
+          "additionalProperties": false,
+          "description": "A fixed item.",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/id",
+              "description": "Identifier in kebab-case. It does not change once published."
+            },
+            "label": {
+              "type": "string",
+              "description": "Text of the item; it can contain {{ }}."
+            },
+            "icon": {
+              "$ref": "#/$defs/icon",
+              "description": "Icon shown before the text, from the built-in set. An unknown name shows no icon."
+            },
+            "visibleIf": {
+              "$ref": "#/$defs/expression",
+              "description": "The item is shown only when the expression is true."
+            },
+            "enabledIf": {
+              "$ref": "#/$defs/expression",
+              "description": "The item can be chosen only when the expression is true."
+            },
+            "onClick": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/step"
+              },
+              "description": "Steps run when the item is chosen, in order."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "source",
+            "labelField",
+            "onClick"
+          ],
+          "additionalProperties": false,
+          "description": "One item for each row of a data source, for example the statuses an issue can move to. Its steps and expressions see the row as `item`.",
+          "properties": {
+            "source": {
+              "type": "string",
+              "description": "Data source with the rows (a list, or the `items` of a paged answer). While it loads the menu shows the activity indicator; with no rows it adds no items."
+            },
+            "labelField": {
+              "type": "string",
+              "description": "Field of the row shown as the text of the item."
+            },
+            "keyField": {
+              "type": "string",
+              "description": "Field that identifies the row (id if absent)."
+            },
+            "badgeField": {
+              "type": "string",
+              "description": "Field shown as a coloured label after the text, for example the status the item leads to; an empty value shows nothing."
+            },
+            "toneField": {
+              "type": "string",
+              "description": "Field whose value decides the colour of the label through `tones` (the value of badgeField if absent)."
+            },
+            "tones": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/tone"
+              },
+              "description": "Colour of the label by value of toneField, for example {\"done\": \"success\"}; values not listed are neutral."
+            },
+            "valueKey": {
+              "type": "string",
+              "description": "Prefix of the translation keys of the label (prefix.value), for example values.status shows t('values.status.open') instead of open; a missing key shows the value."
+            },
+            "enabledIf": {
+              "$ref": "#/$defs/expression",
+              "description": "An item can be chosen only when the expression, which sees the row as item, is true."
+            },
+            "onClick": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/step"
+              },
+              "description": "Steps run when an item is chosen; they see its row as item (for example {{ item.id }})."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "divider"
+          ],
+          "additionalProperties": false,
+          "description": "A line between groups of items. A divider at the start or end of the menu, or next to another, is not shown.",
+          "properties": {
+            "divider": {
+              "const": true,
+              "description": "Always true."
+            }
+          }
+        }
+      ]
     }
   }
 }

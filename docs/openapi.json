@@ -6820,6 +6820,9 @@
       "IssueWorkflow" : {
         "type" : "object",
         "properties" : {
+          "category" : {
+            "type" : "string"
+          },
           "name" : {
             "type" : "string"
           },
@@ -7570,6 +7573,9 @@
       "TransitionView" : {
         "type" : "object",
         "properties" : {
+          "category" : {
+            "type" : "string"
+          },
           "code" : {
             "type" : "string"
           },

@@ -141,6 +141,9 @@
         "custom": "{{formFields.custom}}",
         "version": "{{form.version}}"
       }
+    },
+    "workflow": {
+      "ref": "issues/workflow"
     }
   },
   "components": [
@@ -603,6 +606,127 @@
           "span": 4,
           "components": [
             {
+              "id": "issue-status",
+              "type": "menuButton",
+              "label": "{{ has(data.workflow) ? (data.workflow.status == 'todo' ? t('values.status.todo', 'To do') : data.workflow.status == 'in_progress' ? t('values.status.in_progress', 'In progress') : data.workflow.status == 'done' ? t('values.status.done', 'Done') : data.workflow.status) : '…' }}",
+              "tone": "{{ has(data.workflow) ? (data.workflow.category == 'done' ? 'success' : data.workflow.category == 'in_progress' ? 'primary' : 'neutral') : 'neutral' }}",
+              "items": [
+                {
+                  "source": "transitions",
+                  "keyField": "code",
+                  "labelField": "label",
+                  "badgeField": "to",
+                  "toneField": "category",
+                  "tones": {
+                    "todo": "neutral",
+                    "in_progress": "primary",
+                    "done": "success"
+                  },
+                  "valueKey": "values.status",
+                  "onClick": [
+                    {
+                      "call": "move",
+                      "args": {
+                        "transition": "{{item.code}}",
+                        "version": "{{item.version}}"
+                      },
+                      "onError": [
+                        {
+                          "if": "{{error.status == 409}}",
+                          "then": [
+                            {
+                              "toast": "{{ t('issues.conditions_not_met', 'The conditions of this step are not met') }}"
+                            }
+                          ],
+                          "else": [
+                            {
+                              "if": "{{error.status == 412}}",
+                              "then": [
+                                {
+                                  "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                }
+                              ],
+                              "else": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "refresh": "issue"
+                    },
+                    {
+                      "refresh": "transitions"
+                    },
+                    {
+                      "refresh": "history"
+                    },
+                    {
+                      "refresh": "workflow"
+                    },
+                    {
+                      "toast": "{{ t('issues.moved', 'Status changed') }}"
+                    }
+                  ]
+                },
+                {
+                  "divider": true
+                },
+                {
+                  "id": "status-workflow",
+                  "label": "{{ t('issues.view_workflow', 'View workflow') }}",
+                  "icon": "eye",
+                  "onClick": [
+                    {
+                      "view": {
+                        "title": "{{ t('issues.workflow_title', 'Workflow «{name}»', {'name': has(data.workflow) ? data.workflow.name : ''}) }}",
+                        "size": "large",
+                        "components": [
+                          {
+                            "id": "workflow-current",
+                            "type": "text",
+                            "text": "{{ t('issues.current_status', 'Current status: {status}', {'status': has(data.workflow) ? (data.workflow.status == 'todo' ? t('values.status.todo', 'To do') : data.workflow.status == 'in_progress' ? t('values.status.in_progress', 'In progress') : data.workflow.status == 'done' ? t('values.status.done', 'Done') : data.workflow.status) : ''}) }}"
+                          },
+                          {
+                            "id": "workflow-graph",
+                            "type": "graph",
+                            "source": "workflow",
+                            "nodes": {
+                              "field": "statuses",
+                              "keyField": "code",
+                              "labelField": "code",
+                              "valueKey": "values.status",
+                              "toneField": "category",
+                              "tones": {
+                                "todo": "neutral",
+                                "in_progress": "primary",
+                                "done": "success"
+                              }
+                            },
+                            "edges": {
+                              "field": "transitions",
+                              "fromField": "from",
+                              "toField": "to",
+                              "labelField": "code"
+                            },
+                            "highlight": "{{ has(data.workflow) ? data.workflow.status : '' }}",
+                            "start": "{{ has(data.workflow) && size(data.workflow.statuses) > 0 ? data.workflow.statuses[0].code : '' }}",
+                            "edgeLabels": false,
+                            "height": 420,
+                            "caption": "{{ t('issues.workflow_caption', 'The statuses of the workflow and the transitions between them; the current status is outlined.') }}"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
               "id": "issue-actions",
               "type": "box",
               "gap": "small",
@@ -754,83 +878,6 @@
               ]
             },
             {
-              "id": "issue-next-steps",
-              "type": "section",
-              "title": "{{ t('issues.next_steps', 'Next steps') }}",
-              "components": [
-                {
-                  "id": "transition-table",
-                  "type": "table",
-                  "source": "transitions",
-                  "columns": [
-                    {
-                      "field": "code",
-                      "label": "{{ t('issues.transition', 'Transition') }}",
-                      "valueKey": "values.transition"
-                    },
-                    {
-                      "field": "to",
-                      "label": "{{ t('issues.to_status', 'To status') }}",
-                      "valueKey": "values.status"
-                    }
-                  ],
-                  "rowActions": [
-                    {
-                      "id": "btn-move",
-                      "label": "{{ t('issues.move', 'Move') }}",
-                      "icon": "move",
-                      "onClick": [
-                        {
-                          "call": "move",
-                          "args": {
-                            "transition": "{{row.code}}",
-                            "version": "{{row.version}}"
-                          },
-                          "onError": [
-                            {
-                              "if": "{{error.status == 409}}",
-                              "then": [
-                                {
-                                  "toast": "{{ t('issues.conditions_not_met', 'The conditions of this step are not met') }}"
-                                }
-                              ],
-                              "else": [
-                                {
-                                  "if": "{{error.status == 412}}",
-                                  "then": [
-                                    {
-                                      "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
-                                    }
-                                  ],
-                                  "else": [
-                                    {
-                                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                                    }
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "refresh": "issue"
-                        },
-                        {
-                          "refresh": "transitions"
-                        },
-                        {
-                          "refresh": "history"
-                        },
-                        {
-                          "toast": "{{ t('issues.moved', 'Status changed') }}"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
               "id": "issue-details",
               "type": "section",
               "title": "{{ t('issues.details', 'Details') }}",
@@ -845,18 +892,6 @@
                       "name": "key",
                       "type": "text",
                       "label": "{{ t('issues.key', 'Key') }}",
-                      "readOnlyIf": "{{true}}"
-                    },
-                    {
-                      "name": "status",
-                      "type": "select",
-                      "label": "{{ t('issues.status', 'Status') }}",
-                      "options": [
-                        "todo",
-                        "in_progress",
-                        "done"
-                      ],
-                      "optionKey": "values.status",
                       "readOnlyIf": "{{true}}"
                     },
                     {

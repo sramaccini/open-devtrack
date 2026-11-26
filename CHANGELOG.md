@@ -13,11 +13,18 @@ The entries are written by hand at each release from the commits ([docs/release.
 - **API**: `GET /api/issues/{key}/workflow`, the workflow an issue follows with its statuses and transitions, for the
   status button and the workflow graph of the issue page (#50).
 
+- **Issues**: the status of an issue is a button at the top of its right column, as in Jira: its menu lists the
+  statuses the issue can move to now, each as a coloured badge, and «View workflow», which opens a window with the
+  graph of the workflow and the current status outlined (#50). It replaces the box of the next steps; the status is no
+  longer a field of the details.
+
 ### Changed
 
 - **Issues**: the page of an issue is in two columns, as in Jira: summary, description, attachments, linked work
-  items and activity on the left; the actions, next steps, details, planning and watchers on the right. The summary
+  items and activity on the left; the status, the actions, details, planning and watchers on the right. The summary
   and the description, and the details, are saved separately.
+- **API**: the transitions of an issue have the `category` of the status they lead to.
+- Quadrava 0.23.0 (runtime image and CLI): the menu button, the window step and the graph (Q39).
 
 ### Fixed
 

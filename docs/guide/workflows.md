@@ -1,7 +1,7 @@
 # Workflows
 
 A workflow is the set of statuses an issue goes through, and the transitions that lead from one to another. The status
-of an issue changes only through a transition: from «Next steps» on the issue, or by moving its card on a board.
+of an issue changes only through a transition: from the status button of the issue, or by moving its card on a board.
 
 ## The default workflow
 
@@ -66,7 +66,7 @@ issue.type != "bug" || "regression" in issue.labels
 ```
 
 The condition is checked when it is saved, so a mistake is found at once. A condition that fails while it runs counts
-as false. A transition whose condition is false is not offered in «Next steps», and a card moved on a board with only
+as false. A transition whose condition is false is not offered in the menu of the status button, and a card moved on a board with only
 such transitions goes back.
 
 The permissions are:

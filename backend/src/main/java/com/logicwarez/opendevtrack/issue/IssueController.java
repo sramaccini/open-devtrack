@@ -293,9 +293,10 @@ class IssueController {
             return Problems.forbidden(NOT_A_MEMBER);
         }
         IssueEntity issue = found.get().issue();
+        Map<String, String> categories = categories(issue);
         return ResponseEntity.ok(workflows.available(issue.projectId(), issue.type().value(), issue.status(),
                 guardInput(found.get()), userInput(), permissions).stream()
-                .map(t -> new TransitionView(t.code(), t.to(), issue.version())).toList());
+                .map(t -> new TransitionView(t.code(), t.to(), categories.get(t.to()), issue.version())).toList());
     }
 
     /** The workflow the issue follows (the one its scheme gives to its type), to draw it; 404 in a project without one. */
@@ -313,9 +314,17 @@ class IssueController {
         IssueEntity issue = found.get().issue();
         return workflows.graph(issue.projectId(), issue.type().value())
                 .<ResponseEntity<?>>map(g -> ResponseEntity.ok(new IssueWorkflow(g.name(), issue.status(),
+                        categories(issue).get(issue.status()),
                         g.statuses().stream().map(s -> new IssueWorkflowStatus(s.code(), s.category())).toList(),
                         g.transitions().stream().map(t -> new IssueWorkflowTransition(t.code(), t.from(), t.to())).toList())))
                 .orElseGet(() -> Problems.notFound("The project of the issue has no workflow"));
+    }
+
+    /** The category of each status of the project, by code (a code has one category in a project). */
+    private Map<String, String> categories(IssueEntity issue) {
+        Map<String, String> categories = new HashMap<>();
+        workflows.statuses(issue.projectId()).forEach(s -> categories.put(s.code(), s.category()));
+        return categories;
     }
 
     /** Runs a transition, from the version read with the issue: 409 when it cannot run now, 412 if the issue changed. */

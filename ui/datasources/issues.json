@@ -109,6 +109,11 @@
       "method": "GET",
       "url": "/api/issues/{{params.issue}}/transitions"
     },
+    "workflow": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/issues/{{params.issue}}/workflow"
+    },
     "move": {
       "type": "rest",
       "method": "POST",
