@@ -38,7 +38,7 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   `filter` and `search` for filters and the search, `settings` for the project, `back` to the page above, `external`
   to another page.
 - **Issue page**: `issue-detail` is a `grid` of 12 columns, as the page of a work item in Jira: on the left (8)
-  the summary and the description, then the sections Attachments, Linked work items and Activity (tabs Comments and
+  the summary and the description (`layout: flow`, so that with `width: full` they fill the column), then the sections Attachments, Linked work items and Activity (tabs Comments and
   History); on the right (4) a row with the status and, as icons, the flag, the menu Watchers, the votes and the menu More actions, then Details and Planning. The two menus are `menuButton`s with `display: icon` (Quadrava 0.24.0, Q40): the eye with `count` (the
   watchers) and `pressed` (watching), whose menu has watch or stop and «Watchers», a `view` step with the table of
   the watchers and «Add watcher…», and «…» with Delete in `tone: danger`. The flag
@@ -106,8 +106,11 @@ field `overdue` of the rows: the `badges` of a Quadrava column colour by value, 
 
 ## Attachments
 
-The Attachments tab of `issue-detail` uploads a file at once with a `file` field (`issues/uploadAttachment`, shown
-when `data.issue._perm.attach`) and lists the attachments, with remove for whoever may. The name of a file downloads it
+The Attachments section of `issue-detail` lists the attachments, with remove for whoever may; «Add attachment», a
+button centred under them (shown when `data.issue._perm.attach`), opens a `view` whose `file` input uploads a file at
+once (`issues/uploadAttachment`); a `set` step empties the input first, so the last file is not offered again. Linked
+work items has «Add linked work item» centred under its table in the same way. A dashed drop zone, as in Jira, is
+asked to Quadrava (Q42, #52). The name of a file downloads it
 (`href` of the column, Quadrava 0.9.0, request Q10), and the field allows 25 MB, as the back end: the runtime image
 forwards requests up to `QUADRAVA_MAX_BODY_SIZE` (100m by default, 26m in `e2e/authz/compose.yaml`; request Q11).
 

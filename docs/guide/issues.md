@@ -48,7 +48,7 @@ On the left is what the issue says and what happened to it:
 
 - its **summary** and **description**, which the developers and admins change and save with «Save»;
 - **Attachments**: the files of the issue ([below](#attachments));
-- **Linked work items**: the other issues it is linked to; «Link» adds one ([below](#links));
+- **Linked work items**: the other issues it is linked to; «Add linked work item», under them, adds one ([below](#links));
 - **Activity**: its comments and its history.
 
 On the right is what describes it:
@@ -86,7 +86,7 @@ the first time are told. The admins of the project also delete the comments of o
 
 ### Attachments
 
-«Attach a file» uploads a file at once, up to 25 MB and 100 files per issue. Clicking the name of a file downloads it.
+«Add attachment», under the list of files, opens a window where the chosen file is uploaded at once, up to 25 MB and 100 files per issue. Clicking the name of a file downloads it.
 Whoever attached a file removes it, and so do the admins of the project.
 
 An installation may also set:
@@ -104,7 +104,7 @@ A link says how two issues are related. It is read from both ends:
 | relates to | relates to |
 | duplicates | is duplicated by |
 
-«Link» asks for the relation and the other issue, by its key or by words of its summary. The other issue may be in
+«Add linked work item» asks for the relation and the other issue, by its key or by words of its summary. The other issue may be in
 another project of the tenant. A link to an issue you cannot see is not shown.
 
 ### Watchers

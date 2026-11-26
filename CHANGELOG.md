@@ -12,6 +12,9 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 - **Issues**: the watchers of an issue are in a window, «Watchers» in the menu of the eye, with «Add watcher…»; the
   box of the watchers at the bottom of the right column is gone, as in Jira.
+- **Issues**: the summary and the description fill their box; «Add attachment», now a button that opens a window, and «Add
+  linked work item» are centred under their lists, as in Jira (a dashed drop zone is asked to Quadrava, #52); the arrows of the story points stop at
+  0 and 999.
 
 ## [1.0.0-rc.9] - 2026-11-26
 

@@ -238,39 +238,14 @@
                     }
                   ]
                 }
-              ]
+              ],
+              "layout": "flow"
             },
             {
               "id": "issue-attachments",
               "type": "section",
               "title": "{{ t('issues.attachments', 'Attachments') }}",
               "components": [
-                {
-                  "id": "attachment-upload",
-                  "type": "input",
-                  "visibleIf": "{{ data.issue._perm.attach }}",
-                  "field": {
-                    "name": "attachment",
-                    "type": "file",
-                    "label": "{{ t('issues.attach_file', 'Attach a file') }}",
-                    "upload": "uploadAttachment",
-                    "maxSizeKb": 25600
-                  },
-                  "onChange": [
-                    {
-                      "refresh": "attachments"
-                    },
-                    {
-                      "refresh": "history"
-                    }
-                  ]
-                },
-                {
-                  "id": "attachment-limit-note",
-                  "type": "text",
-                  "visibleIf": "{{ data.issue._perm.attach }}",
-                  "text": "{{ t('issues.attachment_limit', 'Up to 25 MB per file') }}"
-                },
                 {
                   "id": "attachment-table",
                   "type": "table",
@@ -328,6 +303,61 @@
                       ]
                     }
                   ]
+                },
+                {
+                  "id": "attachment-add",
+                  "type": "box",
+                  "justify": "center",
+                  "visibleIf": "{{ data.issue._perm.attach }}",
+                  "components": [
+                    {
+                      "id": "btn-add-attachment",
+                      "type": "button",
+                      "label": "{{ t('issues.add_attachment', 'Add attachment') }}",
+                      "icon": "upload",
+                      "onClick": [
+                        {
+                          "set": {
+                            "path": "state.attachment",
+                            "value": null
+                          }
+                        },
+                        {
+                          "view": {
+                            "title": "{{ t('issues.add_attachment', 'Add attachment') }}",
+                            "size": "small",
+                            "components": [
+                              {
+                                "id": "attachment-upload",
+                                "type": "input",
+                                "bind": "state.attachment",
+                                "field": {
+                                  "name": "attachment",
+                                  "type": "file",
+                                  "label": "{{ t('issues.choose_file', 'File') }}",
+                                  "upload": "uploadAttachment",
+                                  "maxSizeKb": 25600
+                                },
+                                "onChange": [
+                                  {
+                                    "refresh": "attachments"
+                                  },
+                                  {
+                                    "refresh": "history"
+                                  }
+                                ]
+                              },
+                              {
+                                "id": "attachment-limit-note",
+                                "type": "text",
+                                "text": "{{ t('issues.attachment_limit', 'Up to 25 MB per file') }}"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
             },
@@ -336,79 +366,6 @@
               "type": "section",
               "title": "{{ t('issues.linked_items', 'Linked work items') }}",
               "components": [
-                {
-                  "id": "btn-link",
-                  "label": "{{ t('issues.add_link', 'Link') }}",
-                  "icon": "link",
-                  "onClick": [
-                    {
-                      "dialog": {
-                        "title": "{{ t('issues.add_link_title', 'Link to another issue') }}",
-                        "submitLabel": "{{ t('issues.add_link', 'Link') }}",
-                        "initial": {
-                          "relation": "relates"
-                        },
-                        "fields": [
-                          {
-                            "name": "relation",
-                            "type": "select",
-                            "label": "{{ t('issues.relation', 'Relation') }}",
-                            "required": true,
-                            "options": [
-                              "blocks",
-                              "blocked_by",
-                              "relates",
-                              "duplicates",
-                              "duplicated_by"
-                            ],
-                            "optionKey": "values.relation"
-                          },
-                          {
-                            "name": "issue",
-                            "type": "lookup",
-                            "label": "{{ t('issues.linked_issue', 'Issue') }}",
-                            "tooltip": "{{ t('issues.linked_issue_help', 'Its key or words of its summary') }}",
-                            "required": true,
-                            "lookup": {
-                              "source": "linkCandidates",
-                              "valueField": "key",
-                              "labelField": "label",
-                              "minChars": 0
-                            }
-                          }
-                        ],
-                        "onSubmit": [
-                          {
-                            "call": "addLink",
-                            "onError": [
-                              {
-                                "if": "{{error.status == 409}}",
-                                "then": [
-                                  {
-                                    "toast": "{{ t('issues.already_linked', 'The issues are already linked this way') }}"
-                                  }
-                                ],
-                                "else": [
-                                  {
-                                    "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    {
-                      "refresh": "links"
-                    },
-                    {
-                      "refresh": "history"
-                    }
-                  ],
-                  "type": "button",
-                  "visibleIf": "{{data.issue._perm.edit}}"
-                },
                 {
                   "id": "link-table",
                   "type": "table",
@@ -476,6 +433,86 @@
                           "refresh": "history"
                         }
                       ]
+                    }
+                  ]
+                },
+                {
+                  "id": "link-add",
+                  "type": "box",
+                  "justify": "center",
+                  "visibleIf": "{{data.issue._perm.edit}}",
+                  "components": [
+                    {
+                      "id": "btn-link",
+                      "label": "{{ t('issues.add_linked_item', 'Add linked work item') }}",
+                      "icon": "link",
+                      "onClick": [
+                        {
+                          "dialog": {
+                            "title": "{{ t('issues.add_link_title', 'Link to another issue') }}",
+                            "submitLabel": "{{ t('issues.add_link', 'Link') }}",
+                            "initial": {
+                              "relation": "relates"
+                            },
+                            "fields": [
+                              {
+                                "name": "relation",
+                                "type": "select",
+                                "label": "{{ t('issues.relation', 'Relation') }}",
+                                "required": true,
+                                "options": [
+                                  "blocks",
+                                  "blocked_by",
+                                  "relates",
+                                  "duplicates",
+                                  "duplicated_by"
+                                ],
+                                "optionKey": "values.relation"
+                              },
+                              {
+                                "name": "issue",
+                                "type": "lookup",
+                                "label": "{{ t('issues.linked_issue', 'Issue') }}",
+                                "tooltip": "{{ t('issues.linked_issue_help', 'Its key or words of its summary') }}",
+                                "required": true,
+                                "lookup": {
+                                  "source": "linkCandidates",
+                                  "valueField": "key",
+                                  "labelField": "label",
+                                  "minChars": 0
+                                }
+                              }
+                            ],
+                            "onSubmit": [
+                              {
+                                "call": "addLink",
+                                "onError": [
+                                  {
+                                    "if": "{{error.status == 409}}",
+                                    "then": [
+                                      {
+                                        "toast": "{{ t('issues.already_linked', 'The issues are already linked this way') }}"
+                                      }
+                                    ],
+                                    "else": [
+                                      {
+                                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "refresh": "links"
+                        },
+                        {
+                          "refresh": "history"
+                        }
+                      ],
+                      "type": "button"
                     }
                   ]
                 }
@@ -1390,6 +1427,9 @@
                     {
                       "name": "points",
                       "type": "number",
+                      "min": 0,
+                      "max": 999,
+                      "step": 1,
                       "label": "{{ t('agile.points', 'Story points') }}",
                       "readOnlyIf": "{{!form._perm.edit}}",
                       "tooltip": "{{ t('agile.points_help', 'From 0 to 999; empty when not estimated') }}"
