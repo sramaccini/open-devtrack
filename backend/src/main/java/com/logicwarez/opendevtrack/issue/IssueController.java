@@ -11,6 +11,9 @@ import com.logicwarez.opendevtrack.issue.IssueApi.LabelRow;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueView;
 import com.logicwarez.opendevtrack.issue.IssueApi.TransitionRequest;
 import com.logicwarez.opendevtrack.issue.IssueApi.TransitionView;
+import com.logicwarez.opendevtrack.issue.IssueApi.IssueWorkflowStatus;
+import com.logicwarez.opendevtrack.issue.IssueApi.IssueWorkflowTransition;
+import com.logicwarez.opendevtrack.issue.IssueApi.IssueWorkflow;
 import com.logicwarez.opendevtrack.issue.IssueEvents.FieldChange;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueCreated;
@@ -293,6 +296,26 @@ class IssueController {
         return ResponseEntity.ok(workflows.available(issue.projectId(), issue.type().value(), issue.status(),
                 guardInput(found.get()), userInput(), permissions).stream()
                 .map(t -> new TransitionView(t.code(), t.to(), issue.version())).toList());
+    }
+
+    /** The workflow the issue follows (the one its scheme gives to its type), to draw it; 404 in a project without one. */
+    @ApiDoc(value = "The workflow an issue follows, with its statuses and transitions",
+            answer = IssueWorkflow.class, project = "odt.issue.browse")
+    @GetMapping("/api/issues/{issueKey}/workflow")
+    ResponseEntity<?> workflow(@PathVariable String issueKey) {
+        Optional<Found> found = find(issueKey);
+        if (found.isEmpty()) {
+            return Problems.notFound(NOT_FOUND);
+        }
+        if (!permissions(found.get().project()).contains("odt.issue.browse")) {
+            return Problems.forbidden(NOT_A_MEMBER);
+        }
+        IssueEntity issue = found.get().issue();
+        return workflows.graph(issue.projectId(), issue.type().value())
+                .<ResponseEntity<?>>map(g -> ResponseEntity.ok(new IssueWorkflow(g.name(), issue.status(),
+                        g.statuses().stream().map(s -> new IssueWorkflowStatus(s.code(), s.category())).toList(),
+                        g.transitions().stream().map(t -> new IssueWorkflowTransition(t.code(), t.from(), t.to())).toList())))
+                .orElseGet(() -> Problems.notFound("The project of the issue has no workflow"));
     }
 
     /** Runs a transition, from the version read with the issue: 409 when it cannot run now, 412 if the issue changed. */

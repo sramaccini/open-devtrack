@@ -8,6 +8,11 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+### Added
+
+- **API**: `GET /api/issues/{key}/workflow`, the workflow an issue follows with its statuses and transitions, for the
+  status button and the workflow graph of the issue page (#50).
+
 ### Changed
 
 - **Issues**: the page of an issue is in two columns, as in Jira: summary, description, attachments, linked work

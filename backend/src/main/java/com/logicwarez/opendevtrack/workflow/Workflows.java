@@ -58,6 +58,10 @@ public class Workflows {
     public record Transition(String code, String from, String to) {
     }
 
+    /** A workflow as a graph: its statuses in order and its transitions, without their guards. */
+    public record Graph(String name, List<Status> statuses, List<Transition> transitions) {
+    }
+
     /** Outcome of {@link #decide}: the transition when {@code ALLOWED}. */
     public record Decision(Outcome outcome, Transition transition) {
 
@@ -81,6 +85,12 @@ public class Workflows {
     /** The statuses of the workflow of the type in the project. */
     public List<Status> statuses(UUID projectId, String type) {
         return workflow(projectId, type).map(this::statuses).orElse(List.of());
+    }
+
+    /** The workflow of the type in the project as a graph, to draw it; empty in a project without a workflow. */
+    public Optional<Graph> graph(UUID projectId, String type) {
+        return workflow(projectId, type).map(w -> new Graph(w.name(), statuses(w),
+                transitions.findByWorkflowIdOrderByPosition(w.id()).stream().map(Workflows::transition).toList()));
     }
 
     /** The first status of the workflow of the type. */

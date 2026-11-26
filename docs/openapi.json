@@ -1992,6 +1992,44 @@
         "x-project-permissions" : [ "odt.issue.browse", "odt.issue.edit" ]
       }
     },
+    "/api/issues/{issueKey}/workflow" : {
+      "get" : {
+        "operationId" : "issue.workflow",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IssueWorkflow"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "The workflow an issue follows, with its statuses and transitions",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.browse" ]
+      }
+    },
     "/api/me/export" : {
       "get" : {
         "operationId" : "privacy.mine",
@@ -6776,6 +6814,54 @@
           },
           "watching" : {
             "type" : "boolean"
+          }
+        }
+      },
+      "IssueWorkflow" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "statuses" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/IssueWorkflowStatus"
+            }
+          },
+          "transitions" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/IssueWorkflowTransition"
+            }
+          }
+        }
+      },
+      "IssueWorkflowStatus" : {
+        "type" : "object",
+        "properties" : {
+          "category" : {
+            "type" : "string"
+          },
+          "code" : {
+            "type" : "string"
+          }
+        }
+      },
+      "IssueWorkflowTransition" : {
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string"
+          },
+          "from" : {
+            "type" : "string"
+          },
+          "to" : {
+            "type" : "string"
           }
         }
       },

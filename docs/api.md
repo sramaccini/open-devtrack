@@ -92,7 +92,9 @@ curl -s -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/j
 ```
 
 Issues change status only through the transitions of their workflow: `GET /api/issues/{key}/transitions`, then
-`POST /api/issues/{key}/transitions` with `{"transition": "start", "version": 7}`.
+`POST /api/issues/{key}/transitions` with `{"transition": "start", "version": 7}`. `GET /api/issues/{key}/workflow` gives
+the whole workflow the issue follows, to draw it: its name, the status of the issue, the statuses with their category and
+every transition with `from` (absent when it starts from any status) and `to`, without the guards.
 
 ## Lists and the search
 

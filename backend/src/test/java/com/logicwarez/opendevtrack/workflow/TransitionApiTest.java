@@ -137,6 +137,30 @@ class TransitionApiTest {
         assertThat(statusRows()).isEqualTo(2);
     }
 
+    @Test
+    void anIssueShowsTheWorkflowItFollows() throws Exception {
+        // A transition from every status has no from.
+        mvc.perform(as(post("/api/projects/ODT/workflow/transitions"), mario).content("{\"code\":\"cancel\",\"to\":\"done\"}"))
+                .andExpect(status().isCreated());
+        // A viewer sees it too: it only draws the workflow.
+        mvc.perform(as(get("/api/issues/ODT-1/workflow"), paola))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Default"))
+                .andExpect(jsonPath("$.status").value("todo"))
+                .andExpect(jsonPath("$.statuses[*].code").value(org.hamcrest.Matchers.contains("todo", "in_progress", "done")))
+                .andExpect(jsonPath("$.statuses[1].category").value("in_progress"))
+                .andExpect(jsonPath("$.transitions[*].code").value(org.hamcrest.Matchers.contains("start", "finish", "reopen", "cancel")))
+                .andExpect(jsonPath("$.transitions[0].from").value("todo"))
+                .andExpect(jsonPath("$.transitions[0].to").value("in_progress"))
+                .andExpect(jsonPath("$.transitions[3].from").doesNotExist())
+                .andExpect(jsonPath("$.transitions[0].guard").doesNotExist());
+        move(luisa, "start", 0, 200);
+        mvc.perform(as(get("/api/issues/ODT-1/workflow"), luisa)).andExpect(jsonPath("$.status").value("in_progress"));
+        // Another tenant does not see it, nor an issue that does not exist.
+        mvc.perform(as(get("/api/issues/ODT-1/workflow"), ugo)).andExpect(status().isNotFound());
+        mvc.perform(as(get("/api/issues/ODT-99/workflow"), luisa)).andExpect(status().isNotFound());
+    }
+
     private int statusRows() {
         return jdbc.queryForObject("SELECT count(*) FROM odt_audit.issue_change WHERE field = 'status'", Integer.class);
     }

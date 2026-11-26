@@ -38,6 +38,20 @@ final class IssueApi {
     record TransitionRequest(String transition, Long version) {
     }
 
+    /**
+     * The workflow an issue follows, to draw it: its name, the status of the issue, the statuses in order with their
+     * category, and every transition ({@code from} null when it starts from any status), without their guards.
+     */
+    record IssueWorkflow(String name, String status, List<IssueWorkflowStatus> statuses,
+                         List<IssueWorkflowTransition> transitions) {
+    }
+
+    record IssueWorkflowStatus(String code, String category) {
+    }
+
+    record IssueWorkflowTransition(String code, String from, String to) {
+    }
+
     /** Fields of a new issue or of a change; {@code version} only for a change. */
     record IssueRequest(String type, String summary, String description, String priority, String assignee,
                         String dueOn, String reviewer, List<String> labels, Map<String, Object> custom, Long version) {
