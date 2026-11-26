@@ -1941,6 +1941,50 @@
         "x-project-permissions" : [ "odt.issue.edit" ]
       }
     },
+    "/api/issues/{issueKey}/share" : {
+      "post" : {
+        "operationId" : "share.share",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ShareRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "204" : {
+            "description" : "Done"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Shares an issue with members of its project, with an optional message",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.browse" ]
+      }
+    },
     "/api/issues/{issueKey}/transitions" : {
       "get" : {
         "operationId" : "issue.transitions",
@@ -7721,6 +7765,21 @@
           },
           "sort" : {
             "$ref" : "#/components/schemas/Sort"
+          }
+        }
+      },
+      "ShareRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          },
+          "users" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },

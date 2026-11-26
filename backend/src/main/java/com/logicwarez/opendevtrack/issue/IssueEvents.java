@@ -25,6 +25,11 @@ public final class IssueEvents {
     public record IssueChanged(UUID issueId, UUID projectId, String key, String by, Instant at, List<FieldChange> changes) {
     }
 
+    /** An issue shared with members of its project ({@code to}), with an optional message; nothing changed on it. */
+    public record IssueShared(UUID issueId, UUID projectId, String key, String by, Instant at, List<String> to,
+                              String message) {
+    }
+
     public record IssueDeleted(UUID issueId, UUID projectId, String key, String by, Instant at) {
     }
 }

@@ -7,6 +7,7 @@ OpenDevTrack tells you about the work that concerns you: in the application, und
 | Message | When |
 | --- | --- |
 | Mentioned in a comment | Someone writes `@your.name` in a comment ([Issues](issues.md#comments-and-mentions)) |
+| An issue shared with you | Someone shares an issue with you, with or without a message ([Issues](issues.md)) |
 | Assigned to you | You become the assignee of an issue |
 | Asked to review | You become the reviewer of an issue |
 | Comment on an issue you watch | Someone comments on an issue you watch |
@@ -36,7 +37,7 @@ User menu › Settings › «Notifications» has two choices for each kind of me
 - **in the application**: on or off;
 - **by email**: off, «At once», or «In the daily summary».
 
-Until you choose, mentions, assignments and reviews asked are mailed at once, and comments and status changes go in
+Until you choose, mentions, shared issues, assignments and reviews asked are mailed at once, and comments and status changes go in
 the daily summary. A kind with both choices off is not recorded at all. A kind that is only by email does not show
 under the bell.
 

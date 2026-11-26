@@ -11,6 +11,7 @@ import com.logicwarez.opendevtrack.collaboration.CommentEvents.CommentPosted;
 import com.logicwarez.opendevtrack.issue.IssueEvents.FieldChange;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueCreated;
+import com.logicwarez.opendevtrack.issue.IssueEvents.IssueShared;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueDeleted;
 import com.logicwarez.opendevtrack.issue.Watchers;
 import com.logicwarez.opendevtrack.notification.Preferences.Preference;
@@ -81,6 +82,15 @@ class Messages {
             watchers.of(event.issueId()).forEach(w -> to.add(w, MessageKind.COMMENTED, params));
         }
         save(to, event.projectId(), event.issueKey(), event.at());
+    }
+
+    /** An issue shared with members of its project: a message to each, with the message of who shared it. */
+    @ApplicationModuleListener
+    void on(IssueShared event) {
+        Recipients to = new Recipients(event.by());
+        Map<String, String> params = values("message", event.message(), null, null);
+        event.to().forEach(u -> to.add(u, MessageKind.SHARED, params));
+        save(to, event.projectId(), event.key(), event.at());
     }
 
     @ApplicationModuleListener

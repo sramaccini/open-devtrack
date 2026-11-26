@@ -56,6 +56,15 @@
         "summary": "{{form.summary}}"
       }
     },
+    "share": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/issues/{{params.issue}}/share",
+      "body": {
+        "users": "{{form.users}}",
+        "message": "{{form.message}}"
+      }
+    },
     "remove": {
       "type": "rest",
       "method": "DELETE",

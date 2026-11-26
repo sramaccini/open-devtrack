@@ -194,6 +194,39 @@ class NotificationApiTest {
     }
 
     @Test
+    void anIssueSharedWithMembersTellsEachOfThem() throws Exception {
+        // paola, a viewer, shares it with mario and luisa; herself in the list is left out.
+        mvc.perform(as(post("/api/issues/ODT-1/share"), paola)
+                        .content("{\"users\":[\"mario\",\"luisa\",\"paola\"],\"message\":\"  Can you look at it?  \"}"))
+                .andExpect(status().isNoContent());
+        await(this::messages, 2);
+        mvc.perform(as(get("/api/notifications"), mario))
+                .andExpect(jsonPath("$[0].title").value("paola shared ODT-1 with you"))
+                .andExpect(jsonPath("$[0].text").value("Can you look at it?"));
+        mvc.perform(as(get("/api/notifications"), luisa).header("Accept-Language", "it"))
+                .andExpect(jsonPath("$[0].title").value("paola ha condiviso ODT-1 con te"));
+        mvc.perform(as(get("/api/notifications"), paola)).andExpect(jsonPath("$.length()").value(0));
+        // Without a message the text is empty; nothing changes on the issue.
+        mvc.perform(as(post("/api/issues/ODT-1/share"), luisa).content("{\"users\":[\"mario\"]}"))
+                .andExpect(status().isNoContent());
+        await(this::messages, 3);
+        mvc.perform(as(get("/api/issues/ODT-1"), luisa)).andExpect(jsonPath("$.version").value(0));
+
+        mvc.perform(as(post("/api/issues/ODT-1/share"), luisa).content("{\"users\":[\"luisa\"]}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(as(post("/api/issues/ODT-1/share"), luisa).content("{\"users\":[]}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(as(post("/api/issues/ODT-1/share"), luisa).content("{\"users\":[\"ugo\"]}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(as(post("/api/issues/ODT-1/share"), luisa)
+                        .content("{\"users\":[\"mario\"],\"message\":\"" + "x".repeat(1001) + "\"}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(as(post("/api/issues/ODT-1/share"), ugo).content("{\"users\":[\"mario\"]}"))
+                .andExpect(status().isNotFound());
+        assertThat(messages()).isEqualTo(3);
+    }
+
+    @Test
     void readOnlyOwnMessagesInTheTenantAndGoneWithTheIssue() throws Exception {
         mvc.perform(as(post("/api/issues/ODT-1/comments"), luisa).content("{\"body\":\"@mario look\"}"))
                 .andExpect(status().isCreated());

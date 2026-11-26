@@ -47,7 +47,7 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   Planning calls `savePlan` for the points and `moveToSprint` (`boards/backlogPlan`, the move of the backlog) for
   the sprint, a lookup on the columns of the backlog shown when `_perm.plan` (else its name as text). The two menus are `menuButton`s with `display: icon` (Quadrava 0.24.0, Q40): the eye with `count` (the
   watchers) and `pressed` (watching), whose menu has watch or stop and «Watchers», a `view` step with the table of
-  the watchers and «Add watcher…», and «…» with Assign to me (a PATCH of the assignee with `user.username`), Clone (a `dialog` for the summary, then `call` with `as` and `navigate` to the copy), Print (the `print`
+  the watchers and «Add watcher…», and «…» with Assign to me (a PATCH of the assignee with `user.username`), Share (a `dialog` with `tags` suggested from the members and a message), Clone (a `dialog` for the summary, then `call` with `as` and `navigate` to the copy), Print (the `print`
   step) and Delete in `tone: danger`. The flag
   and the votes are `button`s (Quadrava 0.25.1, Q41): the flag with `tone: danger` and `pressed`, shown only while
   flagged; the thumb with `count`, two buttons by `visibleIf` (vote, take the vote back). «Add flag» opens a

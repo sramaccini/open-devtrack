@@ -45,6 +45,9 @@
     "PUT /api/issues/{issueKey}/plan" : {
       "$ref" : "#/components/schemas/PlanRequest"
     },
+    "POST /api/issues/{issueKey}/share" : {
+      "$ref" : "#/components/schemas/ShareRequest"
+    },
     "POST /api/issues/{issueKey}/transitions" : {
       "$ref" : "#/components/schemas/TransitionRequest"
     },
@@ -655,6 +658,21 @@
           },
           "sort" : {
             "$ref" : "#/components/schemas/Sort"
+          }
+        }
+      },
+      "ShareRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          },
+          "users" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },

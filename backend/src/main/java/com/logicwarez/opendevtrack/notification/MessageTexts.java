@@ -38,6 +38,7 @@ class MessageTexts {
                 locale);
         String text = switch (m.kind()) {
             case MENTIONED, COMMENTED -> m.params().get("excerpt");
+            case SHARED -> m.params().get("message");
             case TRANSITIONED -> texts.getMessage("message.transitioned.text",
                     new Object[] {status(m.params().get("from"), locale), to}, locale);
             case ASSIGNED, REVIEW_REQUESTED, WEBHOOK_OFF -> null;

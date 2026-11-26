@@ -63,7 +63,8 @@ On the right is what describes it:
   with the number of people watching the issue, highlighted while you watch it: its menu
   has «Watch» or «Stop watching», and «Watchers», a window with who is watching it ([below](#watchers));
 - the thumb with the number of votes, highlighted when you voted: it adds your vote or takes it back;
-- «…», more actions: «Assign to me», for developers and admins when the issue is not yours yet, «Add flag» or «Remove flag», «Add vote» or «Remove vote» ([below](#flag-and-votes)), «Clone»,
+- «…», more actions: «Assign to me», for developers and admins when the issue is not yours yet, «Add flag» or «Remove flag», «Add vote» or «Remove vote» ([below](#flag-and-votes)), «Share» (up to ten members of the project, with an optional
+  message: each gets a [notification](notifications.md)), «Clone»,
   «Print», «All issues», and «Delete», for the admins of the project. «Clone» asks the summary of the copy («CLONE -»
   and this one) and opens it: it has the type, priority, assignee, reviewer, due date, description, labels and custom
   fields of this issue, you as reporter, the first status of its workflow and the link «clones» to this one; comments,

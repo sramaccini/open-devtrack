@@ -173,6 +173,10 @@ final class IssueApi {
         }
     }
 
+    /** Who to share an issue with (members of its project) and an optional message for them. */
+    record ShareRequest(List<String> users, String message) {
+    }
+
     /** The summary of a clone; without it «CLONE - » and the summary of the original. */
     record CloneRequest(String summary) {
     }

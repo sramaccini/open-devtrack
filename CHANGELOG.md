@@ -10,6 +10,9 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Added
 
+- **Issues**: «Share» in the «…» of an issue, as in Jira: up to ten members of the project who see it, with an
+  optional message, get the new notification «An issue shared with you», by default also by email at once
+  (`POST /api/issues/{key}/share`) (#55).
 - **Issues**: the page shows when the issue was created and last updated, under Planning, as in Jira (T16).
 - **Issues**: «Assign to me» in the «…» of an issue, as in Jira, for those who edit it (#55 T4).
 - **Boards and search**: a flagged issue has a red «Flagged» label on its card and in the backlog, and the new
