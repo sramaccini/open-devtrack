@@ -10,6 +10,7 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Added
 
+- **Issues**: «Assign to me» in the «…» of an issue, as in Jira, for those who edit it (#55 T4).
 - **Boards and search**: a flagged issue has a red «Flagged» label on its card and in the backlog, and the new
   ODQL field `flagged` (`Impediment` or empty, as in Jira) finds them: `flagged IS NOT EMPTY` (#55).
 - **Issues**: «Clone» in the «…» of an issue, as in Jira: a copy in the same project with its fields, labels and

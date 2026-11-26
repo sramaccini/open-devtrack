@@ -124,6 +124,9 @@
     "patchIssue": {
       "ref": "issues/patch"
     },
+    "assignToMe": {
+      "ref": "issues/assignToMe"
+    },
     "cloneIssue": {
       "ref": "issues/clone"
     },
@@ -978,6 +981,27 @@
                       "icon": "more",
                       "display": "icon",
                       "items": [
+                        {
+                          "id": "item-assign-me",
+                          "label": "{{ t('issues.assign_to_me', 'Assign to me') }}",
+                          "visibleIf": "{{ has(data.issue) && data.issue._perm.edit && data.issue.assignee != user.username }}",
+                          "onClick": [
+                            {
+                              "call": "assignToMe",
+                              "onError": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
+                            },
+                            {
+                              "refresh": "issue"
+                            },
+                            {
+                              "refresh": "history"
+                            }
+                          ]
+                        },
                         {
                           "id": "item-flag",
                           "label": "{{ t('issues.add_flag', 'Add flag') }}",

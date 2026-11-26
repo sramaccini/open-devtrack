@@ -641,6 +641,7 @@
   "values.config_action.user.exported": "Dati di un utente esportati",
   "values.config_action.user.removed": "Utente rimosso, nome pseudonimizzato",
   "values.config_kind.user.": "Utenti",
+  "issues.assign_to_me": "Assegna a me",
   "issues.add_flag": "Aggiungi contrassegno",
   "issues.remove_flag": "Rimuovi contrassegno",
   "issues.flag_added": "Contrassegno aggiunto",

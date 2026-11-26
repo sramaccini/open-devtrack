@@ -641,6 +641,7 @@
   "values.config_action.user.exported": "Data of a user exported",
   "values.config_action.user.removed": "User removed, name pseudonymised",
   "values.config_kind.user.": "Users",
+  "issues.assign_to_me": "Assign to me",
   "issues.add_flag": "Add flag",
   "issues.remove_flag": "Remove flag",
   "issues.flag_added": "Flag added",
