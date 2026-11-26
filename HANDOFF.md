@@ -208,9 +208,13 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
      and the image built from the jar of #47: green at the first run; image @sha256:269102b4… with its signature and
      SBOM verified by cosign. The demo is upgraded to it (old `.env` in /root/odt-demo-env.rc7.bak); `watch.sh` ok.
    - #48 (e06c544): the healthcheck of Keycloak in `deploy/compose` asks the discovery of the realm, so the back end no
-     longer starts while Keycloak answers 503 and `./odt.sh up` no longer fails for it; on main, not yet in a candidate.
+     longer starts while Keycloak answers 503 and `./odt.sh up` no longer fails for it; in rc.9.
    - The page of an issue as in Jira (`.target-jira.md`, not committed, lists the differences): two columns (T1), the
-     status as a menu button with the workflow as a graph in a window (T3, Quadrava 0.23.0, Q39, #50), its actions as icon buttons (T12, Quadrava 0.24.0, Q40, #51), the flag and the votes (T12, Quadrava 0.25.1, Q41).
+     status as a menu button with the workflow as a graph in a window (T3, Quadrava 0.23.0, Q39, #50), its actions as icon buttons (T12, Quadrava 0.24.0, Q40, #51), the flag and the votes (T12, Quadrava 0.25.1, Q41); the
+     «Polar night» theme of Quadrava next to the two of the brand.
+   - `v1.0.0-rc.9` tagged on 876d34c with Quadrava 0.25.1 and all of the above: green at the first run; image
+     @sha256:1dacfba4… with its signature and SBOM verified by cosign. The demo is upgraded to it (old `.env` in
+     /root/odt-demo-env.rc8.bak, log /var/log/odt-demo-upgrade-rc9.log); `watch.sh` ok.
    Next: the screen reader lines and the ZAP baseline on the current candidate.
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
