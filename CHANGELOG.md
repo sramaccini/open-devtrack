@@ -15,7 +15,11 @@ The entries are written by hand at each release from the commits ([docs/release.
 - **Issues**: the summary and the description fill their box. Under the attachments a dashed area with «Add attachment»
   takes a file chosen or dropped on it, and «Add linked work item» sits in the same area under the links, as in Jira
   (#52). The arrows of the story points stop at 0 and 999.
-- Quadrava 0.26.0 (runtime image and CLI): the drop zone of a file field and the dashed box (Q42).
+- **Issues**: the summary, as a title, and the description read as text and are changed in place, as in Jira: a click
+  opens one of them, the summary is confirmed with ✓ or Enter, the description with «Save» or Ctrl+Enter, and each is
+  saved on its own; the «Save» button of the two goes (#53).
+- Quadrava 0.27.0 (runtime image and CLI): the drop zone of a file field and the dashed box (Q42, 0.26.0), editing in
+  place in a form (Q43).
 
 ## [1.0.0-rc.9] - 2026-11-26
 

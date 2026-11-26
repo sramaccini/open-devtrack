@@ -67,6 +67,7 @@
   "issues.reporter": "Segnalata da",
   "issues.updated": "Aggiornata",
   "issues.description": "Descrizione",
+  "issues.add_description": "Aggiungi una descrizione…",
   "issues.all": "Tutte le issue",
   "issues.delete": "Elimina",
   "issues.delete_confirm": "Eliminare {key}? Non si può annullare.",

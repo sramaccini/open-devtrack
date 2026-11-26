@@ -46,7 +46,9 @@ The screen of an issue has two columns; on a phone the right one comes below the
 
 On the left is what the issue says and what happened to it:
 
-- its **summary** and **description**, which the developers and admins change and save with «Save»;
+- its **summary**, as a title, and its **description**, as text: developers and admins click one to change it, as in
+  Jira. The summary is confirmed with ✓ or Enter, the description with «Save» or Ctrl+Enter; ✕, «Cancel» or Escape
+  leave it as it was. Each is saved on its own;
 - **Attachments**: the files of the issue ([below](#attachments));
 - **Linked work items**: the other issues it is linked to; «Add linked work item», under them, adds one ([below](#links));
 - **Activity**: its comments and its history.
@@ -69,7 +71,7 @@ On the right is what describes it:
 - **Planning**: its story points (0 to 999, empty when not estimated) and the sprint it is planned in, with their own
   «Save».
 
-Each «Save» saves only its own box, and shows the issue again as saved. If someone else saved the issue in the
+Each «Save» saves only its own box or field, and shows the issue again as saved. If someone else saved the issue in the
 meantime, saving says so: reload it and make the change again, so that no change is lost.
 
 ### Comments and mentions

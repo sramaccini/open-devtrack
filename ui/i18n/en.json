@@ -67,6 +67,7 @@
   "issues.reporter": "Reporter",
   "issues.updated": "Updated",
   "issues.description": "Description",
+  "issues.add_description": "Add a description…",
   "issues.all": "All issues",
   "issues.delete": "Delete",
   "issues.delete_confirm": "Delete {key}? It cannot be undone.",

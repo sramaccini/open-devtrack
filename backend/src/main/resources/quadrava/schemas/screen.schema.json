@@ -898,13 +898,18 @@
         "display": {
           "enum": [
             "button",
-            "dropzone"
+            "dropzone",
+            "heading"
           ],
-          "description": "Only for file fields: button (a button and the chosen file, button if absent) or dropzone (an area with a dashed border across the cell, the button in the middle with the label as its text, and files can also be dropped on it). In a dropzone the label is not repeated above the area."
+          "description": "How the field is drawn. For file fields: button (a button and the chosen file, button if absent) or dropzone (an area with a dashed border across the cell, the button in the middle with the label as its text, and files can also be dropped on it; the label is not repeated above the area). For text fields of an inline form: heading (the value as a large title, the label kept only for assistive technologies)."
         },
         "hint": {
           "type": "string",
           "description": "Only for file fields shown as dropzone: a short text under the button, for example the largest size allowed. It can contain {{ }}."
+        },
+        "emptyText": {
+          "type": "string",
+          "description": "Only in inline forms: the text shown in place of an empty value that can be changed, for example \"Add a description…\" («Click to add» if absent). It can contain {{ }}."
         },
         "upload": {
           "type": "string",
@@ -1801,6 +1806,21 @@
                   "$ref": "#/$defs/action"
                 },
                 "description": "Buttons under the fields: on click the form checks the visible fields and, if they are valid, runs the steps, which see the values in `form`."
+              },
+              "edit": {
+                "enum": [
+                  "form",
+                  "inline"
+                ],
+                "description": "How the fields are changed: form (the inputs always open, saved by the actions, form if absent) or inline (each field shows its value as text; a click, Enter or Space opens the editor of that field only, which is confirmed or cancelled on its own and runs onSave). Inline applies to text, number, textarea, richtext, select, radio, multiselect, tags, date and datetime fields; the other types are drawn as in a normal form."
+              },
+              "onSave": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/step"
+                },
+                "description": "Only with edit inline: steps run when a field is confirmed, after its checks, with the name of the field in `field` and its new value in `value` (also in `form`). Usually a call that sends only that field, then a refresh. If a step fails the editor stays open; a value that did not change closes the editor without running them."
               },
               "columns": {
                 "type": "integer",

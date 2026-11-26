@@ -1,7 +1,7 @@
 # OpenDevTrack screens
 
 The front end of OpenDevTrack is this Quadrava project: screens, navigation, themes and translations, as JSON documents
-validated by the schemas of the pinned Quadrava version (0.26.0, ADR-01). No Angular code: the runtime image of Quadrava
+validated by the schemas of the pinned Quadrava version (0.27.0, ADR-01). No Angular code: the runtime image of Quadrava
 loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 | Path | Registry kind | What |
@@ -38,7 +38,8 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   `filter` and `search` for filters and the search, `settings` for the project, `back` to the page above, `external`
   to another page.
 - **Issue page**: `issue-detail` is a `grid` of 12 columns, as the page of a work item in Jira: on the left (8)
-  the summary and the description (`layout: flow`, so that with `width: full` they fill the column), then the sections Attachments, Linked work items and Activity (tabs Comments and
+  the summary and the description, a form with `edit: inline` (Quadrava 0.27.0, Q43): the summary with `display: heading`,
+  each field saved on its own by `onSave` with `saveContent`, then the sections Attachments, Linked work items and Activity (tabs Comments and
   History); on the right (4) a row with the status and, as icons, the flag, the menu Watchers, the votes and the menu More actions, then Details and Planning. The two menus are `menuButton`s with `display: icon` (Quadrava 0.24.0, Q40): the eye with `count` (the
   watchers) and `pressed` (watching), whose menu has watch or stop and «Watchers», a `view` step with the table of
   the watchers and «Add watcher…», and «…» with Delete in `tone: danger`. The flag
@@ -48,7 +49,7 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   asked for; the label stays as the accessible name and the tooltip. The status is a `menuButton` (Quadrava
   0.23.0, Q39) on the data source `workflow`: its items are the transitions (a badge of the status they lead to,
   toned by its category) and «View workflow», a `view` step with a `graph` of the workflow. Content and Details are two
-  forms on the same `issue`, saved by `saveContent` and `saveDetails`: each sends its own fields and takes the
+  forms on the same `issue`, saved by `saveContent` (the values in `form`) and `saveDetails`: each sends its own fields and takes the
   others from `data.issue`, so that a save never empties the other box.
 - **Project page**: `project-detail` has the tabs General (the form, its buttons and those of the permission scheme
   and the administration log), Boards, Members, Groups, Workflows and Custom fields, in a card (a `section` without a
@@ -67,14 +68,14 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 ## Publishing
 
-The Quadrava CLI (`@sramaccini/quadrava-cli@0.26.0`, the version of the runtime) is on GitHub Packages: the `.npmrc`
+The Quadrava CLI (`@sramaccini/quadrava-cli@0.27.0`, the version of the runtime) is on GitHub Packages: the `.npmrc`
 of the repository maps `@sramaccini` there, and npm needs a token with `read:packages` for `npm.pkg.github.com` in
 the user config (`~/.npmrc`; in CI, `NODE_AUTH_TOKEN`). From the root of the repository, with a Keycloak access token
 of the client `opendevtrack-tools` in `QUADRAVA_TOKEN`:
 
 ```bash
-npx --yes @sramaccini/quadrava-cli@0.26.0 validate ui
-npx --yes @sramaccini/quadrava-cli@0.26.0 publish ui --registry http://localhost:28080 --app opendevtrack --env development
+npx --yes @sramaccini/quadrava-cli@0.27.0 validate ui
+npx --yes @sramaccini/quadrava-cli@0.27.0 publish ui --registry http://localhost:28080 --app opendevtrack --env development
 ```
 
 The same command publishes to `testing` and `production`: the registry has no protected environments (ADR-12), the
