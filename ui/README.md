@@ -1,7 +1,7 @@
 # OpenDevTrack screens
 
 The front end of OpenDevTrack is this Quadrava project: screens, navigation, themes and translations, as JSON documents
-validated by the schemas of the pinned Quadrava version (0.25.1, ADR-01). No Angular code: the runtime image of Quadrava
+validated by the schemas of the pinned Quadrava version (0.26.0, ADR-01). No Angular code: the runtime image of Quadrava
 loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 | Path | Registry kind | What |
@@ -67,14 +67,14 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 ## Publishing
 
-The Quadrava CLI (`@sramaccini/quadrava-cli@0.25.1`, the version of the runtime) is on GitHub Packages: the `.npmrc`
+The Quadrava CLI (`@sramaccini/quadrava-cli@0.26.0`, the version of the runtime) is on GitHub Packages: the `.npmrc`
 of the repository maps `@sramaccini` there, and npm needs a token with `read:packages` for `npm.pkg.github.com` in
 the user config (`~/.npmrc`; in CI, `NODE_AUTH_TOKEN`). From the root of the repository, with a Keycloak access token
 of the client `opendevtrack-tools` in `QUADRAVA_TOKEN`:
 
 ```bash
-npx --yes @sramaccini/quadrava-cli@0.25.1 validate ui
-npx --yes @sramaccini/quadrava-cli@0.25.1 publish ui --registry http://localhost:28080 --app opendevtrack --env development
+npx --yes @sramaccini/quadrava-cli@0.26.0 validate ui
+npx --yes @sramaccini/quadrava-cli@0.26.0 publish ui --registry http://localhost:28080 --app opendevtrack --env development
 ```
 
 The same command publishes to `testing` and `production`: the registry has no protected environments (ADR-12), the
@@ -106,11 +106,12 @@ field `overdue` of the rows: the `badges` of a Quadrava column colour by value, 
 
 ## Attachments
 
-The Attachments section of `issue-detail` lists the attachments, with remove for whoever may; «Add attachment», a
-button centred under them (shown when `data.issue._perm.attach`), opens a `view` whose `file` input uploads a file at
-once (`issues/uploadAttachment`); a `set` step empties the input first, so the last file is not offered again. Linked
-work items has «Add linked work item» centred under its table in the same way. A dashed drop zone, as in Jira, is
-asked to Quadrava (Q42, #52). The name of a file downloads it
+The Attachments section of `issue-detail` lists the attachments, with remove for whoever may; under them a `file`
+input with `display: dropzone` (Quadrava 0.26.0, Q42), a dashed area with «Add attachment» and the limit as its
+`hint`, uploads a file at once, chosen or dropped (`issues/uploadAttachment`, shown when
+`data.issue._perm.attach`); after the upload a `set` step empties the input, so the last file is not shown again.
+Linked work items has «Add linked work item», `tone: neutral`, in a `box` with `variant: dashed`, the same look.
+The name of a file downloads it
 (`href` of the column, Quadrava 0.9.0, request Q10), and the field allows 25 MB, as the back end: the runtime image
 forwards requests up to `QUADRAVA_MAX_BODY_SIZE` (100m by default, 26m in `e2e/authz/compose.yaml`; request Q11).
 

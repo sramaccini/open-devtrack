@@ -305,57 +305,31 @@
                   ]
                 },
                 {
-                  "id": "attachment-add",
-                  "type": "box",
-                  "justify": "center",
+                  "id": "attachment-upload",
+                  "type": "input",
+                  "bind": "state.attachment",
                   "visibleIf": "{{ data.issue._perm.attach }}",
-                  "components": [
+                  "field": {
+                    "name": "attachment",
+                    "type": "file",
+                    "label": "{{ t('issues.add_attachment', 'Add attachment') }}",
+                    "display": "dropzone",
+                    "hint": "{{ t('issues.attachment_limit', 'Up to 25 MB per file') }}",
+                    "upload": "uploadAttachment",
+                    "maxSizeKb": 25600
+                  },
+                  "onChange": [
                     {
-                      "id": "btn-add-attachment",
-                      "type": "button",
-                      "label": "{{ t('issues.add_attachment', 'Add attachment') }}",
-                      "icon": "upload",
-                      "onClick": [
-                        {
-                          "set": {
-                            "path": "state.attachment",
-                            "value": null
-                          }
-                        },
-                        {
-                          "view": {
-                            "title": "{{ t('issues.add_attachment', 'Add attachment') }}",
-                            "size": "small",
-                            "components": [
-                              {
-                                "id": "attachment-upload",
-                                "type": "input",
-                                "bind": "state.attachment",
-                                "field": {
-                                  "name": "attachment",
-                                  "type": "file",
-                                  "label": "{{ t('issues.choose_file', 'File') }}",
-                                  "upload": "uploadAttachment",
-                                  "maxSizeKb": 25600
-                                },
-                                "onChange": [
-                                  {
-                                    "refresh": "attachments"
-                                  },
-                                  {
-                                    "refresh": "history"
-                                  }
-                                ]
-                              },
-                              {
-                                "id": "attachment-limit-note",
-                                "type": "text",
-                                "text": "{{ t('issues.attachment_limit', 'Up to 25 MB per file') }}"
-                              }
-                            ]
-                          }
-                        }
-                      ]
+                      "refresh": "attachments"
+                    },
+                    {
+                      "refresh": "history"
+                    },
+                    {
+                      "set": {
+                        "path": "state.attachment",
+                        "value": null
+                      }
                     }
                   ]
                 }
@@ -439,6 +413,7 @@
                 {
                   "id": "link-add",
                   "type": "box",
+                  "variant": "dashed",
                   "justify": "center",
                   "visibleIf": "{{data.issue._perm.edit}}",
                   "components": [
@@ -446,6 +421,7 @@
                       "id": "btn-link",
                       "label": "{{ t('issues.add_linked_item', 'Add linked work item') }}",
                       "icon": "link",
+                      "tone": "neutral",
                       "onClick": [
                         {
                           "dialog": {

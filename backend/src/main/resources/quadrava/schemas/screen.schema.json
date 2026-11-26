@@ -895,6 +895,17 @@
           "maximum": 102400,
           "description": "For type file: maximum size in KB (1024 if absent). Up to 102400 with multipart upload; base64 content is limited to 10240."
         },
+        "display": {
+          "enum": [
+            "button",
+            "dropzone"
+          ],
+          "description": "Only for file fields: button (a button and the chosen file, button if absent) or dropzone (an area with a dashed border across the cell, the button in the middle with the label as its text, and files can also be dropped on it). In a dropzone the label is not repeated above the area."
+        },
+        "hint": {
+          "type": "string",
+          "description": "Only for file fields shown as dropzone: a short text under the button, for example the largest size allowed. It can contain {{ }}."
+        },
         "upload": {
           "type": "string",
           "description": "For type file: data source (POST) to which the file is sent right away. In multipart the file is the \"file\" part of the request and the `file` variable has name, type and size; in base64 it also has content."
@@ -2673,6 +2684,13 @@
               "wrap": {
                 "type": "boolean",
                 "description": "In a row, wraps when space runs out (true if absent)."
+              },
+              "variant": {
+                "enum": [
+                  "plain",
+                  "dashed"
+                ],
+                "description": "Look of the box: plain (only the arrangement of the children, plain if absent) or dashed (a quiet dashed frame with some padding, for example around the action that adds an item under a list)."
               }
             }
           }

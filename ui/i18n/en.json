@@ -219,7 +219,6 @@
   "values.transition.reopen": "Reopen",
   "issues.attachments": "Attachments",
   "issues.add_attachment": "Add attachment",
-  "issues.choose_file": "File",
   "issues.attachment_limit": "Up to 25 MB per file",
   "issues.attachment_name": "File",
   "issues.attachment_size": "Size (bytes)",
