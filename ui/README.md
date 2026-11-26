@@ -38,7 +38,9 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   to another page.
 - **Issue page**: `issue-detail` is a `grid` of 12 columns, as the page of a work item in Jira: on the left (8)
   the summary and the description, then the sections Attachments, Linked work items and Activity (tabs Comments and
-  History); on the right (4) the status, the buttons, Details, Planning and Watchers. The status is a `menuButton` (Quadrava
+  History); on the right (4) a row with the status and the menus Watchers and More actions, then Details, Planning and Watchers.
+  The two menus are `menuButton`s with a text label for now: they become icon-only buttons (the eye with the number
+  of watchers, and «…») when Quadrava draws them (#51, Q40). The status is a `menuButton` (Quadrava
   0.23.0, Q39) on the data source `workflow`: its items are the transitions (a badge of the status they lead to,
   toned by its category) and «View workflow», a `view` step with a `graph` of the workflow. Content and Details are two
   forms on the same `issue`, saved by `saveContent` and `saveDetails`: each sends its own fields and takes the

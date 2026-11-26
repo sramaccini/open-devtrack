@@ -606,274 +606,299 @@
           "span": 4,
           "components": [
             {
-              "id": "issue-status",
-              "type": "menuButton",
-              "label": "{{ has(data.workflow) ? (data.workflow.status == 'todo' ? t('values.status.todo', 'To do') : data.workflow.status == 'in_progress' ? t('values.status.in_progress', 'In progress') : data.workflow.status == 'done' ? t('values.status.done', 'Done') : data.workflow.status) : '…' }}",
-              "tone": "{{ has(data.workflow) ? (data.workflow.category == 'done' ? 'success' : data.workflow.category == 'in_progress' ? 'primary' : 'neutral') : 'neutral' }}",
-              "items": [
+              "id": "issue-head",
+              "type": "box",
+              "direction": "row",
+              "justify": "between",
+              "align": "center",
+              "gap": "small",
+              "components": [
                 {
-                  "source": "transitions",
-                  "keyField": "code",
-                  "labelField": "label",
-                  "badgeField": "to",
-                  "toneField": "category",
-                  "tones": {
-                    "todo": "neutral",
-                    "in_progress": "primary",
-                    "done": "success"
-                  },
-                  "valueKey": "values.status",
-                  "onClick": [
+                  "id": "issue-status",
+                  "type": "menuButton",
+                  "label": "{{ has(data.workflow) ? (data.workflow.status == 'todo' ? t('values.status.todo', 'To do') : data.workflow.status == 'in_progress' ? t('values.status.in_progress', 'In progress') : data.workflow.status == 'done' ? t('values.status.done', 'Done') : data.workflow.status) : '…' }}",
+                  "tone": "{{ has(data.workflow) ? (data.workflow.category == 'done' ? 'success' : data.workflow.category == 'in_progress' ? 'primary' : 'neutral') : 'neutral' }}",
+                  "items": [
                     {
-                      "call": "move",
-                      "args": {
-                        "transition": "{{item.code}}",
-                        "version": "{{item.version}}"
+                      "source": "transitions",
+                      "keyField": "code",
+                      "labelField": "label",
+                      "badgeField": "to",
+                      "toneField": "category",
+                      "tones": {
+                        "todo": "neutral",
+                        "in_progress": "primary",
+                        "done": "success"
                       },
-                      "onError": [
+                      "valueKey": "values.status",
+                      "onClick": [
                         {
-                          "if": "{{error.status == 409}}",
-                          "then": [
+                          "call": "move",
+                          "args": {
+                            "transition": "{{item.code}}",
+                            "version": "{{item.version}}"
+                          },
+                          "onError": [
                             {
-                              "toast": "{{ t('issues.conditions_not_met', 'The conditions of this step are not met') }}"
-                            }
-                          ],
-                          "else": [
-                            {
-                              "if": "{{error.status == 412}}",
+                              "if": "{{error.status == 409}}",
                               "then": [
                                 {
-                                  "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                  "toast": "{{ t('issues.conditions_not_met', 'The conditions of this step are not met') }}"
                                 }
                               ],
                               "else": [
                                 {
+                                  "if": "{{error.status == 412}}",
+                                  "then": [
+                                    {
+                                      "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                    }
+                                  ],
+                                  "else": [
+                                    {
+                                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "refresh": "issue"
+                        },
+                        {
+                          "refresh": "transitions"
+                        },
+                        {
+                          "refresh": "history"
+                        },
+                        {
+                          "refresh": "workflow"
+                        },
+                        {
+                          "toast": "{{ t('issues.moved', 'Status changed') }}"
+                        }
+                      ]
+                    },
+                    {
+                      "divider": true
+                    },
+                    {
+                      "id": "status-workflow",
+                      "label": "{{ t('issues.view_workflow', 'View workflow') }}",
+                      "icon": "eye",
+                      "onClick": [
+                        {
+                          "view": {
+                            "title": "{{ t('issues.workflow_title', 'Workflow «{name}»', {'name': has(data.workflow) ? data.workflow.name : ''}) }}",
+                            "size": "large",
+                            "components": [
+                              {
+                                "id": "workflow-current",
+                                "type": "text",
+                                "text": "{{ t('issues.current_status', 'Current status: {status}', {'status': has(data.workflow) ? (data.workflow.status == 'todo' ? t('values.status.todo', 'To do') : data.workflow.status == 'in_progress' ? t('values.status.in_progress', 'In progress') : data.workflow.status == 'done' ? t('values.status.done', 'Done') : data.workflow.status) : ''}) }}"
+                              },
+                              {
+                                "id": "workflow-graph",
+                                "type": "graph",
+                                "source": "workflow",
+                                "nodes": {
+                                  "field": "statuses",
+                                  "keyField": "code",
+                                  "labelField": "code",
+                                  "valueKey": "values.status",
+                                  "toneField": "category",
+                                  "tones": {
+                                    "todo": "neutral",
+                                    "in_progress": "primary",
+                                    "done": "success"
+                                  }
+                                },
+                                "edges": {
+                                  "field": "transitions",
+                                  "fromField": "from",
+                                  "toField": "to",
+                                  "labelField": "code"
+                                },
+                                "highlight": "{{ has(data.workflow) ? data.workflow.status : '' }}",
+                                "start": "{{ has(data.workflow) && size(data.workflow.statuses) > 0 ? data.workflow.statuses[0].code : '' }}",
+                                "edgeLabels": false,
+                                "height": 420,
+                                "caption": "{{ t('issues.workflow_caption', 'The statuses of the workflow and the transitions between them; the current status is outlined.') }}"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "issue-head-actions",
+                  "type": "box",
+                  "gap": "small",
+                  "components": [
+                    {
+                      "id": "issue-watch",
+                      "type": "menuButton",
+                      "label": "{{ t('issues.watchers_count', 'Watchers: {count}', {'count': has(data.watchers) ? string(size(data.watchers)) : '0'}) }}",
+                      "icon": "eye",
+                      "tone": "{{ has(data.issue) && data.issue.watching ? 'primary' : 'neutral' }}",
+                      "items": [
+                        {
+                          "id": "item-watch",
+                          "label": "{{ t('issues.watch', 'Watch') }}",
+                          "icon": "eye",
+                          "visibleIf": "{{!data.issue.watching}}",
+                          "onClick": [
+                            {
+                              "call": "watch",
+                              "onError": [
+                                {
                                   "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
                                 }
                               ]
+                            },
+                            {
+                              "refresh": "issue"
+                            },
+                            {
+                              "refresh": "watchers"
+                            },
+                            {
+                              "toast": "{{ t('issues.watching', 'You are watching this issue') }}"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "item-unwatch",
+                          "label": "{{ t('issues.unwatch', 'Stop watching') }}",
+                          "icon": "eye-invisible",
+                          "visibleIf": "{{data.issue.watching}}",
+                          "onClick": [
+                            {
+                              "call": "unwatch",
+                              "args": {
+                                "username": "me"
+                              },
+                              "onError": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
+                            },
+                            {
+                              "refresh": "issue"
+                            },
+                            {
+                              "refresh": "watchers"
+                            },
+                            {
+                              "toast": "{{ t('issues.not_watching', 'You are no longer watching this issue') }}"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "item-add-watcher",
+                          "label": "{{ t('issues.add_watcher', 'Add watcher') }}",
+                          "icon": "user-add",
+                          "visibleIf": "{{data.issue._perm.edit}}",
+                          "onClick": [
+                            {
+                              "dialog": {
+                                "title": "{{ t('issues.add_watcher', 'Add watcher') }}",
+                                "submitLabel": "{{ t('projects.add', 'Add') }}",
+                                "fields": [
+                                  {
+                                    "name": "username",
+                                    "type": "lookup",
+                                    "label": "{{ t('issues.watcher', 'User') }}",
+                                    "tooltip": "{{ t('issues.assignee_help', 'A member of the project') }}",
+                                    "required": true,
+                                    "lookup": {
+                                      "source": "assignees",
+                                      "valueField": "username",
+                                      "labelField": "username",
+                                      "minChars": 0
+                                    }
+                                  }
+                                ],
+                                "onSubmit": [
+                                  {
+                                    "call": "addWatcher",
+                                    "onError": [
+                                      {
+                                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "refresh": "watchers"
+                            },
+                            {
+                              "refresh": "issue"
                             }
                           ]
                         }
                       ]
                     },
                     {
-                      "refresh": "issue"
-                    },
-                    {
-                      "refresh": "transitions"
-                    },
-                    {
-                      "refresh": "history"
-                    },
-                    {
-                      "refresh": "workflow"
-                    },
-                    {
-                      "toast": "{{ t('issues.moved', 'Status changed') }}"
-                    }
-                  ]
-                },
-                {
-                  "divider": true
-                },
-                {
-                  "id": "status-workflow",
-                  "label": "{{ t('issues.view_workflow', 'View workflow') }}",
-                  "icon": "eye",
-                  "onClick": [
-                    {
-                      "view": {
-                        "title": "{{ t('issues.workflow_title', 'Workflow «{name}»', {'name': has(data.workflow) ? data.workflow.name : ''}) }}",
-                        "size": "large",
-                        "components": [
-                          {
-                            "id": "workflow-current",
-                            "type": "text",
-                            "text": "{{ t('issues.current_status', 'Current status: {status}', {'status': has(data.workflow) ? (data.workflow.status == 'todo' ? t('values.status.todo', 'To do') : data.workflow.status == 'in_progress' ? t('values.status.in_progress', 'In progress') : data.workflow.status == 'done' ? t('values.status.done', 'Done') : data.workflow.status) : ''}) }}"
-                          },
-                          {
-                            "id": "workflow-graph",
-                            "type": "graph",
-                            "source": "workflow",
-                            "nodes": {
-                              "field": "statuses",
-                              "keyField": "code",
-                              "labelField": "code",
-                              "valueKey": "values.status",
-                              "toneField": "category",
-                              "tones": {
-                                "todo": "neutral",
-                                "in_progress": "primary",
-                                "done": "success"
+                      "id": "issue-more",
+                      "type": "menuButton",
+                      "label": "{{ t('issues.more_actions', 'More actions') }}",
+                      "icon": "more",
+                      "items": [
+                        {
+                          "id": "item-back",
+                          "label": "{{ t('issues.all', 'All issues') }}",
+                          "icon": "back",
+                          "onClick": [
+                            {
+                              "navigate": "issue-list",
+                              "params": {
+                                "key": "{{params.key}}"
                               }
-                            },
-                            "edges": {
-                              "field": "transitions",
-                              "fromField": "from",
-                              "toField": "to",
-                              "labelField": "code"
-                            },
-                            "highlight": "{{ has(data.workflow) ? data.workflow.status : '' }}",
-                            "start": "{{ has(data.workflow) && size(data.workflow.statuses) > 0 ? data.workflow.statuses[0].code : '' }}",
-                            "edgeLabels": false,
-                            "height": 420,
-                            "caption": "{{ t('issues.workflow_caption', 'The statuses of the workflow and the transitions between them; the current status is outlined.') }}"
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "issue-actions",
-              "type": "box",
-              "gap": "small",
-              "components": [
-                {
-                  "id": "btn-watch",
-                  "label": "{{ t('issues.watch', 'Watch') }}",
-                  "icon": "eye",
-                  "visibleIf": "{{!data.issue.watching}}",
-                  "onClick": [
-                    {
-                      "call": "watch",
-                      "onError": [
-                        {
-                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                        }
-                      ]
-                    },
-                    {
-                      "refresh": "issue"
-                    },
-                    {
-                      "refresh": "watchers"
-                    },
-                    {
-                      "toast": "{{ t('issues.watching', 'You are watching this issue') }}"
-                    }
-                  ],
-                  "type": "button"
-                },
-                {
-                  "id": "btn-unwatch",
-                  "label": "{{ t('issues.unwatch', 'Stop watching') }}",
-                  "icon": "eye-invisible",
-                  "visibleIf": "{{data.issue.watching}}",
-                  "onClick": [
-                    {
-                      "call": "unwatch",
-                      "args": {
-                        "username": "me"
-                      },
-                      "onError": [
-                        {
-                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                        }
-                      ]
-                    },
-                    {
-                      "refresh": "issue"
-                    },
-                    {
-                      "refresh": "watchers"
-                    },
-                    {
-                      "toast": "{{ t('issues.not_watching', 'You are no longer watching this issue') }}"
-                    }
-                  ],
-                  "type": "button"
-                },
-                {
-                  "id": "btn-add-watcher",
-                  "label": "{{ t('issues.add_watcher', 'Add watcher') }}",
-                  "icon": "user-add",
-                  "visibleIf": "{{data.issue._perm.edit}}",
-                  "onClick": [
-                    {
-                      "dialog": {
-                        "title": "{{ t('issues.add_watcher', 'Add watcher') }}",
-                        "submitLabel": "{{ t('projects.add', 'Add') }}",
-                        "fields": [
-                          {
-                            "name": "username",
-                            "type": "lookup",
-                            "label": "{{ t('issues.watcher', 'User') }}",
-                            "tooltip": "{{ t('issues.assignee_help', 'A member of the project') }}",
-                            "required": true,
-                            "lookup": {
-                              "source": "assignees",
-                              "valueField": "username",
-                              "labelField": "username",
-                              "minChars": 0
                             }
-                          }
-                        ],
-                        "onSubmit": [
-                          {
-                            "call": "addWatcher",
-                            "onError": [
-                              {
-                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    {
-                      "refresh": "watchers"
-                    },
-                    {
-                      "refresh": "issue"
-                    }
-                  ],
-                  "type": "button"
-                },
-                {
-                  "id": "btn-back",
-                  "label": "{{ t('issues.all', 'All issues') }}",
-                  "icon": "back",
-                  "onClick": [
-                    {
-                      "navigate": "issue-list",
-                      "params": {
-                        "key": "{{params.key}}"
-                      }
-                    }
-                  ],
-                  "type": "button"
-                },
-                {
-                  "id": "btn-delete",
-                  "label": "{{ t('issues.delete', 'Delete') }}",
-                  "icon": "delete",
-                  "visibleIf": "{{data.issue._perm.delete}}",
-                  "onClick": [
-                    {
-                      "confirm": "{{ t('issues.delete_confirm', 'Delete {key}? It cannot be undone.', {'key': data.issue.key}) }}"
-                    },
-                    {
-                      "call": "remove",
-                      "onError": [
+                          ]
+                        },
                         {
-                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                          "divider": true
+                        },
+                        {
+                          "id": "item-delete",
+                          "label": "{{ t('issues.delete', 'Delete') }}",
+                          "icon": "delete",
+                          "visibleIf": "{{data.issue._perm.delete}}",
+                          "onClick": [
+                            {
+                              "confirm": "{{ t('issues.delete_confirm', 'Delete {key}? It cannot be undone.', {'key': data.issue.key}) }}"
+                            },
+                            {
+                              "call": "remove",
+                              "onError": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
+                            },
+                            {
+                              "toast": "{{ t('issues.deleted', 'Issue deleted') }}"
+                            },
+                            {
+                              "navigate": "issue-list",
+                              "params": {
+                                "key": "{{params.key}}"
+                              }
+                            }
+                          ]
                         }
                       ]
-                    },
-                    {
-                      "toast": "{{ t('issues.deleted', 'Issue deleted') }}"
-                    },
-                    {
-                      "navigate": "issue-list",
-                      "params": {
-                        "key": "{{params.key}}"
-                      }
                     }
-                  ],
-                  "type": "button"
+                  ]
                 }
               ]
             },

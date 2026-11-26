@@ -101,6 +101,8 @@
   "values.issue_field.description": "Descrizione",
   "values.issue_field.status": "Stato",
   "issues.view_workflow": "Vedi workflow",
+  "issues.watchers_count": "Chi la segue: {count}",
+  "issues.more_actions": "Altre azioni",
   "issues.workflow_title": "Workflow «{name}»",
   "issues.current_status": "Stato attuale: {status}",
   "issues.workflow_caption": "Gli stati del workflow e le transizioni tra loro; lo stato attuale è evidenziato.",
