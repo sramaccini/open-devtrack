@@ -293,6 +293,7 @@
   "agile.points_short": "Points",
   "agile.points_help": "From 0 to 999; empty when not estimated",
   "agile.points_invalid": "The story points are from 0 to 999",
+  "agile.points_none": "None",
   "values.board_kind.kanban": "Kanban",
   "values.board_kind.scrum": "Scrum",
   "values.board_lane.none": "None",

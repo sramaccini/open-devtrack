@@ -68,8 +68,8 @@ On the right is what describes it:
   comments, attachments and links of the issue go with it;
 - **Details**: its key, type, priority, assignee, reviewer, reporter, due date, labels and custom fields,
   saved with their own «Save»;
-- **Planning**: its story points (0 to 999, empty when not estimated) and the sprint it is planned in, with their own
-  «Save».
+- **Planning**: its story points (0 to 999, empty when not estimated), changed in place like the summary: a click
+  opens them, ✓ or Enter saves them, ✕ or Escape cancels; and the sprint it is planned in.
 
 Each «Save» saves only its own box or field, and shows the issue again as saved. If someone else saved the issue in the
 meantime, saving says so: reload it and make the change again, so that no change is lost.
