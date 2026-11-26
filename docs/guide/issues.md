@@ -59,7 +59,8 @@ On the right is what describes it:
   its statuses, the transitions between them and the current status outlined;
 - next to it, the eye with the number of people watching the issue, highlighted while you watch it: its menu
   has «Watch» or «Stop watching», and «Add watcher»;
-- «…», more actions: «All issues», and «Delete», for the admins of the project. Delete cannot be undone, and the
+- «…», more actions: «Add flag» or «Remove flag», «Add vote» or «Remove vote» ([below](#flag-and-votes)), «All issues»,
+  and «Delete», for the admins of the project. Delete cannot be undone, and the
   comments, attachments and links of the issue go with it;
 - **Details**: its key, type, priority, assignee, reviewer, reporter, due date, labels and custom fields,
   saved with their own «Save»;
@@ -117,10 +118,19 @@ without asking:
 Anyone who sees the issue can start watching it or stop. Developers and admins also add a member with «Add watcher»,
 or remove one.
 
+### Flag and votes
+
+A flag marks an issue as impeded. Developers and admins add it with «Add flag» in the «…» menu: a window then asks
+why, to tell the team in a comment; closing it adds no comment. «Remove flag» takes it away. Both are in the history
+of the issue, as «Flagged».
+
+A vote says that you want the issue done. Anyone who sees the issue votes for it once with «Add vote», and takes the
+vote back with «Remove vote».
+
 ### History
 
 Every change of a field is a row of the history: who made it, when, and the value before and after. So are its
-creation, its links and its attachments.
+creation, its links, its attachments and its flag.
 
 ## Custom fields
 

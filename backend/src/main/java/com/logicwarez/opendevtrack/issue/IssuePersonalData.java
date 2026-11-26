@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 /**
  * The user in the issues (ADR-24, O13): reporter, assignee, reviewer and the custom fields of type user become the
  * pseudonym, with a new version so that a form opened before is refused; the links they made keep the pseudonym; their
- * watches are deleted.
+ * watches and votes are deleted.
  */
 @Component
 class IssuePersonalData implements PersonalData {
@@ -39,6 +39,11 @@ class IssuePersonalData implements PersonalData {
                 FROM odt_issue.watcher w JOIN odt_issue.issue i ON i.id = w.issue_id
                 WHERE i.tenant_id = ? AND w.username = ?
                 ORDER BY w.created_at""", s.tenantId(), s.username()));
+        parts.put("votes", jdbc.queryForList("""
+                SELECT v.issue_id, v.created_at
+                FROM odt_issue.vote v JOIN odt_issue.issue i ON i.id = v.issue_id
+                WHERE i.tenant_id = ? AND v.username = ?
+                ORDER BY v.created_at""", s.tenantId(), s.username()));
         parts.put("links", jdbc.queryForList("""
                 SELECT l.from_id, l.to_id, l.link_type, l.created_at
                 FROM odt_issue.issue_link l JOIN odt_issue.issue i ON i.id = l.from_id
@@ -70,5 +75,8 @@ class IssuePersonalData implements PersonalData {
         jdbc.update("""
                 DELETE FROM odt_issue.watcher w USING odt_issue.issue i
                 WHERE i.id = w.issue_id AND i.tenant_id = ? AND w.username = ?""", s.tenantId(), s.username());
+        jdbc.update("""
+                DELETE FROM odt_issue.vote v USING odt_issue.issue i
+                WHERE i.id = v.issue_id AND i.tenant_id = ? AND v.username = ?""", s.tenantId(), s.username());
     }
 }

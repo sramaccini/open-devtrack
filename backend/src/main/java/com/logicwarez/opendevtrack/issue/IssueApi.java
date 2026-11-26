@@ -28,6 +28,7 @@ final class IssueApi {
     record IssueView(String key, String project, long number, String type, String summary, String description,
                      String status, String priority, String assignee, String reporter, LocalDate dueOn,
                      String reviewer, List<String> labels, Map<String, Object> custom, Instant createdAt, Instant updatedAt, long version, boolean watching,
+                     boolean flagged, long votes, boolean voted,
                      @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 

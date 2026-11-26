@@ -10,6 +10,10 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Added
 
+- **Issues**: the flag and the votes of an issue, as in Jira. «Add flag» in the «…» menu marks it as impeded, in its
+  history, and asks for a comment to tell the team why; «Add vote» counts who wants it done. The API has
+  `PUT`/`DELETE /api/issues/{key}/flag` and `GET`/`POST /api/issues/{key}/votes`, `DELETE …/votes/me`; an issue has
+  `flagged`, `votes` and `voted`. The votes are in the export of the personal data and are deleted with the user.
 - **API**: `GET /api/issues/{key}/workflow`, the workflow an issue follows with its statuses and transitions, for the
   status button and the workflow graph of the issue page (#50).
 

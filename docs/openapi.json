@@ -1470,6 +1470,66 @@
         "x-project-permissions" : [ "odt.issue.browse" ]
       }
     },
+    "/api/issues/{issueKey}/flag" : {
+      "delete" : {
+        "operationId" : "flagAndVote.unflag",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Done"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Removes the flag of an issue",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.edit" ]
+      },
+      "put" : {
+        "operationId" : "flagAndVote.flag",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Done"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Flags an issue as impeded",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.edit" ]
+      }
+    },
     "/api/issues/{issueKey}/history" : {
       "get" : {
         "operationId" : "history.history",
@@ -1870,6 +1930,107 @@
         "tags" : [ "issue" ],
         "x-permissions" : [ "odt.project.browse" ],
         "x-project-permissions" : [ "odt.issue.transition" ]
+      }
+    },
+    "/api/issues/{issueKey}/votes" : {
+      "get" : {
+        "operationId" : "flagAndVote.voters",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/VoterView"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Who voted for an issue",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.browse" ]
+      },
+      "post" : {
+        "operationId" : "flagAndVote.vote",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Done"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Votes for an issue",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.browse" ]
+      }
+    },
+    "/api/issues/{issueKey}/votes/me" : {
+      "delete" : {
+        "operationId" : "flagAndVote.unvote",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Done"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Takes back the vote for an issue",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.browse" ]
       }
     },
     "/api/issues/{issueKey}/watchers" : {
@@ -6770,6 +6931,9 @@
             "type" : "string",
             "format" : "date"
           },
+          "flagged" : {
+            "type" : "boolean"
+          },
           "key" : {
             "type" : "string"
           },
@@ -6809,6 +6973,13 @@
             "format" : "date-time"
           },
           "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "voted" : {
+            "type" : "boolean"
+          },
+          "votes" : {
             "type" : "integer",
             "format" : "int64"
           },
@@ -7585,6 +7756,18 @@
           "version" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }
+      },
+      "VoterView" : {
+        "type" : "object",
+        "properties" : {
+          "since" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "username" : {
+            "type" : "string"
           }
         }
       },

@@ -62,7 +62,7 @@ module `privacy` asks them all, in one transaction for a removal.
   keeps about them in the tenant; `GET /api/admin/users/{username}/export` (the row action «Export data» of
   `admin-users`) gives the same to an administrator of the tenant (`authz.rbac.manage`). Both are in the audit log
   of the configuration (`user.exported`). The file has: the profile (user name and email); the issues they reported,
-  are assigned or review; their watches and links; their comments, the metadata of their attachments (not the bytes,
+  are assigned or review; their watches, votes and links; their comments, the metadata of their attachments (not the bytes,
   which are the project's and are read in the issue) and the comments that mention them; their changes in the
   histories; their actions in the audit log; their messages and preferences; their saved filters; their roles in
   projects and their groups; the projects they lead or made; the webhooks they made, without secrets.
@@ -74,7 +74,7 @@ module `privacy` asks them all, in one transaction for a removal.
     in the values; with no role left in any tenant the user is deleted from `authz` (their email and personal
     access tokens), and the name leaves the entries without a tenant too; authz-library logs `USER_FORGOTTEN`.
     A tenant administrator does not delete a user that a global administrator deactivated: that row stays;
-  - deleted: their messages, mails not sent yet, preferences, saved filters, watches, mentions, memberships of
+  - deleted: their messages, mails not sent yet, preferences, saved filters, watches, votes, mentions, memberships of
     projects and groups;
   - the name becomes the pseudonym `former-user-<n>` of the tenant (a counter, without a record of who it was) as
     reporter, assignee, reviewer and in custom fields of type user, author of comments and attachments, author and

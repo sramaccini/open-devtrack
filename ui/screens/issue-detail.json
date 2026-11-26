@@ -144,6 +144,24 @@
     },
     "workflow": {
       "ref": "issues/workflow"
+    },
+    "flag": {
+      "ref": "issues/flag"
+    },
+    "unflag": {
+      "ref": "issues/unflag"
+    },
+    "vote": {
+      "ref": "issues/vote"
+    },
+    "unvote": {
+      "ref": "issues/unvote"
+    },
+    "flagComment": {
+      "ref": "issues/addComment",
+      "body": {
+        "body": "{{formFields.comment}}"
+      }
     }
   },
   "components": [
@@ -855,6 +873,114 @@
                       "icon": "more",
                       "display": "icon",
                       "items": [
+                        {
+                          "id": "item-flag",
+                          "label": "{{ t('issues.add_flag', 'Add flag') }}",
+                          "visibleIf": "{{ has(data.issue) && data.issue._perm.edit && !data.issue.flagged }}",
+                          "onClick": [
+                            {
+                              "call": "flag",
+                              "onError": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
+                            },
+                            {
+                              "refresh": "issue"
+                            },
+                            {
+                              "refresh": "history"
+                            },
+                            {
+                              "dialog": {
+                                "title": "{{ t('issues.flag_added', 'Flag added') }}",
+                                "fields": [
+                                  {
+                                    "name": "comment",
+                                    "type": "textarea",
+                                    "label": "{{ t('issues.flag_why', 'Let your team know why this work item has been flagged') }}",
+                                    "required": true
+                                  }
+                                ],
+                                "submitLabel": "{{ t('issues.add_comment', 'Add comment') }}",
+                                "onSubmit": [
+                                  {
+                                    "call": "flagComment",
+                                    "onError": [
+                                      {
+                                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "refresh": "comments"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "item-unflag",
+                          "label": "{{ t('issues.remove_flag', 'Remove flag') }}",
+                          "visibleIf": "{{ has(data.issue) && data.issue._perm.edit && data.issue.flagged }}",
+                          "onClick": [
+                            {
+                              "call": "unflag",
+                              "onError": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
+                            },
+                            {
+                              "refresh": "issue"
+                            },
+                            {
+                              "refresh": "history"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "item-vote",
+                          "label": "{{ t('issues.add_vote', 'Add vote') }}",
+                          "visibleIf": "{{ has(data.issue) && !data.issue.voted }}",
+                          "onClick": [
+                            {
+                              "call": "vote",
+                              "onError": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
+                            },
+                            {
+                              "refresh": "issue"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "item-unvote",
+                          "label": "{{ t('issues.remove_vote', 'Remove vote') }}",
+                          "visibleIf": "{{ has(data.issue) && data.issue.voted }}",
+                          "onClick": [
+                            {
+                              "call": "unvote",
+                              "onError": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
+                            },
+                            {
+                              "refresh": "issue"
+                            }
+                          ]
+                        },
+                        {
+                          "divider": true
+                        },
                         {
                           "id": "item-back",
                           "label": "{{ t('issues.all', 'All issues') }}",

@@ -627,5 +627,13 @@
   "privacy.removal_description": "Per essere rimosso da questo tenant chiedi al suo amministratore: il tuo nome nel lavoro dei progetti diventa uno pseudonimo.",
   "values.config_action.user.exported": "Dati di un utente esportati",
   "values.config_action.user.removed": "Utente rimosso, nome pseudonimizzato",
-  "values.config_kind.user.": "Utenti"
+  "values.config_kind.user.": "Utenti",
+  "issues.add_flag": "Aggiungi contrassegno",
+  "issues.remove_flag": "Rimuovi contrassegno",
+  "issues.flag_added": "Contrassegno aggiunto",
+  "issues.flag_why": "Spiega al team perché questa issue è contrassegnata",
+  "issues.add_vote": "Aggiungi voto",
+  "issues.remove_vote": "Rimuovi voto",
+  "values.issue_field.flagged": "Contrassegnata",
+  "issues.add_comment": "Aggiungi commento"
 }

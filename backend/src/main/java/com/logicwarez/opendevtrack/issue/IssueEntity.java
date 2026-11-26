@@ -57,6 +57,9 @@ class IssueEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<String, Object> custom = new HashMap<>();
 
+    /** Impeded, as the flag of Jira. */
+    private boolean flagged;
+
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -88,6 +91,12 @@ class IssueEntity {
         this.reviewer = reviewer;
         this.labels = labels;
         this.custom = new HashMap<>(custom);
+        this.updatedAt = now;
+    }
+
+    /** Adds or removes the flag. */
+    void flag(boolean flagged, Instant now) {
+        this.flagged = flagged;
         this.updatedAt = now;
     }
 
@@ -143,6 +152,10 @@ class IssueEntity {
 
     String reviewer() {
         return reviewer;
+    }
+
+    boolean flagged() {
+        return flagged;
     }
 
     Map<String, Object> custom() {

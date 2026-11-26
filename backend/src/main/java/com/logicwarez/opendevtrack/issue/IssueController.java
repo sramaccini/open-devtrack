@@ -88,18 +88,20 @@ class IssueController {
     private final ApplicationEventPublisher events;
     private final Workflows workflows;
     private final WatcherRepository watchers;
+    private final VoteRepository votes;
     private final CustomFields customFields;
     private final IssueEditor editor;
     private final Clock clock;
 
     IssueController(IssueRepository issues, Issues finder, Projects projects, ProjectAccess access, CurrentUser user,
                     ApplicationEventPublisher events, Workflows workflows, WatcherRepository watchers,
-                    CustomFields customFields, IssueEditor editor, @Value("${odt.reporting.zone:UTC}") String zone) {
+                    VoteRepository votes, CustomFields customFields, IssueEditor editor, @Value("${odt.reporting.zone:UTC}") String zone) {
         this.editor = editor;
         this.clock = Clock.system(ZoneId.of(zone));
         this.workflows = workflows;
         this.customFields = customFields;
         this.watchers = watchers;
+        this.votes = votes;
         this.issues = issues;
         this.finder = finder;
         this.projects = projects;
@@ -423,6 +425,7 @@ class IssueController {
                 "attach", permissions.contains("odt.issue.attach"));
         return new IssueView(key(project, i), project.key(), i.number(), i.type().value(), i.summary(), i.description(),
                 i.status(), i.priority().value(), i.assignee(), i.reporter(), i.dueOn(), i.reviewer(), i.labels(), i.custom(),
-                i.createdAt(), i.updatedAt(), i.version(), watchers.existsByIssueIdAndUsername(i.id(), user.username()), perm);
+                i.createdAt(), i.updatedAt(), i.version(), watchers.existsByIssueIdAndUsername(i.id(), user.username()),
+                i.flagged(), votes.countByIssueId(i.id()), votes.existsByIssueIdAndUsername(i.id(), user.username()), perm);
     }
 }

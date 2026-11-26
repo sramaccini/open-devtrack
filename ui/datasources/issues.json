@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "datasources": "issues",
-  "description": "Issues of a project (module issue) with their custom fields, attachments, links, watchers and transitions (module workflow), the members who can be assigned, the comments (module collaboration) and the changelog (module audit).",
+  "description": "Issues of a project (module issue) with their custom fields, attachments, links, watchers, flag, votes and transitions (module workflow), the members who can be assigned, the comments (module collaboration) and the changelog (module audit).",
   "sources": {
     "list": {
       "type": "rest",
@@ -165,6 +165,31 @@
       "method": "POST",
       "url": "/api/issues/{{params.issue}}/watchers",
       "body": "{{formFields}}"
+    },
+    "flag": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/issues/{{params.issue}}/flag"
+    },
+    "unflag": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/issues/{{params.issue}}/flag"
+    },
+    "votes": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/issues/{{params.issue}}/votes"
+    },
+    "vote": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/issues/{{params.issue}}/votes"
+    },
+    "unvote": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/issues/{{params.issue}}/votes/me"
     },
     "unwatch": {
       "type": "rest",

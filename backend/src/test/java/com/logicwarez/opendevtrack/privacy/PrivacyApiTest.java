@@ -103,6 +103,7 @@ class PrivacyApiTest {
                 .andExpect(status().isCreated());
         mvc.perform(as(post("/api/filters"), rosa).content("{\"name\":\"Mine\",\"query\":\"assignee = rosa\"}"))
                 .andExpect(status().isCreated());
+        mvc.perform(as(post("/api/issues/ODT-1/votes"), rosa)).andExpect(status().isNoContent());
         TestInfrastructure.awaitListeners(jdbc);
     }
 
@@ -121,6 +122,7 @@ class PrivacyApiTest {
                 .andExpect(jsonPath("$.comments.length()").value(1))
                 .andExpect(jsonPath("$.comments[0].body").value("Seen with Chrome"))
                 .andExpect(jsonPath("$.mentions.length()").value(1))
+                .andExpect(jsonPath("$.votes.length()").value(1))
                 .andExpect(jsonPath("$.filters[0].name").value("Mine"))
                 .andExpect(jsonPath("$.projectRoles[0].role").value("DEVELOPER"));
 
@@ -166,6 +168,7 @@ class PrivacyApiTest {
         for (String where : List.of(
                 "odt_issue.issue WHERE 'rosa' IN (reporter, assignee, reviewer)",
                 "odt_issue.watcher WHERE username = 'rosa'",
+                "odt_issue.vote WHERE username = 'rosa'",
                 "odt_collaboration.comment WHERE author = 'rosa'",
                 "odt_collaboration.mention WHERE username = 'rosa'",
                 "odt_audit.issue_change WHERE 'rosa' IN (author, old_value, new_value)",

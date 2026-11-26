@@ -627,5 +627,13 @@
   "privacy.removal_description": "To be removed from this tenant, ask its administrator: your name in the work of the projects becomes a pseudonym.",
   "values.config_action.user.exported": "Data of a user exported",
   "values.config_action.user.removed": "User removed, name pseudonymised",
-  "values.config_kind.user.": "Users"
+  "values.config_kind.user.": "Users",
+  "issues.add_flag": "Add flag",
+  "issues.remove_flag": "Remove flag",
+  "issues.flag_added": "Flag added",
+  "issues.flag_why": "Let your team know why this work item has been flagged",
+  "issues.add_vote": "Add vote",
+  "issues.remove_vote": "Remove vote",
+  "values.issue_field.flagged": "Flagged",
+  "issues.add_comment": "Add comment"
 }
