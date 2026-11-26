@@ -131,6 +131,7 @@
   "issues.watcher": "User",
   "issues.since": "Since",
   "issues.add_watcher": "Add watcher",
+  "issues.add_watcher_more": "Add watcher…",
   "common.check_fields": "Check the highlighted fields",
   "projects.fields": "Custom fields",
   "projects.add_field": "New field",

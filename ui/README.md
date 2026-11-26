@@ -39,9 +39,9 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   to another page.
 - **Issue page**: `issue-detail` is a `grid` of 12 columns, as the page of a work item in Jira: on the left (8)
   the summary and the description, then the sections Attachments, Linked work items and Activity (tabs Comments and
-  History); on the right (4) a row with the status and, as icons, the flag, the menu Watchers, the votes and the menu More actions, then Details, Planning and
-  Watchers. The two menus are `menuButton`s with `display: icon` (Quadrava 0.24.0, Q40): the eye with `count` (the
-  watchers) and `pressed` (watching), and «…» with Delete in `tone: danger`. The flag
+  History); on the right (4) a row with the status and, as icons, the flag, the menu Watchers, the votes and the menu More actions, then Details and Planning. The two menus are `menuButton`s with `display: icon` (Quadrava 0.24.0, Q40): the eye with `count` (the
+  watchers) and `pressed` (watching), whose menu has watch or stop and «Watchers», a `view` step with the table of
+  the watchers and «Add watcher…», and «…» with Delete in `tone: danger`. The flag
   and the votes are `button`s (Quadrava 0.25.1, Q41): the flag with `tone: danger` and `pressed`, shown only while
   flagged; the thumb with `count`, two buttons by `visibleIf` (vote, take the vote back). «Add flag» opens a
   `popover` under «…» for the optional comment. Buttons are icon-only unless a text is

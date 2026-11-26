@@ -8,6 +8,11 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+### Changed
+
+- **Issues**: the watchers of an issue are in a window, «Watchers» in the menu of the eye, with «Add watcher…»; the
+  box of the watchers at the bottom of the right column is gone, as in Jira.
+
 ## [1.0.0-rc.9] - 2026-11-26
 
 The ninth candidate: the page of an issue closer to Jira, in two columns, with the status as a button with its

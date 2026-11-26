@@ -59,7 +59,7 @@ On the right is what describes it:
   its statuses, the transitions between them and the current status outlined;
 - next to it, a red flag while the issue is flagged (developers and admins remove the flag with it), then the eye
   with the number of people watching the issue, highlighted while you watch it: its menu
-  has «Watch» or «Stop watching», and «Add watcher»;
+  has «Watch» or «Stop watching», and «Watchers», a window with who is watching it ([below](#watchers));
 - the thumb with the number of votes, highlighted when you voted: it adds your vote or takes it back;
 - «…», more actions: «Add flag» or «Remove flag», «Add vote» or «Remove vote» ([below](#flag-and-votes)), «All issues»,
   and «Delete», for the admins of the project. Delete cannot be undone, and the
@@ -67,8 +67,7 @@ On the right is what describes it:
 - **Details**: its key, type, priority, assignee, reviewer, reporter, due date, labels and custom fields,
   saved with their own «Save»;
 - **Planning**: its story points (0 to 999, empty when not estimated) and the sprint it is planned in, with their own
-  «Save»;
-- **Watchers**: who is watching it.
+  «Save».
 
 Each «Save» saves only its own box, and shows the issue again as saved. If someone else saved the issue in the
 meantime, saving says so: reload it and make the change again, so that no change is lost.
@@ -117,8 +116,8 @@ without asking:
 - each assignee, from the assignment;
 - whoever is mentioned.
 
-Anyone who sees the issue can start watching it or stop. Developers and admins also add a member with «Add watcher»,
-or remove one.
+Anyone who sees the issue can start watching it or stop, from the menu of the eye. «Watchers», in the same menu, lists
+who is watching it and since when; there developers and admins add a member with «Add watcher…», or remove one.
 
 ### Flag and votes
 

@@ -131,6 +131,7 @@
   "issues.watcher": "Utente",
   "issues.since": "Da",
   "issues.add_watcher": "Aggiungi chi la segue",
+  "issues.add_watcher_more": "Aggiungi chi la segue…",
   "common.check_fields": "Controlla i campi evidenziati",
   "projects.fields": "Campi personalizzati",
   "projects.add_field": "Nuovo campo",
