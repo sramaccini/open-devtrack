@@ -49,6 +49,7 @@
   "issues.new": "Nuova issue",
   "issues.create": "Crea issue",
   "issues.created": "Issue creata",
+  "issues.created_at": "Creata",
   "issues.cannot_create": "Solo uno sviluppatore o un amministratore del progetto crea issue",
   "issues.project_settings": "Progetto e membri",
   "issues.key": "Chiave",

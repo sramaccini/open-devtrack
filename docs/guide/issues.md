@@ -71,6 +71,7 @@ On the right is what describes it:
   comments, attachments and links of the issue go with it;
 - **Details**: its key, type, priority, assignee, reviewer, reporter, due date, labels and custom fields;
 - **Planning**: its story points (0 to 999, empty when not estimated) and the sprint it is planned in.
+- Under them, when the issue was created and when it last changed, in your time zone.
 
 The fields of Details and Planning are changed in place, like the summary: a click opens one of them. A
 choice from a list (type, priority, assignee, reviewer, sprint, a list or a user among the custom fields) is saved as

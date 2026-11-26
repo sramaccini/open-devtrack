@@ -1527,6 +1527,27 @@
                   "columns": 1
                 }
               ]
+            },
+            {
+              "id": "issue-dates",
+              "type": "form",
+              "layout": "grid",
+              "source": "issue",
+              "edit": "inline",
+              "fields": [
+                {
+                  "name": "createdAt",
+                  "type": "datetime",
+                  "label": "{{ t('issues.created_at', 'Created') }}",
+                  "readOnlyIf": "{{ true }}"
+                },
+                {
+                  "name": "updatedAt",
+                  "type": "datetime",
+                  "label": "{{ t('issues.updated', 'Updated') }}",
+                  "readOnlyIf": "{{ true }}"
+                }
+              ]
             }
           ]
         }

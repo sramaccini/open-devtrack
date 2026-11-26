@@ -49,6 +49,7 @@
   "issues.new": "New issue",
   "issues.create": "Create issue",
   "issues.created": "Issue created",
+  "issues.created_at": "Created",
   "issues.cannot_create": "Only a developer or an admin of the project creates issues",
   "issues.project_settings": "Project and members",
   "issues.key": "Key",

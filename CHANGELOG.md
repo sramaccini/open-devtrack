@@ -10,6 +10,7 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Added
 
+- **Issues**: the page shows when the issue was created and last updated, under Planning, as in Jira (T16).
 - **Issues**: «Assign to me» in the «…» of an issue, as in Jira, for those who edit it (#55 T4).
 - **Boards and search**: a flagged issue has a red «Flagged» label on its card and in the backlog, and the new
   ODQL field `flagged` (`Impediment` or empty, as in Jira) finds them: `flagged IS NOT EMPTY` (#55).
