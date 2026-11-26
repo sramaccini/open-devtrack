@@ -22,10 +22,13 @@ import tools.jackson.databind.json.JsonMapper;
 class UiIconsTest {
 
     private static final Path SCREENS = Path.of("..", "ui", "screens");
-    /** The icons Quadrava 0.19.0 offers for actions (catalogue, § 2.32): an unknown name shows no icon. */
+    /**
+     * The icons Quadrava offers for actions (catalogue, § 2.32): those of 0.19.0, and flag and like of 0.25.0 (Q41). An
+     * unknown name shows no icon.
+     */
     private static final Set<String> ICONS = Set.of("save", "edit", "delete", "plus", "check", "close", "link", "eye",
             "eye-invisible", "user-add", "back", "move", "play", "reload", "download", "upload", "external", "copy",
-            "search", "filter", "settings");
+            "search", "filter", "settings", "flag", "like");
     private static final List<String> ACTIONS = List.of("actions", "rowActions", "bulkActions");
 
     @Test
