@@ -8,6 +8,11 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+## [1.0.0-rc.9] - 2026-11-26
+
+The ninth candidate: the page of an issue closer to Jira, in two columns, with the status as a button with its
+workflow, the actions as icons, the flag and the votes; the «Polar night» theme; on Quadrava 0.24.0.
+
 ### Added
 
 - **Issues**: the flag and the votes of an issue, as in Jira. «Add flag» in the «…» menu marks it as impeded, in its
