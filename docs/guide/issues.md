@@ -63,8 +63,11 @@ On the right is what describes it:
   with the number of people watching the issue, highlighted while you watch it: its menu
   has «Watch» or «Stop watching», and «Watchers», a window with who is watching it ([below](#watchers));
 - the thumb with the number of votes, highlighted when you voted: it adds your vote or takes it back;
-- «…», more actions: «Add flag» or «Remove flag», «Add vote» or «Remove vote» ([below](#flag-and-votes)), «All issues»,
-  and «Delete», for the admins of the project. Delete cannot be undone, and the
+- «…», more actions: «Add flag» or «Remove flag», «Add vote» or «Remove vote» ([below](#flag-and-votes)), «Clone»,
+  «Print», «All issues», and «Delete», for the admins of the project. «Clone» asks the summary of the copy («CLONE -»
+  and this one) and opens it: it has the type, priority, assignee, reviewer, due date, description, labels and custom
+  fields of this issue, you as reporter, the first status of its workflow and the link «clones» to this one; comments,
+  attachments, watchers, votes, the flag and the plan stay here. «Print» prints the page without menus and buttons. Delete cannot be undone, and the
   comments, attachments and links of the issue go with it;
 - **Details**: its key, type, priority, assignee, reviewer, reporter, due date, labels and custom fields;
 - **Planning**: its story points (0 to 999, empty when not estimated) and the sprint it is planned in.
@@ -110,6 +113,7 @@ A link says how two issues are related. It is read from both ends:
 | blocks | is blocked by |
 | relates to | relates to |
 | duplicates | is duplicated by |
+| clones | is cloned by |
 
 «Add linked work item» asks for the relation and the other issue, by its key or by words of its summary. The other issue may be in
 another project of the tenant. A link to an issue you cannot see is not shown.

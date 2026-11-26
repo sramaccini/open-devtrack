@@ -10,6 +10,9 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Added
 
+- **Issues**: «Clone» in the «…» of an issue, as in Jira: a copy in the same project with its fields, labels and
+  custom fields, linked to the original by the new relation «clones» / «is cloned by» (`POST /api/issues/{key}/clone`);
+  and «Print», the page without menus and buttons (#55).
 - **API**: `PATCH /api/issues/{key}` changes only the fields it names, with the version read and the same checks as
   `PUT`; null clears a field, and the custom fields given leave the others as they are.
 

@@ -42,6 +42,14 @@
       "url": "/api/issues/{{params.issue}}",
       "body": "{{ field.startsWith('custom.') ? dyn({'custom': form.custom, 'version': form.version}) : dyn({string(field): value, 'version': form.version}) }}"
     },
+    "clone": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/issues/{{params.issue}}/clone",
+      "body": {
+        "summary": "{{form.summary}}"
+      }
+    },
     "remove": {
       "type": "rest",
       "method": "DELETE",

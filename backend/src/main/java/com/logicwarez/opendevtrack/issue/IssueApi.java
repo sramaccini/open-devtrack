@@ -173,6 +173,10 @@ final class IssueApi {
         }
     }
 
+    /** The summary of a clone; without it «CLONE - » and the summary of the original. */
+    record CloneRequest(String summary) {
+    }
+
     /** Fields of a new issue or of a change; {@code version} only for a change. */
     record IssueRequest(String type, String summary, String description, String priority, String assignee,
                         String dueOn, String reviewer, List<String> labels, Map<String, Object> custom, Long version) {

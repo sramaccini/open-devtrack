@@ -1288,6 +1288,56 @@
         "x-project-permissions" : [ "odt.issue.browse" ]
       }
     },
+    "/api/issues/{issueKey}/clone" : {
+      "post" : {
+        "operationId" : "issue.cloneIssue",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CloneRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IssueView"
+                }
+              }
+            },
+            "description" : "Created"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Copies an issue into a new one of the same project, linked as a clone",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.create" ]
+      }
+    },
     "/api/issues/{issueKey}/comments" : {
       "get" : {
         "operationId" : "comment.list",
@@ -6495,6 +6545,15 @@
             "type" : "string"
           },
           "to" : {
+            "type" : "string"
+          }
+        }
+      },
+      "CloneRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "summary" : {
             "type" : "string"
           }
         }

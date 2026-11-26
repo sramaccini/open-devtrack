@@ -210,6 +210,40 @@ class IssueApiTest {
     }
 
     @Test
+    void aCloneIsACopyLinkedToTheOriginal() throws Exception {
+        createFirst();
+        // The fields of the original, «CLONE - » before the summary, the user as reporter, linked as a clone.
+        mvc.perform(as(post("/api/issues/ODT-1/clone"), mario))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.key").value("ODT-2"))
+                .andExpect(jsonPath("$.summary").value("CLONE - Login fails"))
+                .andExpect(jsonPath("$.type").value("bug"))
+                .andExpect(jsonPath("$.priority").value("high"))
+                .andExpect(jsonPath("$.assignee").value("luisa"))
+                .andExpect(jsonPath("$.description").value("With **two** tenants"))
+                .andExpect(jsonPath("$.labels.length()").value(2))
+                .andExpect(jsonPath("$.reporter").value("mario"))
+                .andExpect(jsonPath("$._perm.clone").value(true))
+                .andExpect(jsonPath("$.status").value("todo"));
+        mvc.perform(as(get("/api/issues/ODT-2/links"), luisa))
+                .andExpect(jsonPath("$[0].relation").value("clones"))
+                .andExpect(jsonPath("$[0].key").value("ODT-1"));
+        mvc.perform(as(get("/api/issues/ODT-1/links"), luisa))
+                .andExpect(jsonPath("$[0].relation").value("cloned_by"))
+                .andExpect(jsonPath("$[0].key").value("ODT-2"));
+        // A summary of its own, checked as any summary.
+        mvc.perform(as(post("/api/issues/ODT-1/clone"), luisa).content("{\"summary\":\"Login fails on Safari\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.summary").value("Login fails on Safari"));
+        mvc.perform(as(post("/api/issues/ODT-1/clone"), luisa).content("{\"summary\":\" \"}"))
+                .andExpect(status().isBadRequest());
+        // A viewer does not create issues; one not seen is not found.
+        mvc.perform(as(post("/api/issues/ODT-1/clone"), paola)).andExpect(status().isForbidden());
+        mvc.perform(as(post("/api/issues/ODT-9/clone"), luisa)).andExpect(status().isNotFound());
+        assertThat(IssueController.cloneSummary("x".repeat(255))).hasSize(255).startsWith("CLONE - ");
+    }
+
+    @Test
     void aPatchChangesOnlyTheFieldsItNames() throws Exception {
         createFirst();
         // One field: the others keep their values, as when a field of the page is saved on its own.

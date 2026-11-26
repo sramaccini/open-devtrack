@@ -30,6 +30,9 @@
     "PUT /api/issues/{issueKey}" : {
       "$ref" : "#/components/schemas/IssueRequest"
     },
+    "POST /api/issues/{issueKey}/clone" : {
+      "$ref" : "#/components/schemas/CloneRequest"
+    },
     "POST /api/issues/{issueKey}/comments" : {
       "$ref" : "#/components/schemas/CommentRequest"
     },
@@ -178,6 +181,15 @@
           "version" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }
+      },
+      "CloneRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "summary" : {
+            "type" : "string"
           }
         }
       },

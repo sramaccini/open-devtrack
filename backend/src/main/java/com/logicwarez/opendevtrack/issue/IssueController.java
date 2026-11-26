@@ -5,6 +5,7 @@
 package com.logicwarez.opendevtrack.issue;
 
 import com.logicwarez.opendevtrack.access.ProjectAccess;
+import com.logicwarez.opendevtrack.issue.IssueApi.CloneRequest;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssuePatch;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueRequest;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueRow;
@@ -83,8 +84,12 @@ class IssueController {
     private static final String NOT_FOUND = "Issue not found";
     private static final String NOT_A_MEMBER = "Only the members of the project see its issues";
     private static final String NOT_AN_EDITOR = "Only a developer or an admin of the project edits issues";
+    private static final String NOT_A_CREATOR = "Only a developer or an admin of the project creates issues";
+    private static final String CLONE_PREFIX = "CLONE - ";
+    private static final int MAX_SUMMARY = 255;
 
     private final IssueRepository issues;
+    private final IssueLinkRepository links;
     private final Issues finder;
     private final Projects projects;
     private final ProjectAccess access;
@@ -97,7 +102,7 @@ class IssueController {
     private final IssueEditor editor;
     private final Clock clock;
 
-    IssueController(IssueRepository issues, Issues finder, Projects projects, ProjectAccess access, CurrentUser user,
+    IssueController(IssueRepository issues, IssueLinkRepository links, Issues finder, Projects projects, ProjectAccess access, CurrentUser user,
                     ApplicationEventPublisher events, Workflows workflows, WatcherRepository watchers,
                     VoteRepository votes, CustomFields customFields, IssueEditor editor, @Value("${odt.reporting.zone:UTC}") String zone) {
         this.editor = editor;
@@ -107,6 +112,7 @@ class IssueController {
         this.watchers = watchers;
         this.votes = votes;
         this.issues = issues;
+        this.links = links;
         this.finder = finder;
         this.projects = projects;
         this.access = access;
@@ -169,30 +175,89 @@ class IssueController {
         }
         Set<String> permissions = permissions(project.get());
         if (!permissions.contains("odt.issue.create")) {
-            return Problems.forbidden("Only a developer or an admin of the project creates issues");
+            return Problems.forbidden(NOT_A_CREATOR);
         }
-        Fields fields;
-        String initial;
+        IssueEntity issue;
         try {
-            fields = editor.fields(project.get(), request, Fields.EMPTY);
-            initial = workflows.initialStatus(project.get().id(), fields.type().value());
-            editor.checkRequired(project.get(), null, fields, initial, user.username(), permissions);
+            issue = newIssue(project.get(), request, permissions, Instant.now());
         } catch (InvalidField e) {
             return Problems.badRequest(e.getMessage());
         } catch (InvalidCustom e) {
             return Problems.invalidFields(InvalidCustom.TITLE, e.errors);
         }
+        return ResponseEntity.status(HttpStatus.CREATED).body(view(project.get(), issue, permissions));
+    }
+
+    /**
+     * A copy of an issue in its project, as Jira clones: the summary given (else «CLONE - » and the original's), the
+     * type, priority, assignee, reviewer, due date, description, labels and custom fields. The user is its reporter, the
+     * status the initial one, and it is linked to the original as «clones»; comments, attachments, watchers, votes, the
+     * flag and the plan stay with the original.
+     */
+    @ApiDoc(value = "Copies an issue into a new one of the same project, linked as a clone",
+            answer = IssueView.class, status = 201, project = "odt.issue.create")
+    @PostMapping("/api/issues/{issueKey}/clone")
+    @Transactional
+    ResponseEntity<?> cloneIssue(@PathVariable String issueKey, @RequestBody(required = false) CloneRequest request) {
+        Optional<Found> found = find(issueKey);
+        if (found.isEmpty()) {
+            return Problems.notFound(NOT_FOUND);
+        }
+        ProjectRef project = found.get().project();
+        Set<String> permissions = permissions(project);
+        if (!permissions.contains("odt.issue.browse")) {
+            return Problems.forbidden(NOT_A_MEMBER);
+        }
+        if (!permissions.contains("odt.issue.create")) {
+            return Problems.forbidden(NOT_A_CREATOR);
+        }
+        IssueEntity original = found.get().issue();
+        String summary = request == null || request.summary() == null ? cloneSummary(original.summary()) : request.summary();
+        IssueRequest fields = new IssueRequest(original.type().value(), summary, original.description(),
+                original.priority().value(), original.assignee(),
+                original.dueOn() == null ? null : original.dueOn().toString(), original.reviewer(), original.labels(),
+                original.custom(), null);
         Instant now = Instant.now();
-        IssueEntity issue = new IssueEntity(user.tenantId(), project.get().id(), projects.nextIssueNumber(project.get().id()),
+        IssueEntity clone;
+        try {
+            clone = newIssue(project, fields, permissions, now);
+        } catch (InvalidField e) {
+            return Problems.badRequest(e.getMessage());
+        } catch (InvalidCustom e) {
+            return Problems.invalidFields(InvalidCustom.TITLE, e.errors);
+        }
+        links.saveAndFlush(new IssueLinkEntity(clone.id(), original.id(), LinkType.CLONES, user.username(), now));
+        String cloneKey = key(project, clone);
+        String originalKey = key(project, original);
+        events.publishEvent(new IssueChanged(clone.id(), project.id(), cloneKey, user.username(), now,
+                List.of(new FieldChange("links", null, LinkType.CLONES.relation(true) + " " + originalKey))));
+        events.publishEvent(new IssueChanged(original.id(), project.id(), originalKey, user.username(), now,
+                List.of(new FieldChange("links", null, LinkType.CLONES.relation(false) + " " + cloneKey))));
+        return ResponseEntity.status(HttpStatus.CREATED).body(view(project, clone, permissions));
+    }
+
+    /** «CLONE - » and the summary, within the length of a summary. */
+    static String cloneSummary(String summary) {
+        String text = CLONE_PREFIX + summary;
+        return text.length() <= MAX_SUMMARY ? text : text.substring(0, MAX_SUMMARY);
+    }
+
+    /** A new issue of the project with the fields of the request, checked, in the initial status of its workflow. */
+    private IssueEntity newIssue(ProjectRef project, IssueRequest request, Set<String> permissions, Instant now)
+            throws InvalidField, InvalidCustom {
+        Fields fields = editor.fields(project, request, Fields.EMPTY);
+        String initial = workflows.initialStatus(project.id(), fields.type().value());
+        editor.checkRequired(project, null, fields, initial, user.username(), permissions);
+        IssueEntity issue = new IssueEntity(user.tenantId(), project.id(), projects.nextIssueNumber(project.id()),
                 initial, user.username(), now);
         fields.applyTo(issue, now);
         issues.saveAndFlush(issue);
         watchers.watch(issue.id(), issue.reporter(), now);
         editor.watchAssignee(issue, now);
         editor.watchReviewer(issue, now);
-        events.publishEvent(new IssueCreated(issue.id(), project.get().id(), key(project.get(), issue), user.username(), now,
+        events.publishEvent(new IssueCreated(issue.id(), project.id(), key(project, issue), user.username(), now,
                 Fields.of(issue).changesFrom(Fields.EMPTY)));
-        return ResponseEntity.status(HttpStatus.CREATED).body(view(project.get(), issue, permissions));
+        return issue;
     }
 
     @ApiDoc(value = "An issue", answer = IssueView.class, project = "odt.issue.browse")
@@ -489,7 +554,8 @@ class IssueController {
                 "delete", permissions.contains("odt.issue.delete"),
                 "transition", permissions.contains("odt.issue.transition"),
                 "comment", permissions.contains("odt.issue.comment"),
-                "attach", permissions.contains("odt.issue.attach"));
+                "attach", permissions.contains("odt.issue.attach"),
+                "clone", permissions.contains("odt.issue.create"));
         return new IssueView(key(project, i), project.key(), i.number(), i.type().value(), i.summary(), i.description(),
                 i.status(), i.priority().value(), i.assignee(), i.reporter(), i.dueOn(), i.reviewer(), i.labels(), i.custom(),
                 i.createdAt(), i.updatedAt(), i.version(), watchers.existsByIssueIdAndUsername(i.id(), user.username()),

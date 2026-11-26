@@ -124,6 +124,9 @@
     "patchIssue": {
       "ref": "issues/patch"
     },
+    "cloneIssue": {
+      "ref": "issues/clone"
+    },
     "workflow": {
       "ref": "issues/workflow"
     },
@@ -397,7 +400,9 @@
                                   "blocked_by",
                                   "relates",
                                   "duplicates",
-                                  "duplicated_by"
+                                  "duplicated_by",
+                                  "clones",
+                                  "cloned_by"
                                 ],
                                 "optionKey": "values.relation"
                               },
@@ -1087,6 +1092,62 @@
                         },
                         {
                           "divider": true
+                        },
+                        {
+                          "id": "item-clone",
+                          "label": "{{ t('issues.clone', 'Clone') }}",
+                          "visibleIf": "{{data.issue._perm.clone}}",
+                          "onClick": [
+                            {
+                              "dialog": {
+                                "title": "{{ t('issues.clone_title', 'Clone {key}', {'key': data.issue.key}) }}",
+                                "submitLabel": "{{ t('issues.clone', 'Clone') }}",
+                                "initial": {
+                                  "summary": "{{ 'CLONE - ' + data.issue.summary }}"
+                                },
+                                "fields": [
+                                  {
+                                    "name": "summary",
+                                    "type": "text",
+                                    "label": "{{ t('issues.summary', 'Summary') }}",
+                                    "tooltip": "{{ t('issues.clone_help', 'The copy keeps the fields, labels and custom fields, and is linked to this issue; comments, attachments and watchers stay here') }}",
+                                    "required": true,
+                                    "maxLength": 255
+                                  }
+                                ],
+                                "onSubmit": [
+                                  {
+                                    "call": "cloneIssue",
+                                    "as": "cloned",
+                                    "onError": [
+                                      {
+                                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "toast": "{{ t('issues.cloned', 'Cloned as {key}', {'key': cloned.key}) }}"
+                                  },
+                                  {
+                                    "navigate": "issue-detail",
+                                    "params": {
+                                      "key": "{{params.key}}",
+                                      "issue": "{{cloned.key}}"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "id": "item-print",
+                          "label": "{{ t('issues.print', 'Print') }}",
+                          "onClick": [
+                            {
+                              "print": true
+                            }
+                          ]
                         },
                         {
                           "id": "item-back",

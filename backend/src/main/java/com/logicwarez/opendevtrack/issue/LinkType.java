@@ -17,7 +17,8 @@ enum LinkType {
 
     BLOCKS("blocks", "blocked_by"),
     RELATES("relates", "relates"),
-    DUPLICATES("duplicates", "duplicated_by");
+    DUPLICATES("duplicates", "duplicated_by"),
+    CLONES("clones", "cloned_by");
 
     private final String outward;
     private final String inward;
