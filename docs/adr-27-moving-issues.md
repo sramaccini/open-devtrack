@@ -1,6 +1,6 @@
 # ADR-27: Moving an issue to another project
 
-Status: Proposed (27 November 2026) — F5
+Status: Accepted (27 November 2026; decided by the maintainer) — F5
 
 ## Context
 
@@ -80,9 +80,8 @@ another workflow moves the status there in the same change (ADR-20, B.5). What i
 - **A full Jira wizard (several steps, bulk).** Heavy for one issue; the two dialogs cover the same choices. Later,
   with the bulk actions.
 
-## To be decided by the maintainer
+## Decided by the maintainer
 
-- whether `odt.issue.move` is a new permission (as above) or the move is allowed to whoever has `odt.issue.delete`
-  in the source (one permission less, admins only);
-- whether watchers who do not see the target are removed rather than kept silent;
-- whether a move to a project of another tenant is ever possible (this ADR says no: tenants are separate, ADR-09).
+- `odt.issue.move` is a new project permission, as in point 2, not `odt.issue.delete`.
+- Watchers who do not see the target stay in the list and get no message while they cannot see it, as in point 5.
+- A move to a project of another tenant is never possible: tenants are separate (ADR-09).
