@@ -26,7 +26,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 /**
- * Validates the documents against the schema of their kind (screen, datasources, navigation, theme, messages). The schemas
+ * Validates the documents against the schema of their kind (screen, datasources, navigation, theme, messages, assets). The schemas
  * are those of the pinned Quadrava version, in {@code classpath:quadrava/schemas} ({@code backend/tools/sync-quadrava-schemas.sh}).
  * References between schemas ({@code datasources} uses the data source of {@code screen}) are read from the classpath,
  * never from the network; their base is the one of the {@code $id} of the schemas, which changed between versions.

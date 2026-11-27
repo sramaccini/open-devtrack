@@ -38,6 +38,10 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Changed
 
+- **Brand**: the logos and icons of the themes come with the screens, as the asset pack `odt` in the registry
+  (`ui/assets/odt.json`, made from `brand/pack.json`), on **Quadrava 0.31.0** (runtime image, CLI, schemas and kits;
+  asset packs, ADR-29 of Quadrava). The runtime no longer mounts `brand/svg` and `brand/png`: an installation without
+  Compose drops those two mounts. The registry accepts the document kind `assets` (registry contract 0.8) (#60).
 - **Boards and issue list**: a flagged issue stands out, as in Jira: its card on the boards and its row in the list
   of the issues of a project get a yellow edge and background with the flag, named «Flagged» for screen readers (the
   red label of the cards gives way to it; the backlog keeps the label). **Quadrava 0.30.0** (runtime image, CLI and

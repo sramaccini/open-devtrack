@@ -13,7 +13,7 @@ browser ──https──▶ Keycloak (login) ◀── OIDC, back-channel logou
 - **Back end**: the image `ghcr.io/sramaccini/opendevtrack-backend` of a release, signed, with its SBOM
   ([operations](../operations/README.md), «Verifying the image»). It holds the API, the BFF of the browser (login,
   session, CSRF), the registry of the screen definitions, and creates its schemas at each start (Flyway).
-- **Quadrava runtime**: `ghcr.io/sramaccini/quadrava-runtime` at the version the release pins (0.30.0). It serves the
+- **Quadrava runtime**: `ghcr.io/sramaccini/quadrava-runtime` at the version the release pins (0.31.0). It serves the
   pages and loads the screens of `ui/` from the registry of the back end.
 - **Proxy**: ends TLS and gives the browser one origin. The paths of the BFF go to the back end and everything else to
   the runtime, so the back end sees `X-Forwarded-Proto: https` and builds its addresses on https.
@@ -138,8 +138,8 @@ The same parts in another platform, a Kubernetes cluster for example (a Helm cha
   the platform. Its port 8080 is reachable only from the proxy, and the management port only from Prometheus.
 - The runtime with `QUADRAVA_REGISTRY_APP=opendevtrack`, `QUADRAVA_REGISTRY_ENV=production`,
   `QUADRAVA_NAVIGATION=main`, `QUADRAVA_THEMES=odt-light,odt-dark,polar`, `QUADRAVA_LANGUAGES=en,it`,
-  `QUADRAVA_TENANT_SWITCH_URL=/bff/tenant` and `QUADRAVA_HSTS`. Mount `brand/svg` at `/usr/share/nginx/html/odt-brand`
-  and `brand/png` at `/usr/share/nginx/html/odt-brand-png`.
+  `QUADRAVA_TENANT_SWITCH_URL=/bff/tenant` and `QUADRAVA_HSTS`. The logo and the icons come with the screens, in
+  the asset pack `odt` of the registry: nothing to mount.
 - A proxy or ingress with the routing of the Caddyfile. Event streams must not be buffered, and the proxy must set
   `X-Forwarded-Proto` and `X-Forwarded-Host`.
 - The realm, the first administrator and the screens as above: the SQL of `odt.sh first-admin` and the script

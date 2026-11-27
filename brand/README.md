@@ -23,6 +23,7 @@ with the uses allowed in [TRADEMARKS.md](../TRADEMARKS.md). A modified fork remo
 | `svg/odt-favicon.svg` | Simplified icon without the nodes, up to 48 px |
 | `png/` | The same files rendered: app icon 64–1024 px, `apple-touch-icon.png` (180 px), favicons 16/32/48 px, logos 1200 px wide |
 | `favicon.ico` | Favicon with 16, 32 and 48 px images |
+| `pack.json` | The files the `ui/` themes use, as the Quadrava asset pack `odt` (`ui/assets/odt.json`, see `ui/README.md`) |
 
 Colour variants: no suffix for light backgrounds, `-dark` for dark backgrounds, `-black` and `-white` for one-colour
 printing.

@@ -32,7 +32,9 @@ public final class Model {
         /** Data sources shared by the screens of the application (the screens refer to them with {@code ref}). */
         DATASOURCES("datasources"),
         /** Translation catalogue of one language: the identifier is the language (it, en, pt-br). */
-        MESSAGES("messages");
+        MESSAGES("messages"),
+        /** Asset pack (ADR-29 of Quadrava): icons and images, already cleaned by the CLI; the identifier is its name. */
+        ASSETS("assets");
 
         private final String idProperty;
 
@@ -40,7 +42,7 @@ public final class Model {
             this.idProperty = idProperty;
         }
 
-        /** Property of the content with the identifier of the document (`screen`, `navigation`, `theme`, `messages`). */
+        /** Property of the content with the identifier of the document (`screen`, `navigation`, `theme`, `messages`, `assets`). */
         public String idProperty() {
             return idProperty;
         }

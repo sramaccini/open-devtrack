@@ -5,13 +5,13 @@
   "mode": "dark",
   "brand": {
     "name": "OpenDevTrack",
-    "logo": "odt-brand/odt-logo-horizontal-dark.svg",
-    "logoOnDark": "odt-brand/odt-logo-horizontal-dark.svg",
-    "icon": "odt-brand/odt-mark-dark.svg",
+    "logo": "asset:odt/logo-dark",
+    "logoOnDark": "asset:odt/logo-dark",
+    "icon": "asset:odt/mark-dark",
     "icons": {
-      "svg": "odt-brand/odt-favicon.svg",
-      "png32": "odt-brand-png/favicon-32.png",
-      "appleTouch": "odt-brand-png/apple-touch-icon.png"
+      "svg": "asset:odt/favicon",
+      "png32": "asset:odt/favicon-32",
+      "appleTouch": "asset:odt/apple-touch-icon"
     },
     "height": 32
   },

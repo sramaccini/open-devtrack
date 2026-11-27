@@ -12,7 +12,7 @@ target="$(cd "$(dirname "$0")/.." && pwd)/src/main/resources/quadrava/schemas"
 base="https://raw.githubusercontent.com/sramaccini/quadrava/v$version/frontend/projects/schema/src/lib/schemas"
 
 mkdir -p "$target"
-for kind in screen datasources navigation theme messages; do
+for kind in screen datasources navigation theme messages assets; do
   curl -fsS -o "$target/$kind.schema.json" "$base/$kind.schema.json"
 done
 echo "$version" > "$target/QUADRAVA_VERSION"

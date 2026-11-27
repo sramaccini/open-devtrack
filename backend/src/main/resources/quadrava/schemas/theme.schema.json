@@ -45,22 +45,22 @@
         "logo": {
           "type": "string",
           "maxLength": 100000,
-          "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
-          "description": "Image of the logo in the expanded side bar (it usually holds the name too).",
+          "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|asset:[a-z0-9]+(-[a-z0-9]+)*/[a-z0-9]+(-[a-z0-9]+)*|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
+          "description": "Image of the logo in the expanded side bar (it usually holds the name too). Also an image of an asset pack, asset:pack/name.",
           "contentMediaType": "image/*"
         },
         "logoOnDark": {
           "type": "string",
           "maxLength": 100000,
-          "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
-          "description": "Variant of the logo for a dark side bar (sider tone dark); the logo if absent.",
+          "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|asset:[a-z0-9]+(-[a-z0-9]+)*/[a-z0-9]+(-[a-z0-9]+)*|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
+          "description": "Variant of the logo for a dark side bar (sider tone dark); the logo if absent. Also an image of an asset pack, asset:pack/name.",
           "contentMediaType": "image/*"
         },
         "icon": {
           "type": "string",
           "maxLength": 100000,
-          "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
-          "description": "Square image for the collapsed side bar; without it the collapsed bar shows the logo, reduced.",
+          "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|asset:[a-z0-9]+(-[a-z0-9]+)*/[a-z0-9]+(-[a-z0-9]+)*|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
+          "description": "Square image for the collapsed side bar; without it the collapsed bar shows the logo, reduced. Also an image of an asset pack, asset:pack/name.",
           "contentMediaType": "image/*"
         },
         "icons": {
@@ -72,22 +72,22 @@
             "svg": {
               "type": "string",
               "maxLength": 100000,
-              "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
-              "description": "Icon in SVG (any size), used by most browsers.",
+              "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|asset:[a-z0-9]+(-[a-z0-9]+)*/[a-z0-9]+(-[a-z0-9]+)*|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
+              "description": "Icon in SVG (any size), used by most browsers. Also an image of an asset pack, asset:pack/name.",
               "contentMediaType": "image/*"
             },
             "png32": {
               "type": "string",
               "maxLength": 100000,
-              "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
-              "description": "Icon in PNG, 32 x 32 px, for browsers without SVG icons.",
+              "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|asset:[a-z0-9]+(-[a-z0-9]+)*/[a-z0-9]+(-[a-z0-9]+)*|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
+              "description": "Icon in PNG, 32 x 32 px, for browsers without SVG icons. Also an image of an asset pack, asset:pack/name.",
               "contentMediaType": "image/*"
             },
             "appleTouch": {
               "type": "string",
               "maxLength": 100000,
-              "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
-              "description": "Icon in PNG, 180 x 180 px, for the home screen of iOS and iPadOS.",
+              "pattern": "^(https://[^\\s]+|data:image/(png|jpeg|gif|webp|svg\\+xml);base64,[A-Za-z0-9+/=]+|asset:[a-z0-9]+(-[a-z0-9]+)*/[a-z0-9]+(-[a-z0-9]+)*|/?[A-Za-z0-9_-][A-Za-z0-9_\\-./%]*)$",
+              "description": "Icon in PNG, 180 x 180 px, for the home screen of iOS and iPadOS. Also an image of an asset pack, asset:pack/name.",
               "contentMediaType": "image/*"
             }
           }

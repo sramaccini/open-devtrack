@@ -1,0 +1,14 @@
+{
+  "name": "odt",
+  "version": "1.0.0",
+  "license": "All rights reserved, OpenDevTrack trademarks (TRADEMARKS.md)",
+  "description": "The OpenDevTrack brand for the themes of ui/: logos, mark and browser-tab icons, the files of brand/ as they are.",
+  "images": {
+    "logo": { "file": "png/odt-logo-horizontal.png", "alt": "OpenDevTrack" },
+    "logo-dark": { "file": "png/odt-logo-horizontal-dark.png", "alt": "OpenDevTrack" },
+    "mark-dark": { "file": "svg/odt-mark-dark.svg", "alt": "OpenDevTrack" },
+    "favicon": { "file": "svg/odt-favicon.svg", "alt": "OpenDevTrack" },
+    "favicon-32": { "file": "png/favicon-32.png", "alt": "OpenDevTrack" },
+    "apple-touch-icon": { "file": "png/apple-touch-icon.png", "alt": "OpenDevTrack" }
+  }
+}

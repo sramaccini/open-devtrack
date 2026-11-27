@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://quadrava.logicwarez.com/schemas/assets.schema.json",
+  "title": "Asset pack",
+  "description": "Icons and images of an application (ADR-29), already cleaned by the CLI: icons are geometry only, images are base64 content. Published with only the entries the application uses. Icons are named pack/name, images asset:pack/name.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "assets",
+    "version",
+    "license"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0",
+      "description": "Version of the format."
+    },
+    "assets": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "maxLength": 40,
+      "description": "Name of the pack, the namespace of its entries (acme in acme/truck), which is also the identifier of the document in the registry."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+([-+][0-9A-Za-z.-]+)?$",
+      "description": "Version of the pack as its authors released it, for example 1.2.0."
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Licence of the content, for example \"MIT\" or \"Proprietary, ACME S.p.A.\", so that the notices of the application can name it."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "What the pack holds, for the people who choose it."
+    },
+    "icons": {
+      "type": "object",
+      "maxProperties": 2000,
+      "propertyNames": {
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+        "maxLength": 60
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "viewBox",
+          "paths"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "viewBox": {
+            "type": "string",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)? -?[0-9]+(\\.[0-9]+)? [0-9]+(\\.[0-9]+)? [0-9]+(\\.[0-9]+)?$",
+            "description": "Coordinates of the drawing of the icon: min-x, min-y, width and height, for example \"0 0 1024 1024\"."
+          },
+          "paths": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 64,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8192,
+              "pattern": "^[MmLlHhVvCcSsQqTtAaZz0-9eE.,+\\- ]+$"
+            },
+            "description": "Path data of the icon (the d attribute of an SVG path), drawn in the current text colour. Only geometry: the CLI turns the other shapes into paths and drops the rest."
+          },
+          "fillRule": {
+            "enum": [
+              "nonzero",
+              "evenodd"
+            ],
+            "description": "How the paths fill their overlaps (nonzero if absent)."
+          },
+          "filled": {
+            "type": "object",
+            "required": [
+              "viewBox",
+              "paths"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "viewBox": {
+                "type": "string",
+                "pattern": "^-?[0-9]+(\\.[0-9]+)? -?[0-9]+(\\.[0-9]+)? [0-9]+(\\.[0-9]+)? [0-9]+(\\.[0-9]+)?$",
+                "description": "Coordinates of the drawing of the filled form: min-x, min-y, width and height, for example \"0 0 1024 1024\"."
+              },
+              "paths": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 64,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 8192,
+                  "pattern": "^[MmLlHhVvCcSsQqTtAaZz0-9eE.,+\\- ]+$"
+                },
+                "description": "Path data of the filled form (the d attribute of an SVG path), drawn in the current text colour. Only geometry: the CLI turns the other shapes into paths and drops the rest."
+              },
+              "fillRule": {
+                "enum": [
+                  "nonzero",
+                  "evenodd"
+                ],
+                "description": "How the paths fill their overlaps (nonzero if absent)."
+              }
+            },
+            "description": "Filled form of the icon, drawn for a pressed toggle."
+          },
+          "keywords": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "string",
+              "maxLength": 40
+            },
+            "description": "Words that find the icon in the icon picker of Studio, for example delivery, shipping."
+          }
+        }
+      },
+      "description": "Icons by name: in the JSON of the screens and the navigation they are named pack/name, for example acme/truck."
+    },
+    "images": {
+      "type": "object",
+      "maxProperties": 500,
+      "propertyNames": {
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+        "maxLength": 60
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "type",
+          "data"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "enum": [
+              "image/png",
+              "image/jpeg",
+              "image/webp",
+              "image/gif",
+              "image/svg+xml"
+            ],
+            "description": "Media type of the image."
+          },
+          "data": {
+            "type": "string",
+            "minLength": 4,
+            "maxLength": 280000,
+            "pattern": "^[A-Za-z0-9+/]+={0,2}$",
+            "description": "Content of the image in base64 (at most about 200 kB); an SVG is cleaned by the CLI like the icons."
+          },
+          "alt": {
+            "type": "string",
+            "maxLength": 300,
+            "description": "Default text alternative of the image, used when the screen gives none."
+          }
+        }
+      },
+      "description": "Images by name, for example the illustration of an empty state or a logo: addressed as asset:pack/name."
+    }
+  }
+}

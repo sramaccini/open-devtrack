@@ -22,3 +22,6 @@ Thumbs.db
 e2e/**/.work/
 stack/.work/
 deploy/demo/.work/
+
+# The zip of the brand asset pack, rebuilt into ui/assets/odt.json (ui/README.md)
+/odt-brand.zip

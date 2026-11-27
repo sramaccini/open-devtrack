@@ -83,7 +83,7 @@ services:
   # The screens: the Quadrava runtime with the definitions of ui/ published in the registry of the back end
   # (environment production). The proxy sends the paths of the BFF to the back end, so QUADRAVA_BFF_URL is not set.
   runtime:
-    image: ghcr.io/sramaccini/quadrava-runtime:0.30.0
+    image: ghcr.io/sramaccini/quadrava-runtime:0.31.0
     restart: unless-stopped
     environment:
       QUADRAVA_REGISTRY_APP: opendevtrack
@@ -94,10 +94,6 @@ services:
       QUADRAVA_DEFAULT_LANGUAGE: en
       QUADRAVA_TENANT_SWITCH_URL: /bff/tenant
       QUADRAVA_HSTS: ${QUADRAVA_HSTS:-max-age=31536000}
-    volumes:
-      # The logo and the icons of brand/, as they are (AGENTS.md §6)
-      - ../../brand/svg:/usr/share/nginx/html/odt-brand:ro
-      - ../../brand/png:/usr/share/nginx/html/odt-brand-png:ro
 
   # TLS and the one origin of the browser (profile proxy, Caddyfile): certificates from Let's Encrypt for public
   # names, from a local authority of its own for *.localhost.

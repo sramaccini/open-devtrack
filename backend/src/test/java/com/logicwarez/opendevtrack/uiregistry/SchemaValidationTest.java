@@ -27,10 +27,11 @@ class SchemaValidationTest {
     @Test
     void everyDocumentOfTheUiProjectIsValid() throws IOException {
         int checked = 0;
-        for (String folder : List.of("screens", "themes", "datasources")) {
+        for (String folder : List.of("screens", "themes", "datasources", "assets")) {
             Kind kind = switch (folder) {
                 case "screens" -> Kind.SCREEN;
                 case "themes" -> Kind.THEME;
+                case "assets" -> Kind.ASSETS;
                 default -> Kind.DATASOURCES;
             };
             if (!Files.isDirectory(UI.resolve(folder))) {
@@ -71,6 +72,17 @@ class SchemaValidationTest {
         // An incomplete data source is rejected: the reference to screen.schema.json was resolved from the classpath.
         assertThat(validation.validate(Kind.DATASOURCES, """
                 {"schemaVersion":"1.0","datasources":"x","sources":{"list":{"url":"/api"}}}""")).isNotEmpty();
+    }
+
+    @Test
+    void assetPacksAreGeometryAndContentOnly() {
+        assertThat(validation.validate(Kind.ASSETS, """
+                {"schemaVersion":"1.0","assets":"probes","version":"1.0.0","license":"MIT",
+                 "icons":{"probe":{"viewBox":"0 0 24 24","paths":["M2 2h20v20H2z"]}}}""")).isEmpty();
+        // Markup in the path data is refused, as by the registry conformance kit of Quadrava 0.31.0.
+        assertThat(validation.validate(Kind.ASSETS, """
+                {"schemaVersion":"1.0","assets":"probes","version":"1.0.0","license":"MIT",
+                 "icons":{"probe":{"viewBox":"0 0 24 24","paths":["<script>"]}}}""")).isNotEmpty();
     }
 
     @Test
