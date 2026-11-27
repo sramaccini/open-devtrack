@@ -84,6 +84,11 @@
       "id": "my-issues",
       "type": "serverDataTable",
       "source": "myIssues",
+      "highlight": {
+        "when": "{{ has(row.flag) && row.flag == 'impediment' }}",
+        "icon": "flag",
+        "label": "{{ t('values.flag.impediment', 'Flagged') }}"
+      },
       "pageSize": 10,
       "columns": [
         {

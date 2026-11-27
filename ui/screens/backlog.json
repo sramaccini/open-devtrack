@@ -238,6 +238,11 @@
       "id": "backlog-issues",
       "type": "serverDataTable",
       "source": "issues",
+      "highlight": {
+        "when": "{{ has(row.flag) && row.flag == 'impediment' }}",
+        "icon": "flag",
+        "label": "{{ t('values.flag.impediment', 'Flagged') }}"
+      },
       "pageSize": 50,
       "groupBy": [
         "sprint"
@@ -272,15 +277,6 @@
           "label": "{{ t('issues.summary', 'Summary') }}",
           "sortable": true,
           "filter": "text"
-        },
-        {
-          "field": "flag",
-          "label": "{{ t('issues.flag', 'Flag') }}",
-          "format": "badge",
-          "badges": {
-            "impediment": "danger"
-          },
-          "valueKey": "values.flag"
         },
         {
           "field": "status",

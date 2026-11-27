@@ -1,7 +1,7 @@
 # OpenDevTrack screens
 
 The front end of OpenDevTrack is this Quadrava project: screens, navigation, themes and translations, as JSON documents
-validated by the schemas of the pinned Quadrava version (0.31.0, ADR-01). No Angular code: the runtime image of Quadrava
+validated by the schemas of the pinned Quadrava version (0.32.0, ADR-01). No Angular code: the runtime image of Quadrava
 loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 | Path | Registry kind | What |
@@ -74,14 +74,14 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 ## Publishing
 
-The Quadrava CLI (`@sramaccini/quadrava-cli@0.31.0`, the version of the runtime) is on GitHub Packages: the `.npmrc`
+The Quadrava CLI (`@sramaccini/quadrava-cli@0.32.0`, the version of the runtime) is on GitHub Packages: the `.npmrc`
 of the repository maps `@sramaccini` there, and npm needs a token with `read:packages` for `npm.pkg.github.com` in
 the user config (`~/.npmrc`; in CI, `NODE_AUTH_TOKEN`). From the root of the repository, with a Keycloak access token
 of the client `opendevtrack-tools` in `QUADRAVA_TOKEN`:
 
 ```bash
-npx --yes @sramaccini/quadrava-cli@0.31.0 validate ui
-npx --yes @sramaccini/quadrava-cli@0.31.0 publish ui --registry http://localhost:28080 --app opendevtrack --env development
+npx --yes @sramaccini/quadrava-cli@0.32.0 validate ui
+npx --yes @sramaccini/quadrava-cli@0.32.0 publish ui --registry http://localhost:28080 --app opendevtrack --env development
 ```
 
 The same command publishes to `testing` and `production`: the registry has no protected environments (ADR-12), the
@@ -130,16 +130,16 @@ The title of the tab is `brand.name` of the active theme and its icons are `bran
 ## Brand asset pack
 
 `assets/odt.json` is the asset pack `odt` (ADR-29 of Quadrava, 0.31.0) made from `brand/pack.json`, which lists the
-files of `brand/` the themes use (logos, mark, tab icons) as images. The Quadrava CLI keeps PNG files as they are and
-rewrites SVG files with svgo, keeping colours and masks: the mark and the favicon come out pixel for pixel the same,
-the outlined lettering of the logos does not, so the logos are the PNG renders of `brand/png`. `quadrava publish`
+files of `brand/` the themes use (logos, mark, tab icons) as images. The Quadrava CLI keeps them as they are: PNG
+files byte for byte and, from 0.32.0, SVG files with their drawing untouched (it removes only scripts, event
+attributes, links and embedded rasters, which the files of `brand/` do not have). `quadrava publish`
 publishes the pack to the registry with the entries the themes use, so the runtime needs no files mounted. After a
 change in `brand/` or `brand/pack.json`, rebuild it from a zip of the folder (`zip -r` on Linux and macOS,
 `tar -a -cf` on Windows):
 
 ```
 cd brand && zip -r ../odt-brand.zip pack.json svg png && cd ..
-npx --yes @sramaccini/quadrava-cli@0.31.0 assets add odt-brand.zip ui
+npx --yes @sramaccini/quadrava-cli@0.32.0 assets add odt-brand.zip ui
 ```
 
 ## Workflow
@@ -160,7 +160,8 @@ the screen says so. Statuses and transitions outside the catalogues are shown by
 `board` is the generic screen of ADR-06 (params `board`): the `kanban` of Quadrava with the columns and the cards of
 the back end (`columnsFrom`), one component whose lanes follow `data.board.lane`
 (`laneField` and `lanes` as expressions, Q12); a flagged card has a `highlight` (Quadrava 0.30.0, Q46), as
-the rows of `issue-list` (`flagged` in the rows of the list). `backlog` (params `key`) is a search (ADR-26): the query field
+the rows of `issue-list` (`flagged` in the rows of the list) and, from Quadrava 0.32.0 (Q50), those of the
+`serverDataTable` of `backlog`, `search` and `dashboard` (`flag` in the rows of the search). `backlog` (params `key`) is a search (ADR-26): the query field
 of `search`, filled with the sprints not completed and the backlog of the project in their order, and a
 `serverDataTable` on `search/search` grouped by `sprint`, with the row actions «Move to sprint…» (a `lookup` on
 `boards/planColumns`, the sprints of the row's project) and «To the top», «To the bottom» (`boards/backlogPlan`),

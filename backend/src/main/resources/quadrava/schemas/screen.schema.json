@@ -2537,6 +2537,10 @@
               "refreshable": {
                 "type": "boolean",
                 "description": "«Refresh» button in the table footer, on the left (pages are on the right): it reloads the data source like the refresh step. Absent if false or not given."
+              },
+              "highlight": {
+                "$ref": "#/$defs/rowHighlight",
+                "description": "Highlights the rows for which when is true, for example the flagged issues of a backlog: the row takes the colour of tone and its first cell an icon with a name for screen readers. Group rows are never highlighted."
               }
             }
           }
@@ -2610,6 +2614,10 @@
               "refreshable": {
                 "type": "boolean",
                 "description": "«Refresh» button in the table footer, on the left (pages are on the right): it reloads the data source like the refresh step. Absent if false or not given."
+              },
+              "highlight": {
+                "$ref": "#/$defs/rowHighlight",
+                "description": "Highlights the rows of the page for which when is true, for example the flagged issues of a backlog: the row takes the colour of tone and its first cell an icon with a name for screen readers. Group rows are never highlighted."
               },
               "selection": {
                 "type": "object",

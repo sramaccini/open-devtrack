@@ -247,6 +247,11 @@ class SearchApiTest {
         assertThat(keys(mario, "flagged = Impediment")).containsExactly("ODT-2");
         assertThat(keys(mario, "flagged IS NOT EMPTY")).containsExactly("ODT-2");
         assertThat(keys(mario, "flagged IS EMPTY ORDER BY key")).containsExactly("ODT-1", "ODT-3", "WEB-1");
+        // The rows carry the flag, for the highlight of the tables.
+        mvc.perform(as(post("/api/search"), mario).content("{\"query\":\"key IN (ODT-1, ODT-2) ORDER BY key\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items[0].flag").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.items[1].flag").value("impediment"));
         mvc.perform(as(post("/api/search"), mario).content("{\"query\":\"flagged = yes\"}"))
                 .andExpect(status().isBadRequest());
         mvc.perform(as(delete("/api/issues/ODT-2/flag"), mario)).andExpect(status().isNoContent());

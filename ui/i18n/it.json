@@ -680,7 +680,6 @@
   "issues.remove_vote": "Rimuovi voto",
   "values.issue_field.flagged": "Contrassegnata",
   "values.flag.impediment": "Contrassegnata",
-  "issues.flag": "Contrassegno",
   "issues.add_comment": "Aggiungi commento",
   "issues.votes": "Voti"
 }

@@ -49,8 +49,7 @@ that shows each user their own cards. The board says when it has a filter.
   under «Move to row».
 
 A card shows the summary, the key, the type and priority, the story points and the initial of the assignee; a flagged
-issue ([Issues](issues.md#flag-and-votes)) stands out with a yellow edge and the flag, and has a red «Flagged» label in
-the backlog. Clicking
+issue ([Issues](issues.md#flag-and-votes)) stands out with a yellow edge and the flag, also in the backlog. Clicking
 the summary opens the issue. Moving cards needs the role of developer or admin.
 
 ## The backlog

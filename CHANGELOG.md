@@ -38,13 +38,18 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Changed
 
+- **Backlog, search and dashboard**: a flagged issue stands out there too, as on the boards: its row gets the yellow
+  edge and background with the flag, in place of the red label of the backlog. The rows of `POST /api/search` carry
+  `flag` (`impediment` or null). **Quadrava 0.32.0** (runtime image, CLI, schemas and kits): `highlight` on
+  `dataTable` and `serverDataTable` (Q50), and SVG images of asset packs kept as they are, so the logos of the
+  themes are again the SVG files of `brand/` (#59).
 - **Brand**: the logos and icons of the themes come with the screens, as the asset pack `odt` in the registry
   (`ui/assets/odt.json`, made from `brand/pack.json`), on **Quadrava 0.31.0** (runtime image, CLI, schemas and kits;
   asset packs, ADR-29 of Quadrava). The runtime no longer mounts `brand/svg` and `brand/png`: an installation without
   Compose drops those two mounts. The registry accepts the document kind `assets` (registry contract 0.8) (#60).
 - **Boards and issue list**: a flagged issue stands out, as in Jira: its card on the boards and its row in the list
   of the issues of a project get a yellow edge and background with the flag, named «Flagged» for screen readers (the
-  red label of the cards gives way to it; the backlog keeps the label). **Quadrava 0.30.0** (runtime image, CLI and
+  red label of the cards gives way to it). **Quadrava 0.30.0** (runtime image, CLI and
   schemas): `highlight` on `kanban` and `table` (Q46), and the Ant Design icons loaded only when shown.
 - **Quadrava 0.29.0** (runtime image, CLI and schemas): the `copy` and `copyLink` steps (Q45), every Ant Design icon by
   name, and an emptied number of a form sent as null (the back end already reads it as a field not given).
@@ -68,6 +73,8 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Fixed
 
+- **Backlog**: the red «Flagged» label of a flagged issue never showed, because the rows of the search have no flag;
+  they have it now, and the label became the highlight of the row.
 - **Telemetry**: the traces and logs that the screens send no longer get 404: the back end implements the
   telemetry contract of Quadrava (`/telemetry/v1/traces`, `/telemetry/v1/logs`), masks personal data again and
   forwards them to the collector of `ODT_TELEMETRY_OTLP_ENDPOINT`, if set (#57).
