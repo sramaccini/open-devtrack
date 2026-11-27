@@ -136,6 +136,9 @@
     "moveTargets": {
       "ref": "issues/moveTargets"
     },
+    "moveStatuses": {
+      "ref": "issues/moveStatuses"
+    },
     "shareIssue": {
       "ref": "issues/share"
     },
@@ -1281,6 +1284,18 @@
                                     ],
                                     "optionKey": "values.issue_type",
                                     "required": true
+                                  },
+                                  {
+                                    "name": "status",
+                                    "type": "lookup",
+                                    "label": "{{ t('issues.status', 'Status') }}",
+                                    "tooltip": "{{ t('issues.move_project_status_help', 'Empty: the status with the same name in the workflow of the project, else one of the same kind; the first proposed is that one') }}",
+                                    "lookup": {
+                                      "source": "moveStatuses",
+                                      "valueField": "code",
+                                      "labelField": "name",
+                                      "minChars": 0
+                                    }
                                   }
                                 ],
                                 "onSubmit": [
@@ -1291,7 +1306,8 @@
                                       "issueType": "{{form.type}}",
                                       "version": "{{data.issue.version}}",
                                       "drop": null,
-                                      "dryRun": true
+                                      "dryRun": true,
+                                      "targetStatus": "{{form.status}}"
                                     },
                                     "as": "preview",
                                     "onError": [
@@ -1315,7 +1331,8 @@
                                       "issueType": "{{form.type}}",
                                       "version": "{{data.issue.version}}",
                                       "drop": "{{preview.dropped}}",
-                                      "dryRun": false
+                                      "dryRun": false,
+                                      "targetStatus": "{{form.status}}"
                                     },
                                     "as": "movedIssue",
                                     "onError": [

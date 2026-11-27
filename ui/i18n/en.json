@@ -96,6 +96,7 @@
   "issues.move_project": "Move",
   "issues.move_project_title": "Move {key}",
   "issues.move_project_target": "Project",
+  "issues.move_project_status_help": "Empty: the status with the same name in the workflow of the project, else one of the same kind; the first proposed is that one",
   "issues.move_project_help": "The issue gets a key of that project; its old key keeps leading to it. Comments, attachments, history, links and watchers follow it",
   "issues.move_project_confirm": "These values cannot be kept in {project} and will be lost: {lost}. Move the issue?",
   "issues.move_project_done": "Moved as {key}",

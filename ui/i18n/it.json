@@ -96,6 +96,7 @@
   "issues.move_project": "Sposta",
   "issues.move_project_title": "Sposta {key}",
   "issues.move_project_target": "Progetto",
+  "issues.move_project_status_help": "Vuoto: lo stato con lo stesso nome nel workflow del progetto, altrimenti uno dello stesso tipo; il primo proposto è quello",
   "issues.move_project_help": "La issue prende una chiave di quel progetto; la vecchia chiave continua a portare a lei. Commenti, allegati, storia, collegamenti e osservatori la seguono",
   "issues.move_project_confirm": "Questi valori non possono restare in {project} e andranno persi: {lost}. Spostare la issue?",
   "issues.move_project_done": "Spostata come {key}",

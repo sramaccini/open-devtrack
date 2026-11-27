@@ -1950,6 +1950,117 @@
         "x-project-permissions" : [ "odt.issue.move" ]
       }
     },
+    "/api/issues/{issueKey}/move/statuses" : {
+      "get" : {
+        "operationId" : "move.statuses",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "project",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "type",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/MoveStatus"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "The statuses an issue can take in a target project for a type, the one chosen by default first",
+        "tags" : [ "issue" ],
+        "x-internal" : true,
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.move" ]
+      }
+    },
+    "/api/issues/{issueKey}/move/targets" : {
+      "get" : {
+        "operationId" : "move.targets",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/MoveTarget"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "The projects an issue can move to: those where the user creates issues, not its own",
+        "tags" : [ "issue" ],
+        "x-internal" : true,
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.move" ]
+      }
+    },
     "/api/issues/{issueKey}/plan" : {
       "get" : {
         "operationId" : "backlog.plan",
@@ -7480,6 +7591,31 @@
             "type" : "string"
           },
           "to" : {
+            "type" : "string"
+          }
+        }
+      },
+      "MoveStatus" : {
+        "type" : "object",
+        "properties" : {
+          "category" : {
+            "type" : "string"
+          },
+          "code" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        }
+      },
+      "MoveTarget" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "name" : {
             "type" : "string"
           }
         }

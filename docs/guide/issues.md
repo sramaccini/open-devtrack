@@ -164,11 +164,11 @@ are in it.
 ### Move
 
 An admin of the project moves an issue to another project with «Move» in «…», as in Jira, if they can create issues
-there. The dialog asks the project and the type. The issue takes the next key of that project (WEB-16 becomes MOB-4);
+there. The dialog offers only those projects, then the type and, if you want, the status there. The issue takes the next key of that project (WEB-16 becomes MOB-4);
 the old key keeps leading to it, in links, bookmarks, mentions and the search (`key = WEB-16`).
 
-- The status becomes the one with the same name in the workflow of the target, else the first of the same category,
-  else its first status.
+- Without a status chosen, it becomes the one with the same name in the workflow of the target, else the first of the
+  same category, else its first status; the dialog proposes that one first.
 - Custom fields that the target has with the same key and type keep their value; the others are lost.
 - The assignee and the reviewer who are not members of the target are cleared.
 - The issue leaves its sprint and goes to the bottom of the backlog of the target.

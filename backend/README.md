@@ -128,6 +128,7 @@ member other than the assignee; ADR-19). `GET /api/issues/{key}/export?format=js
 OpenDocument document written without a library (`IssueDocuments`). The reporter, the assignee and the reviewer watch the issue; an admin (`odt.reporter.edit`) changes the reporter. `POST /api/issues/{key}/move` (ADR-27, `IssueMover`) moves an
 issue to another project with `odt.issue.move` there and `odt.issue.create` in the target: a new number, the old key
 in `odt_issue.moved_key`, which `Issues.findEntity` and `shared.IssueKeys` (for the checks of authz-library) follow;
+the dialog reads `GET /api/issues/{key}/move/targets` and `/move/statuses` (`MoveController`);
 one event `IssueMoved` that agile, search, reporting, audit, notification, integration and collaboration read
 with a `PATCH` naming it, to a member. Only the members
 of the project see them;

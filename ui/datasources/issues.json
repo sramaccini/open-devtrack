@@ -63,6 +63,7 @@
       "body": {
         "project": "{{target}}",
         "type": "{{issueType}}",
+        "status": "{{targetStatus}}",
         "version": "{{version}}",
         "fields": {
           "drop": "{{drop}}"
@@ -73,7 +74,19 @@
     "moveTargets": {
       "type": "rest",
       "method": "GET",
-      "url": "/api/projects"
+      "url": "/api/issues/{{params.issue}}/move/targets",
+      "params": {
+        "q": "{{search}}"
+      }
+    },
+    "moveStatuses": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/issues/{{params.issue}}/move/statuses",
+      "params": {
+        "project": "{{form.project}}",
+        "type": "{{form.type}}"
+      }
     },
     "share": {
       "type": "rest",

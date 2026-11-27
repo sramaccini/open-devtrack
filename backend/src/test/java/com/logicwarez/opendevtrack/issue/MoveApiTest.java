@@ -137,6 +137,29 @@ class MoveApiTest {
     }
 
     @Test
+    void theDialogOffersTheOtherProjectsAndTheStatusesThere() throws Exception {
+        // Not ODT itself, not BET of the other tenant
+        mvc.perform(as(get("/api/issues/ODT-1/move/targets"), mario)).andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].key", contains("APP")))
+                .andExpect(jsonPath("$[0].name").value("App"));
+        mvc.perform(as(get("/api/issues/ODT-1/move/targets?q=open"), mario)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+        mvc.perform(as(get("/api/issues/ODT-1/move/targets"), luisa)).andExpect(status().isForbidden());
+        // The status the move would choose by itself comes first: the issue is in todo
+        mvc.perform(as(get("/api/issues/ODT-1/move/statuses?project=APP&type=story"), mario)).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].code").value("todo"))
+                .andExpect(jsonPath("$[0].name").value("To do"))
+                .andExpect(jsonPath("$[*].code", hasItem("done")));
+        mvc.perform(as(get("/api/issues/ODT-1/move/statuses"), mario)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+        // A status chosen in the dialog
+        mvc.perform(as(post("/api/issues/ODT-1/move"), mario)
+                        .content("{\"project\":\"APP\",\"status\":\"done\",\"version\":0,\"fields\":{\"drop\":[\"region\"]}}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.issue.status").value("done"));
+    }
+
+    @Test
     void aDryRunTellsWhatWouldBeLostAndChangesNothing() throws Exception {
         mvc.perform(as(post("/api/issues/ODT-1/move"), mario).content("{\"project\":\"APP\",\"dryRun\":true}"))
                 .andExpect(status().isOk())
