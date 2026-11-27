@@ -7279,6 +7279,9 @@
             "type" : "string",
             "format" : "date"
           },
+          "flagged" : {
+            "type" : "boolean"
+          },
           "key" : {
             "type" : "string"
           },

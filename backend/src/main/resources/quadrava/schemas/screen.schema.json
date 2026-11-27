@@ -523,6 +523,37 @@
       "unevaluatedProperties": false,
       "description": "Action on a row: it runs steps (onClick) or opens a relative path of the application (href)."
     },
+    "rowHighlight": {
+      "type": "object",
+      "required": [
+        "when",
+        "label"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "when": {
+          "type": "string",
+          "description": "Condition with {{ }} that sees the row as row, for example {{ row.flagged }}. An expression in error does not highlight (fail-closed)."
+        },
+        "tone": {
+          "enum": [
+            "warning",
+            "danger",
+            "success",
+            "primary"
+          ],
+          "description": "Colour of the background and of the mark, taken from the theme (warning if absent)."
+        },
+        "icon": {
+          "type": "string",
+          "description": "Icon of the mark, drawn filled when it has a filled form: a name of the built-in set or of Ant Design, for example flag (warning if absent)."
+        },
+        "label": {
+          "type": "string",
+          "description": "Name of the mark, for example \"Flagged\": read by screen readers and shown as the tooltip of the icon, so the highlight is not told by colour alone. It can contain {{ }} and sees row."
+        }
+      }
+    },
     "field": {
       "type": "object",
       "required": [
@@ -1467,7 +1498,7 @@
               },
               "pressed": {
                 "$ref": "#/$defs/expression",
-                "description": "The button is shown as pressed (highlighted with the colour of tone, aria-pressed) while the expression is true, for example while the user watches an item. Without it the button is not a toggle. A pressed icon is drawn filled when the set has a filled form (flag, like)."
+                "description": "The button is shown as pressed (highlighted with the colour of tone, aria-pressed) while the expression is true, for example while the user watches an item. Without it the button is not a toggle. A pressed icon is drawn filled when it has a filled form (flag, like, star)."
               }
             },
             "allOf": [
@@ -1548,7 +1579,7 @@
               },
               "pressed": {
                 "$ref": "#/$defs/expression",
-                "description": "The button is shown as pressed (highlighted with the colour of tone, aria-pressed) while the expression is true, for example while the user watches an item. Without it the button is not a toggle. A pressed icon is drawn filled when the set has a filled form (flag, like)."
+                "description": "The button is shown as pressed (highlighted with the colour of tone, aria-pressed) while the expression is true, for example while the user watches an item. Without it the button is not a toggle. A pressed icon is drawn filled when it has a filled form (flag, like, star)."
               }
             },
             "allOf": [
@@ -1719,6 +1750,10 @@
               "refreshable": {
                 "type": "boolean",
                 "description": "«Refresh» button in the table footer, on the left (pages are on the right): it reloads the data source like the refresh step. Absent if false or not given."
+              },
+              "highlight": {
+                "$ref": "#/$defs/rowHighlight",
+                "description": "Highlights the rows for which when is true, for example the flagged issues of a backlog: the row takes the colour of tone and its first cell an icon with a name for screen readers."
               }
             }
           }
@@ -3264,6 +3299,10 @@
                   "$ref": "#/$defs/step"
                 },
                 "description": "Steps that open a card (usually navigate to its detail screen): they see the row in row. The title of the card becomes a button, so a card opens with a click on it or from the keyboard; dragging a card does not open it."
+              },
+              "highlight": {
+                "$ref": "#/$defs/rowHighlight",
+                "description": "Highlights the cards for which when is true, for example the flagged issues: the card takes the colour of tone and, before the title, an icon with a name for screen readers."
               }
             },
             "dependentRequired": {

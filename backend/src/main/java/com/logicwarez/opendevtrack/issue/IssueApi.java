@@ -20,7 +20,8 @@ final class IssueApi {
 
     /** A row of the issue list; {@code overdue} when past its due date and not done (ADR-19). */
     record IssueRow(String key, long number, String type, String summary, String status, String priority,
-                    String assignee, LocalDate dueOn, String overdue, List<String> labels, Instant updatedAt) {
+                    String assignee, LocalDate dueOn, String overdue, List<String> labels, Instant updatedAt,
+                    boolean flagged) {
     }
 
     /** A label already used in a project, for the suggestions of the tags field of Quadrava (request Q5). */

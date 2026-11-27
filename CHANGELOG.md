@@ -38,6 +38,10 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Changed
 
+- **Boards and issue list**: a flagged issue stands out, as in Jira: its card on the boards and its row in the list
+  of the issues of a project get a yellow edge and background with the flag, named «Flagged» for screen readers (the
+  red label of the cards gives way to it; the backlog keeps the label). **Quadrava 0.30.0** (runtime image, CLI and
+  schemas): `highlight` on `kanban` and `table` (Q46), and the Ant Design icons loaded only when shown.
 - **Quadrava 0.29.0** (runtime image, CLI and schemas): the `copy` and `copyLink` steps (Q45), every Ant Design icon by
   name, and an emptied number of a form sent as null (the back end already reads it as a field not given).
 - **Issues**: as in Jira, the reporter of an issue does not vote for it, and the votes of a done issue no longer

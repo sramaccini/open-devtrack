@@ -122,6 +122,11 @@
       "id": "issue-table",
       "type": "table",
       "source": "issues",
+      "highlight": {
+        "when": "{{ has(row.flagged) && row.flagged }}",
+        "icon": "flag",
+        "label": "{{ t('values.flag.impediment', 'Flagged') }}"
+      },
       "columns": [
         {
           "field": "key",

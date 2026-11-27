@@ -150,7 +150,8 @@ class IssueController {
         List<IssueRow> rows = issues.search(project.get().id(), blankToNull(status), who, text, Limit.of(MAX_LIST)).stream()
                 .map(i -> new IssueRow(key(project.get(), i), i.number(), i.type().value(), i.summary(), i.status(),
                         i.priority().value(), i.assignee(), i.dueOn(),
-                        overdue(i.dueOn(), categories.get(i.status()), today) ? "overdue" : null, i.labels(), i.updatedAt()))
+                        overdue(i.dueOn(), categories.get(i.status()), today) ? "overdue" : null, i.labels(), i.updatedAt(),
+                        i.flagged()))
                 .toList();
         return ResponseEntity.ok(rows);
     }

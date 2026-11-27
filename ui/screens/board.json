@@ -116,14 +116,12 @@
       "descriptionField": "key",
       "keyField": "key",
       "avatarField": "assignee",
+      "highlight": {
+        "when": "{{ has(row.flag) && row.flag == 'impediment' }}",
+        "icon": "flag",
+        "label": "{{ t('values.flag.impediment', 'Flagged') }}"
+      },
       "badges": [
-        {
-          "field": "flag",
-          "valueKey": "values.flag",
-          "tones": {
-            "impediment": "danger"
-          }
-        },
         {
           "field": "type",
           "valueKey": "values.issue_type"
