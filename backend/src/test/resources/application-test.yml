@@ -20,6 +20,10 @@ authz:
     # The sessions of the tests have no time of the login: the recent login is checked by RecentLoginTest alone
     recent-login:
       paths: ""
+    # The tests of one context send more than 600 requests a minute as the same users: the limit is checked by
+    # SessionRateLimitTest alone, with its own
+    session-rate-limit:
+      max-requests: 1000000
 odt:
   secrets:
     # A key for the tests only (ADR-23); an installation generates its own.
