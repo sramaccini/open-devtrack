@@ -13,7 +13,8 @@ The entries are written by hand at each release from the commits ([docs/release.
 - **Issues**: the reporter of an issue can be changed, as in Jira, by whoever has the new project permission
   `odt.reporter.edit` (the admins in every scheme, also those already made; `PATCH /api/issues/{key}` with
   `reporter`, a member of the project). The change is in the history and the new reporter watches the issue (#55).
-- **Issues**: «Share» in the «…» of an issue, as in Jira: up to ten members of the project who see it, with an
+- **Issues**: «Copy link» in the header of an issue, as in Jira: the address of the issue in the clipboard.
+- **Issues**: «Share» in the header of an issue, as in Jira: up to ten members of the project who see it, with an
   optional message, get the new notification «An issue shared with you», by default also by email at once
   (`POST /api/issues/{key}/share`) (#55).
 - **Issues**: the page shows when the issue was created and last updated, under Planning, as in Jira (T16).
@@ -28,6 +29,8 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Changed
 
+- **Quadrava 0.29.0** (runtime image, CLI and schemas): the `copy` and `copyLink` steps (Q45), every Ant Design icon by
+  name, and an emptied number of a form sent as null (the back end already reads it as a field not given).
 - **Issues**: as in Jira, the reporter of an issue does not vote for it, and the votes of a done issue no longer
   change (409); `_perm.vote` tells the page, which disables the thumb (#55).
 - **Issues**: the watchers of an issue are in a window, «Watchers» in the menu of the eye, with «Add watcher…»; the

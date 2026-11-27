@@ -86,6 +86,8 @@
   "issues.share_with": "Persone",
   "issues.share_title": "Condividi {key}",
   "issues.share": "Condividi",
+  "issues.link_copied": "Link copiato",
+  "issues.copy_link": "Copia link",
   "issues.clone": "Clona",
   "issues.delete_confirm": "Eliminare {key}? Non si può annullare.",
   "issues.deleted": "Issue eliminata",

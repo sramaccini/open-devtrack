@@ -978,6 +978,71 @@
                       ]
                     },
                     {
+                      "id": "btn-copy-link",
+                      "type": "button",
+                      "label": "{{ t('issues.copy_link', 'Copy link') }}",
+                      "icon": "link",
+                      "display": "icon",
+                      "visibleIf": "{{ has(data.issue) }}",
+                      "onClick": [
+                        {
+                          "copyLink": {},
+                          "copied": "{{ t('issues.link_copied', 'Link copied') }}"
+                        }
+                      ]
+                    },
+                    {
+                      "id": "btn-share",
+                      "type": "button",
+                      "label": "{{ t('issues.share', 'Share') }}",
+                      "icon": "share",
+                      "display": "icon",
+                      "visibleIf": "{{ has(data.issue) }}",
+                      "onClick": [
+                        {
+                          "dialog": {
+                            "title": "{{ t('issues.share_title', 'Share {key}', {'key': data.issue.key}) }}",
+                            "submitLabel": "{{ t('issues.share', 'Share') }}",
+                            "fields": [
+                              {
+                                "name": "users",
+                                "type": "tags",
+                                "label": "{{ t('issues.share_with', 'People') }}",
+                                "tooltip": "{{ t('issues.share_with_help', 'Members of the project, at most 10; each gets a notification') }}",
+                                "required": true,
+                                "maxItems": 10,
+                                "suggest": {
+                                  "source": "assignees",
+                                  "valueField": "username"
+                                }
+                              },
+                              {
+                                "name": "message",
+                                "type": "textarea",
+                                "label": "{{ t('issues.share_message', 'Message') }}",
+                                "tooltip": "{{ t('issues.share_message_help', 'Optional, at most 1000 characters') }}",
+                                "maxLength": 1000,
+                                "rows": 3
+                              }
+                            ],
+                            "onSubmit": [
+                              {
+                                "call": "shareIssue",
+                                "onError": [
+                                  {
+                                    "toast": "{{ t('issues.share_failed', 'Sharing failed: choose members of the project') }}"
+                                  }
+                                ]
+                              },
+                              {
+                                "toast": "{{ t('issues.shared', 'Shared') }}"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
                       "id": "issue-more",
                       "type": "menuButton",
                       "label": "{{ t('issues.more_actions', 'More actions') }}",
@@ -1121,53 +1186,6 @@
                         },
                         {
                           "divider": true
-                        },
-                        {
-                          "id": "item-share",
-                          "label": "{{ t('issues.share', 'Share') }}",
-                          "onClick": [
-                            {
-                              "dialog": {
-                                "title": "{{ t('issues.share_title', 'Share {key}', {'key': data.issue.key}) }}",
-                                "submitLabel": "{{ t('issues.share', 'Share') }}",
-                                "fields": [
-                                  {
-                                    "name": "users",
-                                    "type": "tags",
-                                    "label": "{{ t('issues.share_with', 'People') }}",
-                                    "tooltip": "{{ t('issues.share_with_help', 'Members of the project, at most 10; each gets a notification') }}",
-                                    "required": true,
-                                    "maxItems": 10,
-                                    "suggest": {
-                                      "source": "assignees",
-                                      "valueField": "username"
-                                    }
-                                  },
-                                  {
-                                    "name": "message",
-                                    "type": "textarea",
-                                    "label": "{{ t('issues.share_message', 'Message') }}",
-                                    "tooltip": "{{ t('issues.share_message_help', 'Optional, at most 1000 characters') }}",
-                                    "maxLength": 1000,
-                                    "rows": 3
-                                  }
-                                ],
-                                "onSubmit": [
-                                  {
-                                    "call": "shareIssue",
-                                    "onError": [
-                                      {
-                                        "toast": "{{ t('issues.share_failed', 'Sharing failed: choose members of the project') }}"
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "toast": "{{ t('issues.shared', 'Shared') }}"
-                                  }
-                                ]
-                              }
-                            }
-                          ]
                         },
                         {
                           "id": "item-clone",

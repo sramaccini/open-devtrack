@@ -23,12 +23,13 @@ class UiIconsTest {
 
     private static final Path SCREENS = Path.of("..", "ui", "screens");
     /**
-     * The icons Quadrava offers for actions (catalogue, § 2.32): those of 0.19.0, and flag and like of 0.25.0 (Q41). An
-     * unknown name shows no icon.
+     * The icons Quadrava offers for actions (catalogue, § 2.32): those of 0.19.0, flag and like of 0.25.0 (Q41), share
+     * of 0.29.0 (Q45). From 0.29.0 any Ant Design name works too; the screens keep to the short names, and an unknown
+     * name shows no icon.
      */
     private static final Set<String> ICONS = Set.of("save", "edit", "delete", "plus", "check", "close", "link", "eye",
             "eye-invisible", "user-add", "back", "move", "play", "reload", "download", "upload", "external", "copy",
-            "search", "filter", "settings", "flag", "like");
+            "search", "filter", "settings", "flag", "like", "share");
     private static final List<String> ACTIONS = List.of("actions", "rowActions", "bulkActions");
 
     @Test

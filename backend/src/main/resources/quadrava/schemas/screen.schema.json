@@ -255,6 +255,12 @@
           "$ref": "#/$defs/stepDownload"
         },
         {
+          "$ref": "#/$defs/stepCopy"
+        },
+        {
+          "$ref": "#/$defs/stepCopyLink"
+        },
+        {
           "$ref": "#/$defs/stepIf"
         },
         {
@@ -457,7 +463,7 @@
         },
         "icon": {
           "$ref": "#/$defs/icon",
-          "description": "Icon shown before the text of the action, from the built-in set (for example save, edit, delete, plus); the text stays. An unknown name shows no icon."
+          "description": "Icon shown before the text of the action, from the built-in set or by its Ant Design name (for example save, edit, delete, plus); the text stays. An unknown name shows no icon."
         }
       }
     },
@@ -1442,7 +1448,7 @@
               },
               "icon": {
                 "$ref": "#/$defs/icon",
-                "description": "Icon shown before the text of the button, from the built-in set (for example save, edit, delete, plus); with display icon it is shown alone. An unknown name shows no icon."
+                "description": "Icon shown before the text of the button, from the built-in set or by its Ant Design name (for example save, edit, delete, plus); with display icon it is shown alone. An unknown name shows no icon."
               },
               "tone": {
                 "type": "string",
@@ -1519,7 +1525,7 @@
               },
               "icon": {
                 "$ref": "#/$defs/icon",
-                "description": "Icon shown before the text of the button, from the built-in set; with display icon it is shown alone. An unknown name shows no icon."
+                "description": "Icon shown before the text of the button, from the built-in set or by its Ant Design name; with display icon it is shown alone. An unknown name shows no icon."
               },
               "items": {
                 "type": "array",
@@ -3734,7 +3740,7 @@
             },
             "icon": {
               "$ref": "#/$defs/icon",
-              "description": "Icon before the title, from the built-in set (for example flag)."
+              "description": "Icon before the title, from the built-in set or by its Ant Design name (for example flag)."
             },
             "tone": {
               "$ref": "#/$defs/tone",
@@ -4081,6 +4087,59 @@
         "onError": {
           "$ref": "#/$defs/steps",
           "description": "Steps run if the download fails (instead of the default message). They see error.status, as in call. Not run on a 401: the runtime signs the user in again."
+        }
+      }
+    },
+    "stepCopy": {
+      "type": "object",
+      "required": [
+        "copy"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "copy": {
+          "type": "string",
+          "description": "Text written to the clipboard, usually with {{ }}, for example \"{{ row.key }}\". The step fails if the browser refuses."
+        },
+        "copied": {
+          "type": "string",
+          "description": "Notice shown when the text is in the clipboard; it can contain {{ }}. «Copied to the clipboard» (translated) if absent."
+        },
+        "onError": {
+          "$ref": "#/$defs/steps",
+          "description": "Steps run if the browser does not let the page write to the clipboard (no permission, a page not served over https), instead of the default error message."
+        }
+      }
+    },
+    "stepCopyLink": {
+      "type": "object",
+      "required": [
+        "copyLink"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "copyLink": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Writes to the clipboard the full address of a screen, built by the application as for its links (the same whatever way the user reached the page). Empty ({}) for the current screen with its parameters.",
+          "properties": {
+            "screen": {
+              "$ref": "#/$defs/id",
+              "description": "Identifier of the screen to link (the current screen if absent)."
+            },
+            "params": {
+              "type": "object",
+              "description": "Parameters of the linked screen, resolved before copying, for example { \"key\": \"{{ params.key }}\" }; with no screen, the parameters of the current one if absent."
+            }
+          }
+        },
+        "copied": {
+          "type": "string",
+          "description": "Notice shown when the text is in the clipboard; it can contain {{ }}. «Copied to the clipboard» (translated) if absent."
+        },
+        "onError": {
+          "$ref": "#/$defs/steps",
+          "description": "Steps run if the browser does not let the page write to the clipboard (no permission, a page not served over https), instead of the default error message."
         }
       }
     },
@@ -5106,7 +5165,7 @@
     "icon": {
       "type": "string",
       "pattern": "^[a-z][a-z0-9-]*$",
-      "description": "Name of an icon of the built-in set (for example save, edit, delete, plus, flag, like). An unknown name shows no icon."
+      "description": "Name of an icon of the built-in set (for example save, edit, delete, plus, flag, like) or of Ant Design (for example share-alt, team). An unknown name shows no icon."
     },
     "breadcrumbItem": {
       "type": "object",
@@ -5151,7 +5210,7 @@
             },
             "icon": {
               "$ref": "#/$defs/icon",
-              "description": "Icon shown before the text, from the built-in set. An unknown name shows no icon."
+              "description": "Icon shown before the text, from the built-in set or by its Ant Design name. An unknown name shows no icon."
             },
             "visibleIf": {
               "$ref": "#/$defs/expression",

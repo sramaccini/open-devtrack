@@ -86,6 +86,8 @@
   "issues.share_with": "People",
   "issues.share_title": "Share {key}",
   "issues.share": "Share",
+  "issues.link_copied": "Link copied",
+  "issues.copy_link": "Copy link",
   "issues.clone": "Clone",
   "issues.delete_confirm": "Delete {key}? It cannot be undone.",
   "issues.deleted": "Issue deleted",
