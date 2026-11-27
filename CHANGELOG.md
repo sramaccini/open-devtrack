@@ -10,6 +10,9 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Added
 
+- **Issues**: «Export» in the «…» of an issue, as in Jira, for whoever sees it: a Word document (.docx), an
+  OpenDocument text for LibreOffice (.odt), both with the fields, description, links, attachments and comments in the
+  language of the user, or JSON with everything, history included (`GET /api/issues/{key}/export?format=`) (#55).
 - **Issues**: the reporter of an issue can be changed, as in Jira, by whoever has the new project permission
   `odt.reporter.edit` (the admins in every scheme, also those already made; `PATCH /api/issues/{key}` with
   `reporter`, a member of the project). The change is in the history and the new reporter watches the issue (#55).

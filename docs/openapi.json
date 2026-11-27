@@ -1530,6 +1530,48 @@
         "x-project-permissions" : [ "odt.issue.comment" ]
       }
     },
+    "/api/issues/{issueKey}/export" : {
+      "get" : {
+        "operationId" : "export.export",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "format",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "json"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Exports an issue as a file: json, docx (Word) or odt (OpenDocument)",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.browse" ]
+      }
+    },
     "/api/issues/{issueKey}/fields" : {
       "get" : {
         "operationId" : "issue.customFields",

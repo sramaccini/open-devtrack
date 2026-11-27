@@ -65,6 +65,11 @@
         "message": "{{form.message}}"
       }
     },
+    "export": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/issues/{{params.issue}}/export?format={{format}}"
+    },
     "remove": {
       "type": "rest",
       "method": "DELETE",

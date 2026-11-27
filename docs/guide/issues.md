@@ -67,7 +67,7 @@ On the right is what describes it:
 - «Share»: up to ten members of the project, with an optional message; each gets a
   [notification](notifications.md);
 - «…», more actions: «Assign to me», for developers and admins when the issue is not yours yet, «Add flag» or «Remove flag», «Add vote» or «Remove vote» ([below](#flag-and-votes)), «Clone»,
-  «Print», «All issues», and «Delete», for the admins of the project. «Clone» asks the summary of the copy («CLONE -»
+  «Print», the three exports ([below](#export)), «All issues», and «Delete», for the admins of the project. «Clone» asks the summary of the copy («CLONE -»
   and this one) and opens it: it has the type, priority, assignee, reviewer, due date, description, labels and custom
   fields of this issue, you as reporter, the first status of its workflow and the link «clones» to this one; comments,
   attachments, watchers, votes, the flag and the plan stay here. «Print» prints the page without menus and buttons. Delete cannot be undone, and the
@@ -145,6 +145,21 @@ finds them all ([Search](search.md)).
 A vote says that you want the issue done. Anyone who sees the issue votes for it once, with the thumb or «Add vote»,
 and takes the vote back the same way or with «Remove vote». As in Jira, the reporter does not vote for their own issue,
 and once the issue is done its votes no longer change: the thumb still shows them, but cannot be pressed.
+
+### Export
+
+Whoever sees an issue exports it from «…», as in Jira:
+
+- **«Export Word (.docx)»** and **«Export OpenDocument (.odt)»**: a document to read or send, which opens in
+  Microsoft Word, LibreOffice and the other office suites. It has the fields in a table, the description, the linked
+  work items, the attachments listed and the comments, in your language. The description and the comments are their
+  Markdown as written; times carry their zone (that of the reports, `ODT_REPORTING_ZONE`).
+- **«Export JSON»**: everything about the issue for other tools: the fields, the custom fields with their names, the
+  links, the watchers, the votes, the comments, the attachments listed and the whole history. Its field `schema` says
+  the version of its shape.
+
+The content of the attachments is not in the export: download them from the issue. Only the links to issues you see
+are in it.
 
 ### History
 

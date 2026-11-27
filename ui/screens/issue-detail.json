@@ -133,6 +133,9 @@
     "shareIssue": {
       "ref": "issues/share"
     },
+    "exportIssue": {
+      "ref": "issues/export"
+    },
     "workflow": {
       "ref": "issues/workflow"
     },
@@ -1240,6 +1243,63 @@
                           "onClick": [
                             {
                               "print": true
+                            }
+                          ]
+                        },
+                        {
+                          "id": "item-export-docx",
+                          "label": "{{ t('issues.export_word', 'Export Word (.docx)') }}",
+                          "icon": "download",
+                          "onClick": [
+                            {
+                              "download": "exportIssue",
+                              "args": {
+                                "format": "docx"
+                              },
+                              "fileName": "{{ data.issue.key }}.docx",
+                              "onError": [
+                                {
+                                  "toast": "{{ t('issues.export_failed', 'The export failed') }}"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "id": "item-export-odt",
+                          "label": "{{ t('issues.export_odt', 'Export OpenDocument (.odt)') }}",
+                          "icon": "download",
+                          "onClick": [
+                            {
+                              "download": "exportIssue",
+                              "args": {
+                                "format": "odt"
+                              },
+                              "fileName": "{{ data.issue.key }}.odt",
+                              "onError": [
+                                {
+                                  "toast": "{{ t('issues.export_failed', 'The export failed') }}"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "id": "item-export-json",
+                          "label": "{{ t('issues.export_json', 'Export JSON') }}",
+                          "icon": "download",
+                          "onClick": [
+                            {
+                              "download": "exportIssue",
+                              "args": {
+                                "format": "json"
+                              },
+                              "fileName": "{{ data.issue.key }}.json",
+                              "onError": [
+                                {
+                                  "toast": "{{ t('issues.export_failed', 'The export failed') }}"
+                                }
+                              ]
                             }
                           ]
                         },
