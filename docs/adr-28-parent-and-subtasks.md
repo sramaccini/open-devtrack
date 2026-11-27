@@ -1,6 +1,6 @@
 # ADR-28: Parent and subtasks
 
-Status: Proposed (27 November 2026) — F5
+Status: Accepted (27 November 2026; decided by the maintainer) — F5
 
 ## Context
 
@@ -42,10 +42,10 @@ with a default), so a new type needs no change there.
 6. **Agile and reporting.** Story points stay on level-0 issues: a subtask has none (the field is refused on it), so
    velocity and burndown count the items the team commits to, as in Jira. Boards show subtasks as cards in their
    columns. What the backlog lists is question B.
-7. **The open questions of the maintainer** (A to E below) decide the cross-project parent, deletes, the done
-   parent with open children, the backlog and the move.
+7. **The answers of the maintainer** to the questions A to E below decide the cross-project parent, the backlog,
+   deletes, the done parent with open children and the move: each proposal was accepted.
 
-## Questions for the maintainer
+## Questions for the maintainer (each proposal accepted)
 
 - **A. Parent in another project.** Jira allows the children of an epic in other projects (company-managed), and
   keeps subtasks in the project of their parent. Proposal: subtasks always in the project of their parent; the
@@ -79,3 +79,11 @@ with a default), so a new type needs no change there.
 - **Configurable levels now.** More general, but it needs field layouts per project and type (T14) to say which
   fields each level has. Later.
 - **Subtasks as checklists in the description.** No status, assignee or history. Rejected.
+
+## Decided by the maintainer
+
+On 27 November 2026 the maintainer accepted the proposal of each question: A, subtasks and the children of an epic
+in the project of their parent; B, the backlog without subtasks; C, a parent deleted with its subtasks after a
+confirm that lists them, the children of a deleted epic left without a parent; D, a parent may be done with open
+children; E, a subtask does not move alone, a standard issue moves with its subtasks, an epic moves alone and its
+children lose their parent.
