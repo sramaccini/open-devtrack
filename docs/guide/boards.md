@@ -59,7 +59,7 @@ the summary opens the issue. Moving cards needs the role of developer or admin.
 «Backlog» (from the issues or from the project) is a search ([Search](search.md)) that opens with the query
 
 ```
-project = WEB AND type != subtask AND (sprint IN openSprints() OR (sprint IS EMPTY AND category != done)) ORDER BY rank
+project = WEB AND type IN standardIssueTypes() AND (sprint IN openSprints() OR (sprint IS EMPTY AND category != done)) ORDER BY rank
 ```
 
 the issues of the sprints not completed, and those not done that are in no sprint, in the order of the project; the
@@ -75,6 +75,18 @@ Each row has three actions, for developers and admins:
 To plan several issues at once, tick their rows (also on other pages and in other groups) and use **Move to sprint…**
 above the table: they all go into the sprint you pick, or back to the backlog. It works on the issues of the project of
 the backlog; with rows of other projects chosen, it stays off.
+
+### Epics
+
+On the left of the backlog, **Epics** lists the epics of the project that are not done, with how many of their issues
+are done («2/5»), as in Jira. Clicking an epic shows only its issues (the query gets `parent = WEB-1`); the two
+buttons above the list show **All issues** again or the issues **Without epic**; the «…» of an epic opens it. The
+column **Epic** of the table shows the epic of each issue.
+
+**Set epic…**, in the «…» of a story, task or bug and above the table for the chosen rows, puts the issues in an epic
+of the project not done, or out of their epic with the field left empty. It needs the role of developer or admin; with
+several issues it changes all of them or, if one cannot be changed, none. Each change is in the history of the issue,
+as a change of its parent ([Issues](issues.md#parent-and-subtasks)).
 
 To put an issue between two others, drag its card on a board: a board and the backlog share the one order of the
 project.

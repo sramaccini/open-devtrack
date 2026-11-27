@@ -90,7 +90,11 @@ final class OdqlCompiler {
 
     /** The one value of {@code flagged}, as Jira names it. */
     static final String IMPEDIMENT = "Impediment";
-    static final List<String> FUNCTIONS = List.of("currentUser()", "openSprints()");
+    static final List<String> FUNCTIONS = List.of("currentUser()", "openSprints()", "standardIssueTypes()",
+            "subTaskIssueTypes()");
+    /** The types of {@code standardIssueTypes()} and {@code subTaskIssueTypes()}, as in Jira (ADR-28). */
+    static final List<String> STANDARD_TYPES = List.of("task", "bug", "story", "epic");
+    static final List<String> SUBTASK_TYPES = List.of("subtask");
 
     private static final Pattern RELATIVE = Pattern.compile("^([+-]?)(\\d{1,4})([dwmy])$");
     private static final Pattern CUSTOM_KEY = Pattern.compile("^custom\\.([A-Za-z][A-Za-z0-9_]{0,49})$");
@@ -151,7 +155,7 @@ final class OdqlCompiler {
             case "project" -> text(c, PROJECT_KEY, v -> v.toUpperCase(Locale.ROOT));
             case "key" -> key(c);
             case "parent" -> parent(c);
-            case "type" -> text(c, TYPE, v -> oneOf(c, v, TYPES, "type"));
+            case "type" -> type(c);
             case "category" -> text(c, CATEGORY, v -> oneOf(c, v, CATEGORIES, "category"));
             case "status" -> text(c, STATUS, this::status);
             case "priority" -> priority(c);
@@ -189,6 +193,30 @@ final class OdqlCompiler {
             case "notempty" -> field.isNotNull();
             default -> throw notAllowed(c, "= != IN NOT IN IS EMPTY");
         };
+    }
+
+    /**
+     * {@code type}: a type, or in IN and NOT IN also {@code standardIssueTypes()} (task, bug, story, epic) and
+     * {@code subTaskIssueTypes()} (subtask), as in Jira; the types are fixed until they can be configured.
+     */
+    private Condition type(Clause c) {
+        if (!c.op().equals("in") && !c.op().equals("notin")) {
+            return text(c, TYPE, v -> oneOf(c, v, TYPES, "type"));
+        }
+        List<String> types = new ArrayList<>();
+        for (Value v : c.values()) {
+            if (!v.function()) {
+                types.add(oneOf(c, v.text(), TYPES, "type"));
+            } else if (v.text().equalsIgnoreCase("standardIssueTypes")) {
+                types.addAll(STANDARD_TYPES);
+            } else if (v.text().equalsIgnoreCase("subTaskIssueTypes")) {
+                types.addAll(SUBTASK_TYPES);
+            } else {
+                throw error(v.at(), "Unknown function " + v.text() + "() for type",
+                        "standardIssueTypes() subTaskIssueTypes()");
+            }
+        }
+        return c.op().equals("in") ? TYPE.in(types) : TYPE.notIn(types);
     }
 
     /**

@@ -18,12 +18,17 @@ The entries are written by hand at each release from the commits ([docs/release.
   gets `parent = WEB-1` and the type `subtask`; the export gives the parent and the children. API: `parent` in
   `POST /api/projects/{key}/issues` and in the `PATCH` of an issue, `parent` and `parentKey` in the issue,
   `GET /api/issues/{key}/children`, `subtasks` and `detached` in the answer of a move (#55 T5).
+- **Backlog**: the panel of the epics, as in Jira: the epics not done with their progress; a click shows the issues
+  of an epic, «All issues» and «Without epic» the others. The column Epic, and «Set epic…» on an issue or on the
+  chosen ones (`GET /api/projects/{key}/epics`, `POST /api/projects/{key}/epic`); the rows of the search carry
+  `parent` (#55 T5).
+- **Search**: the ODQL functions `standardIssueTypes()` and `subTaskIssueTypes()` for the type, as in Jira (#55 T5).
 
 ### Upgrading
 
 - The migrations add the column of the parent and the type `subtask`; no existing issue has a parent. A workflow
   scheme without `subtask` gives subtasks its default workflow. The default query of the backlog changes: a saved
-  filter made from it still lists subtasks until `type != subtask` is added.
+  filter made from it still lists subtasks until `type IN standardIssueTypes()` is added.
 
 ## [1.0.0-rc.10] - 2026-11-27
 

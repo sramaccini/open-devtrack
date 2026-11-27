@@ -111,7 +111,10 @@ The parent of an issue (ADR-28) is the field `parent`: the key of an epic for a 
 or bug for a subtask (`"type": "subtask"`, which needs it), in the same project; in `POST /api/projects/{key}/issues`
 and in the `PATCH` of an issue, where `null` removes it. The issue answers `parent` (`key`, `summary`, `type`,
 `status`) and `parentKey`; `GET /api/issues/{key}/children` lists the children with `progress` by category, `done`
-and `total`. A change of the parent is a change of the field `parent` in the history and in `issue.changed`. `POST /api/issues/{key}/transitions` with `{"transition": "start", "version": 7}`. `GET /api/issues/{key}/workflow` gives
+and `total`. A change of the parent is a change of the field `parent` in the history and in `issue.changed`. For the panel of the
+backlog, `GET /api/projects/{key}/epics?q=` lists the epics not done with `done`, `total` and `progress` («2/5»),
+and `POST /api/projects/{key}/epic` with `{"issues": ["WEB-2", "WEB-3"], "epic": "WEB-1"}` (no `epic` to take
+them out) sets the epic of up to 100 stories, tasks and bugs, all or none, answering `changed`. `POST /api/issues/{key}/transitions` with `{"transition": "start", "version": 7}`. `GET /api/issues/{key}/workflow` gives
 the whole workflow the issue follows, to draw it: its name, the status of the issue, the statuses with their category and
 every transition with `from` (absent when it starts from any status) and `to`, without the guards.
 
@@ -120,7 +123,7 @@ every transition with `from` (absent when it starts from any status) and `to`, w
 - Lists are not paged unless they say so; each has a limit: the issues of a project at most 500 (newest first),
   the history of an issue at most its last 500 changes.
 - `POST /api/search` runs an ODQL query (ADR-16) and pages: `page` from 0, `size` up to 100 (25 by default), with
-  `total` in the answer.
+  `total` in the answer. Each row has `parent`, the key of its parent, and `_perm` with `plan`, `rank` and `edit`.
 
 ```bash
 curl -s -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \

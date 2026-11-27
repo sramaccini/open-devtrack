@@ -172,7 +172,10 @@ of `search`, filled with the sprints not completed and the backlog of the projec
 `serverDataTable` on `search/search` grouped by `sprint`, with the row actions «Move to sprint…» (a `lookup` on
 `boards/planColumns`, the sprints of the row's project) and «To the top», «To the bottom» (`boards/backlogPlan`),
 and a selection (`state.chosen`, by key) with the bulk action «Move to sprint…» (`boards/projectColumns`,
-`boards/backlogPlanMany`, Q28), on for rows of the project only; the sprints in a table below (new, start, complete, edit, remove). `board-list` (Projects › Boards) lists
+`boards/backlogPlanMany`, Q28), on for rows of the project only. A `grid` puts on its left the panel of the epics (`issues/epics`: a click on an
+epic sets `parent = KEY` in the query, «All issues» and «Without epic» set it back, the «…» of a row opens the epic,
+`rowActionsInline: 0`), and the table has the column Epic and «Set epic…» per row and for the selection
+(`issues/setEpic`, a lookup on `issues/epics`, when `_perm.edit`); the sprints in a table below (new, start, complete, edit, remove). `board-list` (Projects › Boards) lists
 the boards of the projects of the user; `project-detail` manages those of a project and `issue-detail` sets the story
 points. A card opens its issue (`onOpen`) and its badges show the values in the language of the user (`valueKey`):
 both from Q12, Quadrava 0.11.1. A board may have an ODQL filter (ADR-16), set in the dialogs of `project-detail`

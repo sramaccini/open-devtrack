@@ -52,7 +52,8 @@ An empty query finds every issue. Without `ORDER BY`, the most recently updated 
   the fields are read in any case: `and`, `And` and `AND` are the same.
 - A value is a word (letters, digits and `_ . - + : @`) or a text in double quotes, needed for spaces:
   `"To do"`, `"Sprint 1"`. A `"` inside a text is written `\"`.
-- The functions are `currentUser()`, the user who runs the query, and `openSprints()`, the sprints not completed.
+- The functions are `currentUser()`, the user who runs the query, `openSprints()`, the sprints not completed, and,
+  for the type, `standardIssueTypes()` (task, bug, story, epic) and `subTaskIssueTypes()` (subtask), as in Jira.
 
 ### Fields
 
@@ -61,7 +62,7 @@ An empty query finds every issue. Without `ORDER BY`, the most recently updated 
 | `project` | The key of the project: `WEB` | `= != IN NOT IN IS EMPTY` |
 | `key` | The key of the issue: `WEB-4` | `= != IN NOT IN IS EMPTY` |
 | `parent` | The key of the parent: `parent = WEB-1` finds the children of WEB-1 (also by a key it had before a move) | `= != IN NOT IN IS EMPTY` |
-| `type` | `task`, `bug`, `story`, `epic`, `subtask` | `= != IN NOT IN IS EMPTY` |
+| `type` | `task`, `bug`, `story`, `epic`, `subtask`; with `IN` and `NOT IN` also `standardIssueTypes()` and `subTaskIssueTypes()` | `= != IN NOT IN IS EMPTY` |
 | `status` | A status, by its code (`in_progress`) or its name in English or Italian (`"In progress"`, `"In corso"`) | `= != IN NOT IN IS EMPTY` |
 | `category` | The category of the status: `todo`, `in_progress`, `done` | `= != IN NOT IN IS EMPTY` |
 | `priority` | `lowest`, `low`, `medium`, `high`, `highest`, in this order | `= != < <= > >= IN NOT IN` |
@@ -149,6 +150,7 @@ the order of dates written as `2026-12-31`.
 | `reviewer = currentUser() AND status = in_progress` | What waits for your review |
 | `type = bug AND priority >= high AND resolved IS EMPTY` | Open bugs of high and highest priority |
 | `project = WEB AND sprint IN openSprints() ORDER BY rank` | The planned work of WEB, in its order |
+| `project = WEB AND type IN subTaskIssueTypes() AND assignee = currentUser()` | My subtasks in WEB |
 | `labels IN (frontend, i18n) AND updated >= -7d` | Front-end and translation work of the last week |
 | `text ~ "safari menu" OR summary ~ safari` | Anything about the menu on Safari |
 | `due <= +7d AND category != done ORDER BY due` | What is due within a week |

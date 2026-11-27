@@ -10,6 +10,7 @@ import static com.logicwarez.opendevtrack.search.Docs.CREATED_AT;
 import static com.logicwarez.opendevtrack.search.Docs.DUE_ON;
 import static com.logicwarez.opendevtrack.search.Docs.DOC;
 import static com.logicwarez.opendevtrack.search.Docs.FLAGGED;
+import static com.logicwarez.opendevtrack.search.Docs.PARENT_KEY;
 import static com.logicwarez.opendevtrack.search.Docs.ISSUE_ID;
 import static com.logicwarez.opendevtrack.search.Docs.ISSUE_KEY;
 import static com.logicwarez.opendevtrack.search.Docs.NUMBER;
@@ -216,7 +217,8 @@ class Searches {
         order.add(ISSUE_ID.asc());
         LocalDate today = today();
         List<Record> records = new ArrayList<>(sql.select(ISSUE_KEY, PROJECT_KEY, TYPE, STATUS, CATEGORY, PRIORITY,
-                        ASSIGNEE, REVIEWER, REPORTER, SUMMARY, DUE_ON, UPDATED_AT, CREATED_AT, POINTS, SPRINT_ID, FLAGGED)
+                        ASSIGNEE, REVIEWER, REPORTER, SUMMARY, DUE_ON, UPDATED_AT, CREATED_AT, POINTS, SPRINT_ID, FLAGGED,
+                        PARENT_KEY)
                 .from(DOC).where(where).orderBy(order).limit(size).offset(page * size).fetch());
         Map<String, Map<String, Boolean>> perm = perm(records, visible);
         List<Map<String, Object>> items = records.stream().map(r -> row(r, today, columns, perm)).toList();
@@ -344,7 +346,7 @@ class Searches {
 
     /**
      * What the user may do on the rows, by project (ADR-26): {@code plan} moves an issue to a sprint or the backlog,
-     * {@code rank} changes its place in the order of the project.
+     * {@code rank} changes its place in the order of the project, {@code edit} changes its fields (its epic, ADR-28).
      */
     private Map<String, Map<String, Boolean>> perm(List<Record> records, List<ProjectRef> visible) {
         Set<String> keys = new HashSet<>();
@@ -353,7 +355,8 @@ class Searches {
         for (ProjectRef p : visible) {
             if (keys.contains(p.key())) {
                 Set<String> given = access.permissions(p.id(), user.username());
-                perm.put(p.key(), Map.of("plan", given.contains(PLAN), "rank", given.contains(RANK)));
+                perm.put(p.key(), Map.of("plan", given.contains(PLAN), "rank", given.contains(RANK),
+                        "edit", given.contains("odt.issue.edit")));
             }
         }
         return perm;
@@ -371,6 +374,8 @@ class Searches {
         row.put("reviewer", r.get(REVIEWER));
         row.put("reporter", r.get(REPORTER));
         row.put("summary", r.get(SUMMARY));
+        // The key of its parent (ADR-28): the epic of a story, task or bug, the issue of a subtask.
+        row.put("parent", r.get(PARENT_KEY));
         // «impediment» while flagged, else null, as in the cards of the boards: the highlight of the tables. The index
         // holds Jira's «Impediment» for ODQL.
         row.put("flag", r.get(FLAGGED) == null ? null : "impediment");

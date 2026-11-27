@@ -3444,6 +3444,108 @@
         "x-project-permissions" : [ "odt.project.edit" ]
       }
     },
+    "/api/projects/{key}/epic" : {
+      "post" : {
+        "operationId" : "epic.setEpic",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/EpicRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EpicAnswer"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Puts issues of a project in an epic, or out of their epic",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.edit" ]
+      }
+    },
+    "/api/projects/{key}/epics" : {
+      "get" : {
+        "operationId" : "epic.epics",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/EpicRow"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "The epics of a project that are not done, with the progress of their issues",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.browse" ]
+      }
+    },
     "/api/projects/{key}/field-definitions" : {
       "get" : {
         "operationId" : "field.list",
@@ -7180,6 +7282,61 @@
           "version" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }
+      },
+      "EpicAnswer" : {
+        "type" : "object",
+        "properties" : {
+          "changed" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
+      "EpicRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "epic" : {
+            "type" : "string"
+          },
+          "issues" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "EpicRow" : {
+        "type" : "object",
+        "properties" : {
+          "category" : {
+            "type" : "string"
+          },
+          "done" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "label" : {
+            "type" : "string"
+          },
+          "progress" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "summary" : {
+            "type" : "string"
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int32"
           }
         }
       },

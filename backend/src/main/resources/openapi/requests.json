@@ -84,6 +84,9 @@
     "POST /api/projects/{key}/boards" : {
       "$ref" : "#/components/schemas/BoardRequest"
     },
+    "POST /api/projects/{key}/epic" : {
+      "$ref" : "#/components/schemas/EpicRequest"
+    },
     "POST /api/projects/{key}/field-definitions" : {
       "$ref" : "#/components/schemas/DefinitionRequest"
     },
@@ -280,6 +283,21 @@
           "version" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }
+      },
+      "EpicRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "epic" : {
+            "type" : "string"
+          },
+          "issues" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },

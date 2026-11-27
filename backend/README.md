@@ -141,7 +141,10 @@ already used in the project that start with `q`, for the suggestions of the labe
 on a change of type or parent and in `IssueMover` (three levels by `IssueType.level()`, same project, an issue with
 children keeps its level); `GET /api/issues/{key}/children` lists them and `GET /api/projects/{key}/parents?type=`
 proposes the parents for a type. A delete removes the subtasks first and frees the children of an epic, each with its
-event; the search writes `parent_key` and agile refuses story points on a subtask (`Issues.subtask`).
+event; the search writes `parent_key` and agile refuses story points on a subtask (`Issues.subtask`). `EpicController`
+serves the panel of the backlog: the epics not done with their progress, and «Set epic» on up to 100 issues, all
+checked before any changes. ODQL expands `standardIssueTypes()` and `subTaskIssueTypes()` to fixed lists of types
+(`OdqlCompiler`) until the types can be configured.
 
 ## Links (`issue`)
 

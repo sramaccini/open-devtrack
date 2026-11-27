@@ -305,6 +305,23 @@
         "summary": "{{summary}}",
         "parent": "{{params.issue}}"
       }
+    },
+    "epics": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/epics",
+      "params": {
+        "q": "{{search}}"
+      }
+    },
+    "setEpic": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{params.key}}/epic",
+      "body": {
+        "issues": "{{issues}}",
+        "epic": "{{epic}}"
+      }
     }
   }
 }

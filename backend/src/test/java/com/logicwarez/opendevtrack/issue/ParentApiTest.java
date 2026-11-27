@@ -228,6 +228,50 @@ class ParentApiTest {
     }
 
     @Test
+    void odqlHasTheTypeFunctionsOfJira() throws Exception {
+        assertThat(search("type IN subTaskIssueTypes() ORDER BY key")).containsExactly("ODT-3", "ODT-4");
+        assertThat(search("type IN standardIssueTypes() ORDER BY key")).containsExactly("ODT-1", "ODT-2");
+        assertThat(search("project = ODT AND type NOT IN (subTaskIssueTypes(), epic)")).containsExactly("ODT-2");
+        mvc.perform(as(post("/api/search"), mario).content("{\"query\":\"type IN openSprints()\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void theBacklogPanelListsTheEpicsAndSetsThem() throws Exception {
+        create("ODT", "{\"type\":\"epic\",\"summary\":\"Sign up\"}");
+        create("ODT", "{\"type\":\"task\",\"summary\":\"Captcha\"}");
+        create("ODT", "{\"type\":\"bug\",\"summary\":\"Typo\"}");
+        mvc.perform(as(get("/api/projects/ODT/epics"), paola))
+                .andExpect(jsonPath("$[*].key").value(contains("ODT-1", "ODT-5")))
+                .andExpect(jsonPath("$[0].progress").value("0/1"))
+                .andExpect(jsonPath("$[1].total").value(0))
+                .andExpect(jsonPath("$[1].label").value("ODT-5 Sign up"));
+        mvc.perform(as(get("/api/projects/ODT/epics?q=sign"), paola)).andExpect(jsonPath("$[*].key").value(contains("ODT-5")));
+        // Developers set the epic of several issues together; a viewer does not.
+        mvc.perform(as(post("/api/projects/ODT/epic"), paola).content("{\"issues\":[\"ODT-6\"],\"epic\":\"ODT-5\"}"))
+                .andExpect(status().isForbidden());
+        mvc.perform(as(post("/api/projects/ODT/epic"), luisa).content("{\"issues\":[\"ODT-6\",\"ODT-7\"],\"epic\":\"ODT-5\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.changed").value(2));
+        mvc.perform(as(get("/api/issues/ODT-7"), luisa)).andExpect(jsonPath("$.parent.key").value("ODT-5"));
+        // All or none: a subtask, an epic or an issue of another project is refused, and nothing changes.
+        mvc.perform(as(post("/api/projects/ODT/epic"), luisa).content("{\"issues\":[\"ODT-2\",\"ODT-3\"],\"epic\":\"ODT-5\"}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(as(get("/api/issues/ODT-2"), luisa)).andExpect(jsonPath("$.parent.key").value("ODT-1"));
+        mvc.perform(as(post("/api/projects/ODT/epic"), luisa).content("{\"issues\":[\"ODT-6\"],\"epic\":\"ODT-2\"}"))
+                .andExpect(status().isBadRequest());
+        // Without an epic they leave it; the search rows carry the parent.
+        mvc.perform(as(post("/api/projects/ODT/epic"), luisa).content("{\"issues\":[\"ODT-7\"]}"))
+                .andExpect(jsonPath("$.changed").value(1));
+        // No wait for the listeners: the search has the new parent as soon as the call answers, as the backlog needs.
+        String rows = mvc.perform(as(post("/api/search"), luisa).content("{\"query\":\"parent = ODT-5\"}"))
+                .andReturn().getResponse().getContentAsString();
+        assertThat(JsonPath.<List<String>>read(rows, "$.items[*].key")).containsExactly("ODT-6");
+        assertThat(JsonPath.<List<String>>read(rows, "$.items[*].parent")).containsExactly("ODT-5");
+        assertThat(JsonPath.<List<Boolean>>read(rows, "$.items[*]._perm.edit")).containsExactly(true);
+    }
+
+    @Test
     void aSubtaskHasNoStoryPoints() throws Exception {
         mvc.perform(as(put("/api/issues/ODT-3/plan"), luisa).content("{\"points\":3}")).andExpect(status().isBadRequest());
         mvc.perform(as(put("/api/issues/ODT-3/plan"), luisa).content("{\"points\":null}")).andExpect(status().isOk());

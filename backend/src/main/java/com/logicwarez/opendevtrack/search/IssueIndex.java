@@ -119,6 +119,17 @@ class IssueIndex {
         index(event.issueId());
     }
 
+    /**
+     * A change of the parent in the transaction of the change, before its commit (ADR-28): the backlog reloads its rows
+     * right after «Set epic» and filters them by {@code parent}.
+     */
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    void parent(IssueChanged event) {
+        if (event.changes().stream().anyMatch(c -> "parent".equals(c.field()))) {
+            index(event.issueId());
+        }
+    }
+
     @ApplicationModuleListener
     void on(IssueDeleted event) {
         sql.deleteFrom(DOC).where(ISSUE_ID.eq(event.issueId())).execute();

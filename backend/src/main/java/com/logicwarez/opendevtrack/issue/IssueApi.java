@@ -52,6 +52,22 @@ final class IssueApi {
                     String keys) {
     }
 
+    /**
+     * An epic not done, for the panel of the backlog (ADR-28): {@code done} and {@code total} of its issues, and
+     * {@code progress} as «3/5».
+     */
+    record EpicRow(String key, String summary, String label, String status, String category, int done, int total,
+                   String progress) {
+    }
+
+    /** Issues of a project to put in {@code epic}, or out of their epic without it. */
+    record EpicRequest(List<String> issues, String epic) {
+    }
+
+    /** How many issues changed epic. */
+    record EpicAnswer(int changed) {
+    }
+
     /** An issue that can be the parent of one of a type (ADR-28), for the lookup of the field: its key and a label. */
     record ParentCandidate(String key, String label) {
     }

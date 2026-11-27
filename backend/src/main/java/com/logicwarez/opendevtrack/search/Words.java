@@ -179,7 +179,11 @@ class Words {
         List<ProjectRef> visible = name.isEmpty() ? List.of() : searches.visible();
         switch (name) {
             case "project" -> visible.forEach(p -> values.add(p.key()));
-            case "type" -> values.addAll(OdqlCompiler.TYPES);
+            case "type" -> {
+                values.addAll(OdqlCompiler.TYPES);
+                values.add("standardIssueTypes()");
+                values.add("subTaskIssueTypes()");
+            }
             case "priority" -> values.addAll(OdqlCompiler.PRIORITIES);
             case "category" -> values.addAll(OdqlCompiler.CATEGORIES);
             case "flagged" -> values.add(OdqlCompiler.IMPEDIMENT);

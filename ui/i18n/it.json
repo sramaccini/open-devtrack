@@ -697,5 +697,16 @@
   "issues.delete_confirm_subtasks": "Eliminare {key} e le sue sottoattività {keys}? Non si può annullare.",
   "issues.delete_confirm_epic": "Eliminare {key}? I suoi elementi figli {keys} restano, senza epica. Non si può annullare.",
   "issues.move_project_subtasks": "Le sue sottoattività {keys} si spostano con essa e prendono chiavi di {project}. Spostare l'elemento?",
-  "issues.move_project_detached": "I suoi elementi figli {keys} restano in questo progetto, senza epica. Spostare l'epica?"
+  "issues.move_project_detached": "I suoi elementi figli {keys} restano in questo progetto, senza epica. Spostare l'epica?",
+  "agile.epic": "Epica",
+  "agile.epics": "Epiche",
+  "agile.epic_done": "Completati",
+  "agile.all_issues": "Tutti",
+  "agile.without_epic": "Senza epica",
+  "agile.open_epic": "Apri l'epica",
+  "agile.set_epic": "Imposta epica…",
+  "agile.set_epic_title": "Epica di {key}",
+  "agile.set_epic_chosen_title": "Epica di {count} elementi",
+  "agile.set_epic_help": "Un'epica non completata del progetto; vuoto per togliere gli elementi dalla loro epica",
+  "agile.set_epic_failed": "Impossibile impostare l'epica: in un'epica vanno solo storie, attività e bug"
 }

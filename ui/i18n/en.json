@@ -697,5 +697,16 @@
   "issues.delete_confirm_subtasks": "Delete {key} and its subtasks {keys}? It cannot be undone.",
   "issues.delete_confirm_epic": "Delete {key}? Its child work items {keys} stay, without an epic. It cannot be undone.",
   "issues.move_project_subtasks": "Its subtasks {keys} move with it and take keys of {project}. Move the issue?",
-  "issues.move_project_detached": "Its child work items {keys} stay in this project, without an epic. Move the epic?"
+  "issues.move_project_detached": "Its child work items {keys} stay in this project, without an epic. Move the epic?",
+  "agile.epic": "Epic",
+  "agile.epics": "Epics",
+  "agile.epic_done": "Done",
+  "agile.all_issues": "All issues",
+  "agile.without_epic": "Without epic",
+  "agile.open_epic": "Open the epic",
+  "agile.set_epic": "Set epic…",
+  "agile.set_epic_title": "Epic of {key}",
+  "agile.set_epic_chosen_title": "Epic of {count} issues",
+  "agile.set_epic_help": "An epic of the project not done; empty to take the issues out of their epic",
+  "agile.set_epic_failed": "The epic could not be set: only stories, tasks and bugs go in an epic"
 }
