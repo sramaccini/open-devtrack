@@ -52,6 +52,12 @@ The entries are written by hand at each release from the commits ([docs/release.
 - Quadrava 0.28.0 (runtime image and CLI): the drop zone of a file field and the dashed box (Q42, 0.26.0), editing in
   place in a form (Q43, 0.27.0), lookups, selects and checkboxes in place (Q44).
 
+### Fixed
+
+- **Telemetry**: the traces and logs that the screens send no longer get 404: the back end implements the
+  telemetry contract of Quadrava (`/telemetry/v1/traces`, `/telemetry/v1/logs`), masks personal data again and
+  forwards them to the collector of `ODT_TELEMETRY_OTLP_ENDPOINT`, if set (#57).
+
 ## [1.0.0-rc.9] - 2026-11-26
 
 The ninth candidate: the page of an issue closer to Jira, in two columns, with the status as a button with its

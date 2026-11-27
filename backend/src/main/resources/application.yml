@@ -126,13 +126,13 @@ authz:
     # Limited to 600 requests a minute per user, counted on Redis.
     bearer:
       enabled: true
-      paths: /api/**,/registry/**,/v3/api-docs
+      paths: /api/**,/registry/**,/v3/api-docs,/telemetry/**
       # The clients (azp) whose tokens are accepted: the tools client and the service accounts of the installation
       allowed-clients: ${ODT_BEARER_CLIENTS:opendevtrack-tools}
     # The same limit on the requests with a session, per user across their sessions (ADR-24, A9): 429 with Retry-After
     session-rate-limit:
       enabled: true
-      paths: /api/**
+      paths: /api/**,/telemetry/**
       max-requests: ${ODT_SESSION_RATE_LIMIT:600}
     # A login younger than max-age before the sensitive actions of a browser session (ADR-24 point 4, O9, A8; ASVS
     # 3.7.1, 4.3.3): an older one gets 401 recent-login-required, and the Quadrava runtime (0.17.0, Q23) sends the user
@@ -230,6 +230,13 @@ odt:
     # again every night, so a day with no change still has its row.
     zone: ${ODT_REPORTING_ZONE:UTC}
     snapshot-cron: "0 5 0 * * *"
+  # The telemetry of the Quadrava runtime (contracts/telemetry.yaml, #57): traces and logs of the screens, redacted a
+  # second time, go to the OTLP/HTTP collector of the installation (http://collector:4318); without one they are
+  # accepted and dropped.
+  telemetry:
+    otlp-endpoint: ${ODT_TELEMETRY_OTLP_ENDPOINT:}
+    max-bytes: ${ODT_TELEMETRY_MAX_BYTES:1000000}
+    max-in-flight: 16
   # The address of the application for the links of the mails (ADR-18)
   public-url: ${ODT_PUBLIC_URL:${FRONTEND_URL:http://localhost:8090}}
   mail:
