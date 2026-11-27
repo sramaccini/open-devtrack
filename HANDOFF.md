@@ -215,6 +215,11 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
    - `v1.0.0-rc.9` tagged on 876d34c with Quadrava 0.25.1 and all of the above: green at the first run; image
      @sha256:1dacfba4… with its signature and SBOM verified by cosign. The demo is upgraded to it (old `.env` in
      /root/odt-demo-env.rc8.bak, log /var/log/odt-demo-upgrade-rc9.log); `watch.sh` ok.
+   - `v1.0.0-rc.10` tagged on 2e0b3ed with Quadrava 0.32.0: the issue page as in Jira (edit in place, Copy link,
+     Share, Export, Move to another project, ADR-27), flagged issues highlighted everywhere (Q46, Q50), the brand as
+     the asset pack `odt` (runtime without brand mounts), the telemetry contract. Green at the first run; image
+     @sha256:7b674641… with its signature and SBOM verified by cosign. The demo is upgraded to it (old `.env` in
+     /root/odt-demo-env.rc9.bak, log /var/log/odt-demo-upgrade-rc10.log); `watch.sh` ok.
    Next: the screen reader lines and the ZAP baseline on the current candidate.
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
