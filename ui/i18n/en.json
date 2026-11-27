@@ -708,5 +708,9 @@
   "agile.set_epic_chosen_title": "{count, plural, one {Epic of # issue} other {Epic of # issues}}",
   "agile.set_epic_help": "An epic of the project not done; empty to take the issues out of their epic",
   "agile.set_epic_failed": "The epic could not be set: only stories, tasks and bugs go in an epic",
-  "issues.cancel_link": "Cancel"
+  "issues.cancel_link": "Cancel",
+  "issues.add_menu": "Add",
+  "issues.attachment": "Attachment",
+  "issues.attach_done": "Done",
+  "issues.link_item": "Link work item"
 }

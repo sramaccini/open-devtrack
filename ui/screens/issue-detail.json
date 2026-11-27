@@ -188,7 +188,7 @@
           "span": 8,
           "components": [
             {
-              "id": "issue-content-form",
+              "id": "issue-title-form",
               "type": "form",
               "source": "issue",
               "edit": "inline",
@@ -201,7 +201,201 @@
                   "maxLength": 255,
                   "display": "heading",
                   "readOnlyIf": "{{!form._perm.edit}}"
+                }
+              ],
+              "onSave": [
+                {
+                  "call": "patchIssue",
+                  "onError": [
+                    {
+                      "if": "{{error.status == 412}}",
+                      "then": [
+                        {
+                          "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                        }
+                      ]
+                    }
+                  ]
                 },
+                {
+                  "refresh": "issue"
+                },
+                {
+                  "refresh": "history"
+                }
+              ]
+            },
+            {
+              "id": "issue-toolbar",
+              "type": "box",
+              "gap": "small",
+              "visibleIf": "{{ has(data.issue) && (data.issue._perm.edit || data.issue._perm.attach || data.issue._perm.child) }}",
+              "components": [
+                {
+                  "id": "issue-add",
+                  "type": "menuButton",
+                  "label": "{{ t('issues.add_menu', 'Add') }}",
+                  "icon": "plus",
+                  "tone": "neutral",
+                  "items": [
+                    {
+                      "id": "item-add-child",
+                      "label": "{{ has(data.issue) && data.issue.type == 'epic' ? t('issues.add_child', 'Add child work item') : t('issues.add_subtask', 'Add subtask') }}",
+                      "visibleIf": "{{ has(data.issue) && data.issue._perm.child }}",
+                      "onClick": [
+                        {
+                          "popover": {
+                            "title": "{{ has(data.issue) && data.issue.type == 'epic' ? t('issues.add_child', 'Add child work item') : t('issues.add_subtask', 'Add subtask') }}",
+                            "icon": "plus",
+                            "fields": [
+                              {
+                                "name": "summary",
+                                "type": "text",
+                                "label": "{{ t('issues.summary', 'Summary') }}",
+                                "required": true,
+                                "maxLength": 255,
+                                "tooltip": "{{ has(data.issue) && data.issue.type == 'epic' ? t('issues.add_child_help', 'A task of this epic; change its type and fields on its page') : t('issues.add_subtask_help', 'A subtask of this issue; set its fields on its page') }}"
+                              }
+                            ],
+                            "submitLabel": "{{ t('issues.create', 'Create issue') }}",
+                            "submitEnabledIf": "{{ isValid('required', form.summary) }}",
+                            "onSubmit": [
+                              {
+                                "call": "addChild",
+                                "args": {
+                                  "childType": "{{ data.children.childType }}",
+                                  "summary": "{{ form.summary }}"
+                                },
+                                "onError": [
+                                  {
+                                    "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                  }
+                                ]
+                              },
+                              {
+                                "refresh": "children"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "item-add-attachment",
+                      "label": "{{ t('issues.attachment', 'Attachment') }}",
+                      "visibleIf": "{{ has(data.issue) && data.issue._perm.attach }}",
+                      "onClick": [
+                        {
+                          "dialog": {
+                            "title": "{{ t('issues.add_attachment', 'Add attachment') }}",
+                            "submitLabel": "{{ t('issues.attach_done', 'Done') }}",
+                            "fields": [
+                              {
+                                "name": "file",
+                                "type": "file",
+                                "label": "{{ t('issues.add_attachment', 'Add attachment') }}",
+                                "display": "dropzone",
+                                "hint": "{{ t('issues.attachment_limit', 'Up to 25 MB per file') }}",
+                                "upload": "uploadAttachment",
+                                "maxSizeKb": 25600
+                              }
+                            ],
+                            "onSubmit": [
+                              {
+                                "refresh": "attachments"
+                              },
+                              {
+                                "refresh": "history"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "item-add-link",
+                      "label": "{{ t('issues.link_item', 'Link work item') }}",
+                      "visibleIf": "{{ has(data.issue) && data.issue._perm.edit }}",
+                      "onClick": [
+                        {
+                          "dialog": {
+                            "title": "{{ t('issues.add_linked_item', 'Add linked work item') }}",
+                            "submitLabel": "{{ t('issues.add_link', 'Link') }}",
+                            "initial": {
+                              "relation": "relates"
+                            },
+                            "fields": [
+                              {
+                                "name": "relation",
+                                "type": "select",
+                                "label": "{{ t('issues.relation', 'Relation') }}",
+                                "required": true,
+                                "options": [
+                                  "blocks",
+                                  "blocked_by",
+                                  "relates",
+                                  "duplicates",
+                                  "duplicated_by",
+                                  "clones",
+                                  "cloned_by"
+                                ],
+                                "optionKey": "values.relation"
+                              },
+                              {
+                                "name": "issue",
+                                "type": "lookup",
+                                "label": "{{ t('issues.linked_issue', 'Issue') }}",
+                                "tooltip": "{{ t('issues.linked_issue_help', 'Its key or words of its summary') }}",
+                                "required": true,
+                                "lookup": {
+                                  "source": "linkCandidates",
+                                  "valueField": "key",
+                                  "labelField": "label",
+                                  "minChars": 0
+                                }
+                              }
+                            ],
+                            "onSubmit": [
+                              {
+                                "call": "addLink",
+                                "onError": [
+                                  {
+                                    "if": "{{error.status == 409}}",
+                                    "then": [
+                                      {
+                                        "toast": "{{ t('issues.already_linked', 'The issues are already linked this way') }}"
+                                      }
+                                    ],
+                                    "else": [
+                                      {
+                                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "refresh": "links"
+                        },
+                        {
+                          "refresh": "history"
+                        }
+                      ]
+                    }
+                  ],
+                  "display": "icon"
+                }
+              ]
+            },
+            {
+              "id": "issue-description-form",
+              "type": "form",
+              "source": "issue",
+              "edit": "inline",
+              "fields": [
                 {
                   "name": "description",
                   "type": "richtext",

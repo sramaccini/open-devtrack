@@ -708,5 +708,9 @@
   "agile.set_epic_chosen_title": "{count, plural, one {Epica di # elemento} other {Epica di # elementi}}",
   "agile.set_epic_help": "Un'epica non completata del progetto; vuoto per togliere gli elementi dalla loro epica",
   "agile.set_epic_failed": "Impossibile impostare l'epica: in un'epica vanno solo storie, attività e bug",
-  "issues.cancel_link": "Annulla"
+  "issues.cancel_link": "Annulla",
+  "issues.add_menu": "Aggiungi",
+  "issues.attachment": "Allegato",
+  "issues.attach_done": "Fatto",
+  "issues.link_item": "Collega elemento"
 }

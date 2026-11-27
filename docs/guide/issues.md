@@ -50,6 +50,8 @@ On the left is what the issue says and what happened to it:
 - its **summary**, as a title, and its **description**, as text: developers and admins click one to change it, as in
   Jira. The summary is confirmed with ✓ or Enter, the description with «Save» or Ctrl+Enter; ✕, «Cancel» or Escape
   leave it as it was. Each is saved on its own;
+- under the summary, **+** (Add), as in Jira: «Add subtask» («Add child work item» on an epic), «Attachment» and
+  «Link work item», each for whoever may do it, without going down to their sections;
 - **Attachments**: the files of the issue ([below](#attachments));
 - **Linked work items**: the other issues it is linked to; «Add linked work item», under them, adds one ([below](#links));
 - **Activity**: its comments and its history.
