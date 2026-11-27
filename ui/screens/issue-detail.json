@@ -453,13 +453,14 @@
               "components": [
                 {
                   "id": "link-table",
-                  "type": "table",
+                  "type": "dataTable",
                   "source": "links",
                   "columns": [
                     {
                       "field": "relation",
                       "label": "{{ t('issues.relation', 'Relation') }}",
-                      "valueKey": "values.relation"
+                      "valueKey": "values.relation",
+                      "groupable": true
                     },
                     {
                       "field": "key",
@@ -519,14 +520,18 @@
                         }
                       ]
                     }
-                  ]
+                  ],
+                  "groupBy": [
+                    "relation"
+                  ],
+                  "pageSize": 50
                 },
                 {
                   "id": "link-add",
                   "type": "box",
                   "variant": "dashed",
                   "justify": "center",
-                  "visibleIf": "{{data.issue._perm.edit}}",
+                  "visibleIf": "{{ data.issue._perm.edit && !(has(state.linking) && state.linking) }}",
                   "components": [
                     {
                       "id": "btn-link",
@@ -535,73 +540,107 @@
                       "tone": "neutral",
                       "onClick": [
                         {
-                          "dialog": {
-                            "title": "{{ t('issues.add_link_title', 'Link to another issue') }}",
-                            "submitLabel": "{{ t('issues.add_link', 'Link') }}",
-                            "initial": {
-                              "relation": "relates"
-                            },
-                            "fields": [
-                              {
-                                "name": "relation",
-                                "type": "select",
-                                "label": "{{ t('issues.relation', 'Relation') }}",
-                                "required": true,
-                                "options": [
-                                  "blocks",
-                                  "blocked_by",
-                                  "relates",
-                                  "duplicates",
-                                  "duplicated_by",
-                                  "clones",
-                                  "cloned_by"
-                                ],
-                                "optionKey": "values.relation"
-                              },
-                              {
-                                "name": "issue",
-                                "type": "lookup",
-                                "label": "{{ t('issues.linked_issue', 'Issue') }}",
-                                "tooltip": "{{ t('issues.linked_issue_help', 'Its key or words of its summary') }}",
-                                "required": true,
-                                "lookup": {
-                                  "source": "linkCandidates",
-                                  "valueField": "key",
-                                  "labelField": "label",
-                                  "minChars": 0
-                                }
-                              }
-                            ],
-                            "onSubmit": [
-                              {
-                                "call": "addLink",
-                                "onError": [
-                                  {
-                                    "if": "{{error.status == 409}}",
-                                    "then": [
-                                      {
-                                        "toast": "{{ t('issues.already_linked', 'The issues are already linked this way') }}"
-                                      }
-                                    ],
-                                    "else": [
-                                      {
-                                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                                      }
-                                    ]
-                                  }
-                                ]
-                              }
-                            ]
+                          "set": {
+                            "path": "state.linking",
+                            "value": true
                           }
+                        }
+                      ],
+                      "type": "button"
+                    }
+                  ]
+                },
+                {
+                  "id": "link-form",
+                  "type": "form",
+                  "layout": "flow",
+                  "visibleIf": "{{ data.issue._perm.edit && has(state.linking) && state.linking }}",
+                  "initial": {
+                    "relation": "relates"
+                  },
+                  "fields": [
+                    {
+                      "name": "relation",
+                      "type": "select",
+                      "label": "{{ t('issues.relation', 'Relation') }}",
+                      "required": true,
+                      "options": [
+                        "blocks",
+                        "blocked_by",
+                        "relates",
+                        "duplicates",
+                        "duplicated_by",
+                        "clones",
+                        "cloned_by"
+                      ],
+                      "optionKey": "values.relation",
+                      "width": "m"
+                    },
+                    {
+                      "name": "issue",
+                      "type": "lookup",
+                      "label": "{{ t('issues.linked_issue', 'Issue') }}",
+                      "tooltip": "{{ t('issues.linked_issue_help', 'Its key or words of its summary') }}",
+                      "required": true,
+                      "lookup": {
+                        "source": "linkCandidates",
+                        "valueField": "key",
+                        "labelField": "label",
+                        "minChars": 0
+                      },
+                      "width": "l"
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "id": "btn-add-link",
+                      "label": "{{ t('issues.add_link', 'Link') }}",
+                      "icon": "link",
+                      "onClick": [
+                        {
+                          "call": "addLink",
+                          "onError": [
+                            {
+                              "if": "{{error.status == 409}}",
+                              "then": [
+                                {
+                                  "toast": "{{ t('issues.already_linked', 'The issues are already linked this way') }}"
+                                }
+                              ],
+                              "else": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
+                            }
+                          ]
                         },
                         {
                           "refresh": "links"
                         },
                         {
                           "refresh": "history"
+                        },
+                        {
+                          "set": {
+                            "path": "state.linking",
+                            "value": false
+                          }
                         }
-                      ],
-                      "type": "button"
+                      ]
+                    },
+                    {
+                      "id": "btn-cancel-link",
+                      "label": "{{ t('issues.cancel_link', 'Cancel') }}",
+                      "icon": "close",
+                      "onClick": [
+                        {
+                          "set": {
+                            "path": "state.linking",
+                            "value": false
+                          }
+                        }
+                      ]
                     }
                   ]
                 }

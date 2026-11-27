@@ -24,6 +24,8 @@ The entries are written by hand at each release from the commits ([docs/release.
   `parent` (#55 T5).
 - **Search**: the ODQL functions `standardIssueTypes()` and `subTaskIssueTypes()` for the type, as in Jira (#55 T5).
 - **Issues**: the parent of an issue in the path above its title, as in Jira (#61).
+- **Issues**: linked work items grouped by relation, and «Add linked work item» opens in the section instead of a
+  dialog, as in Jira (#55 T6).
 
 ### Changed
 

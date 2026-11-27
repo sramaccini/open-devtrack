@@ -152,7 +152,6 @@
   "issues.links": "Links",
   "issues.add_link": "Link",
   "issues.add_linked_item": "Add linked work item",
-  "issues.add_link_title": "Link to another issue",
   "issues.relation": "Relation",
   "issues.linked_issue": "Issue",
   "issues.linked_issue_help": "Its key or words of its summary",
@@ -708,5 +707,6 @@
   "agile.set_epic_title": "Epic of {key}",
   "agile.set_epic_chosen_title": "{count, plural, one {Epic of # issue} other {Epic of # issues}}",
   "agile.set_epic_help": "An epic of the project not done; empty to take the issues out of their epic",
-  "agile.set_epic_failed": "The epic could not be set: only stories, tasks and bugs go in an epic"
+  "agile.set_epic_failed": "The epic could not be set: only stories, tasks and bugs go in an epic",
+  "issues.cancel_link": "Cancel"
 }

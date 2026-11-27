@@ -152,7 +152,6 @@
   "issues.links": "Collegamenti",
   "issues.add_link": "Collega",
   "issues.add_linked_item": "Aggiungi elemento collegato",
-  "issues.add_link_title": "Collega a un’altra issue",
   "issues.relation": "Relazione",
   "issues.linked_issue": "Issue",
   "issues.linked_issue_help": "La sua chiave o parole del suo titolo",
@@ -708,5 +707,6 @@
   "agile.set_epic_title": "Epica di {key}",
   "agile.set_epic_chosen_title": "{count, plural, one {Epica di # elemento} other {Epica di # elementi}}",
   "agile.set_epic_help": "Un'epica non completata del progetto; vuoto per togliere gli elementi dalla loro epica",
-  "agile.set_epic_failed": "Impossibile impostare l'epica: in un'epica vanno solo storie, attività e bug"
+  "agile.set_epic_failed": "Impossibile impostare l'epica: in un'epica vanno solo storie, attività e bug",
+  "issues.cancel_link": "Annulla"
 }

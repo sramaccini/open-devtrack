@@ -124,7 +124,7 @@ The Attachments section of `issue-detail` lists the attachments, with remove for
 input with `display: dropzone` (Quadrava 0.26.0, Q42), a dashed area with «Add attachment» and the limit as its
 `hint`, uploads a file at once, chosen or dropped (`issues/uploadAttachment`, shown when
 `data.issue._perm.attach`); after the upload a `set` step empties the input, so the last file is not shown again.
-Linked work items has «Add linked work item», `tone: neutral`, in a `box` with `variant: dashed`, the same look.
+Linked work items is a `dataTable` grouped by `relation` (the headers take its `valueKey`) and has «Add linked work item», `tone: neutral`, in a `box` with `variant: dashed`, the same look: it sets `state.linking`, which shows the form `link-form` (`layout: flow`, relation and a lookup on `linkCandidates`) in place of the box; «Link» calls `addLink` with the fields of the form and hides it again.
 The name of a file downloads it
 (`href` of the column, Quadrava 0.9.0, request Q10), and the field allows 25 MB, as the back end: the runtime image
 forwards requests up to `QUADRAVA_MAX_BODY_SIZE` (100m by default, 26m in `e2e/authz/compose.yaml`; request Q11).
