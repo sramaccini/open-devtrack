@@ -110,6 +110,16 @@ public class Workflows {
     }
 
     /**
+     * The status of an issue in {@code status} of project {@code from} once it moves to project {@code to} with the
+     * type (ADR-27): the same rule, the category read in the source.
+     */
+    public String statusFor(UUID from, String status, UUID to, String type) {
+        String category = statuses(from).stream().filter(s -> s.code().equals(status)).map(Status::category)
+                .findFirst().orElse(null);
+        return statusIn(statuses(to, type), status, category);
+    }
+
+    /**
      * The transitions that can run now from {@code status} in the workflow of the type: the user has
      * {@link #TRANSITION} and the guard is true for the issue as it would be after the transition ({@code issue} without
      * the status, which is added here).

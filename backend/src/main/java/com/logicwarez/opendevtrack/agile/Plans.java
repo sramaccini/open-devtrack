@@ -7,6 +7,7 @@ package com.logicwarez.opendevtrack.agile;
 import com.logicwarez.opendevtrack.agile.PlanEvents.IssuePlanned;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueCreated;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueDeleted;
+import com.logicwarez.opendevtrack.issue.IssueEvents.IssueMoved;
 import com.logicwarez.opendevtrack.project.ProjectCreated;
 import java.time.Instant;
 import java.util.List;
@@ -61,6 +62,20 @@ class Plans {
             sprint(p, null, event.at());
             plans.delete(p);
         });
+    }
+
+    /**
+     * An issue moved to another project (ADR-27) leaves its sprint and goes to the bottom of the backlog of the target,
+     * with its points; in the transaction of the move.
+     */
+    @EventListener
+    void on(IssueMoved event) {
+        PlanEntity plan = plan(event.issueId(), event.fromProject());
+        sprint(plan, null, event.at());
+        plans.lock(event.toProject());
+        plan.project(event.toProject(), Rank.after(plans.last(event.toProject()).orElse(null)));
+        plans.save(plan);
+        planned(plan);
     }
 
     /** The plan of the issue; one at the bottom of the order for an issue without one. */

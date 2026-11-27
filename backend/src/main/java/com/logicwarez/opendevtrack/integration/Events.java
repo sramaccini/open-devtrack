@@ -13,6 +13,7 @@ import com.logicwarez.opendevtrack.issue.IssueEvents.FieldChange;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueCreated;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueDeleted;
+import com.logicwarez.opendevtrack.issue.IssueEvents.IssueMoved;
 import com.logicwarez.opendevtrack.project.ProjectRef;
 import com.logicwarez.opendevtrack.project.Projects;
 import java.time.Instant;
@@ -43,6 +44,7 @@ class Events {
     static final String ISSUE_CREATED = "issue.created";
     static final String ISSUE_CHANGED = "issue.changed";
     static final String ISSUE_DELETED = "issue.deleted";
+    static final String ISSUE_MOVED = "issue.moved";
     static final String COMMENT_POSTED = "comment.posted";
     static final String ATTACHMENT_ADDED = "attachment.added";
     static final String ATTACHMENT_REMOVED = "attachment.removed";
@@ -51,7 +53,7 @@ class Events {
     /** «Send a test»: sent to that webhook only, whatever it wants. */
     static final String PING = "ping";
 
-    static final List<String> TYPES = List.of(ISSUE_CREATED, ISSUE_CHANGED, ISSUE_DELETED, COMMENT_POSTED,
+    static final List<String> TYPES = List.of(ISSUE_CREATED, ISSUE_CHANGED, ISSUE_DELETED, ISSUE_MOVED, COMMENT_POSTED,
             ATTACHMENT_ADDED, ATTACHMENT_REMOVED, SPRINT_STARTED, SPRINT_COMPLETED);
 
     private static final JsonMapper JSON = JsonMapper.builder().build();
@@ -84,6 +86,15 @@ class Events {
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("key", e.key());
         queue(e.projectId(), ISSUE_DELETED, e.by(), e.at(), data);
+    }
+
+    /** A move to another project (ADR-27), to the webhooks of both: the source learns the new key. */
+    @ApplicationModuleListener
+    void on(IssueMoved e) {
+        Map<String, Object> data = issue(e.toKey(), e.changes());
+        data.put("movedFrom", e.fromKey());
+        queue(e.fromProject(), ISSUE_MOVED, e.by(), e.at(), data);
+        queue(e.toProject(), ISSUE_MOVED, e.by(), e.at(), data);
     }
 
     @ApplicationModuleListener

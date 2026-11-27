@@ -100,6 +100,19 @@ class IssueEntity {
         this.updatedAt = now;
     }
 
+    /** The issue in another project (ADR-27), with its number there and what fits there. */
+    void movedTo(UUID projectId, long number, IssueType type, String status, String assignee, String reviewer,
+                 Map<String, Object> custom, Instant now) {
+        this.projectId = projectId;
+        this.number = number;
+        this.type = type;
+        this.status = status;
+        this.assignee = assignee;
+        this.reviewer = reviewer;
+        this.custom = new HashMap<>(custom);
+        this.updatedAt = now;
+    }
+
     /** Adds or removes the flag. */
     void flag(boolean flagged, Instant now) {
         this.flagged = flagged;

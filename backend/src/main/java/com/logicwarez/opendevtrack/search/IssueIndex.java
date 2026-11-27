@@ -14,6 +14,7 @@ import static com.logicwarez.opendevtrack.search.Docs.DOC;
 import static com.logicwarez.opendevtrack.search.Docs.ISSUE_ID;
 import static com.logicwarez.opendevtrack.search.Docs.ISSUE_KEY;
 import static com.logicwarez.opendevtrack.search.Docs.LABELS;
+import static com.logicwarez.opendevtrack.search.Docs.MOVED_KEYS;
 import static com.logicwarez.opendevtrack.search.Docs.NUMBER;
 import static com.logicwarez.opendevtrack.search.Docs.POINTS;
 import static com.logicwarez.opendevtrack.search.Docs.PRIORITY;
@@ -44,6 +45,7 @@ import com.logicwarez.opendevtrack.issue.IssueDocument;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueCreated;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueDeleted;
+import com.logicwarez.opendevtrack.issue.IssueEvents.IssueMoved;
 import com.logicwarez.opendevtrack.issue.Issues;
 import com.logicwarez.opendevtrack.workflow.Workflows;
 import java.time.OffsetDateTime;
@@ -101,6 +103,11 @@ class IssueIndex {
     }
 
     @ApplicationModuleListener
+    void on(IssueMoved event) {
+        index(event.issueId());
+    }
+
+    @ApplicationModuleListener
     void on(IssuePlanned event) {
         index(event.issueId());
     }
@@ -139,6 +146,7 @@ class IssueIndex {
                 .set(PROJECT_ID, issue.projectId())
                 .set(PROJECT_KEY, issue.projectKey())
                 .set(ISSUE_KEY, issue.key())
+                .set(MOVED_KEYS, issue.movedKeys().toArray(String[]::new))
                 .set(NUMBER, issue.number())
                 .set(TYPE, issue.type())
                 .set(STATUS, issue.status())
@@ -167,6 +175,7 @@ class IssueIndex {
                 .set(PROJECT_ID, issue.projectId())
                 .set(PROJECT_KEY, issue.projectKey())
                 .set(ISSUE_KEY, issue.key())
+                .set(MOVED_KEYS, issue.movedKeys().toArray(String[]::new))
                 .set(TYPE, issue.type())
                 .set(STATUS, issue.status())
                 .set(CATEGORY, category)

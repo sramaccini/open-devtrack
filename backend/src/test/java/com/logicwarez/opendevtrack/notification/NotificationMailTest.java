@@ -200,7 +200,7 @@ class NotificationMailTest {
                 .andExpect(jsonPath("$.channels.reviewRequestedEmail").value("instant"))
                 .andExpect(jsonPath("$.channels.sharedEmail").value("instant"));
         mvc.perform(as(get("/api/notifications/preferences/fields"), luisa).header("Accept-Language", "it"))
-                .andExpect(jsonPath("$.length()").value(12))
+                .andExpect(jsonPath("$.length()").value(14))
                 .andExpect(jsonPath("$[2].key").value("sharedApp"))
                 .andExpect(jsonPath("$[6].key").value("reviewRequestedApp"))
                 .andExpect(jsonPath("$[0].key").value("mentionedApp"))

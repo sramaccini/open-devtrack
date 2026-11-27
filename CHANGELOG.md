@@ -10,6 +10,11 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Added
 
+- **Issues**: «Move» in the «…» of an issue, as in Jira (ADR-27): to another project of the organisation, for the
+  admins of the project (new permission `odt.issue.move`, added to the admins of every scheme) who can create issues
+  there. The issue gets a new key and the old one keeps leading to it; the screen confirms what would be lost first.
+  Comments, attachments, history, links, watchers and votes follow it. A new notification «An issue you watch moved»
+  and a webhook event `issue.moved`, sent to both projects (`POST /api/issues/{key}/move`) (#55).
 - **Issues**: «Export» in the «…» of an issue, as in Jira, for whoever sees it: a Word document (.docx), an
   OpenDocument text for LibreOffice (.odt), both with the fields, description, links, attachments and comments in the
   language of the user, or JSON with everything, history included (`GET /api/issues/{key}/export?format=`) (#55).

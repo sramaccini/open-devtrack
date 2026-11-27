@@ -12,6 +12,7 @@ import static com.logicwarez.opendevtrack.search.Docs.CREATED_AT;
 import static com.logicwarez.opendevtrack.search.Docs.CUSTOM;
 import static com.logicwarez.opendevtrack.search.Docs.ISSUE_KEY;
 import static com.logicwarez.opendevtrack.search.Docs.LABELS;
+import static com.logicwarez.opendevtrack.search.Docs.MOVED_KEYS;
 import static com.logicwarez.opendevtrack.search.Docs.NUMBER;
 import static com.logicwarez.opendevtrack.search.Docs.POINTS;
 import static com.logicwarez.opendevtrack.search.Docs.PRIORITY_ORDER;
@@ -142,7 +143,7 @@ final class OdqlCompiler {
         }
         return switch (name) {
             case "project" -> text(c, PROJECT_KEY, v -> v.toUpperCase(Locale.ROOT));
-            case "key" -> text(c, ISSUE_KEY, v -> v.toUpperCase(Locale.ROOT));
+            case "key" -> key(c);
             case "type" -> text(c, TYPE, v -> oneOf(c, v, TYPES, "type"));
             case "category" -> text(c, CATEGORY, v -> oneOf(c, v, CATEGORIES, "category"));
             case "status" -> text(c, STATUS, this::status);
@@ -180,6 +181,22 @@ final class OdqlCompiler {
             case "empty" -> field.isNull();
             case "notempty" -> field.isNotNull();
             default -> throw notAllowed(c, "= != IN NOT IN IS EMPTY");
+        };
+    }
+
+    /** {@code key}: the key now, or one the issue had before it moved to another project (ADR-27). */
+    private Condition key(Clause c) {
+        Function<String, String> upper = v -> v.toUpperCase(Locale.ROOT);
+        return switch (c.op()) {
+            case "=", "in" -> {
+                String[] keys = words(c).stream().map(upper).toArray(String[]::new);
+                yield ISSUE_KEY.in(keys).or(condition("{0} && {1}", MOVED_KEYS, val(keys, MOVED_KEYS)));
+            }
+            case "!=", "notin" -> {
+                String[] keys = words(c).stream().map(upper).toArray(String[]::new);
+                yield ISSUE_KEY.notIn(keys).and(not(condition("{0} && {1}", MOVED_KEYS, val(keys, MOVED_KEYS))));
+            }
+            default -> text(c, ISSUE_KEY, upper);
         };
     }
 

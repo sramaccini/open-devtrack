@@ -13,6 +13,7 @@ import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueCreated;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueShared;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueDeleted;
+import com.logicwarez.opendevtrack.issue.IssueEvents.IssueMoved;
 import com.logicwarez.opendevtrack.issue.Watchers;
 import com.logicwarez.opendevtrack.notification.Preferences.Preference;
 import com.logicwarez.opendevtrack.project.ProjectRef;
@@ -91,6 +92,20 @@ class Messages {
         Map<String, String> params = values("message", event.message(), null, null);
         event.to().forEach(u -> to.add(u, MessageKind.SHARED, params));
         save(to, event.projectId(), event.key(), event.at());
+    }
+
+    /**
+     * An issue moved to another project (ADR-27): a message to its watchers who are members of the target, with its old
+     * key. Those who are not stay watchers and get nothing while they cannot see it.
+     */
+    @ApplicationModuleListener
+    void on(IssueMoved event) {
+        Recipients to = new Recipients(event.by());
+        Map<String, String> params = values("from", event.fromKey(), null, null);
+        watchers.of(event.issueId()).stream()
+                .filter(w -> access.role(event.toProject(), w).isPresent())
+                .forEach(w -> to.add(w, MessageKind.MOVED, params));
+        save(to, event.toProject(), event.toKey(), event.at());
     }
 
     @ApplicationModuleListener

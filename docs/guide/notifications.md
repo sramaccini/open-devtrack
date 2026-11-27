@@ -12,6 +12,7 @@ OpenDevTrack tells you about the work that concerns you: in the application, und
 | Asked to review | You become the reviewer of an issue |
 | Comment on an issue you watch | Someone comments on an issue you watch |
 | Status change of an issue you watch | An issue you watch changes its status |
+| An issue you watch moved to another project | An issue you watch moves to another project you are a member of, with its new key |
 
 Some rules:
 

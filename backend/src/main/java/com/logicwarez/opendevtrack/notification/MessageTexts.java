@@ -41,6 +41,7 @@ class MessageTexts {
             case SHARED -> m.params().get("message");
             case TRANSITIONED -> texts.getMessage("message.transitioned.text",
                     new Object[] {status(m.params().get("from"), locale), to}, locale);
+            case MOVED -> texts.getMessage("message.moved.text", new Object[] {m.params().get("from")}, locale);
             case ASSIGNED, REVIEW_REQUESTED, WEBHOOK_OFF -> null;
         };
         return new Text(title, text);

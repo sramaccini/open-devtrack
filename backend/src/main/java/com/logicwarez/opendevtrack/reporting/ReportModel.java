@@ -15,6 +15,7 @@ import com.logicwarez.opendevtrack.issue.IssueDocument;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueCreated;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueDeleted;
+import com.logicwarez.opendevtrack.issue.IssueEvents.IssueMoved;
 import com.logicwarez.opendevtrack.issue.Issues;
 import com.logicwarez.opendevtrack.reporting.Tables.Result;
 import com.logicwarez.opendevtrack.reporting.Tables.Snapshot;
@@ -79,6 +80,16 @@ class ReportModel {
     @ApplicationModuleListener
     void on(IssuePlanned event) {
         issue(event.issueId(), event.projectId());
+    }
+
+    /**
+     * An issue moved to another project (ADR-27): its state follows it, and the source counts without it from today; the
+     * snapshots of the past stay with the source, as they were true on their day.
+     */
+    @ApplicationModuleListener
+    void on(IssueMoved event) {
+        issue(event.issueId(), event.toProject());
+        snapshot(event.fromProject());
     }
 
     @ApplicationModuleListener

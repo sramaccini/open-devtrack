@@ -55,6 +55,12 @@ class PlanEntity {
         this.rank = rank;
     }
 
+    /** The plan in another project (ADR-27): its place in the order there. */
+    void project(UUID projectId, String rank) {
+        this.projectId = projectId;
+        this.rank = rank;
+    }
+
     void sprint(UUID sprintId) {
         this.sprintId = sprintId;
     }

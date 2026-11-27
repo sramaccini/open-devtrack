@@ -5,13 +5,15 @@
 package com.logicwarez.opendevtrack.collaboration;
 
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueDeleted;
+import com.logicwarez.opendevtrack.issue.IssueEvents.IssueMoved;
 import java.util.List;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Component;
 
 /**
  * The comments and attachments of a deleted issue go with it, after the commit of the deletion; the bytes of the
- * attachments after the commit of their metadata (ADR-14).
+ * attachments after the commit of their metadata (ADR-14). Those of an issue moved to another project follow it
+ * (ADR-27): the comments are keyed by the issue, the attachments count in the quota of the target.
  */
 @Component
 class IssueCleanup {
@@ -24,6 +26,11 @@ class IssueCleanup {
         this.comments = comments;
         this.attachments = attachments;
         this.bytes = bytes;
+    }
+
+    @ApplicationModuleListener
+    void on(IssueMoved event) {
+        attachments.moveIssue(event.issueId(), event.toProject());
     }
 
     @ApplicationModuleListener

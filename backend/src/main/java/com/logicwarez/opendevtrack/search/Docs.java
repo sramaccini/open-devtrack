@@ -29,6 +29,8 @@ final class Docs {
     static final Field<UUID> PROJECT_ID = field(name("project_id"), SQLDataType.UUID);
     static final Field<String> PROJECT_KEY = field(name("project_key"), SQLDataType.VARCHAR);
     static final Field<String> ISSUE_KEY = field(name("issue_key"), SQLDataType.VARCHAR);
+    /** The keys the issue had before it moved to another project (ADR-27). */
+    static final Field<String[]> MOVED_KEYS = field(name("moved_keys"), SQLDataType.CLOB.array());
     static final Field<Long> NUMBER = field(name("number"), SQLDataType.BIGINT);
     static final Field<String> TYPE = field(name("type"), SQLDataType.VARCHAR);
     static final Field<String> STATUS = field(name("status"), SQLDataType.VARCHAR);

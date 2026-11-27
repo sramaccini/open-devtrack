@@ -30,6 +30,14 @@ public final class IssueEvents {
                               String message) {
     }
 
+    /**
+     * An issue moved to another project (ADR-27): its new key in {@code toKey}, the changes of project, key, type,
+     * status and of each value dropped or cleared in {@code changes}, as in the history.
+     */
+    public record IssueMoved(UUID issueId, UUID fromProject, UUID toProject, String fromKey, String toKey, String by,
+                             Instant at, List<FieldChange> changes) {
+    }
+
     public record IssueDeleted(UUID issueId, UUID projectId, String key, String by, Instant at) {
     }
 }

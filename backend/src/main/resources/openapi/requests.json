@@ -42,6 +42,9 @@
     "POST /api/issues/{issueKey}/links" : {
       "$ref" : "#/components/schemas/LinkRequest"
     },
+    "POST /api/issues/{issueKey}/move" : {
+      "$ref" : "#/components/schemas/ProjectMoveRequest"
+    },
     "PUT /api/issues/{issueKey}/plan" : {
       "$ref" : "#/components/schemas/PlanRequest"
     },
@@ -541,6 +544,43 @@
           },
           "role" : {
             "type" : "string"
+          }
+        }
+      },
+      "ProjectMoveFields" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "drop" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "ProjectMoveRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "dryRun" : {
+            "type" : "boolean"
+          },
+          "fields" : {
+            "$ref" : "#/components/schemas/ProjectMoveFields"
+          },
+          "project" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       },

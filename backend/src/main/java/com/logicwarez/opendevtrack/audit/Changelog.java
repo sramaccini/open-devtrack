@@ -7,6 +7,7 @@ package com.logicwarez.opendevtrack.audit;
 import com.logicwarez.opendevtrack.issue.IssueEvents.FieldChange;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueCreated;
+import com.logicwarez.opendevtrack.issue.IssueEvents.IssueMoved;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -37,6 +38,12 @@ class Changelog {
 
     @ApplicationModuleListener
     void on(IssueChanged event) {
+        save(event.issueId(), event.by(), event.at(), event.changes());
+    }
+
+    /** The move to another project (ADR-27): the project, the key and every value it changed or lost. */
+    @ApplicationModuleListener
+    void on(IssueMoved event) {
         save(event.issueId(), event.by(), event.at(), event.changes());
     }
 

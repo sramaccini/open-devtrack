@@ -22,6 +22,8 @@ class AttachmentEntity {
 
     private UUID issueId;
     private UUID projectId;
+    /** The project under which the bytes are stored: the first one, also after the issue moves (ADR-27). */
+    private UUID storedIn;
     private String filename;
     private String mediaType;
     private long size;
@@ -37,6 +39,7 @@ class AttachmentEntity {
                      String uploadedBy, Instant uploadedAt) {
         this.issueId = issueId;
         this.projectId = projectId;
+        this.storedIn = projectId;
         this.filename = filename;
         this.mediaType = mediaType;
         this.size = size;
@@ -48,7 +51,7 @@ class AttachmentEntity {
 
     /** The key of the bytes in the store: two UUIDs, never the name of the file. */
     String key() {
-        return key(projectId, id);
+        return key(storedIn, id);
     }
 
     static String key(UUID projectId, UUID id) {

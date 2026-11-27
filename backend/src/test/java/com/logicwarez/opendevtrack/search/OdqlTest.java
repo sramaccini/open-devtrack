@@ -105,7 +105,8 @@ class OdqlTest {
 
     @Test
     void valuesAreNormalisedAndBound() {
-        assertThat(sql("project = web AND key = web-12")).contains("\"project_key\" = 'WEB'", "\"issue_key\" = 'WEB-12'");
+        assertThat(sql("project = web AND key = web-12")).contains("\"project_key\" = 'WEB'", "\"issue_key\" in ('WEB-12')",
+                "\"moved_keys\" && cast('{\"WEB-12\"}' as text[])");
         assertThat(sql("type IN (Bug, story)")).contains("\"type\" in ('bug', 'story')");
         assertThat(sql("status = \"In progress\" OR status = \"in corso\" OR status = todo"))
                 .contains("\"status\" = 'in_progress'", "\"status\" = 'todo'");

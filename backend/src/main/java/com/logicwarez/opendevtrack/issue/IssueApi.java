@@ -187,6 +187,27 @@ final class IssueApi {
     record ShareRequest(List<String> users, String message) {
     }
 
+    /**
+     * A move to another project (ADR-27): the key of the target, the type there (the same without it), the status in
+     * the workflow of the target (the same code, else the same category, else the first status, without it), the version
+     * read, the values the target cannot keep that may be dropped ({@code fields.drop}, custom fields by key), and
+     * {@code dryRun} to learn what would be dropped or cleared without moving.
+     */
+    record ProjectMoveRequest(String project, String type, String status, Long version, ProjectMoveFields fields, Boolean dryRun) {
+    }
+
+    record ProjectMoveFields(List<String> drop) {
+    }
+
+    /**
+     * What a move did, or would do with {@code dryRun}: the key now (or the one it would get), the one before, the
+     * custom fields dropped, the people cleared ({@code assignee}, {@code reviewer}), all of them in {@code lostText} in
+     * the language of the user, and the issue after the move (null for a dry run).
+     */
+    record ProjectMoveAnswer(String key, String movedFrom, List<String> dropped, List<String> cleared, String lostText,
+                      IssueView issue) {
+    }
+
     /** The summary of a clone; without it «CLONE - » and the summary of the original. */
     record CloneRequest(String summary) {
     }

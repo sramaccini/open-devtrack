@@ -10,6 +10,8 @@ import com.logicwarez.opendevtrack.issue.IssueApi.IssuePatch;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueRequest;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueRow;
 import com.logicwarez.opendevtrack.issue.IssueApi.LabelRow;
+import com.logicwarez.opendevtrack.issue.IssueApi.ProjectMoveAnswer;
+import com.logicwarez.opendevtrack.issue.IssueApi.ProjectMoveRequest;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueView;
 import com.logicwarez.opendevtrack.issue.IssueApi.TransitionRequest;
 import com.logicwarez.opendevtrack.issue.IssueApi.TransitionView;
@@ -70,7 +72,8 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>{@code odt.issue.transition} (developer): move them through the workflow of the project, when the guard of the
  *   transition is true (module workflow, ADR-10);</li>
  *   <li>{@code odt.issue.delete} (admin): delete them;</li>
- *   <li>{@code odt.reporter.edit} (admin): change their reporter.</li>
+ *   <li>{@code odt.reporter.edit} (admin): change their reporter;</li>
+ *   <li>{@code odt.issue.move} (admin): move them to another project, with {@code odt.issue.create} there (ADR-27).</li>
  * </ul>
  * The status changes only through the transitions; the reporter, the assignee and the reviewer watch the issue
  * ({@link WatcherController}). An issue of a project of another tenant answers 404, as one that does not exist
@@ -103,12 +106,15 @@ class IssueController {
     private final VoteRepository votes;
     private final CustomFields customFields;
     private final IssueEditor editor;
+    private final IssueMover mover;
     private final Clock clock;
 
     IssueController(IssueRepository issues, IssueLinkRepository links, Issues finder, Projects projects, ProjectAccess access, CurrentUser user,
                     ApplicationEventPublisher events, Workflows workflows, WatcherRepository watchers,
-                    VoteRepository votes, CustomFields customFields, IssueEditor editor, @Value("${odt.reporting.zone:UTC}") String zone) {
+                    VoteRepository votes, CustomFields customFields, IssueEditor editor, IssueMover mover,
+                    @Value("${odt.reporting.zone:UTC}") String zone) {
         this.editor = editor;
+        this.mover = mover;
         this.clock = Clock.system(ZoneId.of(zone));
         this.workflows = workflows;
         this.customFields = customFields;
@@ -237,6 +243,25 @@ class IssueController {
         events.publishEvent(new IssueChanged(original.id(), project.id(), originalKey, user.username(), now,
                 List.of(new FieldChange("links", null, LinkType.CLONES.relation(false) + " " + cloneKey))));
         return ResponseEntity.status(HttpStatus.CREATED).body(view(project, clone, permissions));
+    }
+
+    /**
+     * Moves the issue to another project of the tenant (ADR-27, Jira's «Move»): see {@link IssueMover}. With
+     * {@code dryRun} nothing changes and the answer says what the move would drop and clear.
+     */
+    @ApiDoc(value = "Moves an issue to another project, with a new key; the old one keeps leading to it",
+            answer = ProjectMoveAnswer.class, project = "odt.issue.move")
+    @PostMapping("/api/issues/{issueKey}/move")
+    @Transactional
+    ResponseEntity<?> move(@PathVariable String issueKey, @RequestBody ProjectMoveRequest request) {
+        Optional<Found> found = find(issueKey);
+        if (found.isEmpty()) {
+            return Problems.notFound(NOT_FOUND);
+        }
+        if (!permissions(found.get().project()).contains("odt.issue.browse")) {
+            return Problems.forbidden(NOT_A_MEMBER);
+        }
+        return mover.move(found.get(), request, (project, issue) -> view(project, issue, permissions(project)));
     }
 
     /** «CLONE - » and the summary, within the length of a summary. */
@@ -583,6 +608,7 @@ class IssueController {
                 "comment", permissions.contains("odt.issue.comment"),
                 "attach", permissions.contains("odt.issue.attach"),
                 "clone", permissions.contains("odt.issue.create"),
+                "move", permissions.contains(IssueMover.MOVE),
                 "reporter", permissions.contains("odt.issue.edit") && permissions.contains(REPORTER),
                 "vote", !user.username().equals(i.reporter()) && !FlagAndVoteController.done(workflows, i));
         return new IssueView(key(project, i), project.key(), i.number(), i.type().value(), i.summary(), i.description(),

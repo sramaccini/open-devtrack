@@ -80,6 +80,7 @@ The permissions are:
 | `odt.issue.comment` | comment |
 | `odt.issue.attach` | attach files |
 | `odt.issue.delete` | delete issues |
+| `odt.issue.move` | move an issue to another project (with `odt.issue.create` there) |
 | `odt.reporter.edit` | change the reporter of an issue |
 | `odt.sprint.manage` | manage the sprints |
 | `odt.project.edit` | edit the project |

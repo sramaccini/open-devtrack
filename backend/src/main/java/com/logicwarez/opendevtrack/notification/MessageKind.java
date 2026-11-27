@@ -10,12 +10,14 @@ import java.util.Locale;
 /** What a message tells (ADR-13), from the most to the least direct: a user gets one message per change. */
 enum MessageKind {
     MENTIONED, SHARED, ASSIGNED, REVIEW_REQUESTED, COMMENTED, TRANSITIONED,
+    /** An issue the user watches moved to another project (ADR-27). */
+    MOVED,
     /** A webhook of a project the user is an admin of was turned off (ADR-21, B11): in the application only. */
     WEBHOOK_OFF;
 
     /** The kinds of the notification settings (ADR-18): all but {@link #WEBHOOK_OFF}, which has no choice. */
     static final List<MessageKind> SETTABLE = List.of(MENTIONED, SHARED, ASSIGNED, REVIEW_REQUESTED, COMMENTED,
-            TRANSITIONED);
+            TRANSITIONED, MOVED);
 
     String value() {
         return name().toLowerCase(Locale.ROOT);

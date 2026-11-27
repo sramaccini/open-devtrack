@@ -66,7 +66,7 @@ On the right is what describes it:
 - the link: «Copy link» puts the address of the issue in the clipboard, to paste it anywhere;
 - «Share»: up to ten members of the project, with an optional message; each gets a
   [notification](notifications.md);
-- «…», more actions: «Assign to me», for developers and admins when the issue is not yours yet, «Add flag» or «Remove flag», «Add vote» or «Remove vote» ([below](#flag-and-votes)), «Clone»,
+- «…», more actions: «Assign to me», for developers and admins when the issue is not yours yet, «Add flag» or «Remove flag», «Add vote» or «Remove vote» ([below](#flag-and-votes)), «Clone», «Move» ([below](#move)),
   «Print», the three exports ([below](#export)), «All issues», and «Delete», for the admins of the project. «Clone» asks the summary of the copy («CLONE -»
   and this one) and opens it: it has the type, priority, assignee, reviewer, due date, description, labels and custom
   fields of this issue, you as reporter, the first status of its workflow and the link «clones» to this one; comments,
@@ -160,6 +160,23 @@ Whoever sees an issue exports it from «…», as in Jira:
 
 The content of the attachments is not in the export: download them from the issue. Only the links to issues you see
 are in it.
+
+### Move
+
+An admin of the project moves an issue to another project with «Move» in «…», as in Jira, if they can create issues
+there. The dialog asks the project and the type. The issue takes the next key of that project (WEB-16 becomes MOB-4);
+the old key keeps leading to it, in links, bookmarks, mentions and the search (`key = WEB-16`).
+
+- The status becomes the one with the same name in the workflow of the target, else the first of the same category,
+  else its first status.
+- Custom fields that the target has with the same key and type keep their value; the others are lost.
+- The assignee and the reviewer who are not members of the target are cleared.
+- The issue leaves its sprint and goes to the bottom of the backlog of the target.
+
+Before anything changes, the screen lists what would be lost and asks to confirm. Comments, attachments, history, links,
+watchers, votes, labels, the flag and the story points follow the issue; the history records the move. Watchers who are
+not members of the target stay in the list but get no notification while they cannot see the issue. One issue moves at
+a time, never to another organisation; an epic moves without its children.
 
 ### History
 

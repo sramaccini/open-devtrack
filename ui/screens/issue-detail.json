@@ -130,6 +130,12 @@
     "cloneIssue": {
       "ref": "issues/clone"
     },
+    "moveIssue": {
+      "ref": "issues/moveToProject"
+    },
+    "moveTargets": {
+      "ref": "issues/moveTargets"
+    },
     "shareIssue": {
       "ref": "issues/share"
     },
@@ -1230,6 +1236,102 @@
                                     "params": {
                                       "key": "{{params.key}}",
                                       "issue": "{{cloned.key}}"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "id": "item-move-project",
+                          "label": "{{ t('issues.move_project', 'Move') }}",
+                          "visibleIf": "{{data.issue._perm.move}}",
+                          "onClick": [
+                            {
+                              "dialog": {
+                                "title": "{{ t('issues.move_project_title', 'Move {key}', {'key': data.issue.key}) }}",
+                                "submitLabel": "{{ t('issues.move_project', 'Move') }}",
+                                "initial": {
+                                  "type": "{{data.issue.type}}"
+                                },
+                                "fields": [
+                                  {
+                                    "name": "project",
+                                    "type": "lookup",
+                                    "label": "{{ t('issues.move_project_target', 'Project') }}",
+                                    "tooltip": "{{ t('issues.move_project_help', 'The issue gets a key of that project; its old key keeps leading to it. Comments, attachments, history, links and watchers follow it') }}",
+                                    "required": true,
+                                    "lookup": {
+                                      "source": "moveTargets",
+                                      "valueField": "key",
+                                      "labelField": "name",
+                                      "minChars": 0
+                                    }
+                                  },
+                                  {
+                                    "name": "type",
+                                    "type": "select",
+                                    "label": "{{ t('issues.type', 'Type') }}",
+                                    "options": [
+                                      "task",
+                                      "bug",
+                                      "story",
+                                      "epic"
+                                    ],
+                                    "optionKey": "values.issue_type",
+                                    "required": true
+                                  }
+                                ],
+                                "onSubmit": [
+                                  {
+                                    "call": "moveIssue",
+                                    "args": {
+                                      "target": "{{form.project}}",
+                                      "issueType": "{{form.type}}",
+                                      "version": "{{data.issue.version}}",
+                                      "drop": null,
+                                      "dryRun": true
+                                    },
+                                    "as": "preview",
+                                    "onError": [
+                                      {
+                                        "toast": "{{ t('issues.move_project_failed', 'The move failed: choose another project you can create issues in') }}"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "if": "{{ size(preview.dropped) > 0 || size(preview.cleared) > 0 }}",
+                                    "then": [
+                                      {
+                                        "confirm": "{{ t('issues.move_project_confirm', 'These values cannot be kept in {project} and will be lost: {lost}. Move the issue?', {'project': form.project, 'lost': preview.lostText}) }}"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "call": "moveIssue",
+                                    "args": {
+                                      "target": "{{form.project}}",
+                                      "issueType": "{{form.type}}",
+                                      "version": "{{data.issue.version}}",
+                                      "drop": "{{preview.dropped}}",
+                                      "dryRun": false
+                                    },
+                                    "as": "movedIssue",
+                                    "onError": [
+                                      {
+                                        "toast": "{{ t('issues.move_project_failed', 'The move failed: choose another project you can create issues in') }}"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "toast": "{{ t('issues.move_project_done', 'Moved as {key}', {'key': movedIssue.key}) }}"
+                                  },
+                                  {
+                                    "navigate": "issue-detail",
+                                    "params": {
+                                      "key": "{{movedIssue.issue.project}}",
+                                      "issue": "{{movedIssue.key}}"
                                     }
                                   }
                                 ]

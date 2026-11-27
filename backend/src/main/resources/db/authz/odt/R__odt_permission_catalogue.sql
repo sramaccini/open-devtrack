@@ -23,6 +23,7 @@ INSERT INTO app_permission (permission_code, description) VALUES
     ('odt.issue.attach', 'Attach files to the issues of a project'),
     ('odt.issue.delete', 'Delete issues of a project'),
     ('odt.reporter.edit', 'Change the reporter of the issues of a project'),
+    ('odt.issue.move', 'Move issues of a project to another project'),
     ('odt.sprint.manage', 'Create, start and complete the sprints of a project and plan issues into them'),
     ('odt.project.edit', 'Edit the details of a project'),
     ('odt.member.manage', 'Add and remove the members of a project and change their roles')

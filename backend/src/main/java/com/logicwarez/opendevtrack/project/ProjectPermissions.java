@@ -8,14 +8,17 @@ import com.logicwarez.authz.session.PermissionContributor;
 import com.logicwarez.authz.session.SessionContext;
 import com.logicwarez.opendevtrack.access.PermissionSchemes;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
+import com.logicwarez.opendevtrack.shared.IssueKeys;
 import java.util.Optional;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 /**
  * The project roles in the checks of authz-library ({@code POST /authz/check}, A1): a check with the resource
  * {@code project} (its key) or {@code issue} (its key, {@code WEB-42}) of a permission that a project role gives is
  * decided by the role of the user in that project, the admin of the tenant counting as admin (ADR-07). A project of
- * another tenant, or that does not exist, is a refusal. The other checks keep the permissions of the session.
+ * another tenant, or that does not exist, is a refusal. The key of an issue moved to another project (ADR-27) is
+ * decided in the project it is in now. The other checks keep the permissions of the session.
  *
  * <p>No permission is added to {@code /authz/capabilities}: they all depend on a project. The screens keep reading
  * them as {@code _perm} on rows and forms, which costs no extra request.
@@ -28,10 +31,12 @@ class ProjectPermissions implements PermissionContributor {
 
     private final Projects projects;
     private final ProjectAccess access;
+    private final ObjectProvider<IssueKeys> issueKeys;
 
-    ProjectPermissions(Projects projects, ProjectAccess access) {
+    ProjectPermissions(Projects projects, ProjectAccess access, ObjectProvider<IssueKeys> issueKeys) {
         this.projects = projects;
         this.access = access;
+        this.issueKeys = issueKeys;
     }
 
     @Override
@@ -41,7 +46,8 @@ class ProjectPermissions implements PermissionContributor {
         }
         String key = switch (resource.type()) {
             case PROJECT -> resource.id();
-            case ISSUE -> resource.id().contains("-") ? resource.id().substring(0, resource.id().lastIndexOf('-')) : "";
+            case ISSUE -> issueKeys.stream().findFirst().flatMap(k -> k.projectKeyOf(resource.id()))
+                    .orElse(resource.id().contains("-") ? resource.id().substring(0, resource.id().lastIndexOf('-')) : "");
             default -> null;
         };
         if (key == null) {

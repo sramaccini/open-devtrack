@@ -101,7 +101,10 @@ curl -s -X PATCH -H "Authorization: Bearer $TOKEN" -H "Content-Type: application
 ```
 
 Issues change status only through the transitions of their workflow: `GET /api/issues/{key}/transitions`, then
-`POST /api/issues/{key}/transitions` with `{"transition": "start", "version": 7}`. `GET /api/issues/{key}/workflow` gives
+`POST /api/issues/{key}/move` with `{"project": "MOB", "type": "bug", "version": 7, "fields": {"drop": ["region"]}}`
+moves an issue to another project (ADR-27): `status` is optional, the custom fields the target cannot keep must be
+listed in `fields.drop` (400 names them otherwise), and `"dryRun": true` answers what would be dropped and cleared
+without moving. The old key keeps answering. `POST /api/issues/{key}/transitions` with `{"transition": "start", "version": 7}`. `GET /api/issues/{key}/workflow` gives
 the whole workflow the issue follows, to draw it: its name, the status of the issue, the statuses with their category and
 every transition with `from` (absent when it starts from any status) and `to`, without the guards.
 
@@ -174,6 +177,7 @@ A name used by another webhook of the project, or an eleventh webhook, is 409.
 | `issue.created` | `key`, `url` of the issue in the API, `changes`: the fields set, as in the history |
 | `issue.changed` | `key`, `url`, `changes`: `[{ "field", "from", "to" }]` |
 | `issue.deleted` | `key` |
+| `issue.moved` | `key` (the new one), `movedFrom`, `url`, `changes`: project, key, type, status and the values lost; sent to the webhooks of both projects |
 | `comment.posted` | `key`, `url` of its comments, `comment` (id), `edited`; not the text |
 | `attachment.added`, `attachment.removed` | `key`, `url` of its attachments, `attachment` (id), `filename` |
 | `sprint.started` | `sprint` (id), `name`, `url` of the sprints, `startsOn`, `endsOn`, `committedPoints` |

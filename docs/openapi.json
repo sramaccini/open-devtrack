@@ -1896,6 +1896,60 @@
         "x-project-permissions" : [ "odt.issue.edit" ]
       }
     },
+    "/api/issues/{issueKey}/move" : {
+      "post" : {
+        "operationId" : "issue.move",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ProjectMoveRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProjectMoveAnswer"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          },
+          "412" : {
+            "$ref" : "#/components/responses/ChangedMeanwhile"
+          }
+        },
+        "summary" : "Moves an issue to another project, with a new key; the old one keeps leading to it",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.move" ]
+      }
+    },
     "/api/issues/{issueKey}/plan" : {
       "get" : {
         "operationId" : "backlog.plan",
@@ -7581,6 +7635,72 @@
           },
           "role" : {
             "type" : "string"
+          }
+        }
+      },
+      "ProjectMoveAnswer" : {
+        "type" : "object",
+        "properties" : {
+          "cleared" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "dropped" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "issue" : {
+            "$ref" : "#/components/schemas/IssueView"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "lostText" : {
+            "type" : "string"
+          },
+          "movedFrom" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ProjectMoveFields" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "drop" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "ProjectMoveRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "dryRun" : {
+            "type" : "boolean"
+          },
+          "fields" : {
+            "$ref" : "#/components/schemas/ProjectMoveFields"
+          },
+          "project" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       },

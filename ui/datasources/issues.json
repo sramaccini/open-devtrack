@@ -56,6 +56,25 @@
         "summary": "{{form.summary}}"
       }
     },
+    "moveToProject": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/issues/{{params.issue}}/move",
+      "body": {
+        "project": "{{target}}",
+        "type": "{{issueType}}",
+        "version": "{{version}}",
+        "fields": {
+          "drop": "{{drop}}"
+        },
+        "dryRun": "{{dryRun}}"
+      }
+    },
+    "moveTargets": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects"
+    },
     "share": {
       "type": "rest",
       "method": "POST",

@@ -48,7 +48,7 @@ Only the members of a project see its issues. Each member has a role:
 | --- | --- |
 | Viewer | Sees the issues, their comments and attachments, the boards and the reports |
 | Developer | Also creates and edits issues, changes their status, comments, attaches files and manages the sprints |
-| Admin | Also deletes issues, changes their reporter, edits the project (workflows, boards, custom fields, webhooks) and manages the members |
+| Admin | Also deletes issues, moves them to another project, changes their reporter, edits the project (workflows, boards, custom fields, webhooks) and manages the members |
 
 «Add member» picks a user of the tenant and a role. «Change role» and «Remove» are on each row. A project always keeps
 at least one admin, so the last one cannot be removed or made a developer.
@@ -78,7 +78,7 @@ The admin of a project picks one with «Change the permission scheme». Some rul
 The permissions of a scheme are:
 
 - see the issues;
-- create issues, edit issues, delete issues, change the reporter;
+- create issues, edit issues, delete issues, move issues to another project, change the reporter;
 - change the status;
 - comment, attach files;
 - manage the sprints;

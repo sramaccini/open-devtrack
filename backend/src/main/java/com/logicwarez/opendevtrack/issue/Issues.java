@@ -40,8 +40,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class Issues {
 
-    private static final Pattern ISSUE_KEY = Pattern.compile("^([A-Z][A-Z0-9]{1,9})-([1-9][0-9]{0,17})$");
-
     /** The most issues of a project that a board or the backlog reads at once. */
     public static final int MAX_PLANNED = 2000;
 
@@ -52,10 +50,12 @@ public class Issues {
     private final Workflows workflows;
     private final ApplicationEventPublisher events;
     private final IssueEditor editor;
+    private final MovedKeys moved;
 
     Issues(IssueRepository issues, Projects projects, ProjectAccess access, CurrentUser user, Workflows workflows,
-           ApplicationEventPublisher events, IssueEditor editor) {
+           ApplicationEventPublisher events, IssueEditor editor, MovedKeys moved) {
         this.editor = editor;
+        this.moved = moved;
         this.issues = issues;
         this.projects = projects;
         this.access = access;
@@ -64,9 +64,13 @@ public class Issues {
         this.events = events;
     }
 
-    /** The issue with this key ({@code ODT-42}); empty also when its project belongs to another tenant. */
+    /**
+     * The issue with this key ({@code ODT-42}), or that had it before it moved to another project (ADR-27), with its
+     * key now; empty also when its project belongs to another tenant.
+     */
     public Optional<IssueRef> find(String issueKey) {
-        return findEntity(issueKey).map(f -> new IssueRef(f.issue().id(), f.project().id(), issueKey));
+        return findEntity(issueKey).map(f -> new IssueRef(f.issue().id(), f.project().id(),
+                IssueController.key(f.project(), f.issue())));
     }
 
     /** The summary of the issue with this key in the project, without the session: for the mails (ADR-18). */
@@ -78,7 +82,9 @@ public class Issues {
         } catch (NumberFormatException e) {
             return Optional.empty();
         }
-        return issues.findByProjectIdAndNumber(projectId, number).map(IssueEntity::summary);
+        return issues.findByProjectIdAndNumber(projectId, number)
+                .or(() -> moved.issueOf(projectId, number).flatMap(issues::findById))
+                .map(IssueEntity::summary);
     }
 
     /**
@@ -90,7 +96,7 @@ public class Issues {
                 i.tenantId(), p.id(), p.key(), IssueController.key(p, i), i.number(), i.type().value(), i.summary(),
                 i.description(), i.status(), i.priority().value(), i.priority().ordinal() + 1, i.assignee(), i.reporter(),
                 i.dueOn(), i.reviewer(), List.copyOf(i.labels()), new HashMap<>(i.custom()), i.createdAt(), i.updatedAt(),
-                i.flagged())));
+                i.flagged(), moved.of(i.id()))));
     }
 
     /** The identifiers of every issue of the project, in the order of their numbers: to rebuild an index. */
@@ -228,13 +234,17 @@ public class Issues {
     record Found(ProjectRef project, IssueEntity issue) {
     }
 
+    /** The issue with this key, or that had it before it moved: then with the project it is in now. */
     Optional<Found> findEntity(String issueKey) {
-        Matcher m = ISSUE_KEY.matcher(issueKey);
+        Matcher m = MovedKeys.ISSUE_KEY.matcher(issueKey);
         if (!m.matches()) {
             return Optional.empty();
         }
-        return projects.find(m.group(1)).flatMap(p -> issues.findByProjectIdAndNumber(p.id(), Long.parseLong(m.group(2)))
-                .map(i -> new Found(p, i)));
+        long number = Long.parseLong(m.group(2));
+        return projects.find(m.group(1)).flatMap(p -> issues.findByProjectIdAndNumber(p.id(), number)
+                .map(i -> new Found(p, i))
+                .or(() -> moved.issueOf(p.id(), number).flatMap(issues::findById)
+                        .flatMap(i -> projects.get(i.projectId()).map(now -> new Found(now, i)))));
     }
 
     private static IssueSummary summary(ProjectRef project, IssueEntity i) {
