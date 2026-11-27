@@ -295,7 +295,7 @@
   "agile.backlog_help": "Le segnalazioni degli sprint non completati e del backlog, nell'ordine del progetto, raggruppate per sprint. Cambia la query come nella ricerca; sposta una segnalazione con le azioni della sua riga, o quelle scelte insieme con «Sposta nello sprint…» sopra la tabella. L'ordine per trascinamento è sulle board.",
   "agile.move_to_sprint": "Sposta nello sprint…",
   "agile.move_to_sprint_title": "Sposta {key} in uno sprint",
-  "agile.move_chosen_title": "Sposta {count} segnalazioni in uno sprint",
+  "agile.move_chosen_title": "{count, plural, one {Sposta # segnalazione in uno sprint} other {Sposta # segnalazioni in uno sprint}}",
   "agile.move_to_sprint_help": "Uno sprint non completato del progetto, o il backlog",
   "agile.move": "Sposta",
   "agile.to_top": "In cima",
@@ -706,7 +706,7 @@
   "agile.open_epic": "Apri l'epica",
   "agile.set_epic": "Imposta epica…",
   "agile.set_epic_title": "Epica di {key}",
-  "agile.set_epic_chosen_title": "Epica di {count} elementi",
+  "agile.set_epic_chosen_title": "{count, plural, one {Epica di # elemento} other {Epica di # elementi}}",
   "agile.set_epic_help": "Un'epica non completata del progetto; vuoto per togliere gli elementi dalla loro epica",
   "agile.set_epic_failed": "Impossibile impostare l'epica: in un'epica vanno solo storie, attività e bug"
 }

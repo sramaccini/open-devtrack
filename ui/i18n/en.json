@@ -295,7 +295,7 @@
   "agile.backlog_help": "The issues of the sprints not completed and of the backlog, in the order of the project, grouped by sprint. Change the query as in the search; move an issue with the actions of its row, or the chosen ones together with «Move to sprint…» above the table. The order by drag is on the boards.",
   "agile.move_to_sprint": "Move to sprint…",
   "agile.move_to_sprint_title": "Move {key} to a sprint",
-  "agile.move_chosen_title": "Move {count} issues to a sprint",
+  "agile.move_chosen_title": "{count, plural, one {Move # issue to a sprint} other {Move # issues to a sprint}}",
   "agile.move_to_sprint_help": "A sprint not completed of the project, or the backlog",
   "agile.move": "Move",
   "agile.to_top": "To the top",
@@ -706,7 +706,7 @@
   "agile.open_epic": "Open the epic",
   "agile.set_epic": "Set epic…",
   "agile.set_epic_title": "Epic of {key}",
-  "agile.set_epic_chosen_title": "Epic of {count} issues",
+  "agile.set_epic_chosen_title": "{count, plural, one {Epic of # issue} other {Epic of # issues}}",
   "agile.set_epic_help": "An epic of the project not done; empty to take the issues out of their epic",
   "agile.set_epic_failed": "The epic could not be set: only stories, tasks and bugs go in an epic"
 }

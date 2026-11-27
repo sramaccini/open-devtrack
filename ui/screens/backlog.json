@@ -458,7 +458,7 @@
                   "onClick": [
                     {
                       "dialog": {
-                        "title": "{{ t('agile.move_chosen_title', 'Move {count} issues to a sprint', { 'count': size(selection) }) }}",
+                        "title": "{{ t('agile.move_chosen_title', '{count, plural, one {Move # issue to a sprint} other {Move # issues to a sprint}}', { 'count': size(selection) }) }}",
                         "submitLabel": "{{ t('agile.move', 'Move') }}",
                         "fields": [
                           {
@@ -514,7 +514,7 @@
                   "onClick": [
                     {
                       "dialog": {
-                        "title": "{{ t('agile.set_epic_chosen_title', 'Epic of {count} issues', { 'count': size(selection) }) }}",
+                        "title": "{{ t('agile.set_epic_chosen_title', '{count, plural, one {Epic of # issue} other {Epic of # issues}}', { 'count': size(selection) }) }}",
                         "submitLabel": "{{ t('common.save', 'Save') }}",
                         "fields": [
                           {
