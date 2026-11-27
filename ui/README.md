@@ -1,7 +1,7 @@
 # OpenDevTrack screens
 
 The front end of OpenDevTrack is this Quadrava project: screens, navigation, themes and translations, as JSON documents
-validated by the schemas of the pinned Quadrava version (0.32.0, ADR-01). No Angular code: the runtime image of Quadrava
+validated by the schemas of the pinned Quadrava version (0.33.0, ADR-01). No Angular code: the runtime image of Quadrava
 loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 | Path | Registry kind | What |
@@ -49,12 +49,13 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   Planning calls `savePlan` for the points and `moveToSprint` (`boards/backlogPlan`, the move of the backlog) for
   the sprint, a lookup on the columns of the backlog shown when `_perm.plan` (else its name as text). The two menus are `menuButton`s with `display: icon` (Quadrava 0.24.0, Q40): the eye with `count` (the
   watchers) and `pressed` (watching), whose menu has watch or stop and «Watchers», a `view` step with the table of
-  the watchers and «Add watcher…», Share as an icon (a `dialog` with `tags` suggested from the members and a message), and «…» with Assign to me (a PATCH of the assignee with `user.username`), Clone (a `dialog` for the summary, then `call` with `as` and `navigate` to the copy), Move (a `dialog` whose lookups read the targets and, from the project and type in `form`, their statuses; a dry run of `moveToProject`, an `if` with a `confirm` of what is lost, then the move), Export Word, OpenDocument and JSON (the `download` step on `export` with the format), Print (the `print`
+  the watchers and «Add watcher…», Share as an icon (a `dialog` with `tags` suggested from the members and a message), and «…» with Clone (a `dialog` for the summary, then `call` with `as` and `navigate` to the copy), Move (a `dialog` whose lookups read the targets and, from the project and type in `form`, their statuses; a dry run of `moveToProject`, an `if` with a `confirm` of what is lost, then the move), Export Word, OpenDocument and JSON (the `download` step on `export` with the format), Print (the `print`
   step) and Delete in `tone: danger`, whose confirm names the subtasks deleted with it (the `keys` of `children`).
   «Parent» in Details is the lookup `parentKey` on `parents` (the candidates for the type in `form`); `patchIssue`
-  sends it as `parent`, since a field name has no dots. The parent is not yet in the path above the title, as ADR-28 wants: an item of `breadcrumb` cannot be
-  hidden, and one with an empty label shows as an empty step on every issue without a parent; it comes when Quadrava
-  lets an item be left out (requested, #61), until then «Parent» in Details shows it. The flag
+  sends it as `parent`, since a field name has no dots. The parent is in the path above the title, as ADR-28 wants: an
+  item of `breadcrumb` with `visibleIf` (Quadrava 0.33.0, #61), only on an issue that has one. «Assign to me» is an
+  action under Assignee (Quadrava 0.33.0, Q47): its `value` `user.username` is saved through the `onSave` of the
+  inline form, and it hides once the issue is the user's. The flag
   and the votes are `button`s (Quadrava 0.25.1, Q41): the flag with `tone: danger` and `pressed`, shown only while
   flagged; the thumb with `count`, two buttons by `visibleIf` (vote, take the vote back). «Add flag» opens a
   `popover` under «…» for the optional comment. Buttons are icon-only unless a text is
@@ -80,14 +81,14 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 ## Publishing
 
-The Quadrava CLI (`@sramaccini/quadrava-cli@0.32.0`, the version of the runtime) is on GitHub Packages: the `.npmrc`
+The Quadrava CLI (`@sramaccini/quadrava-cli@0.33.0`, the version of the runtime) is on GitHub Packages: the `.npmrc`
 of the repository maps `@sramaccini` there, and npm needs a token with `read:packages` for `npm.pkg.github.com` in
 the user config (`~/.npmrc`; in CI, `NODE_AUTH_TOKEN`). From the root of the repository, with a Keycloak access token
 of the client `opendevtrack-tools` in `QUADRAVA_TOKEN`:
 
 ```bash
-npx --yes @sramaccini/quadrava-cli@0.32.0 validate ui
-npx --yes @sramaccini/quadrava-cli@0.32.0 publish ui --registry http://localhost:28080 --app opendevtrack --env development
+npx --yes @sramaccini/quadrava-cli@0.33.0 validate ui
+npx --yes @sramaccini/quadrava-cli@0.33.0 publish ui --registry http://localhost:28080 --app opendevtrack --env development
 ```
 
 The same command publishes to `testing` and `production`: the registry has no protected environments (ADR-12), the
@@ -145,7 +146,7 @@ change in `brand/` or `brand/pack.json`, rebuild it from a zip of the folder (`z
 
 ```
 cd brand && zip -r ../odt-brand.zip pack.json svg png && cd ..
-npx --yes @sramaccini/quadrava-cli@0.32.0 assets add odt-brand.zip ui
+npx --yes @sramaccini/quadrava-cli@0.33.0 assets add odt-brand.zip ui
 ```
 
 ## Workflow

@@ -23,6 +23,12 @@ The entries are written by hand at each release from the commits ([docs/release.
   chosen ones (`GET /api/projects/{key}/epics`, `POST /api/projects/{key}/epic`); the rows of the search carry
   `parent` (#55 T5).
 - **Search**: the ODQL functions `standardIssueTypes()` and `subTaskIssueTypes()` for the type, as in Jira (#55 T5).
+- **Issues**: the parent of an issue in the path above its title, as in Jira (#61).
+
+### Changed
+
+- **Issues**: «Assign to me» is a link under Assignee, as in Jira, in place of the item of «…» (#55 T4).
+- Quadrava 0.33.0: runtime image, CLI, schemas and kits.
 
 ### Upgrading
 

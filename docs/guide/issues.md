@@ -30,7 +30,7 @@ Developers and admins of the project create issues. The fields:
 | Type | Task, Bug, Story, Epic or Subtask ([below](#parent-and-subtasks)). Required |
 | Parent | The epic of a story, task or bug, or the story, task or bug of a subtask, in the same project. Required for a subtask |
 | Priority | Lowest, Low, Medium, High or Highest. Required |
-| Assignee | The member who does it |
+| Assignee | The member who does it; «Assign to me» under the field, for developers and admins when the issue is not yours yet |
 | Reviewer | The member who checks it: not the assignee |
 | Due date | The day it should be done. Past it, and not done, the issue is overdue |
 | Labels | Words that group issues across types: lower-case letters, digits, dots, dashes and underscores. Enter or a comma adds one, and the labels already used in the project are suggested |
@@ -67,7 +67,7 @@ On the right is what describes it:
 - the link: «Copy link» puts the address of the issue in the clipboard, to paste it anywhere;
 - «Share»: up to ten members of the project, with an optional message; each gets a
   [notification](notifications.md);
-- «…», more actions: «Assign to me», for developers and admins when the issue is not yours yet, «Add flag» or «Remove flag», «Add vote» or «Remove vote» ([below](#flag-and-votes)), «Clone», «Move» ([below](#move)),
+- «…», more actions: «Add flag» or «Remove flag», «Add vote» or «Remove vote» ([below](#flag-and-votes)), «Clone», «Move» ([below](#move)),
   «Print», the three exports ([below](#export)), «All issues», and «Delete», for the admins of the project. «Clone» asks the summary of the copy («CLONE -»
   and this one) and opens it: it has the type, priority, assignee, reviewer, due date, description, labels and custom
   fields of this issue, you as reporter, the first status of its workflow and the link «clones» to this one; comments,

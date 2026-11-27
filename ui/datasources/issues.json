@@ -42,12 +42,6 @@
       "url": "/api/issues/{{params.issue}}",
       "body": "{{ field == 'parentKey' ? dyn({'parent': value, 'version': form.version}) : field.startsWith('custom.') ? dyn({'custom': form.custom, 'version': form.version}) : dyn({string(field): value, 'version': form.version}) }}"
     },
-    "assignToMe": {
-      "type": "rest",
-      "method": "PATCH",
-      "url": "/api/issues/{{params.issue}}",
-      "body": "{{ dyn({'assignee': user.username, 'version': data.issue.version}) }}"
-    },
     "clone": {
       "type": "rest",
       "method": "POST",
