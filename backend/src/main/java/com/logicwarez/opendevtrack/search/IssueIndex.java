@@ -15,6 +15,7 @@ import static com.logicwarez.opendevtrack.search.Docs.ISSUE_ID;
 import static com.logicwarez.opendevtrack.search.Docs.ISSUE_KEY;
 import static com.logicwarez.opendevtrack.search.Docs.LABELS;
 import static com.logicwarez.opendevtrack.search.Docs.MOVED_KEYS;
+import static com.logicwarez.opendevtrack.search.Docs.PARENT_KEY;
 import static com.logicwarez.opendevtrack.search.Docs.NUMBER;
 import static com.logicwarez.opendevtrack.search.Docs.POINTS;
 import static com.logicwarez.opendevtrack.search.Docs.PRIORITY;
@@ -147,6 +148,7 @@ class IssueIndex {
                 .set(PROJECT_KEY, issue.projectKey())
                 .set(ISSUE_KEY, issue.key())
                 .set(MOVED_KEYS, issue.movedKeys().toArray(String[]::new))
+                .set(PARENT_KEY, issue.parentKey())
                 .set(NUMBER, issue.number())
                 .set(TYPE, issue.type())
                 .set(STATUS, issue.status())
@@ -176,6 +178,7 @@ class IssueIndex {
                 .set(PROJECT_KEY, issue.projectKey())
                 .set(ISSUE_KEY, issue.key())
                 .set(MOVED_KEYS, issue.movedKeys().toArray(String[]::new))
+                .set(PARENT_KEY, issue.parentKey())
                 .set(TYPE, issue.type())
                 .set(STATUS, issue.status())
                 .set(CATEGORY, category)

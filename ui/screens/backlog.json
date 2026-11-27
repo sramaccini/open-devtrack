@@ -209,7 +209,7 @@
       "id": "backlog-query",
       "type": "input",
       "bind": "state.query",
-      "default": "{{ 'project = ' + params.key + ' AND (sprint IN openSprints() OR (sprint IS EMPTY AND category != done)) ORDER BY rank' }}",
+      "default": "{{ 'project = ' + params.key + ' AND type != subtask AND (sprint IN openSprints() OR (sprint IS EMPTY AND category != done)) ORDER BY rank' }}",
       "field": {
         "name": "query",
         "type": "text",

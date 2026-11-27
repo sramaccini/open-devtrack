@@ -85,7 +85,8 @@
             "task",
             "bug",
             "story",
-            "epic"
+            "epic",
+            "subtask"
           ],
           "optionKey": "values.issue_type",
           "readOnlyIf": "{{!form._perm.types}}",

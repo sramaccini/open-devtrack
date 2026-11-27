@@ -392,6 +392,9 @@
               "type" : "string"
             }
           },
+          "parent" : {
+            "type" : "string"
+          },
           "priority" : {
             "type" : "string"
           },
@@ -435,6 +438,9 @@
             "items" : {
               "type" : "string"
             }
+          },
+          "parent" : {
+            "type" : "string"
           },
           "priority" : {
             "type" : "string"

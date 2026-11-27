@@ -13,6 +13,9 @@ import static com.logicwarez.opendevtrack.search.Docs.CUSTOM;
 import static com.logicwarez.opendevtrack.search.Docs.ISSUE_KEY;
 import static com.logicwarez.opendevtrack.search.Docs.LABELS;
 import static com.logicwarez.opendevtrack.search.Docs.MOVED_KEYS;
+import static com.logicwarez.opendevtrack.search.Docs.PARENT_KEY;
+import static com.logicwarez.opendevtrack.search.Docs.DOC;
+import static com.logicwarez.opendevtrack.search.Docs.TENANT_ID;
 import static com.logicwarez.opendevtrack.search.Docs.NUMBER;
 import static com.logicwarez.opendevtrack.search.Docs.POINTS;
 import static com.logicwarez.opendevtrack.search.Docs.PRIORITY_ORDER;
@@ -32,7 +35,9 @@ import static org.jooq.impl.DSL.condition;
 import static org.jooq.impl.DSL.falseCondition;
 import static org.jooq.impl.DSL.field;
 import static org.jooq.impl.DSL.inline;
+import static org.jooq.impl.DSL.name;
 import static org.jooq.impl.DSL.not;
+import static org.jooq.impl.DSL.select;
 import static org.jooq.impl.DSL.trueCondition;
 import static org.jooq.impl.DSL.val;
 
@@ -65,6 +70,7 @@ import java.util.regex.Pattern;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.SortField;
+import org.jooq.Table;
 import org.jooq.impl.SQLDataType;
 
 /**
@@ -74,11 +80,11 @@ import org.jooq.impl.SQLDataType;
 final class OdqlCompiler {
 
     /** The fields of the language, in the order the suggestions show them. */
-    static final List<String> FIELDS = List.of("project", "key", "type", "status", "category", "priority", "assignee",
+    static final List<String> FIELDS = List.of("project", "key", "parent", "type", "status", "category", "priority", "assignee",
             "reviewer", "reporter", "labels", "flagged", "summary", "text", "created", "updated", "resolved", "due", "sprint",
             "points", "rank");
 
-    static final List<String> TYPES = List.of("task", "bug", "story", "epic");
+    static final List<String> TYPES = List.of("task", "bug", "story", "epic", "subtask");
     static final List<String> PRIORITIES = List.of("lowest", "low", "medium", "high", "highest");
     static final List<String> CATEGORIES = List.of("todo", "in_progress", "done");
 
@@ -144,6 +150,7 @@ final class OdqlCompiler {
         return switch (name) {
             case "project" -> text(c, PROJECT_KEY, v -> v.toUpperCase(Locale.ROOT));
             case "key" -> key(c);
+            case "parent" -> parent(c);
             case "type" -> text(c, TYPE, v -> oneOf(c, v, TYPES, "type"));
             case "category" -> text(c, CATEGORY, v -> oneOf(c, v, CATEGORIES, "category"));
             case "status" -> text(c, STATUS, this::status);
@@ -182,6 +189,34 @@ final class OdqlCompiler {
             case "notempty" -> field.isNotNull();
             default -> throw notAllowed(c, "= != IN NOT IN IS EMPTY");
         };
+    }
+
+    /**
+     * {@code parent} (ADR-28): the children of the issues with these keys, also by a key a parent had before it moved
+     * (ADR-27); IS EMPTY for the issues without a parent.
+     */
+    private Condition parent(Clause c) {
+        Function<String, String> upper = v -> v.toUpperCase(Locale.ROOT);
+        return switch (c.op()) {
+            case "=", "in" -> PARENT_KEY.in(parentKeys(words(c).stream().map(upper).toArray(String[]::new)));
+            case "!=", "notin" -> PARENT_KEY.isNull()
+                    .or(PARENT_KEY.notIn(parentKeys(words(c).stream().map(upper).toArray(String[]::new))));
+            case "empty" -> PARENT_KEY.isNull();
+            case "notempty" -> PARENT_KEY.isNotNull();
+            default -> throw notAllowed(c, "= != IN NOT IN IS EMPTY");
+        };
+    }
+
+    /** The keys now of the issues these keys name, in the tenant of the row: the keys themselves and moved ones. */
+    private static org.jooq.Select<org.jooq.Record1<String>> parentKeys(String[] keys) {
+        // The fields of a plain table are not known to jOOQ: they are named on the alias.
+        Table<?> parent = DOC.as("parent_doc");
+        Field<String> key = field(name("parent_doc", ISSUE_KEY.getName()), SQLDataType.VARCHAR);
+        Field<String[]> moved = field(name("parent_doc", MOVED_KEYS.getName()), SQLDataType.CLOB.array());
+        Field<String> tenant = field(name("parent_doc", TENANT_ID.getName()), SQLDataType.VARCHAR);
+        Field<String> outerTenant = field(name("issue_doc", TENANT_ID.getName()), SQLDataType.VARCHAR);
+        return select(key).from(parent).where(tenant.eq(outerTenant))
+                .and(key.in(keys).or(condition("{0} && {1}", moved, val(keys, MOVED_KEYS))));
     }
 
     /** {@code key}: the key now, or one the issue had before it moved to another project (ADR-27). */

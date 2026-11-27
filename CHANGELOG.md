@@ -8,6 +8,23 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+### Added
+
+- **Issues**: parent and subtasks, as in Jira (ADR-28). The new type «Subtask», and «Parent» in the details of an issue: an
+  epic for a story, task or bug, a story, task or bug for a subtask, in the same
+  project. The page of an issue lists its subtasks («Child work items» on an epic) with their progress, and «Add
+  subtask» creates one with its summary. A subtask has no story points and is not in the backlog; deleting an issue
+  deletes its subtasks after a confirm that names them, and a story moves to another project with its subtasks. ODQL
+  gets `parent = WEB-1` and the type `subtask`; the export gives the parent and the children. API: `parent` in
+  `POST /api/projects/{key}/issues` and in the `PATCH` of an issue, `parent` and `parentKey` in the issue,
+  `GET /api/issues/{key}/children`, `subtasks` and `detached` in the answer of a move (#55 T5).
+
+### Upgrading
+
+- The migrations add the column of the parent and the type `subtask`; no existing issue has a parent. A workflow
+  scheme without `subtask` gives subtasks its default workflow. The default query of the backlog changes: a saved
+  filter made from it still lists subtasks until `type != subtask` is added.
+
 ## [1.0.0-rc.10] - 2026-11-27
 
 ### Added

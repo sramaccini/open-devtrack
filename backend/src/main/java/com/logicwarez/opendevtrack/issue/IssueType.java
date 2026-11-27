@@ -9,12 +9,24 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-/** Types of issue; per-project types and custom fields come later in F2. */
+/**
+ * Types of issue, on three levels (ADR-28): an epic is the parent of stories, tasks and bugs, which are the parents of
+ * subtasks.
+ */
 enum IssueType {
 
-    TASK, BUG, STORY, EPIC;
+    TASK, BUG, STORY, EPIC, SUBTASK;
 
-    /** Name in the API: {@code task}, {@code bug}, {@code story}, {@code epic}. */
+    /** The level in the hierarchy: 1 for an epic, 0 for a story, task or bug, -1 for a subtask. */
+    int level() {
+        return switch (this) {
+            case EPIC -> 1;
+            case SUBTASK -> -1;
+            default -> 0;
+        };
+    }
+
+    /** Name in the API: {@code task}, {@code bug}, {@code story}, {@code epic}, {@code subtask}. */
     String value() {
         return name().toLowerCase(Locale.ROOT);
     }

@@ -73,6 +73,11 @@ public class Issues {
                 IssueController.key(f.project(), f.issue())));
     }
 
+    /** Whether the issue is a subtask (ADR-28), which has no story points. */
+    public boolean subtask(UUID issueId) {
+        return issues.findById(issueId).map(i -> i.type() == IssueType.SUBTASK).orElse(false);
+    }
+
     /** The summary of the issue with this key in the project, without the session: for the mails (ADR-18). */
     public Optional<String> summary(UUID projectId, String issueKey) {
         int dash = issueKey.lastIndexOf('-');
@@ -96,7 +101,8 @@ public class Issues {
                 i.tenantId(), p.id(), p.key(), IssueController.key(p, i), i.number(), i.type().value(), i.summary(),
                 i.description(), i.status(), i.priority().value(), i.priority().ordinal() + 1, i.assignee(), i.reporter(),
                 i.dueOn(), i.reviewer(), List.copyOf(i.labels()), new HashMap<>(i.custom()), i.createdAt(), i.updatedAt(),
-                i.flagged(), moved.of(i.id()))));
+                i.flagged(), moved.of(i.id()), i.parentId() == null ? null : issues.findById(i.parentId())
+                        .map(parent -> IssueController.key(p, parent)).orElse(null))));
     }
 
     /** The identifiers of every issue of the project, in the order of their numbers: to rebuild an index. */
@@ -223,11 +229,11 @@ public class Issues {
         String given = value == null ? "" : value;
         return switch (lane.field()) {
             case "assignee" -> new IssueRequest(now.type(), now.summary(), now.description(), now.priority(), value,
-                    now.dueOn(), now.reviewer(), now.labels(), null, now.version());
+                    now.dueOn(), now.reviewer(), now.labels(), null, null, now.version());
             case "priority" -> new IssueRequest(now.type(), now.summary(), now.description(), given, now.assignee(),
-                    now.dueOn(), now.reviewer(), now.labels(), null, now.version());
+                    now.dueOn(), now.reviewer(), now.labels(), null, null, now.version());
             default -> new IssueRequest(given, now.summary(), now.description(), now.priority(), now.assignee(),
-                    now.dueOn(), now.reviewer(), now.labels(), null, now.version());
+                    now.dueOn(), now.reviewer(), now.labels(), null, null, now.version());
         };
     }
 

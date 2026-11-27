@@ -1288,6 +1288,44 @@
         "x-project-permissions" : [ "odt.issue.browse" ]
       }
     },
+    "/api/issues/{issueKey}/children" : {
+      "get" : {
+        "operationId" : "issue.children",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Children"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "The children of an issue: its subtasks, or the issues of an epic, with their progress",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.browse" ]
+      }
+    },
     "/api/issues/{issueKey}/clone" : {
       "post" : {
         "operationId" : "issue.cloneIssue",
@@ -4092,6 +4130,72 @@
         "x-project-permissions" : [ "odt.member.manage" ]
       }
     },
+    "/api/projects/{key}/parents" : {
+      "get" : {
+        "operationId" : "issue.parents",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "key",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "type",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "exclude",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ParentCandidate"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "The issues of a project that can be the parent of an issue of a type",
+        "tags" : [ "issue" ],
+        "x-internal" : true,
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.browse" ]
+      }
+    },
     "/api/projects/{key}/permission-scheme" : {
       "put" : {
         "operationId" : "project.useScheme",
@@ -6803,6 +6907,64 @@
           }
         }
       },
+      "ChildRow" : {
+        "type" : "object",
+        "properties" : {
+          "assignee" : {
+            "type" : "string"
+          },
+          "category" : {
+            "type" : "string"
+          },
+          "key" : {
+            "type" : "string"
+          },
+          "priority" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "summary" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Children" : {
+        "type" : "object",
+        "properties" : {
+          "childType" : {
+            "type" : "string"
+          },
+          "done" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ChildRow"
+            }
+          },
+          "keys" : {
+            "type" : "string"
+          },
+          "progress" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "integer",
+              "format" : "int32"
+            }
+          },
+          "total" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
       "CloneRequest" : {
         "type" : "object",
         "additionalProperties" : false,
@@ -7207,6 +7369,9 @@
               "type" : "string"
             }
           },
+          "parent" : {
+            "type" : "string"
+          },
           "priority" : {
             "type" : "string"
           },
@@ -7250,6 +7415,9 @@
             "items" : {
               "type" : "string"
             }
+          },
+          "parent" : {
+            "type" : "string"
           },
           "priority" : {
             "type" : "string"
@@ -7358,6 +7526,12 @@
           "number" : {
             "type" : "integer",
             "format" : "int64"
+          },
+          "parent" : {
+            "$ref" : "#/components/schemas/ParentView"
+          },
+          "parentKey" : {
+            "type" : "string"
           },
           "priority" : {
             "type" : "string"
@@ -7634,6 +7808,34 @@
           }
         }
       },
+      "ParentCandidate" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "label" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ParentView" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "summary" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          }
+        }
+      },
       "PlanManyRequest" : {
         "type" : "object",
         "additionalProperties" : false,
@@ -7786,6 +7988,12 @@
               "type" : "string"
             }
           },
+          "detached" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
           "dropped" : {
             "type" : "array",
             "items" : {
@@ -7803,6 +8011,12 @@
           },
           "movedFrom" : {
             "type" : "string"
+          },
+          "subtasks" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
           }
         }
       },

@@ -38,6 +38,9 @@
     },
     "newFields": {
       "ref": "issues/newFields"
+    },
+    "newParents": {
+      "ref": "issues/newParents"
     }
   },
   "components": [
@@ -67,10 +70,32 @@
             "task",
             "bug",
             "story",
-            "epic"
+            "epic",
+            "subtask"
           ],
           "optionKey": "values.issue_type",
           "required": true
+        },
+        {
+          "name": "parent",
+          "type": "lookup",
+          "label": "{{ t('issues.parent', 'Parent') }}",
+          "width": "m",
+          "tooltip": "{{ t('issues.parent_help', 'An epic for a story, task or bug; a story, task or bug for a subtask; in the same project') }}",
+          "visibleIf": "{{ form.type != 'epic' }}",
+          "validation": [
+            {
+              "required": true,
+              "when": "{{ form.type == 'subtask' }}",
+              "message": "{{ t('issues.parent_required', 'A subtask has a parent') }}"
+            }
+          ],
+          "lookup": {
+            "source": "newParents",
+            "valueField": "key",
+            "labelField": "label",
+            "minChars": 0
+          }
         },
         {
           "name": "priority",

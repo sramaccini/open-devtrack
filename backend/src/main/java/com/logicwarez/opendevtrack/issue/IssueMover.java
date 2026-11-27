@@ -11,6 +11,7 @@ import com.logicwarez.opendevtrack.issue.IssueApi.ProjectMoveRequest;
 import com.logicwarez.opendevtrack.issue.IssueEditor.Fields;
 import com.logicwarez.opendevtrack.issue.IssueEditor.InvalidCustom;
 import com.logicwarez.opendevtrack.issue.IssueEvents.FieldChange;
+import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueMoved;
 import com.logicwarez.opendevtrack.issue.Issues.Found;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
@@ -46,6 +47,10 @@ import org.springframework.stereotype.Component;
  * that the target does not have with the same key and type (or whose value it would refuse) must be listed in
  * {@code fields.drop}, and the assignee and the reviewer who are not members of the target are cleared and named in the
  * answer. A dry run tells all of it without moving.
+ *
+ * <p>With the hierarchy (ADR-28, its point E): a subtask does not move alone, since its parent stays; a story, task or
+ * bug moves with its subtasks, which take numbers of the target, and leaves its epic; an epic moves alone, and its
+ * children stay and lose their parent. The type of an issue with children keeps its level.
  */
 @Component
 class IssueMover {
@@ -118,6 +123,21 @@ class IssueMover {
             }
             type = given.get();
         }
+        if (issue.type() == IssueType.SUBTASK) {
+            return Problems.conflict("A subtask moves with its parent: move "
+                    + editor.parentOf(source, issue).key() + " instead");
+        }
+        if (type == IssueType.SUBTASK) {
+            return Problems.badRequest("An issue does not become a subtask in a move: its parent would stay behind");
+        }
+        List<IssueEntity> children = issues.findByParentIdOrderByNumber(issue.id());
+        if (!children.isEmpty() && type.level() != issue.type().level()) {
+            return Problems.badRequest("An issue with children keeps its level: an epic stays an epic, an issue with"
+                    + " subtasks stays a story, task or bug");
+        }
+        boolean epic = issue.type() == IssueType.EPIC;
+        List<IssueEntity> subtasks = epic ? List.of() : children;
+        List<IssueEntity> detached = epic ? children : List.of();
         String status;
         if (request.status() != null && !request.status().isBlank()) {
             List<String> codes = workflows.statuses(target.id(), type.value()).stream().map(Workflows.Status::code).toList();
@@ -132,32 +152,29 @@ class IssueMover {
 
         Map<String, FieldDefinitionEntity> sourceFields = byKey(source);
         Map<String, FieldDefinitionEntity> targetFields = byKey(target);
-        Map<String, Object> kept = new LinkedHashMap<>();
-        List<String> lost = new ArrayList<>();
-        issue.custom().forEach((key, value) -> {
-            FieldDefinitionEntity from = sourceFields.get(key);
-            FieldDefinitionEntity to = targetFields.get(key);
-            CustomFields.Checked checked = to == null || to.archived() || from == null || from.type() != to.type()
-                    ? null : customFields.check(target.id(), Map.of(key, value), Map.of());
-            if (checked != null && checked.errors().isEmpty() && checked.values().containsKey(key)) {
-                kept.put(key, checked.values().get(key));
-            } else {
-                lost.add(key);
-            }
-        });
-        String assignee = member(target, issue.assignee());
-        String reviewer = member(target, issue.reviewer());
-        List<String> cleared = new ArrayList<>();
-        if (!Objects.equals(assignee, issue.assignee())) {
-            cleared.add("assignee");
+        Landing landing = landing(issue, target, sourceFields, targetFields);
+        Map<String, Object> kept = landing.kept();
+        List<String> lost = new ArrayList<>(landing.lost());
+        String assignee = landing.assignee();
+        String reviewer = landing.reviewer();
+        List<String> cleared = new ArrayList<>(landing.cleared());
+        String parentKey = editor.parentOf(source, issue).key();
+        if (parentKey != null) {
+            cleared.add("parent");
         }
-        if (!Objects.equals(reviewer, issue.reviewer())) {
-            cleared.add("reviewer");
+        Map<IssueEntity, Landing> landings = new LinkedHashMap<>();
+        for (IssueEntity subtask : subtasks) {
+            Landing l = landing(subtask, target, sourceFields, targetFields);
+            landings.put(subtask, l);
+            l.lost().stream().filter(k -> !lost.contains(k)).forEach(lost::add);
         }
-        String lostText = lostText(issue, lost, cleared, sourceFields);
+        String lostText = lostText(issue, lost, cleared, sourceFields, parentKey);
         String fromKey = IssueController.key(source, issue);
+        List<String> subtaskKeys = subtasks.stream().map(s -> IssueController.key(source, s)).toList();
+        List<String> detachedKeys = detached.stream().map(c -> IssueController.key(source, c)).toList();
         if (dryRun) {
-            return ResponseEntity.ok(new ProjectMoveAnswer(null, fromKey, lost, cleared, lostText, null));
+            return ResponseEntity.ok(new ProjectMoveAnswer(null, fromKey, lost, cleared, lostText, subtaskKeys,
+                    detachedKeys, null));
         }
 
         Set<String> drop = request.fields() == null || request.fields().drop() == null ? Set.of()
@@ -170,8 +187,17 @@ class IssueMover {
         }
         Fields fields = new Fields(type, issue.summary(), issue.description(), issue.priority(), assignee, issue.dueOn(),
                 reviewer, issue.labels(), kept);
+        Map<IssueEntity, String> subtaskStatus = new LinkedHashMap<>();
         try {
             editor.checkRequired(target, null, fields, status, issue.reporter(), there);
+            for (Map.Entry<IssueEntity, Landing> e : landings.entrySet()) {
+                IssueEntity s = e.getKey();
+                Landing l = e.getValue();
+                String to = workflows.statusFor(source.id(), s.status(), target.id(), IssueType.SUBTASK.value());
+                subtaskStatus.put(s, to);
+                editor.checkRequired(target, null, new Fields(IssueType.SUBTASK, s.summary(), s.description(),
+                        s.priority(), l.assignee(), s.dueOn(), l.reviewer(), s.labels(), l.kept()), to, s.reporter(), there);
+            }
         } catch (InvalidCustom e) {
             return Problems.invalidFields(InvalidCustom.TITLE, e.errors);
         }
@@ -194,7 +220,12 @@ class IssueMover {
         if (cleared.contains("reviewer")) {
             changes.add(new FieldChange("reviewer", issue.reviewer(), null));
         }
-        lost.forEach(k -> changes.add(new FieldChange("custom." + k, CustomFields.text(issue.custom().get(k)), null)));
+        if (parentKey != null) {
+            changes.add(new FieldChange("parent", parentKey, null));
+            issue.parentTo(null, now);
+        }
+        landing.lost().forEach(k -> changes.add(new FieldChange("custom." + k, CustomFields.text(issue.custom().get(k)),
+                null)));
         moved.add(source.tenantId(), source.id(), issue.number(), issue.id(), now);
         issue.movedTo(target.id(), number, type, status, assignee, reviewer, kept, now);
         try {
@@ -204,7 +235,77 @@ class IssueMover {
         }
         events.publishEvent(new IssueMoved(issue.id(), source.id(), target.id(), fromKey, toKey, user.username(), now,
                 changes));
-        return ResponseEntity.ok(new ProjectMoveAnswer(toKey, fromKey, lost, cleared, lostText, view.apply(target, issue)));
+        for (Map.Entry<IssueEntity, Landing> e : landings.entrySet()) {
+            moveSubtask(e.getKey(), e.getValue(), subtaskStatus.get(e.getKey()), source, target, now);
+        }
+        for (IssueEntity child : detached) {
+            child.parentTo(null, now);
+            issues.save(child);
+            events.publishEvent(new IssueChanged(child.id(), source.id(), IssueController.key(source, child),
+                    user.username(), now, List.of(new FieldChange("parent", fromKey, null))));
+        }
+        return ResponseEntity.ok(new ProjectMoveAnswer(toKey, fromKey, lost, cleared, lostText, subtaskKeys,
+                detachedKeys, view.apply(target, issue)));
+    }
+
+    /** What an issue keeps in the target: the custom fields that fit, and the people who are members there. */
+    private record Landing(Map<String, Object> kept, List<String> lost, String assignee, String reviewer,
+                           List<String> cleared) {
+    }
+
+    private Landing landing(IssueEntity issue, ProjectRef target, Map<String, FieldDefinitionEntity> sourceFields,
+                            Map<String, FieldDefinitionEntity> targetFields) {
+        Map<String, Object> kept = new LinkedHashMap<>();
+        List<String> lost = new ArrayList<>();
+        issue.custom().forEach((key, value) -> {
+            FieldDefinitionEntity from = sourceFields.get(key);
+            FieldDefinitionEntity to = targetFields.get(key);
+            CustomFields.Checked checked = to == null || to.archived() || from == null || from.type() != to.type()
+                    ? null : customFields.check(target.id(), Map.of(key, value), Map.of());
+            if (checked != null && checked.errors().isEmpty() && checked.values().containsKey(key)) {
+                kept.put(key, checked.values().get(key));
+            } else {
+                lost.add(key);
+            }
+        });
+        String assignee = member(target, issue.assignee());
+        String reviewer = member(target, issue.reviewer());
+        List<String> cleared = new ArrayList<>();
+        if (!Objects.equals(assignee, issue.assignee())) {
+            cleared.add("assignee");
+        }
+        if (!Objects.equals(reviewer, issue.reviewer())) {
+            cleared.add("reviewer");
+        }
+        return new Landing(kept, lost, assignee, reviewer, cleared);
+    }
+
+    /** A subtask that moves with its parent (ADR-28): a number of the target, its old key kept, its own event. */
+    private void moveSubtask(IssueEntity subtask, Landing landing, String status, ProjectRef source, ProjectRef target,
+                             Instant now) {
+        String fromKey = IssueController.key(source, subtask);
+        long number = projects.nextIssueNumber(target.id());
+        String toKey = target.key() + "-" + number;
+        List<FieldChange> changes = new ArrayList<>();
+        changes.add(new FieldChange("project", source.key(), target.key()));
+        changes.add(new FieldChange("key", fromKey, toKey));
+        if (!status.equals(subtask.status())) {
+            changes.add(new FieldChange("status", subtask.status(), status));
+        }
+        if (landing.cleared().contains("assignee")) {
+            changes.add(new FieldChange("assignee", subtask.assignee(), null));
+        }
+        if (landing.cleared().contains("reviewer")) {
+            changes.add(new FieldChange("reviewer", subtask.reviewer(), null));
+        }
+        landing.lost().forEach(k -> changes.add(new FieldChange("custom." + k,
+                CustomFields.text(subtask.custom().get(k)), null)));
+        moved.add(source.tenantId(), source.id(), subtask.number(), subtask.id(), now);
+        subtask.movedTo(target.id(), number, IssueType.SUBTASK, status, landing.assignee(), landing.reviewer(),
+                landing.kept(), now);
+        issues.saveAndFlush(subtask);
+        events.publishEvent(new IssueMoved(subtask.id(), source.id(), target.id(), fromKey, toKey, user.username(), now,
+                changes));
     }
 
     private Map<String, FieldDefinitionEntity> byKey(ProjectRef project) {
@@ -219,7 +320,7 @@ class IssueMover {
 
     /** What the move loses, for the confirm of the screen: the names of the fields, and the people cleared. */
     private String lostText(IssueEntity issue, List<String> lost, List<String> cleared,
-                            Map<String, FieldDefinitionEntity> fields) {
+                            Map<String, FieldDefinitionEntity> fields, String parentKey) {
         Locale locale = LocaleContextHolder.getLocale();
         List<String> parts = new ArrayList<>();
         lost.forEach(k -> parts.add(Optional.ofNullable(fields.get(k)).map(FieldDefinitionEntity::label).orElse(k)));
@@ -228,6 +329,9 @@ class IssueMover {
         }
         if (cleared.contains("reviewer")) {
             parts.add(texts.getMessage("field.reviewer", null, locale) + " (" + issue.reviewer() + ")");
+        }
+        if (cleared.contains("parent")) {
+            parts.add(texts.getMessage("field.parent", null, locale) + " (" + parentKey + ")");
         }
         return String.join(", ", parts);
     }

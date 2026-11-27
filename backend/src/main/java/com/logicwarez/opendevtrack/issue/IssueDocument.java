@@ -12,11 +12,12 @@ import java.util.UUID;
 
 /**
  * An issue with every field, as the index of the module search reads it (ADR-16): type and priority as in the API,
- * custom fields by their key, and the keys it had before it moved to another project (ADR-27).
+ * custom fields by their key, the keys it had before it moved to another project (ADR-27) and the key of its parent
+ * (ADR-28).
  */
 public record IssueDocument(UUID id, String tenantId, UUID projectId, String projectKey, String key, long number,
                             String type, String summary, String description, String status, String priority,
                             int priorityOrder, String assignee, String reporter, LocalDate dueOn, String reviewer,
                             List<String> labels, Map<String, Object> custom, Instant createdAt, Instant updatedAt,
-                            boolean flagged, List<String> movedKeys) {
+                            boolean flagged, List<String> movedKeys, String parentKey) {
 }

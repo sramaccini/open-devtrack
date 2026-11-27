@@ -60,6 +60,9 @@ class IssueEntity {
     /** Impeded, as the flag of Jira. */
     private boolean flagged;
 
+    /** The epic of a story, task or bug, or the issue of a subtask (ADR-28); in the same project. */
+    private UUID parentId;
+
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -110,6 +113,12 @@ class IssueEntity {
         this.assignee = assignee;
         this.reviewer = reviewer;
         this.custom = new HashMap<>(custom);
+        this.updatedAt = now;
+    }
+
+    /** Another parent, or none (ADR-28); the rules are those of {@link IssueEditor}. */
+    void parentTo(UUID parentId, Instant now) {
+        this.parentId = parentId;
         this.updatedAt = now;
     }
 
@@ -171,6 +180,10 @@ class IssueEntity {
 
     String reviewer() {
         return reviewer;
+    }
+
+    UUID parentId() {
+        return parentId;
     }
 
     boolean flagged() {

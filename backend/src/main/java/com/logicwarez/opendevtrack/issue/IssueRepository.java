@@ -37,6 +37,11 @@ interface IssueRepository extends JpaRepository<IssueEntity, UUID> {
 
     List<IssueEntity> findByIdIn(List<UUID> ids);
 
+    /** The children of an issue (ADR-28), in the order of their numbers. */
+    List<IssueEntity> findByParentIdOrderByNumber(UUID parentId);
+
+    boolean existsByParentId(UUID parentId);
+
     List<IssueEntity> findByProjectIdOrderByNumber(UUID projectId, Limit limit);
 
     List<IssueEntity> findByProjectIdAndTypeInAndStatus(UUID projectId, Collection<IssueType> types, String status);

@@ -10,6 +10,7 @@ import com.logicwarez.opendevtrack.issue.IssueEvents.FieldChange;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems.FieldError;
 import com.logicwarez.opendevtrack.project.ProjectRef;
+import com.logicwarez.opendevtrack.project.Projects;
 import com.logicwarez.opendevtrack.workflow.Workflows;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -23,6 +24,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
@@ -44,9 +47,15 @@ class IssueEditor {
     private final Workflows workflows;
     private final WatcherRepository watchers;
     private final CurrentUser user;
+    private final IssueRepository issues;
+    private final Projects projects;
+    private final MovedKeys moved;
 
     IssueEditor(ProjectAccess access, CustomFields customFields, Workflows workflows, WatcherRepository watchers,
-                CurrentUser user) {
+                CurrentUser user, IssueRepository issues, Projects projects, MovedKeys moved) {
+        this.issues = issues;
+        this.projects = projects;
+        this.moved = moved;
         this.access = access;
         this.customFields = customFields;
         this.workflows = workflows;
@@ -54,8 +63,11 @@ class IssueEditor {
         this.user = user;
     }
 
-    /** A change of an issue, checked and not applied yet: its fields, the status they lead to and what differs. */
-    record Edit(Fields fields, String status, List<FieldChange> changes) {
+    /**
+     * A change of an issue, checked and not applied yet: its fields, the status they lead to, its parent and what
+     * differs.
+     */
+    record Edit(Fields fields, String status, Parent parent, List<FieldChange> changes) {
 
         /** The issue as the guards would see it after the change. */
         Map<String, Object> guardInput(ProjectRef project, IssueEntity issue) {
@@ -71,16 +83,94 @@ class IssueEditor {
         String status = fields.type() == issue.type() ? issue.status()
                 : workflows.statusFor(project.id(), fields.type().value(), issue.status());
         checkRequired(project, IssueController.key(project, issue), fields, status, issue.reporter(), permissions);
+        Parent before = parentOf(project, issue);
+        Parent parent = parent(project, issue, fields.type(), request.parent(), before);
         List<FieldChange> changes = new ArrayList<>(fields.changesFrom(Fields.of(issue)));
+        if (!Objects.equals(before.key(), parent.key())) {
+            changes.add(new FieldChange("parent", before.key(), parent.key()));
+        }
         if (!status.equals(issue.status())) {
             changes.add(new FieldChange("status", issue.status(), status));
         }
-        return new Edit(fields, status, changes);
+        return new Edit(fields, status, parent, changes);
+    }
+
+    /** The parent of an issue (ADR-28), by its id and its key; {@link Parent#NONE} without one. */
+    record Parent(UUID id, String key) {
+        static final Parent NONE = new Parent(null, null);
+    }
+
+    /** The parent the issue has now; {@link Parent#NONE} for a new one. */
+    Parent parentOf(ProjectRef project, IssueEntity issue) {
+        if (issue == null || issue.parentId() == null) {
+            return Parent.NONE;
+        }
+        return issues.findById(issue.parentId()).map(p -> new Parent(p.id(), IssueController.key(project, p)))
+                .orElse(Parent.NONE);
+    }
+
+    /**
+     * The parent an issue of this type would have (ADR-28): the one asked ({@code null} keeps {@code before}, an empty
+     * key removes it), checked. An issue that changes level without a parent asked loses the one it had, as a subtask
+     * made a task does in Jira. An epic has none; a story, task or bug may have an epic; a subtask has a story, task or
+     * bug; always of the same project. An issue with children keeps its level, so that they keep a parent of theirs.
+     */
+    Parent parent(ProjectRef project, IssueEntity issue, IssueType type, String asked, Parent before)
+            throws InvalidField {
+        Parent parent = before;
+        IssueEntity found = null;
+        if (asked != null) {
+            String key = asked.strip().toUpperCase(Locale.ROOT);
+            if (key.isEmpty()) {
+                parent = Parent.NONE;
+            } else {
+                found = inProject(project, key).orElseThrow(
+                        () -> new InvalidField("The parent is an issue of the same project"));
+                if (issue != null && found.id().equals(issue.id())) {
+                    throw new InvalidField("An issue is not its own parent");
+                }
+                parent = new Parent(found.id(), IssueController.key(project, found));
+            }
+        } else if (before.id() != null && issue != null && type.level() != issue.type().level()) {
+            parent = Parent.NONE;
+        } else if (before.id() != null) {
+            found = issues.findById(before.id()).orElse(null);
+        }
+        if (issue != null && type.level() != issue.type().level() && issues.existsByParentId(issue.id())) {
+            throw new InvalidField("An issue with children keeps its level: an epic stays an epic, an issue with"
+                    + " subtasks stays a story, task or bug");
+        }
+        if (type == IssueType.EPIC && parent.id() != null) {
+            throw new InvalidField("An epic has no parent");
+        }
+        if (type == IssueType.SUBTASK && parent.id() == null) {
+            throw new InvalidField("A subtask has a parent: a story, task or bug");
+        }
+        if (found != null && found.type().level() != type.level() + 1) {
+            throw new InvalidField(type == IssueType.SUBTASK ? "The parent of a subtask is a story, task or bug"
+                    : "The parent of a story, task or bug is an epic");
+        }
+        return parent;
+    }
+
+    /** The issue with this key in the project, also by a key it had before it moved here (ADR-27). */
+    private java.util.Optional<IssueEntity> inProject(ProjectRef project, String key) {
+        Matcher m = MovedKeys.ISSUE_KEY.matcher(key);
+        if (!m.matches()) {
+            return java.util.Optional.empty();
+        }
+        long number = Long.parseLong(m.group(2));
+        return projects.find(m.group(1)).flatMap(p -> issues.findByProjectIdAndNumber(p.id(), number)
+                        .or(() -> moved.issueOf(p.id(), number).flatMap(issues::findById)))
+                .filter(i -> i.projectId().equals(project.id()));
     }
 
     /** Applies the change to the issue, without saving it. */
     void apply(IssueEntity issue, Edit edit, Instant now) {
         edit.fields().applyTo(issue, now);
+        if (!Objects.equals(issue.parentId(), edit.parent().id())) {
+            issue.parentTo(edit.parent().id(), now);
+        }
         if (!edit.status().equals(issue.status())) {
             issue.moveTo(edit.status(), now);
         }
@@ -117,7 +207,7 @@ class IssueEditor {
     static IssueRequest unchanged(IssueEntity issue) {
         return new IssueRequest(issue.type().value(), issue.summary(), issue.description(), issue.priority().value(),
                 issue.assignee(), issue.dueOn() == null ? null : issue.dueOn().toString(), issue.reviewer(),
-                issue.labels(), null, issue.version());
+                issue.labels(), null, null, issue.version());
     }
 
     /** An issue as the conditions see it (ADR-10, ADR-11), also one not saved yet ({@code key} null). */

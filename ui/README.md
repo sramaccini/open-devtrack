@@ -39,7 +39,9 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   to another page.
 - **Issue page**: `issue-detail` is a `grid` of 12 columns, as the page of a work item in Jira: on the left (8)
   the summary and the description, a form with `edit: inline` (Quadrava 0.27.0, Q43): the summary with `display: heading`,
-  each field saved on its own by `onSave` with `patchIssue`, then the sections Attachments, Linked work items and Activity (tabs Comments and
+  each field saved on its own by `onSave` with `patchIssue`, then the sections Attachments, Subtasks («Child work items» on an epic: a `progress` and a `table` on `children`,
+  «Add subtask» a `popover` with the summary that calls `addChild` with the `childType` of the answer, ADR-28), Linked
+  work items and Activity (tabs Comments and
   History); on the right (4) a row with the status and, as icons, the flag, the menu Watchers, the votes, Copy link (the `copyLink` step, Quadrava 0.29.0, Q45), Share and the menu More actions, then Details and Planning. Details and Planning are forms with `edit: inline` too (Quadrava 0.28.0, Q44: lookups and
   selects confirm on pick, checkboxes on toggle, the fields of `fieldsFrom` alike), each field saved on its own by
   `onSave`. The issue forms call `patchIssue` (`issues/patch`, `PATCH /api/issues/{key}`): only the field that
@@ -48,7 +50,11 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   the sprint, a lookup on the columns of the backlog shown when `_perm.plan` (else its name as text). The two menus are `menuButton`s with `display: icon` (Quadrava 0.24.0, Q40): the eye with `count` (the
   watchers) and `pressed` (watching), whose menu has watch or stop and «Watchers», a `view` step with the table of
   the watchers and «Add watcher…», Share as an icon (a `dialog` with `tags` suggested from the members and a message), and «…» with Assign to me (a PATCH of the assignee with `user.username`), Clone (a `dialog` for the summary, then `call` with `as` and `navigate` to the copy), Move (a `dialog` whose lookups read the targets and, from the project and type in `form`, their statuses; a dry run of `moveToProject`, an `if` with a `confirm` of what is lost, then the move), Export Word, OpenDocument and JSON (the `download` step on `export` with the format), Print (the `print`
-  step) and Delete in `tone: danger`. The flag
+  step) and Delete in `tone: danger`, whose confirm names the subtasks deleted with it (the `keys` of `children`).
+  «Parent» in Details is the lookup `parentKey` on `parents` (the candidates for the type in `form`); `patchIssue`
+  sends it as `parent`, since a field name has no dots. The parent is not yet in the path above the title, as ADR-28 wants: an item of `breadcrumb` cannot be
+  hidden, and one with an empty label shows as an empty step on every issue without a parent; it comes when Quadrava
+  lets an item be left out (requested, #61), until then «Parent» in Details shows it. The flag
   and the votes are `button`s (Quadrava 0.25.1, Q41): the flag with `tone: danger` and `pressed`, shown only while
   flagged; the thumb with `count`, two buttons by `visibleIf` (vote, take the vote back). «Add flag» opens a
   `popover` under «…» for the optional comment. Buttons are icon-only unless a text is

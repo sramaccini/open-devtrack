@@ -31,8 +31,33 @@ final class IssueApi {
     record IssueView(String key, String project, long number, String type, String summary, String description,
                      String status, String priority, String assignee, String reporter, LocalDate dueOn,
                      String reviewer, List<String> labels, Map<String, Object> custom, Instant createdAt, Instant updatedAt, long version, boolean watching,
-                     boolean flagged, long votes, boolean voted,
+                     boolean flagged, long votes, boolean voted, ParentView parent, String parentKey,
                      @JsonProperty("_perm") Map<String, Boolean> perm) {
+    }
+
+    /**
+     * The parent of an issue (ADR-28): an epic, or the issue of a subtask; {@code parentKey} in the issue is its key alone,
+     * as a field of a form.
+     */
+    record ParentView(String key, String summary, String type, String status) {
+    }
+
+    /**
+     * The children of an issue (ADR-28): its subtasks, or the issues of an epic, in the order of their numbers, with how
+     * many are in each category of status ({@code todo}, {@code in_progress}, {@code done}) and the type a new child
+     * takes ({@code subtask}, or {@code task} under an epic; null when the issue cannot have children); {@code keys}
+     * lists the keys in a text, for the confirm of a delete.
+     */
+    record Children(List<ChildRow> items, Map<String, Integer> progress, int done, int total, String childType,
+                    String keys) {
+    }
+
+    /** An issue that can be the parent of one of a type (ADR-28), for the lookup of the field: its key and a label. */
+    record ParentCandidate(String key, String label) {
+    }
+
+    record ChildRow(String key, String type, String summary, String status, String category, String priority,
+                    String assignee) {
     }
 
     /**
@@ -77,6 +102,7 @@ final class IssueApi {
         private String reporter;
         private List<String> labels;
         private Map<String, Object> custom;
+        private String parent;
         private Long version;
 
         public String getType() {
@@ -169,6 +195,15 @@ final class IssueApi {
             given.add("custom");
         }
 
+        public String getParent() {
+            return parent;
+        }
+
+        public void setParent(String parent) {
+            this.parent = parent;
+            given.add("parent");
+        }
+
         public Long getVersion() {
             return version;
         }
@@ -202,19 +237,26 @@ final class IssueApi {
 
     /**
      * What a move did, or would do with {@code dryRun}: the key now (or the one it would get), the one before, the
-     * custom fields dropped, the people cleared ({@code assignee}, {@code reviewer}), all of them in {@code lostText} in
-     * the language of the user, and the issue after the move (null for a dry run).
+     * custom fields dropped, what is cleared ({@code assignee}, {@code reviewer}, {@code parent}), all of them in
+     * {@code lostText} in the language of the user, and the issue after the move (null for a dry run). With ADR-28 also
+     * the subtasks that move with it (their keys before the move) and the children of an epic that stay and lose their
+     * parent.
      */
     record ProjectMoveAnswer(String key, String movedFrom, List<String> dropped, List<String> cleared, String lostText,
-                      IssueView issue) {
+                      List<String> subtasks, List<String> detached, IssueView issue) {
     }
 
     /** The summary of a clone; without it «CLONE - » and the summary of the original. */
     record CloneRequest(String summary) {
     }
 
-    /** Fields of a new issue or of a change; {@code version} only for a change. */
+    /**
+     * Fields of a new issue or of a change; {@code version} only for a change. {@code parent} (ADR-28): the key of the
+     * parent, in the same project; without it the issue keeps its parent (a new one has none), and an empty one
+     * removes it.
+     */
     record IssueRequest(String type, String summary, String description, String priority, String assignee,
-                        String dueOn, String reviewer, List<String> labels, Map<String, Object> custom, Long version) {
+                        String dueOn, String reviewer, List<String> labels, Map<String, Object> custom, String parent,
+                        Long version) {
     }
 }

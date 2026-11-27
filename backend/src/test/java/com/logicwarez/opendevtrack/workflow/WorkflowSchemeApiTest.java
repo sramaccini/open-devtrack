@@ -148,7 +148,7 @@ class WorkflowSchemeApiTest {
         mvc.perform(as(get(WORKFLOWS), luisa))
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].default").value(true))
-                .andExpect(jsonPath("$[0].types").value(contains("task", "bug", "story", "epic")))
+                .andExpect(jsonPath("$[0].types").value(contains("task", "bug", "story", "epic", "subtask")))
                 .andExpect(jsonPath("$[0]._perm.remove").value(false));
         mvc.perform(as(post(WORKFLOWS), luisa).content("{\"name\":\"Bugs\"}")).andExpect(status().isForbidden());
         String bugs = add("Bugs");
@@ -174,7 +174,7 @@ class WorkflowSchemeApiTest {
         call(put(WORKFLOWS + "/" + bugs), "{\"types\":[\"incident\"],\"version\":" + version(bugs) + "}", 400);
         types(bugs, "[\"bug\"]");
         mvc.perform(as(get(WORKFLOWS), luisa))
-                .andExpect(jsonPath("$[0].types").value(contains("task", "story", "epic")))
+                .andExpect(jsonPath("$[0].types").value(contains("task", "story", "epic", "subtask")))
                 .andExpect(jsonPath("$[1].types").value(contains("bug")))
                 .andExpect(jsonPath("$[1]._perm.remove").value(false));
         // ODT-1, a bug in to do, stays there: Bugs has it.

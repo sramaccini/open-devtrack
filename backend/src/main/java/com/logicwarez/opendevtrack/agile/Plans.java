@@ -5,6 +5,7 @@
 package com.logicwarez.opendevtrack.agile;
 
 import com.logicwarez.opendevtrack.agile.PlanEvents.IssuePlanned;
+import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueCreated;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueDeleted;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueMoved;
@@ -54,6 +55,19 @@ class Plans {
     @EventListener
     void on(IssueCreated event) {
         plan(event.issueId(), event.projectId());
+    }
+
+    /** An issue that becomes a subtask loses its story points (ADR-28): its parent has them. */
+    @EventListener
+    void on(IssueChanged event) {
+        if (event.changes().stream().noneMatch(c -> "type".equals(c.field()) && "subtask".equals(c.to()))) {
+            return;
+        }
+        plans.findById(event.issueId()).filter(p -> p.points() != null).ifPresent(p -> {
+            p.points(null);
+            plans.save(p);
+            planned(p);
+        });
     }
 
     @EventListener

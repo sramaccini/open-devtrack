@@ -681,5 +681,21 @@
   "values.issue_field.flagged": "Contrassegnata",
   "values.flag.impediment": "Contrassegnata",
   "issues.add_comment": "Aggiungi commento",
-  "issues.votes": "Voti"
+  "issues.votes": "Voti",
+  "values.issue_type.subtask": "Sottoattività",
+  "values.issue_field.parent": "Padre",
+  "issues.parent": "Padre",
+  "issues.parent_help": "Un'epica per una storia, un'attività o un bug; una storia, un'attività o un bug per una sottoattività; nello stesso progetto",
+  "issues.parent_required": "Una sottoattività ha un padre",
+  "issues.subtasks": "Sottoattività",
+  "issues.child_items": "Elementi di lavoro figli",
+  "issues.children_done": "{done} di {total} completati",
+  "issues.add_subtask": "Aggiungi sottoattività",
+  "issues.add_child": "Aggiungi elemento di lavoro figlio",
+  "issues.add_subtask_help": "Una sottoattività di questo elemento; i suoi campi si impostano nella sua pagina",
+  "issues.add_child_help": "Un'attività di questa epica; tipo e campi si cambiano nella sua pagina",
+  "issues.delete_confirm_subtasks": "Eliminare {key} e le sue sottoattività {keys}? Non si può annullare.",
+  "issues.delete_confirm_epic": "Eliminare {key}? I suoi elementi figli {keys} restano, senza epica. Non si può annullare.",
+  "issues.move_project_subtasks": "Le sue sottoattività {keys} si spostano con essa e prendono chiavi di {project}. Spostare l'elemento?",
+  "issues.move_project_detached": "I suoi elementi figli {keys} restano in questo progetto, senza epica. Spostare l'epica?"
 }

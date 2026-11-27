@@ -59,10 +59,11 @@ the summary opens the issue. Moving cards needs the role of developer or admin.
 «Backlog» (from the issues or from the project) is a search ([Search](search.md)) that opens with the query
 
 ```
-project = WEB AND (sprint IN openSprints() OR (sprint IS EMPTY AND category != done)) ORDER BY rank
+project = WEB AND type != subtask AND (sprint IN openSprints() OR (sprint IS EMPTY AND category != done)) ORDER BY rank
 ```
 
-the issues of the sprints not completed, and those not done that are in no sprint, in the order of the project. The
+the issues of the sprints not completed, and those not done that are in no sprint, in the order of the project; the
+subtasks are on the page of their parent and on the boards, as cards of their own ([Issues](issues.md#parent-and-subtasks)). The
 table groups them by sprint: the active sprint first, then the planned ones, then the backlog. Change the query, sort,
 filter and group as in the search; «Group by» without «Sprint» shows the plain order.
 

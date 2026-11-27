@@ -60,7 +60,8 @@ An empty query finds every issue. Without `ORDER BY`, the most recently updated 
 | --- | --- | --- |
 | `project` | The key of the project: `WEB` | `= != IN NOT IN IS EMPTY` |
 | `key` | The key of the issue: `WEB-4` | `= != IN NOT IN IS EMPTY` |
-| `type` | `task`, `bug`, `story`, `epic` | `= != IN NOT IN IS EMPTY` |
+| `parent` | The key of the parent: `parent = WEB-1` finds the children of WEB-1 (also by a key it had before a move) | `= != IN NOT IN IS EMPTY` |
+| `type` | `task`, `bug`, `story`, `epic`, `subtask` | `= != IN NOT IN IS EMPTY` |
 | `status` | A status, by its code (`in_progress`) or its name in English or Italian (`"In progress"`, `"In corso"`) | `= != IN NOT IN IS EMPTY` |
 | `category` | The category of the status: `todo`, `in_progress`, `done` | `= != IN NOT IN IS EMPTY` |
 | `priority` | `lowest`, `low`, `medium`, `high`, `highest`, in this order | `= != < <= > >= IN NOT IN` |
@@ -153,6 +154,8 @@ the order of dates written as `2026-12-31`.
 | `due <= +7d AND category != done ORDER BY due` | What is due within a week |
 | `labels IS EMPTY AND created >= -30d` | Recent issues without labels |
 | `NOT (type = epic OR category = done)` | Everything open but the epics |
+| `parent = WEB-1 AND category != done` | The open children of WEB-1 |
+| `type = story AND parent IS EMPTY` | The stories in no epic |
 
 ### Errors
 

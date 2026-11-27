@@ -681,5 +681,21 @@
   "values.issue_field.flagged": "Flagged",
   "values.flag.impediment": "Flagged",
   "issues.add_comment": "Add comment",
-  "issues.votes": "Votes"
+  "issues.votes": "Votes",
+  "values.issue_type.subtask": "Subtask",
+  "values.issue_field.parent": "Parent",
+  "issues.parent": "Parent",
+  "issues.parent_help": "An epic for a story, task or bug; a story, task or bug for a subtask; in the same project",
+  "issues.parent_required": "A subtask has a parent",
+  "issues.subtasks": "Subtasks",
+  "issues.child_items": "Child work items",
+  "issues.children_done": "{done} of {total} done",
+  "issues.add_subtask": "Add subtask",
+  "issues.add_child": "Add child work item",
+  "issues.add_subtask_help": "A subtask of this issue; set its fields on its page",
+  "issues.add_child_help": "A task of this epic; change its type and fields on its page",
+  "issues.delete_confirm_subtasks": "Delete {key} and its subtasks {keys}? It cannot be undone.",
+  "issues.delete_confirm_epic": "Delete {key}? Its child work items {keys} stay, without an epic. It cannot be undone.",
+  "issues.move_project_subtasks": "Its subtasks {keys} move with it and take keys of {project}. Move the issue?",
+  "issues.move_project_detached": "Its child work items {keys} stay in this project, without an epic. Move the epic?"
 }

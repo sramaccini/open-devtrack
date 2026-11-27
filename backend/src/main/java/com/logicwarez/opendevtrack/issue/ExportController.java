@@ -113,21 +113,39 @@ class ExportController {
         Map<String, List<Map<String, Object>>> parts = new LinkedHashMap<>();
         modules.forEach(m -> parts.putAll(m.content(issue.id())));
         List<Map<String, Object>> linked = links(issue);
+        Map<String, Object> parent = parent(project, issue);
+        List<Map<String, Object>> children = issues.findByParentIdOrderByNumber(issue.id()).stream()
+                .map(c -> row(project, c)).toList();
         Map<String, String> labels = customFields.all(project.id()).stream()
                 .collect(Collectors.toMap(FieldDefinitionEntity::key, FieldDefinitionEntity::label, (a, b) -> a));
         Instant now = Instant.now();
         return switch (format) {
             case "json" -> file(key + ".json", MediaType.APPLICATION_JSON,
-                    json(project, issue, key, labels, linked, parts, now));
+                    json(project, issue, key, labels, linked, parent, children, parts, now));
             case "docx" -> file(key + ".docx", MediaType.parseMediaType(IssueDocuments.DOCX),
-                    IssueDocuments.docx(key + " " + issue.summary(), document(project, issue, key, labels, linked, parts, now)));
+                    IssueDocuments.docx(key + " " + issue.summary(), document(project, issue, key, labels, linked, parent, children, parts, now)));
             default -> file(key + ".odt", MediaType.parseMediaType(IssueDocuments.ODT),
-                    IssueDocuments.odt(key + " " + issue.summary(), document(project, issue, key, labels, linked, parts, now)));
+                    IssueDocuments.odt(key + " " + issue.summary(), document(project, issue, key, labels, linked, parent, children, parts, now)));
         };
     }
 
+    /** The parent of the issue (ADR-28) as the export gives it: key, summary, type and status; null without one. */
+    private Map<String, Object> parent(ProjectRef project, IssueEntity issue) {
+        return issue.parentId() == null ? null : issues.findById(issue.parentId()).map(p -> row(project, p)).orElse(null);
+    }
+
+    private static Map<String, Object> row(ProjectRef project, IssueEntity i) {
+        Map<String, Object> row = new LinkedHashMap<>();
+        row.put("key", IssueController.key(project, i));
+        row.put("summary", i.summary());
+        row.put("type", i.type().value());
+        row.put("status", i.status());
+        return row;
+    }
+
     private Map<String, Object> json(ProjectRef project, IssueEntity i, String key, Map<String, String> labels,
-                                     List<Map<String, Object>> linked, Map<String, List<Map<String, Object>>> parts,
+                                     List<Map<String, Object>> linked, Map<String, Object> parent,
+                                     List<Map<String, Object>> children, Map<String, List<Map<String, Object>>> parts,
                                      Instant now) {
         Map<String, Object> fields = new LinkedHashMap<>();
         fields.put("key", key);
@@ -141,6 +159,7 @@ class ExportController {
         fields.put("reviewer", i.reviewer());
         fields.put("dueOn", i.dueOn() == null ? null : i.dueOn().toString());
         fields.put("labels", i.labels());
+        fields.put("parent", parent);
         fields.put("flagged", i.flagged());
         fields.put("description", i.description());
         fields.put("createdAt", i.createdAt());
@@ -159,6 +178,7 @@ class ExportController {
         export.put("exportedBy", user.username());
         export.put("issue", fields);
         export.put("links", linked);
+        export.put("children", children);
         export.put("watchers", watchers.of(i.id()));
         export.put("votes", votes.countByIssueId(i.id()));
         for (String part : List.of("comments", "attachments", "history")) {
@@ -168,7 +188,8 @@ class ExportController {
     }
 
     private List<Block> document(ProjectRef project, IssueEntity i, String key, Map<String, String> labels,
-                                 List<Map<String, Object>> linked, Map<String, List<Map<String, Object>>> parts,
+                                 List<Map<String, Object>> linked, Map<String, Object> parent,
+                                 List<Map<String, Object>> children, Map<String, List<Map<String, Object>>> parts,
                                  Instant now) {
         List<Block> blocks = new ArrayList<>();
         blocks.add(new Heading(0, key + " " + i.summary()));
@@ -176,6 +197,9 @@ class ExportController {
         rows.add(List.of(text("field.project"), project.key() + " · " + project.name()));
         rows.add(List.of(text("field.type"), text("type." + i.type().value(), i.type().value())));
         rows.add(List.of(text("field.status"), text("status." + i.status(), i.status())));
+        if (parent != null) {
+            rows.add(List.of(text("field.parent"), parent.get("key") + " " + parent.get("summary")));
+        }
         rows.add(List.of(text("field.priority"), text("priority." + i.priority().value(), i.priority().value())));
         rows.add(List.of(text("field.assignee"), orNone(i.assignee())));
         rows.add(List.of(text("field.reporter"), i.reporter()));
@@ -204,6 +228,13 @@ class ExportController {
                             text("relation." + l.get("relation"), (String) l.get("relation")),
                             l.get("key") + " " + l.get("summary"),
                             text("status." + l.get("status"), (String) l.get("status")))).toList()));
+        }
+        if (!children.isEmpty()) {
+            blocks.add(new Heading(1, text(i.type() == IssueType.EPIC ? "children.epic" : "children")));
+            blocks.add(new Table(List.of(text("link.issue"), text("field.type"), text("field.status")),
+                    children.stream().map(c -> List.of(c.get("key") + " " + c.get("summary"),
+                            text("type." + c.get("type"), (String) c.get("type")),
+                            text("status." + c.get("status"), (String) c.get("status")))).toList()));
         }
         List<Map<String, Object>> attachments = parts.getOrDefault("attachments", List.of());
         if (!attachments.isEmpty()) {

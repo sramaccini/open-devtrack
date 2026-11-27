@@ -137,7 +137,11 @@ changes only through the transitions of the workflow of the project (below). `GE
 `assignee` (`me` for the user) and `q` (text of the summary); `GET /api/projects/{key}/labels?q=` gives the labels
 already used in the project that start with `q`, for the suggestions of the labels field. The rows of the list carry
 `dueOn` and `overdue` (`"overdue"` when past the due date, in `odt.reporting.zone`, and not done). Each change is published as an event
-(`IssueEvents`); other modules find an issue by its key through `Issues`.
+(`IssueEvents`); other modules find an issue by its key through `Issues`. The parent of an issue (ADR-28) is `odt_issue.issue.parent_id`, checked by `IssueEditor` on create,
+on a change of type or parent and in `IssueMover` (three levels by `IssueType.level()`, same project, an issue with
+children keeps its level); `GET /api/issues/{key}/children` lists them and `GET /api/projects/{key}/parents?type=`
+proposes the parents for a type. A delete removes the subtasks first and frees the children of an epic, each with its
+event; the search writes `parent_key` and agile refuses story points on a subtask (`Issues.subtask`).
 
 ## Links (`issue`)
 

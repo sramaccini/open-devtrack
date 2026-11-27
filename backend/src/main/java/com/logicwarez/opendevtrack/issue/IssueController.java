@@ -5,6 +5,8 @@
 package com.logicwarez.opendevtrack.issue;
 
 import com.logicwarez.opendevtrack.access.ProjectAccess;
+import com.logicwarez.opendevtrack.issue.IssueApi.ChildRow;
+import com.logicwarez.opendevtrack.issue.IssueApi.Children;
 import com.logicwarez.opendevtrack.issue.IssueApi.CloneRequest;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssuePatch;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueRequest;
@@ -13,6 +15,8 @@ import com.logicwarez.opendevtrack.issue.IssueApi.LabelRow;
 import com.logicwarez.opendevtrack.issue.IssueApi.ProjectMoveAnswer;
 import com.logicwarez.opendevtrack.issue.IssueApi.ProjectMoveRequest;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueView;
+import com.logicwarez.opendevtrack.issue.IssueApi.ParentCandidate;
+import com.logicwarez.opendevtrack.issue.IssueApi.ParentView;
 import com.logicwarez.opendevtrack.issue.IssueApi.TransitionRequest;
 import com.logicwarez.opendevtrack.issue.IssueApi.TransitionView;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueWorkflowStatus;
@@ -25,6 +29,7 @@ import com.logicwarez.opendevtrack.issue.IssueEvents.IssueDeleted;
 import com.logicwarez.opendevtrack.issue.IssueEditor.Fields;
 import com.logicwarez.opendevtrack.issue.IssueEditor.InvalidCustom;
 import com.logicwarez.opendevtrack.issue.IssueEditor.InvalidField;
+import com.logicwarez.opendevtrack.issue.IssueEditor.Parent;
 import com.logicwarez.opendevtrack.issue.Issues.Found;
 import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
@@ -226,7 +231,7 @@ class IssueController {
         IssueRequest fields = new IssueRequest(original.type().value(), summary, original.description(),
                 original.priority().value(), original.assignee(),
                 original.dueOn() == null ? null : original.dueOn().toString(), original.reviewer(), original.labels(),
-                original.custom(), null);
+                original.custom(), editor.parentOf(project, original).key(), null);
         Instant now = Instant.now();
         IssueEntity clone;
         try {
@@ -275,17 +280,25 @@ class IssueController {
     private IssueEntity newIssue(ProjectRef project, IssueRequest request, Set<String> permissions, Instant now)
             throws InvalidField, InvalidCustom {
         Fields fields = editor.fields(project, request, Fields.EMPTY);
+        Parent parent = editor.parent(project, null, fields.type(), request.parent(), Parent.NONE);
         String initial = workflows.initialStatus(project.id(), fields.type().value());
         editor.checkRequired(project, null, fields, initial, user.username(), permissions);
         IssueEntity issue = new IssueEntity(user.tenantId(), project.id(), projects.nextIssueNumber(project.id()),
                 initial, user.username(), now);
         fields.applyTo(issue, now);
+        if (parent.id() != null) {
+            issue.parentTo(parent.id(), now);
+        }
         issues.saveAndFlush(issue);
         watchers.watch(issue.id(), issue.reporter(), now);
         editor.watchAssignee(issue, now);
         editor.watchReviewer(issue, now);
+        List<FieldChange> created = new ArrayList<>(Fields.of(issue).changesFrom(Fields.EMPTY));
+        if (parent.key() != null) {
+            created.add(new FieldChange("parent", null, parent.key()));
+        }
         events.publishEvent(new IssueCreated(issue.id(), project.id(), key(project, issue), user.username(), now,
-                Fields.of(issue).changesFrom(Fields.EMPTY)));
+                created));
         return issue;
     }
 
@@ -388,6 +401,7 @@ class IssueController {
                 patch.has("reviewer") ? patch.getReviewer() : issue.reviewer(),
                 labels,
                 custom,
+                patch.has("parent") ? (patch.getParent() == null ? "" : patch.getParent()) : null,
                 patch.getVersion());
     }
 
@@ -443,10 +457,99 @@ class IssueController {
         if (!permissions(found.get().project()).contains("odt.issue.delete")) {
             return Problems.forbidden("Only an admin of the project deletes issues");
         }
-        issues.delete(found.get().issue());
-        events.publishEvent(new IssueDeleted(found.get().issue().id(), found.get().project().id(),
-                key(found.get().project(), found.get().issue()), user.username(), Instant.now()));
+        ProjectRef project = found.get().project();
+        IssueEntity issue = found.get().issue();
+        Instant now = Instant.now();
+        String parentKey = key(project, issue);
+        for (IssueEntity child : issues.findByParentIdOrderByNumber(issue.id())) {
+            if (child.type() == IssueType.SUBTASK) {
+                issues.delete(child);
+                events.publishEvent(new IssueDeleted(child.id(), project.id(), key(project, child), user.username(), now));
+            } else {
+                child.parentTo(null, now);
+                issues.save(child);
+                events.publishEvent(new IssueChanged(child.id(), project.id(), key(project, child), user.username(), now,
+                        List.of(new FieldChange("parent", parentKey, null))));
+            }
+        }
+        issues.delete(issue);
+        events.publishEvent(new IssueDeleted(issue.id(), project.id(), parentKey, user.username(), now));
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * The children of the issue (ADR-28): the subtasks of a story, task or bug, the issues of an epic, with how many
+     * are in each category of status.
+     */
+    @ApiDoc(value = "The children of an issue: its subtasks, or the issues of an epic, with their progress",
+            answer = Children.class, project = "odt.issue.browse")
+    @GetMapping("/api/issues/{issueKey}/children")
+    ResponseEntity<?> children(@PathVariable String issueKey) {
+        Optional<Found> found = find(issueKey);
+        if (found.isEmpty()) {
+            return Problems.notFound(NOT_FOUND);
+        }
+        if (!permissions(found.get().project()).contains("odt.issue.browse")) {
+            return Problems.forbidden(NOT_A_MEMBER);
+        }
+        ProjectRef project = found.get().project();
+        IssueEntity issue = found.get().issue();
+        Map<String, String> categories = categories(issue);
+        Map<String, Integer> progress = new LinkedHashMap<>();
+        progress.put("todo", 0);
+        progress.put("in_progress", 0);
+        progress.put("done", 0);
+        List<ChildRow> rows = issues.findByParentIdOrderByNumber(issue.id()).stream().map(c -> {
+            String category = categories.getOrDefault(c.status(), "todo");
+            progress.merge(category, 1, Integer::sum);
+            return new ChildRow(key(project, c), c.type().value(), c.summary(), c.status(), category,
+                    c.priority().value(), c.assignee());
+        }).toList();
+        return ResponseEntity.ok(new Children(rows, progress, progress.get("done"), rows.size(), childType(issue),
+                String.join(", ", rows.stream().map(ChildRow::key).toList())));
+    }
+
+    /**
+     * The issues of the project that can be the parent of an issue of {@code type} (ADR-28): epics for a story, task or
+     * bug, those for a subtask, none for an epic; whose key or summary has {@code q}, without {@code exclude} (the issue
+     * itself), at most 20.
+     */
+    @ApiDoc(value = "The issues of a project that can be the parent of an issue of a type",
+            answer = ParentCandidate.class, list = true, project = "odt.issue.browse", internal = true)
+    @GetMapping("/api/projects/{key}/parents")
+    ResponseEntity<?> parents(@PathVariable String key, @RequestParam(required = false) String type,
+                              @RequestParam(required = false) String q, @RequestParam(required = false) String exclude) {
+        Optional<ProjectRef> project = projects.find(key);
+        if (project.isEmpty()) {
+            return Problems.notFound("Project not found");
+        }
+        if (!permissions(project.get()).contains("odt.issue.browse")) {
+            return Problems.forbidden(NOT_A_MEMBER);
+        }
+        IssueType child = type == null || type.isBlank() ? IssueType.TASK : IssueType.parse(type).orElse(null);
+        if (child == null) {
+            return Problems.badRequest("The type is one of " + String.join(", ", IssueType.names()));
+        }
+        String word = q == null ? "" : q.strip().toLowerCase(Locale.ROOT);
+        String skip = exclude == null ? "" : exclude.strip().toUpperCase(Locale.ROOT);
+        List<ParentCandidate> rows = issues.findByProjectIdOrderByNumber(project.get().id(), Limit.of(MAX_LIST)).stream()
+                .filter(i -> i.type().level() == child.level() + 1)
+                .filter(i -> !key(project.get(), i).equals(skip))
+                .filter(i -> word.isEmpty() || key(project.get(), i).toLowerCase(Locale.ROOT).contains(word)
+                        || i.summary().toLowerCase(Locale.ROOT).contains(word))
+                .limit(MAX_SUGGESTED)
+                .map(i -> new ParentCandidate(key(project.get(), i), key(project.get(), i) + " " + i.summary()))
+                .toList();
+        return ResponseEntity.ok(rows);
+    }
+
+    /** The type a new child of the issue takes: a task under an epic, a subtask under the others, none under a subtask. */
+    static String childType(IssueEntity issue) {
+        return switch (issue.type()) {
+            case EPIC -> IssueType.TASK.value();
+            case SUBTASK -> null;
+            default -> IssueType.SUBTASK.value();
+        };
     }
 
     /** The custom fields of the issue for {@code fieldsFrom}, required as their rules say for the issue as it is. */
@@ -611,10 +714,14 @@ class IssueController {
                 "clone", permissions.contains("odt.issue.create"),
                 "move", permissions.contains(IssueMover.MOVE),
                 "reporter", permissions.contains("odt.issue.edit") && permissions.contains(REPORTER),
-                "vote", !user.username().equals(i.reporter()) && !FlagAndVoteController.done(workflows, i));
+                "vote", !user.username().equals(i.reporter()) && !FlagAndVoteController.done(workflows, i),
+                "child", permissions.contains("odt.issue.create") && i.type() != IssueType.SUBTASK);
+        ParentView parent = i.parentId() == null ? null : issues.findById(i.parentId())
+                .map(p -> new ParentView(key(project, p), p.summary(), p.type().value(), p.status())).orElse(null);
         return new IssueView(key(project, i), project.key(), i.number(), i.type().value(), i.summary(), i.description(),
                 i.status(), i.priority().value(), i.assignee(), i.reporter(), i.dueOn(), i.reviewer(), i.labels(), i.custom(),
                 i.createdAt(), i.updatedAt(), i.version(), watchers.existsByIssueIdAndUsername(i.id(), user.username()),
-                i.flagged(), votes.countByIssueId(i.id()), votes.existsByIssueIdAndUsername(i.id(), user.username()), perm);
+                i.flagged(), votes.countByIssueId(i.id()), votes.existsByIssueIdAndUsername(i.id(), user.username()), parent,
+                parent == null ? null : parent.key(), perm);
     }
 }

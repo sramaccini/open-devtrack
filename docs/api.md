@@ -104,7 +104,14 @@ Issues change status only through the transitions of their workflow: `GET /api/i
 `POST /api/issues/{key}/move` with `{"project": "MOB", "type": "bug", "version": 7, "fields": {"drop": ["region"]}}`
 moves an issue to another project (ADR-27): `status` is optional, the custom fields the target cannot keep must be
 listed in `fields.drop` (400 names them otherwise), and `"dryRun": true` answers what would be dropped and cleared
-without moving. The old key keeps answering. `POST /api/issues/{key}/transitions` with `{"transition": "start", "version": 7}`. `GET /api/issues/{key}/workflow` gives
+without moving. The old key keeps answering. A story, task or bug moves with its subtasks (`subtasks` in the answer)
+and an epic alone (`detached`: its children, which lose it); a subtask answers 409.
+
+The parent of an issue (ADR-28) is the field `parent`: the key of an epic for a story, task or bug, of a story, task
+or bug for a subtask (`"type": "subtask"`, which needs it), in the same project; in `POST /api/projects/{key}/issues`
+and in the `PATCH` of an issue, where `null` removes it. The issue answers `parent` (`key`, `summary`, `type`,
+`status`) and `parentKey`; `GET /api/issues/{key}/children` lists the children with `progress` by category, `done`
+and `total`. A change of the parent is a change of the field `parent` in the history and in `issue.changed`. `POST /api/issues/{key}/transitions` with `{"transition": "start", "version": 7}`. `GET /api/issues/{key}/workflow` gives
 the whole workflow the issue follows, to draw it: its name, the status of the issue, the statuses with their category and
 every transition with `from` (absent when it starts from any status) and `to`, without the guards.
 

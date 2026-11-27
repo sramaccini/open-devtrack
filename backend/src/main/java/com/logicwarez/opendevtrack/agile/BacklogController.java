@@ -207,6 +207,9 @@ class BacklogController {
         if (request.points() != null && (request.points() < 0 || request.points() > 999)) {
             return Problems.badRequest("The story points are from 0 to 999");
         }
+        if (request.points() != null && issues.subtask(issue.get().id())) {
+            return Problems.badRequest("A subtask has no story points: its parent has them (ADR-28)");
+        }
         PlanEntity plan = plans.plan(issue.get().id(), scope.get().projectId());
         plan.points(request.points());
         planRepository.save(plan);

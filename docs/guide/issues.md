@@ -27,7 +27,8 @@ Developers and admins of the project create issues. The fields:
 | Field | What |
 | --- | --- |
 | Summary | One line: what it is about. Required |
-| Type | Task, Bug, Story or Epic. Required |
+| Type | Task, Bug, Story, Epic or Subtask ([below](#parent-and-subtasks)). Required |
+| Parent | The epic of a story, task or bug, or the story, task or bug of a subtask, in the same project. Required for a subtask |
 | Priority | Lowest, Low, Medium, High or Highest. Required |
 | Assignee | The member who does it |
 | Reviewer | The member who checks it: not the assignee |
@@ -176,12 +177,33 @@ the old key keeps leading to it, in links, bookmarks, mentions and the search (`
 Before anything changes, the screen lists what would be lost and asks to confirm. Comments, attachments, history, links,
 watchers, votes, labels, the flag and the story points follow the issue; the history records the move. Watchers who are
 not members of the target stay in the list but get no notification while they cannot see the issue. One issue moves at
-a time, never to another organisation; an epic moves without its children.
+a time, never to another organisation. A story, task or bug moves with its subtasks, which take keys of the target
+and keep leading to them by the old ones, and leaves its epic; an epic moves alone, and its children stay without an
+epic. The confirm names both.
+
+### Parent and subtasks
+
+Issues have three levels, as in Jira: an **epic** groups stories, tasks and bugs, and each of these may have
+**subtasks**, the steps of the work. «Parent» in the details of an issue is its epic, or the issue of a subtask.
+Developers and admins change it: an epic for a story, task or bug (or none), a story,
+task or bug for a subtask (always one), in the same project. The change is in the history, and the watchers of the
+child are told as for any field.
+
+Below the description, «Subtasks» (on an epic «Child work items») lists the children with their status and how many are
+done; «Add subtask» (on an epic «Add child work item», a task) creates one with only its summary, and its page sets
+the rest. A parent can be done while some children are open.
+
+- An issue with children keeps its level: an epic stays an epic, a story with subtasks stays a story, task or bug.
+- A subtask made a task leaves its parent; a task made a subtask needs one in the same change.
+- A subtask has no story points: they go on its parent, so velocity and burndown count what the team commits to.
+- The backlog lists the stories, tasks, bugs and epics; subtasks are on the page of their parent and on the boards.
+- Deleting an issue deletes its subtasks, which the confirm names; the children of a deleted epic stay, without an epic.
+- A subtask does not move to another project alone: move its parent ([above](#move)).
 
 ### History
 
 Every change of a field is a row of the history: who made it, when, and the value before and after. So are its
-creation, its links, its attachments and its flag.
+creation, its parent, its links, its attachments and its flag.
 
 ## Custom fields
 

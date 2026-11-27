@@ -40,7 +40,7 @@
       "type": "rest",
       "method": "PATCH",
       "url": "/api/issues/{{params.issue}}",
-      "body": "{{ field.startsWith('custom.') ? dyn({'custom': form.custom, 'version': form.version}) : dyn({string(field): value, 'version': form.version}) }}"
+      "body": "{{ field == 'parentKey' ? dyn({'parent': value, 'version': form.version}) : field.startsWith('custom.') ? dyn({'custom': form.custom, 'version': form.version}) : dyn({string(field): value, 'version': form.version}) }}"
     },
     "assignToMe": {
       "type": "rest",
@@ -271,6 +271,40 @@
       "type": "rest",
       "method": "GET",
       "url": "/api/issues/{{params.issue}}/fields"
+    },
+    "children": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/issues/{{params.issue}}/children"
+    },
+    "parents": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/parents",
+      "params": {
+        "type": "{{data.issue.type}}",
+        "q": "{{search}}",
+        "exclude": "{{params.issue}}"
+      }
+    },
+    "newParents": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects/{{params.key}}/parents",
+      "params": {
+        "type": "{{form.type}}",
+        "q": "{{search}}"
+      }
+    },
+    "addChild": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{params.key}}/issues",
+      "body": {
+        "type": "{{childType}}",
+        "summary": "{{summary}}",
+        "parent": "{{params.issue}}"
+      }
     }
   }
 }
