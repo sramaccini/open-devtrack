@@ -8,6 +8,8 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+## [1.0.0-rc.10] - 2026-11-27
+
 ### Added
 
 - **Issues**: «Move» in the «…» of an issue, as in Jira (ADR-27): to another project of the organisation, for the
@@ -78,6 +80,14 @@ The entries are written by hand at each release from the commits ([docs/release.
 - **Telemetry**: the traces and logs that the screens send no longer get 404: the back end implements the
   telemetry contract of Quadrava (`/telemetry/v1/traces`, `/telemetry/v1/logs`), masks personal data again and
   forwards them to the collector of `ODT_TELEMETRY_OTLP_ENDPOINT`, if set (#57).
+
+### Upgrading
+
+From 1.0.0-rc.9: put the digest of the new image in `.env`, then `./odt.sh up` and `./odt.sh publish-ui`
+([upgrades-and-backups.md](docs/admin/upgrades-and-backups.md)). The schema changes by itself at start-up (the old keys
+of moved issues, the permission `odt.issue.move` for the admins of every scheme). The runtime no longer needs
+`brand/svg` and `brand/png` mounted: an installation without Compose can drop those two mounts. New optional
+settings: `ODT_TELEMETRY_OTLP_ENDPOINT` and `ODT_TELEMETRY_MAX_BYTES` ([configuration.md](docs/admin/configuration.md)).
 
 ## [1.0.0-rc.9] - 2026-11-26
 
