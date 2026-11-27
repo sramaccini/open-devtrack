@@ -166,6 +166,7 @@
                       "odt.issue.comment",
                       "odt.issue.attach",
                       "odt.issue.delete",
+                      "odt.reporter.edit",
                       "odt.sprint.manage",
                       "odt.project.edit",
                       "odt.member.manage"
@@ -184,6 +185,7 @@
                       "odt.issue.comment",
                       "odt.issue.attach",
                       "odt.issue.delete",
+                      "odt.reporter.edit",
                       "odt.sprint.manage",
                       "odt.project.edit",
                       "odt.member.manage"
@@ -202,6 +204,7 @@
                       "odt.issue.comment",
                       "odt.issue.attach",
                       "odt.issue.delete",
+                      "odt.reporter.edit",
                       "odt.sprint.manage",
                       "odt.project.edit",
                       "odt.member.manage"

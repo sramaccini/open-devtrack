@@ -94,6 +94,12 @@ class IssueEntity {
         this.updatedAt = now;
     }
 
+    /** Another member becomes the reporter. */
+    void reportedBy(String reporter, Instant now) {
+        this.reporter = reporter;
+        this.updatedAt = now;
+    }
+
     /** Adds or removes the flag. */
     void flag(boolean flagged, Instant now) {
         this.flagged = flagged;

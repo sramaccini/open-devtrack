@@ -392,6 +392,9 @@
           "priority" : {
             "type" : "string"
           },
+          "reporter" : {
+            "type" : "string"
+          },
           "reviewer" : {
             "type" : "string"
           },

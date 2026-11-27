@@ -35,6 +35,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -68,7 +69,8 @@ import org.springframework.web.bind.annotation.RestController;
  *   <li>{@code odt.issue.create}, {@code odt.issue.edit} (developer): create them, change their fields;</li>
  *   <li>{@code odt.issue.transition} (developer): move them through the workflow of the project, when the guard of the
  *   transition is true (module workflow, ADR-10);</li>
- *   <li>{@code odt.issue.delete} (admin): delete them.</li>
+ *   <li>{@code odt.issue.delete} (admin): delete them;</li>
+ *   <li>{@code odt.reporter.edit} (admin): change their reporter.</li>
  * </ul>
  * The status changes only through the transitions; the reporter, the assignee and the reviewer watch the issue
  * ({@link WatcherController}). An issue of a project of another tenant answers 404, as one that does not exist
@@ -85,6 +87,7 @@ class IssueController {
     private static final String NOT_A_MEMBER = "Only the members of the project see its issues";
     private static final String NOT_AN_EDITOR = "Only a developer or an admin of the project edits issues";
     private static final String NOT_A_CREATOR = "Only a developer or an admin of the project creates issues";
+    private static final String REPORTER = "odt.reporter.edit";
     private static final String CLONE_PREFIX = "CLONE - ";
     private static final int MAX_SUMMARY = 255;
 
@@ -287,13 +290,14 @@ class IssueController {
         if (!permissions.contains("odt.issue.edit")) {
             return Problems.forbidden(NOT_AN_EDITOR);
         }
-        return save(found.get(), request, permissions);
+        return save(found.get(), request, permissions, null);
     }
 
     /**
      * Changes only the fields named in the body, from the version read with the issue, or 412 if someone saved it in
      * the meantime: the other fields keep their values, and the custom fields given leave the others as they are. The
-     * checks are those of the full change.
+     * checks are those of the full change. The reporter changes only here, with {@code odt.reporter.edit} (admin, as
+     * in Jira), to a member of the project.
      */
     @ApiDoc(value = "Changes some fields of an issue", answer = IssueView.class, project = "odt.issue.edit")
     @PatchMapping("/api/issues/{issueKey}")
@@ -307,13 +311,26 @@ class IssueController {
         if (!permissions.contains("odt.issue.edit")) {
             return Problems.forbidden(NOT_AN_EDITOR);
         }
+        String reporter = null;
+        if (body.has("reporter")) {
+            if (!permissions.contains(REPORTER)) {
+                return Problems.forbidden("Only an admin of the project changes the reporter");
+            }
+            reporter = blankToNull(body.getReporter());
+            if (reporter == null) {
+                return Problems.badRequest("The reporter is required");
+            }
+            if (access.role(found.get().project().id(), reporter).isEmpty()) {
+                return Problems.badRequest("The reporter must be a member of the project");
+            }
+        }
         IssueRequest request;
         try {
             request = patched(found.get().issue(), body);
         } catch (InvalidField e) {
             return Problems.badRequest(e.getMessage());
         }
-        return save(found.get(), request, permissions);
+        return save(found.get(), request, permissions, reporter);
     }
 
     /** The issue as it is with the fields of a PATCH on top, as the request of a full change. */
@@ -348,8 +365,11 @@ class IssueController {
                 patch.getVersion());
     }
 
-    /** Checks a change against the version read with the issue and saves it, with its changelog and its event. */
-    private ResponseEntity<?> save(Found found, IssueRequest request, Set<String> permissions) {
+    /**
+     * Checks a change against the version read with the issue and saves it, with its changelog and its event; a
+     * {@code reporter} not null is the new reporter, already checked.
+     */
+    private ResponseEntity<?> save(Found found, IssueRequest request, Set<String> permissions, String reporter) {
         ProjectRef project = found.project();
         IssueEntity issue = found.issue();
         IssueEditor.Edit edit;
@@ -363,12 +383,19 @@ class IssueController {
         if (request.version() == null || request.version() != issue.version()) {
             return Problems.changedMeanwhile();
         }
-        List<FieldChange> changes = edit.changes();
+        List<FieldChange> changes = new ArrayList<>(edit.changes());
+        boolean newReporter = reporter != null && !reporter.equals(issue.reporter());
+        if (newReporter) {
+            changes.add(new FieldChange("reporter", issue.reporter(), reporter));
+        }
         if (changes.isEmpty()) {
             return ResponseEntity.ok(view(project, issue, permissions));
         }
         Instant now = Instant.now();
         editor.apply(issue, edit, now);
+        if (newReporter) {
+            issue.reportedBy(reporter, now);
+        }
         try {
             issues.saveAndFlush(issue);
         } catch (ObjectOptimisticLockingFailureException e) {
@@ -556,6 +583,7 @@ class IssueController {
                 "comment", permissions.contains("odt.issue.comment"),
                 "attach", permissions.contains("odt.issue.attach"),
                 "clone", permissions.contains("odt.issue.create"),
+                "reporter", permissions.contains("odt.issue.edit") && permissions.contains(REPORTER),
                 "vote", !user.username().equals(i.reporter()) && !FlagAndVoteController.done(workflows, i));
         return new IssueView(key(project, i), project.key(), i.number(), i.type().value(), i.summary(), i.description(),
                 i.status(), i.priority().value(), i.assignee(), i.reporter(), i.dueOn(), i.reviewer(), i.labels(), i.custom(),

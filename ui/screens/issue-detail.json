@@ -1353,9 +1353,16 @@
                     },
                     {
                       "name": "reporter",
-                      "type": "text",
+                      "type": "lookup",
                       "label": "{{ t('issues.reporter', 'Reporter') }}",
-                      "readOnlyIf": "{{true}}"
+                      "tooltip": "{{ t('issues.reporter_help', 'A member of the project; an admin changes it') }}",
+                      "readOnlyIf": "{{!form._perm.reporter}}",
+                      "lookup": {
+                        "source": "assignees",
+                        "valueField": "username",
+                        "labelField": "username",
+                        "minChars": 0
+                      }
                     },
                     {
                       "name": "dueOn",

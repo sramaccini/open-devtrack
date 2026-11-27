@@ -117,7 +117,8 @@ of ACME (`TENANT_ADMIN`) and `anna.bianchi` global admin in GLOBEX (`GLOBAL_ADMI
 
 Issues of a project (`odt_issue`), keyed by the project and their number (`ODT-42`): type, summary, description
 (restricted Markdown), priority, assignee (a member), reporter, labels, due date (`dueOn`, a day) and reviewer (a
-member other than the assignee; ADR-19). The reporter, the assignee and the reviewer watch the issue. Only the members
+member other than the assignee; ADR-19). The reporter, the assignee and the reviewer watch the issue; an admin (`odt.reporter.edit`) changes the reporter
+with a `PATCH` naming it, to a member. Only the members
 of the project see them;
 developers create and edit them, admins delete them; edits carry the version read and get 412 if it changed. The status
 changes only through the transitions of the workflow of the project (below). `GET /api/projects/{key}/issues` takes `status`,

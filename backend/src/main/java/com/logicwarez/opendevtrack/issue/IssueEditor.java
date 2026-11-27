@@ -86,8 +86,11 @@ class IssueEditor {
         }
     }
 
-    /** After the issue is saved: a new assignee or reviewer watches it. */
+    /** After the issue is saved: a new assignee, reviewer or reporter watches it. */
     void watch(IssueEntity issue, List<FieldChange> changes, Instant now) {
+        if (changes.stream().anyMatch(c -> c.field().equals("reporter"))) {
+            watchers.watch(issue.id(), issue.reporter(), now);
+        }
         if (changes.stream().anyMatch(c -> c.field().equals("assignee"))) {
             watchAssignee(issue, now);
         }

@@ -73,6 +73,7 @@ final class IssueApi {
         private String assignee;
         private String dueOn;
         private String reviewer;
+        private String reporter;
         private List<String> labels;
         private Map<String, Object> custom;
         private Long version;
@@ -138,6 +139,15 @@ final class IssueApi {
         public void setReviewer(String reviewer) {
             this.reviewer = reviewer;
             given.add("reviewer");
+        }
+
+        public String getReporter() {
+            return reporter;
+        }
+
+        public void setReporter(String reporter) {
+            this.reporter = reporter;
+            given.add("reporter");
         }
 
         public List<String> getLabels() {

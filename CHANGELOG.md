@@ -10,6 +10,9 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Added
 
+- **Issues**: the reporter of an issue can be changed, as in Jira, by whoever has the new project permission
+  `odt.reporter.edit` (the admins in every scheme, also those already made; `PATCH /api/issues/{key}` with
+  `reporter`, a member of the project). The change is in the history and the new reporter watches the issue (#55).
 - **Issues**: «Share» in the «…» of an issue, as in Jira: up to ten members of the project who see it, with an
   optional message, get the new notification «An issue shared with you», by default also by email at once
   (`POST /api/issues/{key}/share`) (#55).

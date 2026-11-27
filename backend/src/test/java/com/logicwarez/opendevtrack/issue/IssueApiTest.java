@@ -288,6 +288,36 @@ class IssueApiTest {
                 + " ORDER BY field",
                 String.class)).contains("assignee", "labels", "priority").doesNotContain("summary", "description", "type");
     }
+
+    @Test
+    void anAdminChangesTheReporterToAMember() throws Exception {
+        createFirst();
+        // A developer edits the issue but not its reporter, as in Jira (Modify Reporter is for the admins).
+        mvc.perform(as(get("/api/issues/ODT-1"), luisa)).andExpect(jsonPath("$._perm.reporter").value(false));
+        mvc.perform(as(patch("/api/issues/ODT-1"), luisa).content("{\"reporter\":\"paola\",\"version\":0}"))
+                .andExpect(status().isForbidden());
+        mvc.perform(as(get("/api/issues/ODT-1"), mario)).andExpect(jsonPath("$._perm.reporter").value(true));
+        mvc.perform(as(patch("/api/issues/ODT-1"), mario).content("{\"reporter\":\"ugo\",\"version\":0}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("The reporter must be a member of the project"));
+        mvc.perform(as(patch("/api/issues/ODT-1"), mario).content("{\"reporter\":null,\"version\":0}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("The reporter is required"));
+        mvc.perform(as(patch("/api/issues/ODT-1"), mario).content("{\"reporter\":\" paola \",\"version\":0}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reporter").value("paola"))
+                .andExpect(jsonPath("$.assignee").value("luisa"))
+                .andExpect(jsonPath("$.version").value(1));
+        // The same reporter again is no change; the new one watches the issue, and the change is in the history.
+        mvc.perform(as(patch("/api/issues/ODT-1"), mario).content("{\"reporter\":\"paola\",\"version\":1}"))
+                .andExpect(jsonPath("$.version").value(1));
+        mvc.perform(as(get("/api/issues/ODT-1/watchers"), mario))
+                .andExpect(jsonPath("$[*].username").value(org.hamcrest.Matchers.hasItem("paola")));
+        TestInfrastructure.awaitListeners(jdbc);
+        assertThat(jdbc.queryForList("SELECT old_value || '>' || new_value FROM odt_audit.issue_change"
+                + " WHERE field = 'reporter'", String.class)).containsExactly("luisa>paola");
+    }
+
     @Test
     void aDueDateAndAReviewer() throws Exception {
         String yesterday = LocalDate.now(ZoneOffset.UTC).minusDays(1).toString();
