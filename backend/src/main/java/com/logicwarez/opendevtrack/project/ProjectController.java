@@ -89,10 +89,18 @@ class ProjectController {
 
     @ApiDoc(value = "The projects of the tenant the user sees", answer = ProjectView.class, list = true)
     @GetMapping("/api/projects")
-    List<ProjectView> list() {
-        List<ProjectEntity> all = projects.findByTenantIdOrderByKey(user.tenantId());
+    List<ProjectView> list(@RequestParam(name = "q", defaultValue = "") String text,
+                           @RequestParam(defaultValue = "false") boolean creatable) {
+        // q: key or name containing the text, for a lookup; creatable: only those where the user creates issues.
+        String typed = text.strip().toLowerCase(Locale.ROOT);
+        List<ProjectEntity> all = projects.findByTenantIdOrderByKey(user.tenantId()).stream()
+                .filter(p -> typed.isEmpty() || p.key().toLowerCase(Locale.ROOT).contains(typed)
+                        || p.name().toLowerCase(Locale.ROOT).contains(typed))
+                .toList();
         Map<UUID, ProjectRole> roles = access.roles(all.stream().map(ProjectEntity::id).toList(), user.username());
-        return all.stream().map(p -> view(p, Optional.ofNullable(roles.get(p.id())))).toList();
+        return all.stream().map(p -> view(p, Optional.ofNullable(roles.get(p.id()))))
+                .filter(v -> !creatable || v.perm().get("createIssue"))
+                .toList();
     }
 
     @ApiDoc(value = "A project", answer = ProjectView.class)

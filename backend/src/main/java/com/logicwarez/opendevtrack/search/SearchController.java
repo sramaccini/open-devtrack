@@ -92,6 +92,14 @@ class SearchController {
         }
     }
 
+    /** The search box of the top bar: a few issues by key or by words, while the user types. */
+    @ApiDoc(value = "Issues by the start of their key or of their words, for the search box of the top bar",
+            answer = Searches.QuickHit.class, list = true)
+    @GetMapping("/api/search/quick")
+    List<Searches.QuickHit> quick(@RequestParam(name = "q", defaultValue = "") String text) {
+        return searches.quick(text);
+    }
+
     @ApiDoc(value = "The words that may follow in an ODQL query",
             answer = Words.Word.class, list = true, internal = true)
     @GetMapping("/api/search/words")

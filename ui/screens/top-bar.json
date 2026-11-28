@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "top-bar",
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "quick": {
+      "ref": "search/quick"
+    },
+    "creatable": {
+      "ref": "projects/creatable"
+    }
+  },
+  "components": [
+    {
+      "id": "top-search",
+      "type": "search",
+      "source": "quick",
+      "label": "{{ t('top.search', 'Search issues') }}",
+      "labelField": "summary",
+      "secondaryField": "key",
+      "onPick": [
+        {
+          "navigate": "issue-detail",
+          "params": {
+            "key": "{{ row.projectKey }}",
+            "issue": "{{ row.key }}"
+          }
+        }
+      ],
+      "onSubmit": [
+        {
+          "navigate": "search",
+          "params": {
+            "q": "{{ 'text ~ \"' + search + '\"' }}"
+          }
+        }
+      ]
+    },
+    {
+      "id": "btn-top-create",
+      "type": "button",
+      "label": "{{ t('top.create', 'Create') }}",
+      "icon": "plus",
+      "display": "icon",
+      "visibleIf": "{{ has(data.creatable) && size(data.creatable) > 0 }}",
+      "onClick": [
+        {
+          "openScreen": "issue-create",
+          "size": "medium"
+        }
+      ]
+    }
+  ]
+}

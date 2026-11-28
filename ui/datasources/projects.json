@@ -123,6 +123,15 @@
       "type": "rest",
       "method": "GET",
       "url": "/api/projects/{{params.key}}/admin-events"
+    },
+    "creatable": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/projects",
+      "params": {
+        "q": "{{ search }}",
+        "creatable": "true"
+      }
     }
   }
 }

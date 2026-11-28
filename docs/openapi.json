@@ -3224,6 +3224,23 @@
     "/api/projects" : {
       "get" : {
         "operationId" : "project.list",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : ""
+          }
+        }, {
+          "in" : "query",
+          "name" : "creatable",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
         "responses" : {
           "200" : {
             "content" : {
@@ -3237,6 +3254,9 @@
               }
             },
             "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
           },
           "401" : {
             "$ref" : "#/components/responses/Unauthorized"
@@ -6603,6 +6623,47 @@
         "x-permissions" : [ "odt.project.browse" ]
       }
     },
+    "/api/search/quick" : {
+      "get" : {
+        "operationId" : "search.quick",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : ""
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/QuickHit"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          }
+        },
+        "summary" : "Issues by the start of their key or of their words, for the search box of the top bar",
+        "tags" : [ "search" ],
+        "x-permissions" : [ "odt.project.browse" ]
+      }
+    },
     "/api/search/reindex" : {
       "post" : {
         "operationId" : "search.reindex",
@@ -8587,6 +8648,23 @@
           "version" : {
             "type" : "integer",
             "format" : "int64"
+          }
+        }
+      },
+      "QuickHit" : {
+        "type" : "object",
+        "properties" : {
+          "key" : {
+            "type" : "string"
+          },
+          "projectKey" : {
+            "type" : "string"
+          },
+          "summary" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
           }
         }
       },

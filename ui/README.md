@@ -197,6 +197,13 @@ and groups computed by the back end, and the saved filters below (use, edit, rem
 one). The field checks the query on the back end as one types and says where it is wrong; Enter runs it.
 `issue-list` opens the search on its project («Open in search»).
 
+The top bar (`topBar` in `navigation.json`, Quadrava 0.34.0, Q54) is the screen `top-bar`: a `search` on
+`search/quick` (`/api/search/quick`, `summary` with `key` under it) whose `onPick` opens `issue-detail` and whose
+`onSubmit` opens `search` with `q` = `text ~ "…"`, and «Create» (`plus`, icon only), shown when
+`projects/creatable` (`/api/projects?creatable=true`) is not empty, which runs `openScreen` on `issue-create`: a window
+with project (a lookup on the same source), type and summary that calls `issues/quickCreate`, says «WEB-19 created» and
+runs `close`.
+
 ## Dashboards
 
 `dashboard` (Home › Dashboard, the first screen) is the personal dashboard of ADR-17: six indicators («Overdue» and «In review by me» from

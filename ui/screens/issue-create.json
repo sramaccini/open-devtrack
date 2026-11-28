@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "issue-create",
+  "title": "{{ t('top.create_issue', 'Create issue') }}",
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "projects": {
+      "ref": "projects/creatable"
+    },
+    "quickCreate": {
+      "ref": "issues/quickCreate"
+    }
+  },
+  "components": [
+    {
+      "id": "create-form",
+      "type": "form",
+      "layout": "flow",
+      "initial": {
+        "type": "task"
+      },
+      "fields": [
+        {
+          "name": "project",
+          "type": "lookup",
+          "label": "{{ t('issues.project', 'Project') }}",
+          "width": "m",
+          "required": true,
+          "lookup": {
+            "source": "projects",
+            "valueField": "key",
+            "labelField": "name",
+            "minChars": 0
+          }
+        },
+        {
+          "name": "type",
+          "type": "select",
+          "label": "{{ t('issues.type', 'Type') }}",
+          "width": "s",
+          "required": true,
+          "options": [
+            "task",
+            "bug",
+            "story",
+            "epic"
+          ],
+          "optionKey": "values.issue_type"
+        },
+        {
+          "name": "summary",
+          "type": "text",
+          "label": "{{ t('issues.summary', 'Summary') }}",
+          "width": "l",
+          "required": true,
+          "maxLength": 255
+        }
+      ],
+      "actions": [
+        {
+          "id": "btn-create-issue",
+          "label": "{{ t('issues.create', 'Create issue') }}",
+          "icon": "plus",
+          "onClick": [
+            {
+              "call": "quickCreate",
+              "as": "created",
+              "onError": [
+                {
+                  "if": "{{error.fields > 0}}",
+                  "then": [
+                    {
+                      "toast": "{{ t('common.check_fields', 'Check the highlighted fields') }}"
+                    }
+                  ],
+                  "else": [
+                    {
+                      "if": "{{error.status == 403}}",
+                      "then": [
+                        {
+                          "toast": "{{ t('issues.cannot_create', 'Only a developer or an admin of the project creates issues') }}"
+                        }
+                      ],
+                      "else": [
+                        {
+                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "toast": "{{ t('top.created', '{key} created', {'key': created.key}) }}"
+            },
+            {
+              "close": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -374,6 +374,27 @@ class SearchApiTest {
                 .andExpect(jsonPath("$.valid").value(true));
     }
 
+    private List<String> quick(SessionAuthentication who, String text) throws Exception {
+        String body = mvc.perform(as(get("/api/search/quick").param("q", text), who))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        return JsonPath.read(body, "$[*].key");
+    }
+
+    @Test
+    void theSearchBoxFindsIssuesByKeyOrWords() throws Exception {
+        assertThat(quick(mario, "odt-1")).containsExactly("ODT-1");
+        assertThat(quick(mario, "log")).containsExactlyInAnyOrder("ODT-1", "WEB-1");
+        assertThat(quick(mario, "login col")).containsExactly("WEB-1");
+        assertThat(quick(mario, "caffe")).containsExactly("ODT-2");
+        assertThat(quick(luisa, "log")).containsExactly("ODT-1");
+        assertThat(quick(ugo, "login")).containsExactly("ODT-1");
+        assertThat(quick(mario, " ")).isEmpty();
+        mvc.perform(as(get("/api/search/quick").param("q", "coupon"), mario))
+                .andExpect(jsonPath("$[0].summary").value("Checkout with a coupon"))
+                .andExpect(jsonPath("$[0].projectKey").value("ODT"))
+                .andExpect(jsonPath("$[0].type").value("story"));
+    }
+
     @Test
     void suggestionsFollowTheQuery() throws Exception {
         mvc.perform(as(get("/api/search/words").param("q", "stat").param("word", "stat"), mario))

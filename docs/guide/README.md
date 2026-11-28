@@ -39,6 +39,11 @@ and settings, and you see the work of one at a time.
   - **Administration**: shown only to administrators ([administrator guide](../admin/administration.md)).
 
   «Search the menu» finds an item by its name, and the arrow next to the logo folds the side bar.
+- **The top bar**, as in Jira, has a search box and **+** (Create). The box finds issues while you type, by the start
+  of their key (`web-4`) or of the words of their summary, description or labels, in the projects you see: picking
+  one opens it, Enter opens the search with `text ~ "…"` ([Search and ODQL](search.md)). **+** opens a window to
+  create an issue with its project, type and summary, from any page; it is shown when you may create issues in some
+  project, and lists only those projects. The other fields are set on the page of the issue.
 - **The path** above the title of each page says where you are, for example Projects › WEB › Issues › WEB-4. Each
   step before the last one leads back to its page.
 - **The bell** shows your messages: mentions, assignments, reviews asked, comments and status changes

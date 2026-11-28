@@ -334,6 +334,15 @@
         "assignee": "{{assignee}}",
         "version": "{{version}}"
       }
+    },
+    "quickCreate": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/projects/{{formFields.project}}/issues",
+      "body": {
+        "summary": "{{formFields.summary}}",
+        "type": "{{formFields.type}}"
+      }
     }
   }
 }

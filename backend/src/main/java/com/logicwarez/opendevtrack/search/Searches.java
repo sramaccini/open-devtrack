@@ -171,6 +171,43 @@ class Searches {
                 .and(PROJECT_ID.in(visible.stream().map(ProjectRef::id).toList())).and(compiled.where()));
     }
 
+    /** An issue found by the search box of the top bar. */
+    record QuickHit(String key, String projectKey, String summary, String type) {
+    }
+
+    static final int QUICK_SIZE = 8;
+
+    /**
+     * The search box of the top bar, as in Jira: the issues of the projects the user sees whose key starts with the
+     * text, or whose summary, description or labels have words starting with each word of it; the key typed in full
+     * first, then the issues changed last.
+     */
+    List<QuickHit> quick(String text) {
+        String typed = text == null ? "" : text.strip();
+        if (typed.isEmpty() || typed.length() > 200) {
+            return List.of();
+        }
+        List<String> words = new ArrayList<>();
+        for (String w : typed.split("[^\\p{L}\\p{N}]+")) {
+            if (!w.isEmpty()) {
+                words.add(w + ":*");
+            }
+        }
+        String key = typed.toUpperCase(Locale.ROOT);
+        Condition matches = ISSUE_KEY.startsWith(key);
+        if (!words.isEmpty()) {
+            matches = matches.or(DSL.condition("{0} @@ to_tsquery('simple', odt_search.fold({1}))", Docs.TSV,
+                    val(String.join(" & ", words))));
+        }
+        List<ProjectRef> visible = visible();
+        return sql.select(ISSUE_KEY, PROJECT_KEY, SUMMARY, TYPE).from(DOC)
+                .where(TENANT_ID.eq(user.tenantId()).and(PROJECT_ID.in(visible.stream().map(ProjectRef::id).toList()))
+                        .and(matches))
+                .orderBy(DSL.when(ISSUE_KEY.eq(key), inline(0)).otherwise(inline(1)), UPDATED_AT.desc())
+                .limit(QUICK_SIZE)
+                .fetch(r -> new QuickHit(r.get(ISSUE_KEY), r.get(PROJECT_KEY), r.get(SUMMARY), r.get(TYPE)));
+    }
+
     /** Today in the zone of the instance. */
     LocalDate today() {
         return LocalDate.now(zone);

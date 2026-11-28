@@ -736,5 +736,10 @@
   "issues.attachment_preview": "Anteprima",
   "issues.shortcut_description": "Modifica la descrizione",
   "issues.shortcut_assignee": "Cambia l'assegnatario",
-  "issues.shortcut_labels": "Modifica le etichette"
+  "issues.shortcut_labels": "Modifica le etichette",
+  "top.search": "Cerca issue",
+  "top.create": "Crea",
+  "top.create_issue": "Crea issue",
+  "top.created": "{key} creata",
+  "issues.project": "Progetto"
 }

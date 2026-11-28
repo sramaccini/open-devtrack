@@ -120,6 +120,23 @@ class ProjectApiTest {
     }
 
     @Test
+    void theListIsFilteredByTextAndByWhereTheUserCreatesIssues() throws Exception {
+        createOdt();
+        mvc.perform(as(post("/api/projects"), mario).content("{\"key\":\"WEB\",\"name\":\"Web site\"}"))
+                .andExpect(status().isCreated());
+        mvc.perform(as(post("/api/projects/WEB/members"), mario).content("{\"username\":\"luisa\",\"role\":\"developer\"}"))
+                .andExpect(status().isOk());
+        mvc.perform(as(get("/api/projects").param("q", "site"), mario))
+                .andExpect(jsonPath("$[*].key").value(org.hamcrest.Matchers.contains("WEB")));
+        mvc.perform(as(get("/api/projects").param("q", "od"), mario))
+                .andExpect(jsonPath("$[*].key").value(org.hamcrest.Matchers.contains("ODT")));
+        mvc.perform(as(get("/api/projects"), luisa))
+                .andExpect(jsonPath("$[*].key").value(org.hamcrest.Matchers.contains("ODT", "WEB")));
+        mvc.perform(as(get("/api/projects").param("creatable", "true"), luisa))
+                .andExpect(jsonPath("$[*].key").value(org.hamcrest.Matchers.contains("WEB")));
+    }
+
+    @Test
     void anotherTenantDoesNotSeeTheProject() throws Exception {
         createOdt();
         mvc.perform(as(get("/api/projects"), ugo)).andExpect(jsonPath("$.length()").value(0));

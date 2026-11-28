@@ -736,5 +736,10 @@
   "issues.attachment_preview": "Preview",
   "issues.shortcut_description": "Edit the description",
   "issues.shortcut_assignee": "Change the assignee",
-  "issues.shortcut_labels": "Edit the labels"
+  "issues.shortcut_labels": "Edit the labels",
+  "top.search": "Search issues",
+  "top.create": "Create",
+  "top.create_issue": "Create issue",
+  "top.created": "{key} created",
+  "issues.project": "Project"
 }

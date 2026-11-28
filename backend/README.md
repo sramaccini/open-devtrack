@@ -114,7 +114,8 @@ Keycloak calls `POST /bff/backchannel-logout` and the sessions of the BFF with i
 the schema of OpenDevTrack. The development seed `V103__dev_administrators.sql` makes `mario.rossi` admin of the users
 of ACME (`TENANT_ADMIN`) and `anna.bianchi` global admin in GLOBEX (`GLOBAL_ADMIN`).
 
-- `odt.project.browse`: list and read the projects of the tenant and their members.
+- `odt.project.browse`: list and read the projects of the tenant and their members. `GET /api/projects` takes `q`
+  (key or name containing it) and `creatable=true` (only those where the user creates issues: `_perm.createIssue`).
 - `odt.project.create` (role `ODT_PROJECT_CREATOR`): create one; the creator becomes its lead and admin.
 - `odt.user.browse`: search the users of the tenant.
 - `odt.project.admin` (role `ODT_ADMIN`): admin of the tenant, with the role admin in every project of the tenant.
@@ -368,7 +369,9 @@ modules; `POST /api/search/reindex` (admin of the tenant) rebuilds the rows of t
   (all for the admin of the tenant). A wrong query is a 400 Problem with `position` (1-based) and `expected`.
   `GET /api/search/check?q=` checks a query and answers as a remote check of Quadrava (`valid`, code `odql` with
   `position` and `reason`: the reason is in English, like the titles of the Problems), `GET /api/search/words?q=&word=`
-  suggests the next word.
+  suggests the next word. `GET /api/search/quick?q=` is the search box of the top bar: at most 8 issues of the projects
+  the user sees whose key starts with the text, or whose words start with each of its words, the key typed in full
+  first, then those changed last (`key`, `projectKey`, `summary`, `type`).
 - Filters: `GET|POST /api/filters`, `PUT|DELETE /api/filters/{id}` (name, query, `shared`, `onDashboard`; changed only
   by their owner, `version` gives 412). A shared filter is seen by everyone in the tenant, and each one finds only the
   issues they may see. A filter's query is checked when it is saved.
