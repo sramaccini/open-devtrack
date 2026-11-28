@@ -343,6 +343,11 @@
         "summary": "{{formFields.summary}}",
         "type": "{{formFields.type}}"
       }
+    },
+    "activity": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/issues/{{params.issue}}/activity"
     }
   }
 }

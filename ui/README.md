@@ -47,8 +47,9 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   Q56 (`focus` on a `comments` node goes to its first button, #68);
   each field saved on its own by `onSave` with `patchIssue`, then the sections Attachments, Subtasks («Child work items» on an epic: a `progress` and a `table` on `children`,
   «Add subtask» a `popover` with the summary that calls `addChild` with the `childType` of the answer, ADR-28), Linked
-  work items and Activity (tabs Comments and
-  History); on the right (4) a row with the status and, as icons, the flag, the menu Watchers, the votes, Copy link (the `copyLink` step, Quadrava 0.29.0, Q45), Share and the menu More actions, then Details and Planning. Details and Planning are forms with `edit: inline` too (Quadrava 0.28.0, Q44: lookups and
+  work items and Activity (the activity feed of Quadrava 0.34.0, Q49: `comments` on `issues/activity` with
+  `kindField: kind`, `changes` translated with `values.issue_field` and `values`, `filters`, `orderToggle` newest
+  first, `orderBind` `state.activityOrder`; every step that changed the issue refreshes `activity`); on the right (4) a row with the status and, as icons, the flag, the menu Watchers, the votes, Copy link (the `copyLink` step, Quadrava 0.29.0, Q45), Share and the menu More actions, then Details and Planning. Details and Planning are forms with `edit: inline` too (Quadrava 0.28.0, Q44: lookups and
   selects confirm on pick, checkboxes on toggle, the fields of `fieldsFrom` alike), each field saved on its own by
   `onSave`. The issue forms call `patchIssue` (`issues/patch`, `PATCH /api/issues/{key}`): only the field that
   changed and the version, or all the custom fields when one of them changed (`field` is then `custom.<key>`);
@@ -105,7 +106,7 @@ review is the one of the code before it reaches `main`.
 
 ## Comments and messages
 
-The Comments tab of `issue-detail` is the `comments` thread of Quadrava: Markdown with `@` to pick a member
+The Activity of `issue-detail` is the `comments` thread of Quadrava: Markdown with `@` to pick a member
 (`assignees`), posted through `issues/addComment`. The box shows to
 those who may comment (`postIf` on `data.issue._perm.comment`, the answer the issue form loads; Quadrava 0.8.0, Q9). The author edits a comment in
 place and deletes it, an admin of the project deletes those of others (`editIf`, `deleteIf` on the `_perm` of the

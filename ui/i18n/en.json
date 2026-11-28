@@ -741,5 +741,11 @@
   "top.create": "Create",
   "top.create_issue": "Create issue",
   "top.created": "{key} created",
-  "issues.project": "Project"
+  "issues.project": "Project",
+  "values.issue_field.attachments": "Attachment",
+  "values.type.task": "Task",
+  "values.type.bug": "Bug",
+  "values.type.story": "Story",
+  "values.type.epic": "Epic",
+  "values.type.subtask": "Subtask"
 }

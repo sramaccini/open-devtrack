@@ -54,15 +54,17 @@ class CommentController {
     private final CurrentUser user;
     private final Mentions mentions;
     private final ApplicationEventPublisher events;
+    private final IssueComments shown;
 
     CommentController(Issues issues, CommentRepository comments, ProjectAccess access, CurrentUser user,
-                      Mentions mentions, ApplicationEventPublisher events) {
+                      Mentions mentions, ApplicationEventPublisher events, IssueComments shown) {
         this.issues = issues;
         this.comments = comments;
         this.access = access;
         this.user = user;
         this.mentions = mentions;
         this.events = events;
+        this.shown = shown;
     }
 
     record CommentView(UUID id, String author, String body, Instant createdAt, Instant updatedAt, boolean edited,
@@ -84,8 +86,7 @@ class CommentController {
         if (!permissions.contains("odt.issue.browse")) {
             return Problems.forbidden("Only the members of the project see its issues");
         }
-        return ResponseEntity.ok(comments.findByIssueIdOrderByCreatedAtAscIdAsc(issue.get().id()).stream()
-                .map(c -> view(c, permissions)).toList());
+        return ResponseEntity.ok(shown.of(issue.get().id(), permissions).stream().map(CommentController::view).toList());
     }
 
     @ApiDoc(value = "Posts a comment (Markdown, @ mentions the members)",
@@ -122,7 +123,7 @@ class CommentController {
             return Problems.notFound(NOT_FOUND);
         }
         CommentEntity comment = found.get().comment();
-        if (!canEdit(comment, found.get().permissions())) {
+        if (!shown.canEdit(comment, found.get().permissions())) {
             return Problems.forbidden("Only the author edits a comment");
         }
         Optional<String> invalid = check(request.body());
@@ -152,7 +153,7 @@ class CommentController {
         if (found.isEmpty()) {
             return Problems.notFound(NOT_FOUND);
         }
-        if (!canDelete(found.get().comment(), found.get().permissions())) {
+        if (!shown.canDelete(found.get().comment(), found.get().permissions())) {
             return Problems.forbidden("Only the author or an admin of the project deletes a comment");
         }
         comments.delete(found.get().comment());
@@ -190,14 +191,6 @@ class CommentController {
         return access.permissions(issue.projectId(), user.username());
     }
 
-    private boolean canEdit(CommentEntity comment, Set<String> permissions) {
-        return permissions.contains("odt.issue.comment") && comment.author().equals(user.username());
-    }
-
-    private boolean canDelete(CommentEntity comment, Set<String> permissions) {
-        return canEdit(comment, permissions) || permissions.contains("odt.issue.delete");
-    }
-
     private static Optional<String> check(String body) {
         if (body == null || body.isBlank()) {
             return Optional.of("The comment is empty");
@@ -209,7 +202,10 @@ class CommentController {
     }
 
     private CommentView view(CommentEntity c, Set<String> permissions) {
-        return new CommentView(c.id(), c.author(), c.body(), c.createdAt(), c.updatedAt(), !c.updatedAt().equals(c.createdAt()),
-                c.version(), Map.of("edit", canEdit(c, permissions), "delete", canDelete(c, permissions)));
+        return view(shown.view(c, permissions));
+    }
+
+    private static CommentView view(IssueComments.Comment c) {
+        return new CommentView(c.id(), c.author(), c.body(), c.createdAt(), c.updatedAt(), c.edited(), c.version(), c.perm());
     }
 }

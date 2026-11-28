@@ -48,9 +48,6 @@
     "labels": {
       "ref": "issues/labels"
     },
-    "comments": {
-      "ref": "issues/comments"
-    },
     "addComment": {
       "ref": "issues/addComment"
     },
@@ -93,9 +90,6 @@
     },
     "removeAttachment": {
       "ref": "issues/removeAttachment"
-    },
-    "history": {
-      "ref": "issues/history"
     },
     "transitions": {
       "ref": "issues/transitions"
@@ -180,6 +174,9 @@
     },
     "assign": {
       "ref": "issues/assign"
+    },
+    "activity": {
+      "ref": "issues/activity"
     }
   },
   "shortcuts": [
@@ -230,7 +227,7 @@
           "refresh": "issue"
         },
         {
-          "refresh": "history"
+          "refresh": "activity"
         }
       ]
     },
@@ -312,7 +309,7 @@
                   "refresh": "issue"
                 },
                 {
-                  "refresh": "history"
+                  "refresh": "activity"
                 }
               ]
             },
@@ -398,7 +395,7 @@
                                 "refresh": "attachments"
                               },
                               {
-                                "refresh": "history"
+                                "refresh": "activity"
                               }
                             ]
                           }
@@ -462,7 +459,7 @@
                   "refresh": "issue"
                 },
                 {
-                  "refresh": "history"
+                  "refresh": "activity"
                 }
               ]
             },
@@ -545,7 +542,7 @@
                           "refresh": "attachments"
                         },
                         {
-                          "refresh": "history"
+                          "refresh": "activity"
                         }
                       ]
                     }
@@ -572,7 +569,7 @@
                       "refresh": "attachments"
                     },
                     {
-                      "refresh": "history"
+                      "refresh": "activity"
                     },
                     {
                       "set": {
@@ -772,7 +769,7 @@
                           "refresh": "links"
                         },
                         {
-                          "refresh": "history"
+                          "refresh": "activity"
                         }
                       ]
                     }
@@ -877,7 +874,7 @@
                           "refresh": "links"
                         },
                         {
-                          "refresh": "history"
+                          "refresh": "activity"
                         },
                         {
                           "set": {
@@ -910,126 +907,88 @@
               "title": "{{ t('issues.activity', 'Activity') }}",
               "components": [
                 {
-                  "id": "issue-tabs",
-                  "type": "tabs",
-                  "tabs": [
+                  "id": "comment-thread",
+                  "type": "comments",
+                  "source": "activity",
+                  "kindField": "kind",
+                  "textField": "text",
+                  "authorField": "author",
+                  "dateField": "at",
+                  "postIf": "{{ data.issue._perm.comment }}",
+                  "mentions": {
+                    "source": "assignees",
+                    "valueField": "username",
+                    "labelField": "username"
+                  },
+                  "onPost": [
                     {
-                      "id": "tab-comments",
-                      "label": "{{ t('issues.comments', 'Comments') }}",
-                      "components": [
+                      "call": "postComment",
+                      "onError": [
                         {
-                          "id": "comment-thread",
-                          "type": "comments",
-                          "source": "comments",
-                          "textField": "body",
-                          "authorField": "author",
-                          "dateField": "createdAt",
-                          "postIf": "{{ data.issue._perm.comment }}",
-                          "mentions": {
-                            "source": "assignees",
-                            "valueField": "username",
-                            "labelField": "username"
-                          },
-                          "onPost": [
-                            {
-                              "call": "postComment",
-                              "onError": [
-                                {
-                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                                }
-                              ]
-                            },
-                            {
-                              "refresh": "comments"
-                            }
-                          ],
-                          "editIf": "{{ row._perm.edit }}",
-                          "onEdit": [
-                            {
-                              "call": "updateComment",
-                              "args": {
-                                "id": "{{row.id}}"
-                              },
-                              "onError": [
-                                {
-                                  "if": "{{error.status == 412}}",
-                                  "then": [
-                                    {
-                                      "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
-                                    }
-                                  ],
-                                  "else": [
-                                    {
-                                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                                    }
-                                  ]
-                                }
-                              ]
-                            },
-                            {
-                              "refresh": "comments"
-                            }
-                          ],
-                          "deleteIf": "{{ row._perm.delete }}",
-                          "onDelete": [
-                            {
-                              "confirm": "{{ t('issues.delete_comment_confirm', 'Delete this comment?') }}"
-                            },
-                            {
-                              "call": "removeComment",
-                              "args": {
-                                "id": "{{row.id}}"
-                              },
-                              "onError": [
-                                {
-                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                                }
-                              ]
-                            },
-                            {
-                              "refresh": "comments"
-                            }
-                          ],
-                          "editedField": "edited"
+                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
                         }
                       ]
                     },
                     {
-                      "id": "tab-history",
-                      "label": "{{ t('issues.history', 'History') }}",
-                      "components": [
+                      "refresh": "activity"
+                    }
+                  ],
+                  "editIf": "{{ row._perm.edit }}",
+                  "onEdit": [
+                    {
+                      "call": "updateComment",
+                      "args": {
+                        "id": "{{row.id}}"
+                      },
+                      "onError": [
                         {
-                          "id": "history-table",
-                          "type": "table",
-                          "source": "history",
-                          "columns": [
+                          "if": "{{error.status == 412}}",
+                          "then": [
                             {
-                              "field": "at",
-                              "label": "{{ t('issues.when', 'When') }}",
-                              "format": "datetime"
-                            },
+                              "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                            }
+                          ],
+                          "else": [
                             {
-                              "field": "author",
-                              "label": "{{ t('issues.author', 'Author') }}"
-                            },
-                            {
-                              "field": "field",
-                              "label": "{{ t('issues.field', 'Field') }}",
-                              "valueKey": "values.issue_field"
-                            },
-                            {
-                              "field": "from",
-                              "label": "{{ t('issues.from', 'From') }}"
-                            },
-                            {
-                              "field": "to",
-                              "label": "{{ t('issues.to', 'To') }}"
+                              "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
                             }
                           ]
                         }
                       ]
+                    },
+                    {
+                      "refresh": "activity"
                     }
-                  ]
+                  ],
+                  "deleteIf": "{{ row._perm.delete }}",
+                  "onDelete": [
+                    {
+                      "confirm": "{{ t('issues.delete_comment_confirm', 'Delete this comment?') }}"
+                    },
+                    {
+                      "call": "removeComment",
+                      "args": {
+                        "id": "{{row.id}}"
+                      },
+                      "onError": [
+                        {
+                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                        }
+                      ]
+                    },
+                    {
+                      "refresh": "activity"
+                    }
+                  ],
+                  "editedField": "edited",
+                  "changes": {
+                    "fieldKey": "values.issue_field",
+                    "valueKey": "values"
+                  },
+                  "filters": true,
+                  "orderToggle": true,
+                  "order": "desc",
+                  "orderBind": "state.activityOrder"
                 }
               ]
             }
@@ -1106,7 +1065,7 @@
                           "refresh": "transitions"
                         },
                         {
-                          "refresh": "history"
+                          "refresh": "activity"
                         },
                         {
                           "refresh": "workflow"
@@ -1197,7 +1156,7 @@
                           "refresh": "issue"
                         },
                         {
-                          "refresh": "history"
+                          "refresh": "activity"
                         }
                       ]
                     },
@@ -1509,7 +1468,7 @@
                               "refresh": "issue"
                             },
                             {
-                              "refresh": "history"
+                              "refresh": "activity"
                             },
                             {
                               "popover": {
@@ -1541,7 +1500,7 @@
                               }
                             },
                             {
-                              "refresh": "comments"
+                              "refresh": "activity"
                             }
                           ],
                           "icon": "flag"
@@ -1563,7 +1522,7 @@
                               "refresh": "issue"
                             },
                             {
-                              "refresh": "history"
+                              "refresh": "activity"
                             }
                           ],
                           "icon": "flag"
@@ -2133,7 +2092,7 @@
                       "refresh": "issue"
                     },
                     {
-                      "refresh": "history"
+                      "refresh": "activity"
                     },
                     {
                       "refresh": "transitions"
@@ -2237,7 +2196,7 @@
                       "refresh": "plan"
                     },
                     {
-                      "refresh": "history"
+                      "refresh": "activity"
                     }
                   ],
                   "columns": 1

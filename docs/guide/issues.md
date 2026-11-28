@@ -56,7 +56,7 @@ On the left is what the issue says and what happened to it:
   of the links and brings it into view, the cursor in Issue;
 - **Attachments**: the files of the issue ([below](#attachments));
 - **Linked work items**: the other issues it is linked to; «Add linked work item», under them, adds one ([below](#links));
-- **Activity**: its comments and its history.
+- **Activity**: its comments and its history in one list, as in Jira ([below](#history)).
 
 The page has keyboard shortcuts, as in Jira; **?** lists those you may use. **E** edits the description, **A** opens
 Assignee, **I** assigns the issue to you (not when you are its assignee or its reviewer), **L** opens Labels and **K**
@@ -221,7 +221,12 @@ the rest. A parent can be done while some children are open.
 ### History
 
 Every change of a field is a row of the history: who made it, when, and the value before and after. So are its
-creation, its parent, its links, its attachments and its flag.
+parent, its links, its attachments and its flag.
+
+Activity shows the comments and the history together, newest first, as in Jira: «changed Priority from Medium to
+High», «set Assignee to anna.bianchi», «cleared Due date». **All**, **Comments** and **History** above it choose what
+it shows, and **Newest first** turns the order. The box for a comment stays under every choice. The creation of the
+issue and the values it was created with are not changes: they are in Created and in the fields.
 
 ## Custom fields
 

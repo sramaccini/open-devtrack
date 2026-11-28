@@ -136,6 +136,34 @@ class CommentAndHistoryApiTest {
     }
 
     @Test
+    void theActivityHasCommentsAndChangesInOneList() throws Exception {
+        await(() -> rows("odt_audit.issue_change"), 4);
+        mvc.perform(as(post("/api/issues/ODT-1/comments"), luisa).content("{\"body\":\"Seen with Chrome\"}"))
+                .andExpect(status().isCreated());
+        mvc.perform(as(put("/api/issues/ODT-1"), luisa).content("""
+                        {"type":"bug","summary":"Login fails","priority":"high","version":0}"""))
+                .andExpect(status().isOk());
+        await(() -> rows("odt_audit.issue_change"), 5);
+        // Oldest first; the creation and the values it was created with are not changes.
+        mvc.perform(as(get("/api/issues/ODT-1/activity"), luisa))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].kind").value("comment"))
+                .andExpect(jsonPath("$[0].text").value("Seen with Chrome"))
+                .andExpect(jsonPath("$[0].author").value("luisa"))
+                .andExpect(jsonPath("$[0]._perm.edit").value(true))
+                .andExpect(jsonPath("$[1].kind").value("change"))
+                .andExpect(jsonPath("$[1].field").value("priority"))
+                .andExpect(jsonPath("$[1].from").value("medium"))
+                .andExpect(jsonPath("$[1].to").value("high"));
+        // A viewer reads it without rights on the comments; another tenant does not find the issue.
+        mvc.perform(as(get("/api/issues/ODT-1/activity"), paola))
+                .andExpect(jsonPath("$[0]._perm.edit").value(false))
+                .andExpect(jsonPath("$[0]._perm.delete").value(false));
+        mvc.perform(as(get("/api/issues/ODT-1/activity"), ugo)).andExpect(status().isNotFound());
+    }
+
+    @Test
     void developersCommentAndAuthorsEditTheirOwn() throws Exception {
         String created = mvc.perform(as(post("/api/issues/ODT-1/comments"), luisa).content("{\"body\":\"Seen with **Chrome**\"}"))
                 .andExpect(status().isCreated())

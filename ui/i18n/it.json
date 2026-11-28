@@ -741,5 +741,11 @@
   "top.create": "Crea",
   "top.create_issue": "Crea issue",
   "top.created": "{key} creata",
-  "issues.project": "Progetto"
+  "issues.project": "Progetto",
+  "values.issue_field.attachments": "Allegato",
+  "values.type.task": "Attività",
+  "values.type.bug": "Bug",
+  "values.type.story": "Storia",
+  "values.type.epic": "Epica",
+  "values.type.subtask": "Sottoattività"
 }

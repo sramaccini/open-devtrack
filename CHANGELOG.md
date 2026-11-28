@@ -27,6 +27,9 @@ The entries are written by hand at each release from the commits ([docs/release.
 - **Issues**: «+» under the summary, as in Jira: add a subtask (a child on an epic), an attachment or a link without
   going down to their sections; «Link work item» opens the form of the links in its section and brings it into view,
   the cursor in Issue (#55 T15, Q55).
+- **Issues**: Activity as in Jira: the comments and the changes of an issue in one list, newest first, with All,
+  Comments and History and a button that turns the order; it takes the place of the tabs Comments and History. API:
+  `GET /api/issues/{key}/activity` (#55 T8, Q49).
 - **Top bar**: a search box and «+» (Create), as in Jira. The box finds issues while typing by the start of their key
   or of their words, a pick opens one and Enter opens the search; «+» creates an issue with project, type and summary
   from any page. API: `GET /api/search/quick?q=`, `q` and `creatable` in `GET /api/projects` (#55 T18, Q54).
