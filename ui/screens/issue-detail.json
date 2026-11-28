@@ -1943,6 +1943,14 @@
                       }
                     },
                     {
+                      "name": "startOn",
+                      "type": "date",
+                      "label": "{{ t('issues.start_on', 'Start date') }}",
+                      "emptyText": "{{ t('common.none', 'None') }}",
+                      "tooltip": "{{ t('issues.start_on_help', 'The day the work should start; never after the due date') }}",
+                      "readOnlyIf": "{{!form._perm.edit}}"
+                    },
+                    {
                       "name": "dueOn",
                       "type": "date",
                       "label": "{{ t('issues.due_on', 'Due date') }}",

@@ -168,6 +168,7 @@ class Words {
             case "created" -> "created >= -14d";
             case "updated" -> "updated >= -7d";
             case "resolved" -> "resolved >= 2026-11-01";
+            case "start" -> "start <= today";
             case "due" -> "due < today";
             case "sprint" -> "sprint IN openSprints()";
             case "points" -> "points >= 5";
@@ -211,7 +212,7 @@ class Words {
                 searches.context(visible).sprints().forEach(s -> values.add(s.name()));
             }
             case "created", "updated", "resolved" -> values.addAll(List.of("today", "-7d", "-14d", "-30d"));
-            case "due" -> values.addAll(List.of("today", "7d", "14d", "-7d"));
+            case "start", "due" -> values.addAll(List.of("today", "7d", "14d", "-7d"));
             default -> {
                 // key, linked, summary, text, points: free values.
             }

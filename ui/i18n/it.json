@@ -728,5 +728,9 @@
   "values.config_action.linktype.created": "Tipo di collegamento creato",
   "values.config_action.linktype.changed": "Tipo di collegamento modificato",
   "values.config_action.linktype.removed": "Tipo di collegamento rimosso",
-  "values.config_kind.linktype.": "Tipi di collegamento"
+  "values.config_kind.linktype.": "Tipi di collegamento",
+  "issues.start_on": "Data di inizio",
+  "issues.start_on_help": "Il giorno in cui il lavoro deve iniziare; mai dopo la scadenza",
+  "issues.start": "Inizio",
+  "values.issue_field.start": "Data di inizio"
 }

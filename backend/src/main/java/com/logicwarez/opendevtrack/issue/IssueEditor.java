@@ -206,7 +206,8 @@ class IssueEditor {
     /** The request that keeps every field of the issue as it is, its custom fields included. */
     static IssueRequest unchanged(IssueEntity issue) {
         return new IssueRequest(issue.type().value(), issue.summary(), issue.description(), issue.priority().value(),
-                issue.assignee(), issue.dueOn() == null ? null : issue.dueOn().toString(), issue.reviewer(),
+                issue.assignee(), issue.dueOn() == null ? null : issue.dueOn().toString(),
+                issue.startOn() == null ? null : issue.startOn().toString(), issue.reviewer(),
                 issue.labels(), null, null, issue.version());
     }
 
@@ -224,6 +225,7 @@ class IssueEditor {
         issue.put("assignee", f.assignee());
         issue.put("reporter", reporter);
         issue.put("dueOn", f.dueOn() == null ? null : f.dueOn().toString());
+        issue.put("startOn", f.startOn() == null ? null : f.startOn().toString());
         issue.put("reviewer", f.reviewer());
         issue.put("labels", f.labels() == null ? List.of() : f.labels());
         issue.put("custom", f.custom());
@@ -242,17 +244,18 @@ class IssueEditor {
 
     /** The fields of a request, checked; type and priority default to task and medium. */
     record Fields(IssueType type, String summary, String description, Priority priority, String assignee,
-                  LocalDate dueOn, String reviewer, List<String> labels, Map<String, Object> custom) {
+                  LocalDate dueOn, LocalDate startOn, String reviewer, List<String> labels,
+                  Map<String, Object> custom) {
 
         void applyTo(IssueEntity issue, Instant now) {
-            issue.edit(type, summary, description, priority, assignee, dueOn, reviewer, labels, custom, now);
+            issue.edit(type, summary, description, priority, assignee, dueOn, startOn, reviewer, labels, custom, now);
         }
 
-        static final Fields EMPTY = new Fields(null, null, null, null, null, null, null, List.of(), Map.of());
+        static final Fields EMPTY = new Fields(null, null, null, null, null, null, null, null, List.of(), Map.of());
 
         static Fields of(IssueEntity issue) {
             return new Fields(issue.type(), issue.summary(), issue.description(), issue.priority(), issue.assignee(),
-                    issue.dueOn(), issue.reviewer(), issue.labels(), issue.custom());
+                    issue.dueOn(), issue.startOn(), issue.reviewer(), issue.labels(), issue.custom());
         }
 
         /** The fields that differ from {@code before}, in the order of the form. */
@@ -266,6 +269,8 @@ class IssueEditor {
             change(changes, "reviewer", before.reviewer, reviewer);
             change(changes, "due", before.dueOn == null ? null : before.dueOn.toString(),
                     dueOn == null ? null : dueOn.toString());
+            change(changes, "start", before.startOn == null ? null : before.startOn.toString(),
+                    startOn == null ? null : startOn.toString());
             change(changes, "labels", text(before.labels), text(labels));
             change(changes, "description", before.description, description);
             Set<String> keys = new TreeSet<>(before.custom.keySet());
@@ -334,6 +339,15 @@ class IssueEditor {
         } catch (DateTimeParseException e) {
             throw new InvalidField("The due date is a day as YYYY-MM-DD");
         }
+        LocalDate startOn;
+        try {
+            startOn = blankToNull(request.startOn()) == null ? null : LocalDate.parse(request.startOn().strip());
+        } catch (DateTimeParseException e) {
+            throw new InvalidField("The start date is a day as YYYY-MM-DD");
+        }
+        if (startOn != null && dueOn != null && startOn.isAfter(dueOn)) {
+            throw new InvalidField("The start date cannot be after the due date");
+        }
         Map<String, Object> custom = before.custom();
         if (request.custom() != null) {
             CustomFields.Checked checked = customFields.check(project.id(), request.custom(), before.custom());
@@ -343,7 +357,7 @@ class IssueEditor {
             custom = checked.values();
         }
         return new Fields(type, request.summary().strip(), blankToNull(request.description()), priority, assignee,
-                dueOn, reviewer, labels(request.labels()), custom);
+                dueOn, startOn, reviewer, labels(request.labels()), custom);
     }
 
     /** Labels in lower case, without repetitions, in the order given. */

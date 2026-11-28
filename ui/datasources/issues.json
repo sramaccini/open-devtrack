@@ -29,6 +29,7 @@
         "priority": "{{formFields.priority}}",
         "assignee": "{{formFields.assignee}}",
         "reviewer": "{{formFields.reviewer}}",
+        "startOn": "{{formFields.startOn}}",
         "dueOn": "{{formFields.dueOn}}",
         "labels": "{{formFields.labels}}",
         "description": "{{formFields.description}}",

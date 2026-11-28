@@ -30,7 +30,7 @@ final class IssueApi {
 
     record IssueView(String key, String project, long number, String type, String summary, String description,
                      String status, String priority, String assignee, String reporter, LocalDate dueOn,
-                     String reviewer, List<String> labels, Map<String, Object> custom, Instant createdAt, Instant updatedAt, long version, boolean watching,
+                     LocalDate startOn, String reviewer, List<String> labels, Map<String, Object> custom, Instant createdAt, Instant updatedAt, long version, boolean watching,
                      boolean flagged, long votes, boolean voted, ParentView parent, String parentKey,
                      @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
@@ -114,6 +114,7 @@ final class IssueApi {
         private String priority;
         private String assignee;
         private String dueOn;
+        private String startOn;
         private String reviewer;
         private String reporter;
         private List<String> labels;
@@ -173,6 +174,15 @@ final class IssueApi {
         public void setDueOn(String dueOn) {
             this.dueOn = dueOn;
             given.add("dueOn");
+        }
+
+        public String getStartOn() {
+            return startOn;
+        }
+
+        public void setStartOn(String startOn) {
+            this.startOn = startOn;
+            given.add("startOn");
         }
 
         public String getReviewer() {
@@ -272,7 +282,7 @@ final class IssueApi {
      * removes it.
      */
     record IssueRequest(String type, String summary, String description, String priority, String assignee,
-                        String dueOn, String reviewer, List<String> labels, Map<String, Object> custom, String parent,
-                        Long version) {
+                        String dueOn, String startOn, String reviewer, List<String> labels, Map<String, Object> custom,
+                        String parent, Long version) {
     }
 }

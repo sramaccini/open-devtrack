@@ -34,6 +34,8 @@ The entries are written by hand at each release from the commits ([docs/release.
   removed. API: `GET/POST /api/link-types`, `PATCH/DELETE /api/link-types/{code}` (`replaceWith`, `deleteLinks`);
   a link carries `type`, `outward` and `label` besides `relation`, and a new type reads `code` from one end and
   `code:inward` from the other (#55 T6).
+- **Issues**: the start date, as in Jira: in Details, the new issue and the export, never after the due date; the
+  column Start of the search and `start` in ODQL. API: `startOn` in the issue, `POST`, `PUT` and `PATCH` (#55 T10).
 - **Search**: links in ODQL, as in Jira (ADR-29): `linked = WEB-4`, `linkType = blocks` and
   `key IN linkedIssues(WEB-4)` or `linkedIssues(WEB-4, blocks)`; a function of ODQL may now take arguments (#55 T6).
 
@@ -49,6 +51,7 @@ The entries are written by hand at each release from the commits ([docs/release.
   filter made from it still lists subtasks until `type IN standardIssueTypes()` is added.
 - The migration `V44` adds the table of the link types and stores the type of each link in lowercase (`blocks`,
   not `BLOCKS`); the relations of the API (`blocks`, `blocked_by`, …) do not change.
+- The migrations `V46` and `V47` add the start date to the issues and to the index, empty for every issue.
 - The migration `V45` adds the links to the search documents, from the links already there: no rebuild of the
   index is needed.
 

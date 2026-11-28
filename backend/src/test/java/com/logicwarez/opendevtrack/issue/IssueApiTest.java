@@ -353,4 +353,25 @@ class IssueApiTest {
         assertThat(jdbc.queryForList("SELECT field FROM odt_audit.issue_change WHERE new_value IS NULL OR field = 'reviewer'"
                 + " ORDER BY field", String.class)).contains("due", "reviewer");
     }
+
+    @Test
+    void aStartDateNeverAfterTheDueDate() throws Exception {
+        mvc.perform(as(post("/api/projects/ODT/issues"), luisa).content("""
+                        {"summary":"Release notes","startOn":"2026-12-01","dueOn":"2026-12-10"}"""))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.startOn").value("2026-12-01"));
+        mvc.perform(as(patch("/api/issues/ODT-1"), luisa).content("{\"startOn\":\"2026-12-11\",\"version\":0}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").value("The start date cannot be after the due date"));
+        mvc.perform(as(patch("/api/issues/ODT-1"), luisa).content("{\"startOn\":\"soon\",\"version\":0}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(as(patch("/api/issues/ODT-1"), luisa).content("{\"startOn\":\"2026-12-05\",\"version\":0}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.startOn").value("2026-12-05"))
+                .andExpect(jsonPath("$.dueOn").value("2026-12-10"));
+        TestInfrastructure.awaitListeners(jdbc);
+        assertThat(jdbc.queryForList("SELECT old_value || '>' || new_value FROM odt_audit.issue_change"
+                + " WHERE field = 'start' AND old_value IS NOT NULL", String.class))
+                .containsExactly("2026-12-01>2026-12-05");
+    }
 }

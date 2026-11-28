@@ -8,6 +8,7 @@ import static com.logicwarez.opendevtrack.search.Docs.ASSIGNEE;
 import static com.logicwarez.opendevtrack.search.Docs.CATEGORY;
 import static com.logicwarez.opendevtrack.search.Docs.CREATED_AT;
 import static com.logicwarez.opendevtrack.search.Docs.DUE_ON;
+import static com.logicwarez.opendevtrack.search.Docs.START_ON;
 import static com.logicwarez.opendevtrack.search.Docs.DOC;
 import static com.logicwarez.opendevtrack.search.Docs.FLAGGED;
 import static com.logicwarez.opendevtrack.search.Docs.PARENT_KEY;
@@ -86,7 +87,8 @@ class Searches {
             Map.entry("key", ISSUE_KEY), Map.entry("project", PROJECT_KEY), Map.entry("type", TYPE),
             Map.entry("status", STATUS), Map.entry("category", CATEGORY), Map.entry("priority", PRIORITY),
             Map.entry("assignee", ASSIGNEE), Map.entry("reporter", REPORTER), Map.entry("summary", SUMMARY),
-            Map.entry("reviewer", REVIEWER), Map.entry("due", DUE_ON), Map.entry("updated", UPDATED_AT),
+            Map.entry("reviewer", REVIEWER), Map.entry("due", DUE_ON), Map.entry("start", START_ON),
+            Map.entry("updated", UPDATED_AT),
             Map.entry("created", CREATED_AT), Map.entry("points", POINTS));
 
     static final Set<String> GROUPS = Set.of("project", "type", "status", "category", "priority", "assignee", "sprint");
@@ -221,7 +223,8 @@ class Searches {
         order.add(ISSUE_ID.asc());
         LocalDate today = today();
         List<Record> records = new ArrayList<>(sql.select(ISSUE_KEY, PROJECT_KEY, TYPE, STATUS, CATEGORY, PRIORITY,
-                        ASSIGNEE, REVIEWER, REPORTER, SUMMARY, DUE_ON, UPDATED_AT, CREATED_AT, POINTS, SPRINT_ID, FLAGGED,
+                        ASSIGNEE, REVIEWER, REPORTER, SUMMARY, DUE_ON, START_ON, UPDATED_AT, CREATED_AT, POINTS, SPRINT_ID,
+                        FLAGGED,
                         PARENT_KEY)
                 .from(DOC).where(where).orderBy(order).limit(size).offset(page * size).fetch());
         Map<String, Map<String, Boolean>> perm = perm(records, visible);
@@ -383,6 +386,7 @@ class Searches {
         // «impediment» while flagged, else null, as in the cards of the boards: the highlight of the tables. The index
         // holds Jira's «Impediment» for ODQL.
         row.put("flag", r.get(FLAGGED) == null ? null : "impediment");
+        row.put("start", r.get(START_ON));
         LocalDate due = r.get(DUE_ON);
         row.put("due", due);
         // Past its due date and not done (ADR-19): a value for the badges of the column, which colour by value.

@@ -232,7 +232,8 @@ class IssueController {
         String summary = request == null || request.summary() == null ? cloneSummary(original.summary()) : request.summary();
         IssueRequest fields = new IssueRequest(original.type().value(), summary, original.description(),
                 original.priority().value(), original.assignee(),
-                original.dueOn() == null ? null : original.dueOn().toString(), original.reviewer(), original.labels(),
+                original.dueOn() == null ? null : original.dueOn().toString(),
+                original.startOn() == null ? null : original.startOn().toString(), original.reviewer(), original.labels(),
                 original.custom(), editor.parentOf(project, original).key(), null);
         Instant now = Instant.now();
         IssueEntity clone;
@@ -402,6 +403,7 @@ class IssueController {
                 patch.has("priority") ? patch.getPriority() : issue.priority().value(),
                 patch.has("assignee") ? patch.getAssignee() : issue.assignee(),
                 patch.has("dueOn") ? patch.getDueOn() : issue.dueOn() == null ? null : issue.dueOn().toString(),
+                patch.has("startOn") ? patch.getStartOn() : issue.startOn() == null ? null : issue.startOn().toString(),
                 patch.has("reviewer") ? patch.getReviewer() : issue.reviewer(),
                 labels,
                 custom,
@@ -723,7 +725,7 @@ class IssueController {
         ParentView parent = i.parentId() == null ? null : issues.findById(i.parentId())
                 .map(p -> new ParentView(key(project, p), p.summary(), p.type().value(), p.status())).orElse(null);
         return new IssueView(key(project, i), project.key(), i.number(), i.type().value(), i.summary(), i.description(),
-                i.status(), i.priority().value(), i.assignee(), i.reporter(), i.dueOn(), i.reviewer(), i.labels(), i.custom(),
+                i.status(), i.priority().value(), i.assignee(), i.reporter(), i.dueOn(), i.startOn(), i.reviewer(), i.labels(), i.custom(),
                 i.createdAt(), i.updatedAt(), i.version(), watchers.existsByIssueIdAndUsername(i.id(), user.username()),
                 i.flagged(), votes.countByIssueId(i.id()), votes.existsByIssueIdAndUsername(i.id(), user.username()), parent,
                 parent == null ? null : parent.key(), perm);

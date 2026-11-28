@@ -46,6 +46,7 @@ final class Docs {
     static final Field<String> REPORTER = field(name("reporter"), SQLDataType.VARCHAR);
     static final Field<String> REVIEWER = field(name("reviewer"), SQLDataType.VARCHAR);
     static final Field<LocalDate> DUE_ON = field(name("due_on"), SQLDataType.LOCALDATE);
+    static final Field<LocalDate> START_ON = field(name("start_on"), SQLDataType.LOCALDATE);
     static final Field<String> FLAGGED = field(name("flagged"), SQLDataType.VARCHAR);
     static final Field<String[]> LABELS = field(name("labels"), SQLDataType.CLOB.array());
     static final Field<String> SUMMARY = field(name("summary"), SQLDataType.VARCHAR);

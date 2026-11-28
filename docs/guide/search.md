@@ -82,6 +82,7 @@ An empty query finds every issue. Without `ORDER BY`, the most recently updated 
 | `created` | The day it was created | `= != < <= > >= IS EMPTY` |
 | `updated` | The day it last changed | `= != < <= > >= IS EMPTY` |
 | `resolved` | The day its status reached the category Done | `= != < <= > >= IS EMPTY` |
+| `start` | Its start date | `= != < <= > >= IS EMPTY` |
 | `due` | Its due date | `= != < <= > >= IS EMPTY` |
 | `sprint` | A sprint, by its name, or `openSprints()` | `= != IN NOT IN IS EMPTY` |
 | `points` | The story points, a whole number | `= != < <= > >= IN NOT IN IS EMPTY` |
@@ -110,7 +111,7 @@ What `~` finds depends on the field:
 
 ### Dates
 
-`created`, `updated`, `resolved` and `due` take a day:
+`created`, `updated`, `resolved`, `start` and `due` take a day:
 
 - a date: `2026-11-07`;
 - `today`;
@@ -129,7 +130,8 @@ ORDER BY priority DESC, due ASC
 ```
 
 The fields are `project`, `key`, `type`, `status`, `category`, `priority`, `assignee`, `reviewer`, `reporter`,
-`summary`, `created`, `updated`, `resolved`, `due`, `points`, `rank` and `custom.<key>`. Empty values come last.
+`summary`, `created`, `updated`, `resolved`, `start`, `due`, `points`, `rank` and `custom.<key>`. Empty values come
+last.
 `project` and `key` order by project, then by number, so `WEB-10` comes after `WEB-9`. `rank` is the order of the
 project, the one of the backlog.
 

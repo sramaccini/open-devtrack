@@ -160,6 +160,7 @@ class ExportController {
         fields.put("reporter", i.reporter());
         fields.put("reviewer", i.reviewer());
         fields.put("dueOn", i.dueOn() == null ? null : i.dueOn().toString());
+        fields.put("startOn", i.startOn() == null ? null : i.startOn().toString());
         fields.put("labels", i.labels());
         fields.put("parent", parent);
         fields.put("flagged", i.flagged());
@@ -206,6 +207,7 @@ class ExportController {
         rows.add(List.of(text("field.assignee"), orNone(i.assignee())));
         rows.add(List.of(text("field.reporter"), i.reporter()));
         rows.add(List.of(text("field.reviewer"), orNone(i.reviewer())));
+        rows.add(List.of(text("field.start"), i.startOn() == null ? text("none") : i.startOn().toString()));
         rows.add(List.of(text("field.due"), i.dueOn() == null ? text("none") : i.dueOn().toString()));
         rows.add(List.of(text("field.labels"), i.labels().isEmpty() ? text("none") : String.join(", ", i.labels())));
         rows.add(List.of(text("field.flagged"), text(i.flagged() ? "yes" : "no")));

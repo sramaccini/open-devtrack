@@ -48,6 +48,8 @@ class IssueEntity {
 
     /** The day the issue should be done, and who reviews it (ADR-19); both optional. */
     private LocalDate dueOn;
+    /** The day the work on it should start, as Jira's Start date; optional, never after the due date. */
+    private LocalDate startOn;
     private String reviewer;
 
     @JdbcTypeCode(SqlTypes.ARRAY)
@@ -84,13 +86,14 @@ class IssueEntity {
     }
 
     void edit(IssueType type, String summary, String description, Priority priority, String assignee, LocalDate dueOn,
-              String reviewer, List<String> labels, Map<String, Object> custom, Instant now) {
+              LocalDate startOn, String reviewer, List<String> labels, Map<String, Object> custom, Instant now) {
         this.type = type;
         this.summary = summary;
         this.description = description;
         this.priority = priority;
         this.assignee = assignee;
         this.dueOn = dueOn;
+        this.startOn = startOn;
         this.reviewer = reviewer;
         this.labels = labels;
         this.custom = new HashMap<>(custom);
@@ -176,6 +179,10 @@ class IssueEntity {
 
     LocalDate dueOn() {
         return dueOn;
+    }
+
+    LocalDate startOn() {
+        return startOn;
     }
 
     String reviewer() {

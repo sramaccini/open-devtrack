@@ -428,6 +428,9 @@
           "reviewer" : {
             "type" : "string"
           },
+          "startOn" : {
+            "type" : "string"
+          },
           "summary" : {
             "type" : "string"
           },
@@ -470,6 +473,9 @@
             "type" : "string"
           },
           "reviewer" : {
+            "type" : "string"
+          },
+          "startOn" : {
             "type" : "string"
           },
           "summary" : {

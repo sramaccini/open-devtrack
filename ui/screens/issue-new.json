@@ -139,6 +139,13 @@
           }
         },
         {
+          "name": "startOn",
+          "type": "date",
+          "label": "{{ t('issues.start_on', 'Start date') }}",
+          "width": "s",
+          "tooltip": "{{ t('issues.start_on_help', 'The day the work should start; never after the due date') }}"
+        },
+        {
           "name": "dueOn",
           "type": "date",
           "label": "{{ t('issues.due_on', 'Due date') }}",

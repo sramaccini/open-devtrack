@@ -212,6 +212,12 @@
           "sortable": true
         },
         {
+          "field": "start",
+          "label": "{{ t('issues.start', 'Start') }}",
+          "format": "date",
+          "sortable": true
+        },
+        {
           "field": "due",
           "label": "{{ t('issues.due', 'Due') }}",
           "format": "date",

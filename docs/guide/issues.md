@@ -32,6 +32,7 @@ Developers and admins of the project create issues. The fields:
 | Priority | Lowest, Low, Medium, High or Highest. Required |
 | Assignee | The member who does it; «Assign to me» under the field, for developers and admins when the issue is not yours yet |
 | Reviewer | The member who checks it: not the assignee |
+| Start date | The day the work should start, as in Jira; never after the due date |
 | Due date | The day it should be done. Past it, and not done, the issue is overdue |
 | Labels | Words that group issues across types: lower-case letters, digits, dots, dashes and underscores. Enter or a comma adds one, and the labels already used in the project are suggested |
 | Description | Text with simple formatting (Markdown), from the toolbar of the field: bold, italic, lists, links |
@@ -71,11 +72,11 @@ On the right is what describes it:
   [notification](notifications.md);
 - «…», more actions: «Add flag» or «Remove flag», «Add vote» or «Remove vote» ([below](#flag-and-votes)), «Clone», «Move» ([below](#move)),
   «Print», the three exports ([below](#export)), «All issues», and «Delete», for the admins of the project. «Clone» asks the summary of the copy («CLONE -»
-  and this one) and opens it: it has the type, priority, assignee, reviewer, due date, description, labels and custom
-  fields of this issue, you as reporter, the first status of its workflow and the link «clones» to this one; comments,
+  and this one) and opens it: it has the type, priority, assignee, reviewer, start and due dates, description, labels
+  and custom fields of this issue, you as reporter, the first status of its workflow and the link «clones» to this one; comments,
   attachments, watchers, votes, the flag and the plan stay here. «Print» prints the page without menus and buttons. Delete cannot be undone, and the
   comments, attachments and links of the issue go with it;
-- **Details**: its key, type, priority, assignee, reviewer, reporter, due date, labels and custom fields;
+- **Details**: its key, type, priority, assignee, reviewer, reporter, start and due dates, labels and custom fields;
 - **Planning**: its story points (0 to 999, empty when not estimated) and the sprint it is planned in.
 - Under them, when the issue was created and when it last changed, in your time zone.
 

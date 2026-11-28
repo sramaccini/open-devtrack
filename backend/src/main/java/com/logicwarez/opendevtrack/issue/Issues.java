@@ -105,7 +105,7 @@ public class Issues {
         return issues.findById(issueId).flatMap(i -> projects.byId(i.projectId()).map(p -> new IssueDocument(i.id(),
                 i.tenantId(), p.id(), p.key(), IssueController.key(p, i), i.number(), i.type().value(), i.summary(),
                 i.description(), i.status(), i.priority().value(), i.priority().ordinal() + 1, i.assignee(), i.reporter(),
-                i.dueOn(), i.reviewer(), List.copyOf(i.labels()), new HashMap<>(i.custom()), i.createdAt(), i.updatedAt(),
+                i.dueOn(), i.startOn(), i.reviewer(), List.copyOf(i.labels()), new HashMap<>(i.custom()), i.createdAt(), i.updatedAt(),
                 i.flagged(), moved.of(i.id()), i.parentId() == null ? null : issues.findById(i.parentId())
                         .map(parent -> IssueController.key(p, parent)).orElse(null),
                 links.findByIssue(i.id()).stream().map(l -> new IssueDocument.Link(l.type(), l.fromId().equals(i.id()),
@@ -256,11 +256,11 @@ public class Issues {
         String given = value == null ? "" : value;
         return switch (lane.field()) {
             case "assignee" -> new IssueRequest(now.type(), now.summary(), now.description(), now.priority(), value,
-                    now.dueOn(), now.reviewer(), now.labels(), null, null, now.version());
+                    now.dueOn(), now.startOn(), now.reviewer(), now.labels(), null, null, now.version());
             case "priority" -> new IssueRequest(now.type(), now.summary(), now.description(), given, now.assignee(),
-                    now.dueOn(), now.reviewer(), now.labels(), null, null, now.version());
+                    now.dueOn(), now.startOn(), now.reviewer(), now.labels(), null, null, now.version());
             default -> new IssueRequest(given, now.summary(), now.description(), now.priority(), now.assignee(),
-                    now.dueOn(), now.reviewer(), now.labels(), null, null, now.version());
+                    now.dueOn(), now.startOn(), now.reviewer(), now.labels(), null, null, now.version());
         };
     }
 

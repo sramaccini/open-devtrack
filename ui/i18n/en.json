@@ -728,5 +728,9 @@
   "values.config_action.linktype.created": "Link type created",
   "values.config_action.linktype.changed": "Link type changed",
   "values.config_action.linktype.removed": "Link type removed",
-  "values.config_kind.linktype.": "Link types"
+  "values.config_kind.linktype.": "Link types",
+  "issues.start_on": "Start date",
+  "issues.start_on_help": "The day the work should start; never after the due date",
+  "issues.start": "Start",
+  "values.issue_field.start": "Start date"
 }

@@ -6,6 +6,7 @@ package com.logicwarez.opendevtrack.search;
 
 import static com.logicwarez.opendevtrack.search.Docs.ASSIGNEE;
 import static com.logicwarez.opendevtrack.search.Docs.DUE_ON;
+import static com.logicwarez.opendevtrack.search.Docs.START_ON;
 import static com.logicwarez.opendevtrack.search.Docs.FLAGGED;
 import static com.logicwarez.opendevtrack.search.Docs.CATEGORY;
 import static com.logicwarez.opendevtrack.search.Docs.CREATED_AT;
@@ -84,7 +85,7 @@ final class OdqlCompiler {
     /** The fields of the language, in the order the suggestions show them. */
     static final List<String> FIELDS = List.of("project", "key", "parent", "linked", "linkType", "type", "status",
             "category", "priority", "assignee", "reviewer", "reporter", "labels", "flagged", "summary", "text", "created",
-            "updated", "resolved", "due", "sprint", "points", "rank");
+            "updated", "resolved", "start", "due", "sprint", "points", "rank");
 
     static final List<String> TYPES = List.of("task", "bug", "story", "epic", "subtask");
     static final List<String> PRIORITIES = List.of("lowest", "low", "medium", "high", "highest");
@@ -185,6 +186,7 @@ final class OdqlCompiler {
             case "created" -> date(c, CREATED_AT);
             case "updated" -> date(c, UPDATED_AT);
             case "resolved" -> date(c, RESOLVED_AT);
+            case "start" -> day(c, START_ON);
             case "due" -> day(c, DUE_ON);
             case "sprint" -> sprint(c);
             case "points" -> number(c, POINTS);
@@ -593,12 +595,13 @@ final class OdqlCompiler {
             case "created" -> CREATED_AT;
             case "updated" -> UPDATED_AT;
             case "resolved" -> RESOLVED_AT;
+            case "start" -> START_ON;
             case "due" -> DUE_ON;
             case "points" -> POINTS;
             case "rank" -> RANK;
             default -> throw error(o.at(), "Cannot order by '" + o.field() + "'",
                     "project key type status category priority assignee reviewer reporter summary created updated "
-                            + "resolved due points rank");
+                            + "resolved start due points rank");
         };
     }
 

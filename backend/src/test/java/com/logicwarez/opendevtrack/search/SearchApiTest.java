@@ -309,15 +309,18 @@ class SearchApiTest {
                 .getContentAsString(), "$.version");
         mvc.perform(as(put("/api/issues/ODT-1"), mario).content("""
                         {"summary":"Login fails","type":"bug","priority":"highest","assignee":"luisa","reviewer":"mario",
-                         "dueOn":"%s","labels":["backend"],"version":%d}""".formatted(yesterday, version)))
+                         "startOn":"%s","dueOn":"%s","labels":["backend"],"version":%d}""".formatted(yesterday, yesterday,
+                        version)))
                 .andExpect(status().isOk());
         await(() -> jdbc.queryForObject("SELECT reviewer IS NOT NULL FROM odt_search.issue_doc WHERE tenant_id = 'ALPHA'"
                 + " AND issue_key = 'ODT-1'", Boolean.class));
         assertThat(keys(mario, "reviewer = currentUser()")).containsExactly("ODT-1");
         assertThat(keys(mario, "due < today")).containsExactly("ODT-1");
         assertThat(keys(mario, "due IS EMPTY ORDER BY key")).containsExactly("ODT-2", "ODT-3", "WEB-1");
+        assertThat(keys(mario, "start <= today ORDER BY start")).containsExactly("ODT-1");
         mvc.perform(as(post("/api/search"), mario).content("{\"query\":\"key = ODT-1\"}"))
                 .andExpect(jsonPath("$.items[0].due").value(yesterday))
+                .andExpect(jsonPath("$.items[0].start").value(yesterday))
                 .andExpect(jsonPath("$.items[0].reviewer").value("mario"))
                 .andExpect(jsonPath("$.items[0].overdue").value("overdue"));
         // The personal dashboard: overdue for the assignee; in review for the reviewer once the work has started.
@@ -373,7 +376,7 @@ class SearchApiTest {
 
     @Test
     void suggestionsFollowTheQuery() throws Exception {
-        mvc.perform(as(get("/api/search/words").param("q", "sta").param("word", "sta"), mario))
+        mvc.perform(as(get("/api/search/words").param("q", "stat").param("word", "stat"), mario))
                 .andExpect(jsonPath("$[*].insert").value(org.hamcrest.Matchers.contains("status ")));
         mvc.perform(as(get("/api/search/words").param("q", "status ").param("word", ""), mario))
                 .andExpect(jsonPath("$[*].label").value(org.hamcrest.Matchers.hasItems("=", "IN (", "IS EMPTY")));

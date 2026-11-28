@@ -17,7 +17,8 @@ import java.util.UUID;
  */
 public record IssueDocument(UUID id, String tenantId, UUID projectId, String projectKey, String key, long number,
                             String type, String summary, String description, String status, String priority,
-                            int priorityOrder, String assignee, String reporter, LocalDate dueOn, String reviewer,
+                            int priorityOrder, String assignee, String reporter, LocalDate dueOn, LocalDate startOn,
+                            String reviewer,
                             List<String> labels, Map<String, Object> custom, Instant createdAt, Instant updatedAt,
                             boolean flagged, List<String> movedKeys, String parentKey,
                             List<IssueDocument.Link> links) {
