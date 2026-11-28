@@ -742,6 +742,7 @@
                   "id": "link-table",
                   "type": "dataTable",
                   "source": "links",
+                  "visibleIf": "{{ has(data.links) && size(data.links) > 0 }}",
                   "columns": [
                     {
                       "field": "label",
