@@ -76,15 +76,15 @@ class WorkLogController {
         this.zone = ZoneId.of(zone);
     }
 
-    /** {@code startedLocal} is {@code started} in the zone of the installation, as a date and time field takes it. */
-    record WorkLogView(UUID id, String author, Instant started, String startedLocal, String timeSpent, int minutes,
+    record WorkLogView(UUID id, String author, Instant started, String timeSpent, int minutes,
                        String comment, Instant createdAt, Instant updatedAt, long version,
                        @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
     /**
-     * {@code timeSpent} as {@code 1d 2h 30m}; {@code started} an instant or a local date and time (now when absent);
-     * {@code remainingEstimate} sets what remains, else it moves by the work.
+     * {@code timeSpent} as {@code 1d 2h 30m}; {@code started} an instant, with {@code Z} or an offset, or a date and
+     * time in the zone of the installation (now when absent); {@code remainingEstimate} sets what remains, else it
+     * moves by the work.
      */
     record WorkLogRequest(String timeSpent, String started, String comment, String remainingEstimate, Long version) {
     }
@@ -268,8 +268,7 @@ class WorkLogController {
     }
 
     private WorkLogView view(IssueWorkLogs.WorkLog w) {
-        String local = LocalDateTime.ofInstant(w.started(), zone).truncatedTo(ChronoUnit.MINUTES).toString();
-        return new WorkLogView(w.id(), w.author(), w.started(), local, durations.text(w.minutes()), w.minutes(),
+        return new WorkLogView(w.id(), w.author(), w.started(), durations.text(w.minutes()), w.minutes(),
                 w.comment(), w.createdAt(), w.updatedAt(), w.version(), w.perm());
     }
 }

@@ -75,7 +75,10 @@ The entries are written by hand at each release from the commits ([docs/release.
 ### Changed
 
 - **Issues**: «Assign to me» is a link under Assignee, as in Jira, in place of the item of «…» (#55 T4).
-- Quadrava 0.34.0: runtime image, CLI, schemas and kits.
+- Quadrava 0.35.0: runtime image, CLI, schemas and kits. With it the shortcut **M** of an issue puts the cursor in
+  the comment box (#68); a work log is changed and deleted from the Activity too, with the same window as Time
+  tracking (#70); the start of a work log is shown and written in the time zone of the browser, and the list of the
+  work logs shows it (#71).
 
 ### Upgrading
 

@@ -993,6 +993,14 @@
           "maximum": 102400,
           "description": "For type file: maximum size in KB (1024 if absent). Up to 102400 with multipart upload; base64 content is limited to 10240."
         },
+        "zone": {
+          "type": "string",
+          "enum": [
+            "local",
+            "offset"
+          ],
+          "description": "For type datetime: local gives the time as written, YYYY-MM-DDTHH:mm without a zone; offset gives an instant: the field reads a value with an offset or Z, shows it in the zone of the browser and sends YYYY-MM-DDTHH:mm:ss with the offset of the browser, such as +01:00. (local if absent)"
+        },
         "multiple": {
           "type": "boolean",
           "description": "For type file: several files, each checked and uploaded on its own with its progress and its error; the value is the list of the files (maxItems the most). One file if absent."
@@ -3542,9 +3550,17 @@
                     "type": "string",
                     "minLength": 1,
                     "description": "Field of the row with the time spent, in minutes (minutes if absent)."
+                  },
+                  "onEdit": {
+                    "$ref": "#/$defs/steps",
+                    "description": "Steps run by the Edit button of a work log, with the row in row, instead of the text box of a comment: for example a view step with the form of the time logged. The button follows editIf. (the text box with the onEdit of the node if absent)"
+                  },
+                  "onDelete": {
+                    "$ref": "#/$defs/steps",
+                    "description": "Steps run by the Delete button of a work log, with the row in row, instead of the onDelete of the node. The button follows deleteIf. (the onDelete of the node if absent)"
                   }
                 },
-                "description": "Rows that record time spent, drawn as a line «Anna Rossi logged 2 hr 30 min» with the text of the row, if any, under it. They have the Edit and Delete buttons as comments. Needs kindField."
+                "description": "Rows that record time spent, drawn as a line «Anna Rossi logged 2 hr 30 min» with the text of the row, if any, under it. They have the Edit and Delete buttons as comments, or steps of their own with onEdit and onDelete. Needs kindField."
               },
               "filters": {
                 "description": "Chips above the feed that show only some rows, filtered in the page. true gives All, Comments and, when the feed has them, History (changes) and Work log; a list gives the chips of the screen, in order, each with its label and the values of kindField it shows (all rows without kinds). The first chip is chosen at the start. Needs kindField. (no chips if absent)",
@@ -4332,7 +4348,7 @@
       "additionalProperties": false,
       "properties": {
         "focus": {
-          "description": "Brings a component into view and moves the focus into it: its first field, or the field named. An inline form opens the editor of that field. The step waits a moment for a component the previous steps have just shown; a component or field not found is reported in the diagnostics and the sequence goes on.",
+          "description": "Brings a component into view and moves the focus into it: its first field, or the field named. An inline form opens the editor of that field; a comments node focuses its writing box (field text), and with no box (no onPost, or postIf false) is reported. The step waits a moment for a component the previous steps have just shown; a component or field not found is reported in the diagnostics and the sequence goes on.",
           "oneOf": [
             {
               "type": "string",
@@ -4354,7 +4370,7 @@
                 "field": {
                   "type": "string",
                   "minLength": 1,
-                  "description": "The name of a field of the form; its first field if absent."
+                  "description": "The name of a field of the form (text for the writing box of a comments node); its first field if absent."
                 }
               }
             }

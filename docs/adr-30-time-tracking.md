@@ -81,15 +81,15 @@ of the plan towards Jira.
   ones are, not `worklog_created`.
 - **Time tracking is a section of its own**, under Planning, rather than inside Details, since Details is the form of
   the fields of the issue; «Log work» is in «…» and under the list of the work logs.
-- **A work log in the Activity has Edit only for its description**: the Edit of the feed of Quadrava 0.34.0 changes
-  the text of a row, so the time and the start of a log are changed from the list of Time tracking, with a dialog.
-  An Edit of the feed that opens the steps of the screen for a work log is asked of Quadrava (Q57, #70).
+- **A work log in the Activity is edited with the dialog of Time tracking**: with Quadrava 0.34.0 the Edit of the
+  feed changed only the text of a row; since 0.35.0 (Q57, #70) its Edit and Delete run steps of the screen, the same
+  dialog and removal as the list of Time tracking.
 - The search (step 2): `time_spent` of the index is never empty (`0m`); the search table shows Time spent only, the
   estimates being in its rows and in ODQL, since the table has no chooser of columns.
-- The answer of a work log has `startedLocal`, the start in `odt.reporting.zone`, as the `datetime` field of the
-  dialog takes it; `_perm.worklog` of an issue says whether the user logs work. The `datetime` field has no zone, so
-  the start is read in the zone of the installation, not of the user: a field with the offset is asked of Quadrava
-  (Q58, #71).
+- The start of a work log is an instant: the screens send it with the offset of the browser (the `datetime` field
+  with `zone: offset` of Quadrava 0.35.0, Q58, #71) and show it in its zone. A date and time without a zone, still
+  taken by the API, is read in `odt.reporting.zone`. `_perm.worklog` of an issue says whether the user logs work.
+  (With Quadrava 0.34.0 the answer had a `startedLocal` for the field without zone; it went before any release.)
 
 ## Consequences
 

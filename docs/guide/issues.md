@@ -60,9 +60,8 @@ On the left is what the issue says and what happened to it:
 
 The page has keyboard shortcuts, as in Jira; **?** lists those you may use. **E** edits the description, **A** opens
 Assignee, **I** assigns the issue to you (not when you are its assignee or its reviewer), **L** opens Labels and **K**
-opens the form of the links, the cursor in Issue. They are off while you type in a field or a window is open. **M**,
-which puts the cursor in the comment box in Jira, comes with the next Quadrava
-([#68](https://github.com/sramaccini/open-devtrack/issues/68)).
+opens the form of the links, the cursor in Issue, and **M** puts the cursor in the comment box of the Activity. They
+are off while you type in a field or a window is open.
 
 On the right is what describes it:
 
@@ -120,9 +119,9 @@ otherwise ([configuration](../admin/configuration.md)). The first original estim
 
 «Log work», in «…» and under the work logged, asks for the time spent, when the work started (now if empty), what
 remains after it (if empty, it goes down by the time spent, never below zero) and a description. Developers and admins
-log work; the author changes or deletes their logs, from the list of Time tracking, and the admins of the project
-also those of others. Changing or deleting a log moves what remains by the difference. The work logged is in the
-Activity, under «Work log», where its description can be edited too.
+log work; the author changes or deletes their logs, from the list of Time tracking or from the Activity, and the
+admins of the project also those of others. Changing or deleting a log moves what remains by the difference. The work
+logged is in the Activity, under «Work log». The start is shown and written in the time zone of your browser.
 
 ### Attachments
 

@@ -1,7 +1,7 @@
 # OpenDevTrack screens
 
 The front end of OpenDevTrack is this Quadrava project: screens, navigation, themes and translations, as JSON documents
-validated by the schemas of the pinned Quadrava version (0.34.0, ADR-01). No Angular code: the runtime image of Quadrava
+validated by the schemas of the pinned Quadrava version (0.35.0, ADR-01). No Angular code: the runtime image of Quadrava
 loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 | Path | Registry kind | What |
@@ -43,13 +43,13 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   «Link work item», which opens `link-form` with `state.linking` and the step `focus` on its field `issue`, Quadrava
   0.34.0, Q55): the summary with `display: heading`; the screen has `shortcuts` (Quadrava 0.34.0, Q53): E and L and
   A the step `focus` on `description`, `labels` and `assignee`, K that of «Link work item», I `issues/assign`
-  (`PATCH` with `assignee` and `version`) with the user, hidden to the assignee and to the reviewer; M waits for
-  Q56 (`focus` on a `comments` node goes to its first button, #68);
+  (`PATCH` with `assignee` and `version`) with the user, hidden to the assignee and to the reviewer, M the step
+  `focus` on the writing box of `comment-thread` (Quadrava 0.35.0, Q56);
   each field saved on its own by `onSave` with `patchIssue`, then the sections Attachments, Subtasks («Child work items» on an epic: a `progress` and a `table` on `children`,
   «Add subtask» a `popover` with the summary that calls `addChild` with the `childType` of the answer, ADR-28), Linked
   work items and Activity (the activity feed of Quadrava 0.34.0, Q49: `comments` on `issues/activity` with
   `kindField: kind`, `changes` translated with `values.issue_field` and `values`, `filters`, `orderToggle` newest
-  first, `orderBind` `state.activityOrder`, `workLog` with `minutes`: a work log is edited there only by its description, `editWorkLogText`, and deleted with `removeWorkLog`; every step that changed the issue refreshes `activity`); on the right (4) a row with the status and, as icons, the flag, the menu Watchers, the votes, Copy link (the `copyLink` step, Quadrava 0.29.0, Q45), Share and the menu More actions, then Details, Planning and Time tracking (ADR-30: a `progress` of `timeSpentMinutes` against it plus `remainingEstimateMinutes`, the form `time-form` on `issue` with the two estimates saved by `patchIssue`, the table of `worklogs` (who and time spent, the start in the tooltip) with Edit, a `dialog` with `startedLocal` in the `datetime` field, and Delete in «⋯» (`rowActionsInline: 0`), and «Log work», also in «…», a `dialog` on `addWorkLog`). Details and Planning are forms with `edit: inline` too (Quadrava 0.28.0, Q44: lookups and
+  first, `orderBind` `state.activityOrder`, `workLog` with `minutes` and its own `onEdit` and `onDelete` (Quadrava 0.35.0, Q57): the dialog of the table of the work logs, the time from `minutes` as `2h 30m`, and `removeWorkLog`; every step that changed the issue refreshes `activity`); on the right (4) a row with the status and, as icons, the flag, the menu Watchers, the votes, Copy link (the `copyLink` step, Quadrava 0.29.0, Q45), Share and the menu More actions, then Details, Planning and Time tracking (ADR-30: a `progress` of `timeSpentMinutes` against it plus `remainingEstimateMinutes`, the form `time-form` on `issue` with the two estimates saved by `patchIssue`, the table of `worklogs` (who and time spent, the start in the tooltip) (who, the start as `relative` and the time spent) with Edit, a `dialog` with `started` in a `datetime` field with `zone: offset` (Quadrava 0.35.0, Q58), as in «Log work», and Delete in «⋯» (`rowActionsInline: 0`), and «Log work», also in «…», a `dialog` on `addWorkLog`). Details and Planning are forms with `edit: inline` too (Quadrava 0.28.0, Q44: lookups and
   selects confirm on pick, checkboxes on toggle, the fields of `fieldsFrom` alike), each field saved on its own by
   `onSave`. The issue forms call `patchIssue` (`issues/patch`, `PATCH /api/issues/{key}`): only the field that
   changed and the version, or all the custom fields when one of them changed (`field` is then `custom.<key>`);
@@ -88,14 +88,14 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 
 ## Publishing
 
-The Quadrava CLI (`@sramaccini/quadrava-cli@0.34.0`, the version of the runtime) is on GitHub Packages: the `.npmrc`
+The Quadrava CLI (`@sramaccini/quadrava-cli@0.35.0`, the version of the runtime) is on GitHub Packages: the `.npmrc`
 of the repository maps `@sramaccini` there, and npm needs a token with `read:packages` for `npm.pkg.github.com` in
 the user config (`~/.npmrc`; in CI, `NODE_AUTH_TOKEN`). From the root of the repository, with a Keycloak access token
 of the client `opendevtrack-tools` in `QUADRAVA_TOKEN`:
 
 ```bash
-npx --yes @sramaccini/quadrava-cli@0.34.0 validate ui
-npx --yes @sramaccini/quadrava-cli@0.34.0 publish ui --registry http://localhost:28080 --app opendevtrack --env development
+npx --yes @sramaccini/quadrava-cli@0.35.0 validate ui
+npx --yes @sramaccini/quadrava-cli@0.35.0 publish ui --registry http://localhost:28080 --app opendevtrack --env development
 ```
 
 The same command publishes to `testing` and `production`: the registry has no protected environments (ADR-12), the
@@ -154,7 +154,7 @@ change in `brand/` or `brand/pack.json`, rebuild it from a zip of the folder (`z
 
 ```
 cd brand && zip -r ../odt-brand.zip pack.json svg png && cd ..
-npx --yes @sramaccini/quadrava-cli@0.34.0 assets add odt-brand.zip ui
+npx --yes @sramaccini/quadrava-cli@0.35.0 assets add odt-brand.zip ui
 ```
 
 ## Workflow

@@ -134,14 +134,16 @@ class TimeTrackingApiTest {
                 .andExpect(jsonPath("$[0].minutes").value(120))
                 .andExpect(jsonPath("$[0].author").value("luisa"))
                 .andExpect(jsonPath("$[0].comment").value("Found the cause"))
-                .andExpect(jsonPath("$[0].startedLocal").value("2026-11-27T09:00"))
+                .andExpect(jsonPath("$[0].started").value("2026-11-27T09:00:00Z"))
                 .andExpect(jsonPath("$[0]._perm.edit").value(true))
                 .andExpect(jsonPath("$[1]._perm.edit").value(false));
-        // Changed from 2h to 3h: one more hour spent, one less remaining, never below zero.
+        // Changed from 2h to 3h: one more hour spent, one less remaining, never below zero; a start with an offset is
+        // the instant it names.
         mvc.perform(as(put("/api/issues/ODT-1/worklogs/" + id), luisa).content("""
-                        {"timeSpent":"3h","comment":"Found and fixed","version":0}"""))
+                        {"timeSpent":"3h","started":"2026-11-27T10:30:00+01:00","comment":"Found and fixed","version":0}"""))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.timeSpent").value("3h"));
+                .andExpect(jsonPath("$.timeSpent").value("3h"))
+                .andExpect(jsonPath("$.started").value("2026-11-27T09:30:00Z"));
         mvc.perform(as(get("/api/issues/ODT-1"), paola))
                 .andExpect(jsonPath("$.timeSpent").value("4h"))
                 .andExpect(jsonPath("$.remainingEstimate").value("0m"));

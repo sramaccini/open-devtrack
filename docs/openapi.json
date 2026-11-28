@@ -10017,9 +10017,6 @@
             "type" : "string",
             "format" : "date-time"
           },
-          "startedLocal" : {
-            "type" : "string"
-          },
           "timeSpent" : {
             "type" : "string"
           },
