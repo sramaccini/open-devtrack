@@ -30,6 +30,9 @@ class CollaborationPersonalData implements PersonalData {
         parts.put("comments", jdbc.queryForList("""
                 SELECT id, issue_id, body, created_at, updated_at FROM odt_collaboration.comment
                 WHERE author = ? AND issue_id = ANY(?::uuid[]) ORDER BY created_at""", s.username(), s.issueIds()));
+        parts.put("worklogs", jdbc.queryForList("""
+                SELECT id, issue_id, started_at, minutes, comment, created_at, updated_at FROM odt_collaboration.worklog
+                WHERE author = ? AND issue_id = ANY(?::uuid[]) ORDER BY started_at""", s.username(), s.issueIds()));
         parts.put("attachments", jdbc.queryForList("""
                 SELECT id, issue_id, filename, media_type, size, sha256, uploaded_at FROM odt_collaboration.attachment
                 WHERE uploaded_by = ? AND project_id = ANY(?::uuid[]) ORDER BY uploaded_at""",
@@ -50,6 +53,9 @@ class CollaborationPersonalData implements PersonalData {
                 s.username(), s.issueIds());
         jdbc.update("""
                 UPDATE odt_collaboration.comment SET author = ?, version = version + 1
+                WHERE author = ? AND issue_id = ANY(?::uuid[])""", pseudonym, s.username(), s.issueIds());
+        jdbc.update("""
+                UPDATE odt_collaboration.worklog SET author = ?, version = version + 1
                 WHERE author = ? AND issue_id = ANY(?::uuid[])""", pseudonym, s.username(), s.issueIds());
         jdbc.update("""
                 UPDATE odt_collaboration.attachment SET uploaded_by = ?

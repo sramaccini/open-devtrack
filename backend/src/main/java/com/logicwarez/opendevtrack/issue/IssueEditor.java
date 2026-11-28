@@ -11,6 +11,7 @@ import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems.FieldError;
 import com.logicwarez.opendevtrack.project.ProjectRef;
 import com.logicwarez.opendevtrack.project.Projects;
+import com.logicwarez.opendevtrack.shared.Durations;
 import com.logicwarez.opendevtrack.workflow.Workflows;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -50,9 +51,11 @@ class IssueEditor {
     private final IssueRepository issues;
     private final Projects projects;
     private final MovedKeys moved;
+    private final Durations durations;
 
     IssueEditor(ProjectAccess access, CustomFields customFields, Workflows workflows, WatcherRepository watchers,
-                CurrentUser user, IssueRepository issues, Projects projects, MovedKeys moved) {
+                CurrentUser user, IssueRepository issues, Projects projects, MovedKeys moved, TimeTracking time) {
+        this.durations = time.durations();
         this.issues = issues;
         this.projects = projects;
         this.moved = moved;
@@ -85,7 +88,7 @@ class IssueEditor {
         checkRequired(project, IssueController.key(project, issue), fields, status, issue.reporter(), permissions);
         Parent before = parentOf(project, issue);
         Parent parent = parent(project, issue, fields.type(), request.parent(), before);
-        List<FieldChange> changes = new ArrayList<>(fields.changesFrom(Fields.of(issue)));
+        List<FieldChange> changes = new ArrayList<>(fields.changesFrom(Fields.of(issue), durations));
         if (!Objects.equals(before.key(), parent.key())) {
             changes.add(new FieldChange("parent", before.key(), parent.key()));
         }
@@ -204,11 +207,12 @@ class IssueEditor {
     }
 
     /** The request that keeps every field of the issue as it is, its custom fields included. */
-    static IssueRequest unchanged(IssueEntity issue) {
+    IssueRequest unchanged(IssueEntity issue) {
         return new IssueRequest(issue.type().value(), issue.summary(), issue.description(), issue.priority().value(),
                 issue.assignee(), issue.dueOn() == null ? null : issue.dueOn().toString(),
                 issue.startOn() == null ? null : issue.startOn().toString(), issue.reviewer(),
-                issue.labels(), null, null, issue.version());
+                issue.labels(), null, durations(issue.originalEstimate()), durations(issue.remainingEstimate()), null,
+                issue.version());
     }
 
     /** An issue as the conditions see it (ADR-10, ADR-11), also one not saved yet ({@code key} null). */
@@ -245,21 +249,24 @@ class IssueEditor {
     /** The fields of a request, checked; type and priority default to task and medium. */
     record Fields(IssueType type, String summary, String description, Priority priority, String assignee,
                   LocalDate dueOn, LocalDate startOn, String reviewer, List<String> labels,
-                  Map<String, Object> custom) {
+                  Map<String, Object> custom, Integer originalEstimate, Integer remainingEstimate) {
 
         void applyTo(IssueEntity issue, Instant now) {
-            issue.edit(type, summary, description, priority, assignee, dueOn, startOn, reviewer, labels, custom, now);
+            issue.edit(type, summary, description, priority, assignee, dueOn, startOn, reviewer, labels, custom,
+                    originalEstimate, remainingEstimate, now);
         }
 
-        static final Fields EMPTY = new Fields(null, null, null, null, null, null, null, null, List.of(), Map.of());
+        static final Fields EMPTY = new Fields(null, null, null, null, null, null, null, null, List.of(), Map.of(), null,
+                null);
 
         static Fields of(IssueEntity issue) {
             return new Fields(issue.type(), issue.summary(), issue.description(), issue.priority(), issue.assignee(),
-                    issue.dueOn(), issue.startOn(), issue.reviewer(), issue.labels(), issue.custom());
+                    issue.dueOn(), issue.startOn(), issue.reviewer(), issue.labels(), issue.custom(),
+                    issue.originalEstimate(), issue.remainingEstimate());
         }
 
         /** The fields that differ from {@code before}, in the order of the form. */
-        List<FieldChange> changesFrom(Fields before) {
+        List<FieldChange> changesFrom(Fields before, Durations durations) {
             List<FieldChange> changes = new ArrayList<>();
             change(changes, "type", before.type == null ? null : before.type.value(), type == null ? null : type.value());
             change(changes, "summary", before.summary, summary);
@@ -271,6 +278,10 @@ class IssueEditor {
                     dueOn == null ? null : dueOn.toString());
             change(changes, "start", before.startOn == null ? null : before.startOn.toString(),
                     startOn == null ? null : startOn.toString());
+            change(changes, "originalEstimate", durations.textOrNull(before.originalEstimate),
+                    durations.textOrNull(originalEstimate));
+            change(changes, "remainingEstimate", durations.textOrNull(before.remainingEstimate),
+                    durations.textOrNull(remainingEstimate));
             change(changes, "labels", text(before.labels), text(labels));
             change(changes, "description", before.description, description);
             Set<String> keys = new TreeSet<>(before.custom.keySet());
@@ -348,6 +359,20 @@ class IssueEditor {
         if (startOn != null && dueOn != null && startOn.isAfter(dueOn)) {
             throw new InvalidField("The start date cannot be after the due date");
         }
+        Integer originalEstimate;
+        Integer remainingEstimate;
+        try {
+            originalEstimate = blankToNull(request.originalEstimate()) == null ? null
+                    : durations.minutesOrZero(request.originalEstimate());
+            remainingEstimate = blankToNull(request.remainingEstimate()) == null ? null
+                    : durations.minutesOrZero(request.remainingEstimate());
+        } catch (Durations.WrongDuration e) {
+            throw new InvalidField("An estimate: " + e.getMessage());
+        }
+        // As in Jira, the first original estimate is also what remains, when no remaining estimate is given.
+        if (remainingEstimate == null && originalEstimate != null && before.originalEstimate() == null) {
+            remainingEstimate = originalEstimate;
+        }
         Map<String, Object> custom = before.custom();
         if (request.custom() != null) {
             CustomFields.Checked checked = customFields.check(project.id(), request.custom(), before.custom());
@@ -357,7 +382,16 @@ class IssueEditor {
             custom = checked.values();
         }
         return new Fields(type, request.summary().strip(), blankToNull(request.description()), priority, assignee,
-                dueOn, startOn, reviewer, labels(request.labels()), custom);
+                dueOn, startOn, reviewer, labels(request.labels()), custom, originalEstimate, remainingEstimate);
+    }
+
+    /** The text of an estimate for a request, {@code null} for none. */
+    String durations(Integer minutes) {
+        return durations.textOrNull(minutes);
+    }
+
+    Durations durations() {
+        return durations;
     }
 
     /** Labels in lower case, without repetitions, in the order given. */

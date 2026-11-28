@@ -2623,6 +2623,198 @@
         "x-project-permissions" : [ "odt.issue.browse" ]
       }
     },
+    "/api/issues/{issueKey}/worklogs" : {
+      "get" : {
+        "operationId" : "workLog.list",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/WorkLogView"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "The work log of an issue, by when the work started",
+        "tags" : [ "collaboration" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.issue.browse" ]
+      },
+      "post" : {
+        "operationId" : "workLog.add",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/WorkLogRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WorkLogView"
+                }
+              }
+            },
+            "description" : "Created"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          },
+          "412" : {
+            "$ref" : "#/components/responses/ChangedMeanwhile"
+          }
+        },
+        "summary" : "Logs work on an issue",
+        "tags" : [ "collaboration" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.worklog.add" ]
+      }
+    },
+    "/api/issues/{issueKey}/worklogs/{id}" : {
+      "delete" : {
+        "operationId" : "workLog.delete",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Done"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Deletes a work log: its author, or whoever manages the work logs",
+        "tags" : [ "collaboration" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.worklog.add" ]
+      },
+      "put" : {
+        "operationId" : "workLog.edit",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "issueKey",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/WorkLogRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WorkLogView"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          },
+          "412" : {
+            "$ref" : "#/components/responses/ChangedMeanwhile"
+          }
+        },
+        "summary" : "Changes a work log: its author, or whoever manages the work logs",
+        "tags" : [ "collaboration" ],
+        "x-permissions" : [ "odt.project.browse" ],
+        "x-project-permissions" : [ "odt.worklog.add" ]
+      }
+    },
     "/api/link-types" : {
       "get" : {
         "operationId" : "linkType.list",
@@ -6972,6 +7164,32 @@
         "x-project-permissions" : [ "odt.sprint.manage" ]
       }
     },
+    "/api/time-tracking" : {
+      "get" : {
+        "operationId" : "workLog.settings",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TimeTrackingSettings"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          }
+        },
+        "summary" : "The settings of time tracking of the installation",
+        "tags" : [ "collaboration" ],
+        "x-permissions" : [ "odt.project.browse" ]
+      }
+    },
     "/api/users" : {
       "get" : {
         "operationId" : "user.search",
@@ -7108,6 +7326,14 @@
           },
           "kind" : {
             "type" : "string"
+          },
+          "minutes" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "started" : {
+            "type" : "string",
+            "format" : "date-time"
           },
           "text" : {
             "type" : "string"
@@ -7909,10 +8135,16 @@
               "type" : "string"
             }
           },
+          "originalEstimate" : {
+            "type" : "string"
+          },
           "parent" : {
             "type" : "string"
           },
           "priority" : {
+            "type" : "string"
+          },
+          "remainingEstimate" : {
             "type" : "string"
           },
           "reporter" : {
@@ -7959,10 +8191,16 @@
               "type" : "string"
             }
           },
+          "originalEstimate" : {
+            "type" : "string"
+          },
           "parent" : {
             "type" : "string"
           },
           "priority" : {
+            "type" : "string"
+          },
+          "remainingEstimate" : {
             "type" : "string"
           },
           "reviewer" : {
@@ -8073,6 +8311,13 @@
             "type" : "integer",
             "format" : "int64"
           },
+          "originalEstimate" : {
+            "type" : "string"
+          },
+          "originalEstimateMinutes" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
           "parent" : {
             "$ref" : "#/components/schemas/ParentView"
           },
@@ -8084,6 +8329,13 @@
           },
           "project" : {
             "type" : "string"
+          },
+          "remainingEstimate" : {
+            "type" : "string"
+          },
+          "remainingEstimateMinutes" : {
+            "type" : "integer",
+            "format" : "int32"
           },
           "reporter" : {
             "type" : "string"
@@ -8100,6 +8352,13 @@
           },
           "summary" : {
             "type" : "string"
+          },
+          "timeSpent" : {
+            "type" : "string"
+          },
+          "timeSpentMinutes" : {
+            "type" : "integer",
+            "format" : "int32"
           },
           "type" : {
             "type" : "string"
@@ -9114,6 +9373,19 @@
           }
         }
       },
+      "TimeTrackingSettings" : {
+        "type" : "object",
+        "properties" : {
+          "daysPerWeek" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "hoursPerDay" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        }
+      },
       "TransitionRequest" : {
         "type" : "object",
         "additionalProperties" : false,
@@ -9272,6 +9544,75 @@
           },
           "label" : {
             "type" : "string"
+          }
+        }
+      },
+      "WorkLogRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "comment" : {
+            "type" : "string"
+          },
+          "remainingEstimate" : {
+            "type" : "string"
+          },
+          "started" : {
+            "type" : "string"
+          },
+          "timeSpent" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "WorkLogView" : {
+        "type" : "object",
+        "properties" : {
+          "_perm" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "boolean"
+            }
+          },
+          "author" : {
+            "type" : "string"
+          },
+          "comment" : {
+            "type" : "string"
+          },
+          "createdAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "minutes" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "started" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "startedLocal" : {
+            "type" : "string"
+          },
+          "timeSpent" : {
+            "type" : "string"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
           }
         }
       },

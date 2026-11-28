@@ -69,6 +69,26 @@ of the plan towards Jira.
 - **D. ODQL now or later.** Proposal: points 1–6 and 8–9 first, the search of point 7 in a second step, as for the
   links of ADR-29.
 
+## As built
+
+- **The time spent is stored on the issue** (`odt_issue.issue.time_spent`), moved by each work log in the same
+  transaction (`Issues.logWork`), instead of being only a sum in the search document: the view of an issue, its export,
+  the history and the webhooks need it without reading `collaboration`, which depends on `issue` and not the other
+  way. It is still the sum of the work logs.
+- **The history keeps durations as text** (`timeSpent`, `remainingEstimate`, `originalEstimate` from `2h` to
+  `3h 30m`), as the other fields keep their values.
+- **The webhook events are dotted**, `worklog.created`, `worklog.updated` and `worklog.deleted`, as the existing
+  ones are, not `worklog_created`.
+- **Time tracking is a section of its own**, under Planning, rather than inside Details, since Details is the form of
+  the fields of the issue; «Log work» is in «…» and under the list of the work logs.
+- **A work log in the Activity has Edit only for its description**: the Edit of the feed of Quadrava 0.34.0 changes
+  the text of a row, so the time and the start of a log are changed from the list of Time tracking, with a dialog.
+  An Edit of the feed that opens the steps of the screen for a work log is asked of Quadrava (Q57, #70).
+- The answer of a work log has `startedLocal`, the start in `odt.reporting.zone`, as the `datetime` field of the
+  dialog takes it; `_perm.worklog` of an issue says whether the user logs work. The `datetime` field has no zone, so
+  the start is read in the zone of the installation, not of the user: a field with the offset is asked of Quadrava
+  (Q58, #71).
+
 ## Consequences
 
 - Migrations: two columns of `odt_issue.issue`, the table `odt_collaboration.worklog`, the two permissions in the

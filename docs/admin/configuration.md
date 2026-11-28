@@ -28,7 +28,8 @@ the same way, in capitals with `_` (`spring.mail.host` is `SPRING_MAIL_HOST`). I
 | `ODT_BEARER_CLIENTS` | The Keycloak clients whose access tokens the API accepts (comma separated): the publisher of `ui/` and the service accounts ([api.md](../api.md)) | `opendevtrack-tools` |
 | `ODT_SESSION_RATE_LIMIT` | Requests a minute per user on `/api` and `/telemetry`, across their sessions (429 over it) | `600` |
 | `ODT_RECENT_LOGIN_MAX_AGE` | How old a login may be before the sensitive actions (administration, workflows, schemes, groups, webhooks, tokens) ask for the password again | `15m` |
-| `ODT_REPORTING_ZONE` | Time zone of the days of the reports and of the dates of search | `UTC` |
+| `ODT_REPORTING_ZONE` | Time zone of the days of the reports and of the dates of search, and of the start of the work logged | `UTC` |
+| `ODT_TIME_TRACKING_HOURS_PER_DAY`, `ODT_TIME_TRACKING_DAYS_PER_WEEK` | How long a day (`1d`) and a week (`1w`) of time tracking are, 1 to 24 hours and 1 to 7 days. Changing them changes how the minutes already logged are written, not the minutes | `8`, `5` |
 | `ODT_TELEMETRY_OTLP_ENDPOINT` | The OpenTelemetry collector (OTLP/HTTP, for example `http://collector:4318`) that receives the traces and logs of the screens, redacted again by the back end | empty: accepted and dropped |
 | `ODT_TELEMETRY_MAX_BYTES` | The largest body of a telemetry post (413 over it) | `1000000` |
 | `ODT_AUDIT_RETENTION` | How long the audit log of the administration is kept | `P730D` |

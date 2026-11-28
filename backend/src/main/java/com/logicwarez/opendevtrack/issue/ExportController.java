@@ -15,6 +15,7 @@ import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
 import com.logicwarez.opendevtrack.project.ProjectRef;
 import com.logicwarez.opendevtrack.project.Projects;
+import com.logicwarez.opendevtrack.shared.Durations;
 import com.logicwarez.opendevtrack.shared.IssueContent;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -77,10 +78,13 @@ class ExportController {
     private final LinkTypes linkTypes;
     private final ResourceBundleMessageSource texts = new ResourceBundleMessageSource();
 
+    private final Durations durations;
+
     ExportController(Issues finder, IssueRepository issues, IssueLinkRepository links, Projects projects,
                      ProjectAccess access, Watchers watchers, VoteRepository votes, CustomFields customFields,
-                     List<IssueContent> modules, LinkTypes linkTypes,
+                     List<IssueContent> modules, LinkTypes linkTypes, TimeTracking time,
                      CurrentUser user, @Value("${odt.reporting.zone:UTC}") String zone) {
+        this.durations = time.durations();
         this.finder = finder;
         this.linkTypes = linkTypes;
         this.issues = issues;
@@ -161,6 +165,9 @@ class ExportController {
         fields.put("reviewer", i.reviewer());
         fields.put("dueOn", i.dueOn() == null ? null : i.dueOn().toString());
         fields.put("startOn", i.startOn() == null ? null : i.startOn().toString());
+        fields.put("originalEstimateMinutes", i.originalEstimate());
+        fields.put("remainingEstimateMinutes", i.remainingEstimate());
+        fields.put("timeSpentMinutes", i.timeSpent());
         fields.put("labels", i.labels());
         fields.put("parent", parent);
         fields.put("flagged", i.flagged());
@@ -209,6 +216,9 @@ class ExportController {
         rows.add(List.of(text("field.reviewer"), orNone(i.reviewer())));
         rows.add(List.of(text("field.start"), i.startOn() == null ? text("none") : i.startOn().toString()));
         rows.add(List.of(text("field.due"), i.dueOn() == null ? text("none") : i.dueOn().toString()));
+        rows.add(List.of(text("field.original_estimate"), duration(i.originalEstimate())));
+        rows.add(List.of(text("field.remaining_estimate"), duration(i.remainingEstimate())));
+        rows.add(List.of(text("field.time_spent"), durations.text(i.timeSpent())));
         rows.add(List.of(text("field.labels"), i.labels().isEmpty() ? text("none") : String.join(", ", i.labels())));
         rows.add(List.of(text("field.flagged"), text(i.flagged() ? "yes" : "no")));
         rows.add(List.of(text("field.votes"), String.valueOf(votes.countByIssueId(i.id()))));
@@ -341,5 +351,9 @@ class ExportController {
                         .filename(name, StandardCharsets.UTF_8).build().toString())
                 .contentType(type)
                 .body(body);
+    }
+
+    private String duration(Integer minutes) {
+        return minutes == null ? text("none") : durations.text(minutes);
     }
 }

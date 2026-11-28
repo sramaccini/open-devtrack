@@ -32,6 +32,8 @@ final class IssueApi {
                      String status, String priority, String assignee, String reporter, LocalDate dueOn,
                      LocalDate startOn, String reviewer, List<String> labels, Map<String, Object> custom, Instant createdAt, Instant updatedAt, long version, boolean watching,
                      boolean flagged, long votes, boolean voted, ParentView parent, String parentKey,
+                     String originalEstimate, Integer originalEstimateMinutes, String remainingEstimate,
+                     Integer remainingEstimateMinutes, String timeSpent, int timeSpentMinutes,
                      @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
@@ -115,6 +117,8 @@ final class IssueApi {
         private String assignee;
         private String dueOn;
         private String startOn;
+        private String originalEstimate;
+        private String remainingEstimate;
         private String reviewer;
         private String reporter;
         private List<String> labels;
@@ -183,6 +187,24 @@ final class IssueApi {
         public void setStartOn(String startOn) {
             this.startOn = startOn;
             given.add("startOn");
+        }
+
+        public String getOriginalEstimate() {
+            return originalEstimate;
+        }
+
+        public void setOriginalEstimate(String originalEstimate) {
+            this.originalEstimate = originalEstimate;
+            given.add("originalEstimate");
+        }
+
+        public String getRemainingEstimate() {
+            return remainingEstimate;
+        }
+
+        public void setRemainingEstimate(String remainingEstimate) {
+            this.remainingEstimate = remainingEstimate;
+            given.add("remainingEstimate");
         }
 
         public String getReviewer() {
@@ -283,6 +305,6 @@ final class IssueApi {
      */
     record IssueRequest(String type, String summary, String description, String priority, String assignee,
                         String dueOn, String startOn, String reviewer, List<String> labels, Map<String, Object> custom,
-                        String parent, Long version) {
+                        String originalEstimate, String remainingEstimate, String parent, Long version) {
     }
 }

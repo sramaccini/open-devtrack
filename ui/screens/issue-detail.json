@@ -177,6 +177,29 @@
     },
     "activity": {
       "ref": "issues/activity"
+    },
+    "worklogs": {
+      "ref": "issues/worklogs"
+    },
+    "addWorkLog": {
+      "ref": "issues/addWorkLog"
+    },
+    "editWorkLog": {
+      "ref": "issues/editWorkLog"
+    },
+    "removeWorkLog": {
+      "ref": "issues/removeWorkLog"
+    },
+    "timeTracking": {
+      "ref": "issues/timeTracking"
+    },
+    "editWorkLogText": {
+      "ref": "issues/editWorkLog",
+      "body": {
+        "timeSpent": "{{ string(row.minutes) }}",
+        "comment": "{{text}}",
+        "version": "{{row.version}}"
+      }
     }
   },
   "shortcuts": [
@@ -933,24 +956,62 @@
                       "refresh": "activity"
                     }
                   ],
-                  "editIf": "{{ row._perm.edit }}",
+                  "editIf": "{{ row._perm.edit && (row.kind != 'worklog' || row.text != null) }}",
                   "onEdit": [
                     {
-                      "call": "updateComment",
-                      "args": {
-                        "id": "{{row.id}}"
-                      },
-                      "onError": [
+                      "if": "{{ row.kind == 'worklog' }}",
+                      "then": [
                         {
-                          "if": "{{error.status == 412}}",
-                          "then": [
+                          "call": "editWorkLogText",
+                          "args": {
+                            "id": "{{row.id}}"
+                          },
+                          "onError": [
                             {
-                              "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                              "if": "{{error.status == 400}}",
+                              "then": [
+                                {
+                                  "toast": "{{ t('time.duration_invalid', 'Written as 1w 2d 3h 30m') }}"
+                                }
+                              ],
+                              "else": [
+                                {
+                                  "if": "{{error.status == 412}}",
+                                  "then": [
+                                    {
+                                      "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                    }
+                                  ],
+                                  "else": [
+                                    {
+                                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                    }
+                                  ]
+                                }
+                              ]
                             }
-                          ],
-                          "else": [
+                          ]
+                        }
+                      ],
+                      "else": [
+                        {
+                          "call": "updateComment",
+                          "args": {
+                            "id": "{{row.id}}"
+                          },
+                          "onError": [
                             {
-                              "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                              "if": "{{error.status == 412}}",
+                              "then": [
+                                {
+                                  "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                }
+                              ],
+                              "else": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
                             }
                           ]
                         }
@@ -958,21 +1019,51 @@
                     },
                     {
                       "refresh": "activity"
+                    },
+                    {
+                      "refresh": "worklogs"
                     }
                   ],
                   "deleteIf": "{{ row._perm.delete }}",
                   "onDelete": [
                     {
-                      "confirm": "{{ t('issues.delete_comment_confirm', 'Delete this comment?') }}"
-                    },
-                    {
-                      "call": "removeComment",
-                      "args": {
-                        "id": "{{row.id}}"
-                      },
-                      "onError": [
+                      "if": "{{ row.kind == 'worklog' }}",
+                      "then": [
                         {
-                          "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                          "confirm": "{{ t('time.delete_confirm', 'Delete this work log? Its time goes back to what remains') }}"
+                        },
+                        {
+                          "call": "removeWorkLog",
+                          "args": {
+                            "id": "{{row.id}}"
+                          },
+                          "onError": [
+                            {
+                              "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                            }
+                          ]
+                        },
+                        {
+                          "refresh": "worklogs"
+                        },
+                        {
+                          "refresh": "issue"
+                        }
+                      ],
+                      "else": [
+                        {
+                          "confirm": "{{ t('issues.delete_comment_confirm', 'Delete this comment?') }}"
+                        },
+                        {
+                          "call": "removeComment",
+                          "args": {
+                            "id": "{{row.id}}"
+                          },
+                          "onError": [
+                            {
+                              "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                            }
+                          ]
                         }
                       ]
                     },
@@ -988,7 +1079,10 @@
                   "filters": true,
                   "orderToggle": true,
                   "order": "desc",
-                  "orderBind": "state.activityOrder"
+                  "orderBind": "state.activityOrder",
+                  "workLog": {
+                    "minutesField": "minutes"
+                  }
                 }
               ]
             }
@@ -1564,6 +1658,106 @@
                             }
                           ],
                           "icon": "like"
+                        },
+                        {
+                          "id": "item-log-work",
+                          "label": "{{ t('time.log_work', 'Log work') }}",
+                          "icon": "clock-circle",
+                          "visibleIf": "{{data.issue._perm.worklog}}",
+                          "onClick": [
+                            {
+                              "dialog": {
+                                "title": "{{ t('time.log_work_title', 'Log work on {key}', {'key': data.issue.key}) }}",
+                                "submitLabel": "{{ t('time.log', 'Log') }}",
+                                "fields": [
+                                  {
+                                    "name": "timeSpent",
+                                    "type": "text",
+                                    "label": "{{ t('time.time_spent', 'Time spent') }}",
+                                    "required": true,
+                                    "maxLength": 40,
+                                    "transform": [
+                                      "trim"
+                                    ],
+                                    "pattern": "^\\s*(\\d{1,6}w)?\\s*(\\d{1,6}d)?\\s*(\\d{1,6}h)?\\s*(\\d{1,6}m)?\\s*$",
+                                    "tooltip": "{{ t('time.time_spent_help', 'As 1w 2d 3h 30m: a day is {hours} hours, a week {days} days') }}",
+                                    "messages": {
+                                      "pattern": "{{ t('time.duration_invalid', 'Written as 1w 2d 3h 30m') }}"
+                                    }
+                                  },
+                                  {
+                                    "name": "started",
+                                    "type": "datetime",
+                                    "label": "{{ t('time.started', 'Started') }}",
+                                    "tooltip": "{{ t('time.started_help', 'When the work began; now if empty') }}"
+                                  },
+                                  {
+                                    "name": "remainingEstimate",
+                                    "type": "text",
+                                    "label": "{{ t('time.remaining', 'Remaining estimate') }}",
+                                    "maxLength": 40,
+                                    "transform": [
+                                      "trim"
+                                    ],
+                                    "pattern": "^\\s*(\\d{1,6}w)?\\s*(\\d{1,6}d)?\\s*(\\d{1,6}h)?\\s*(\\d{1,6}m)?\\s*$",
+                                    "tooltip": "{{ t('time.remaining_log_help', 'What remains after this work; if empty it goes down by the time spent') }}",
+                                    "messages": {
+                                      "pattern": "{{ t('time.duration_invalid', 'Written as 1w 2d 3h 30m') }}"
+                                    }
+                                  },
+                                  {
+                                    "name": "comment",
+                                    "type": "textarea",
+                                    "label": "{{ t('time.work_description', 'Work description') }}",
+                                    "rows": 3,
+                                    "maxLength": 32000
+                                  }
+                                ],
+                                "onSubmit": [
+                                  {
+                                    "call": "addWorkLog",
+                                    "onError": [
+                                      {
+                                        "if": "{{error.status == 400}}",
+                                        "then": [
+                                          {
+                                            "toast": "{{ t('time.duration_invalid', 'Written as 1w 2d 3h 30m') }}"
+                                          }
+                                        ],
+                                        "else": [
+                                          {
+                                            "if": "{{error.status == 412}}",
+                                            "then": [
+                                              {
+                                                "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                              }
+                                            ],
+                                            "else": [
+                                              {
+                                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "toast": "{{ t('time.logged', 'Work logged') }}"
+                                  },
+                                  {
+                                    "refresh": "worklogs"
+                                  },
+                                  {
+                                    "refresh": "issue"
+                                  },
+                                  {
+                                    "refresh": "activity"
+                                  }
+                                ]
+                              }
+                            }
+                          ]
                         },
                         {
                           "divider": true
@@ -2203,6 +2397,367 @@
                 }
               ],
               "visibleIf": "{{ has(data.issue) && data.issue.type != 'subtask' }}"
+            },
+            {
+              "id": "issue-time",
+              "type": "section",
+              "title": "{{ t('time.title', 'Time tracking') }}",
+              "components": [
+                {
+                  "id": "time-progress",
+                  "type": "progress",
+                  "value": "{{ has(data.issue) ? data.issue.timeSpentMinutes : 0 }}",
+                  "max": "{{ has(data.issue) && data.issue.timeSpentMinutes + (data.issue.remainingEstimateMinutes == null ? 0 : data.issue.remainingEstimateMinutes) > 0 ? data.issue.timeSpentMinutes + (data.issue.remainingEstimateMinutes == null ? 0 : data.issue.remainingEstimateMinutes) : 1 }}",
+                  "label": "{{ has(data.issue) ? t('time.progress', '{spent} logged, {remaining} remaining', dyn({'spent': data.issue.timeSpent, 'remaining': data.issue.remainingEstimate == null ? '0m' : data.issue.remainingEstimate})) : '' }}",
+                  "tone": "success"
+                },
+                {
+                  "id": "time-form",
+                  "type": "form",
+                  "layout": "grid",
+                  "source": "issue",
+                  "edit": "inline",
+                  "columns": 1,
+                  "fields": [
+                    {
+                      "name": "originalEstimate",
+                      "type": "text",
+                      "label": "{{ t('time.original', 'Original estimate') }}",
+                      "maxLength": 40,
+                      "transform": [
+                        "trim"
+                      ],
+                      "pattern": "^\\s*(\\d{1,6}w)?\\s*(\\d{1,6}d)?\\s*(\\d{1,6}h)?\\s*(\\d{1,6}m)?\\s*$",
+                      "tooltip": "{{ t('time.original_help', 'The work planned, as 1w 2d 3h 30m; the first one is also what remains') }}",
+                      "messages": {
+                        "pattern": "{{ t('time.duration_invalid', 'Written as 1w 2d 3h 30m') }}"
+                      },
+                      "emptyText": "{{ t('common.none', 'None') }}",
+                      "readOnlyIf": "{{!form._perm.edit}}"
+                    },
+                    {
+                      "name": "remainingEstimate",
+                      "type": "text",
+                      "label": "{{ t('time.remaining', 'Remaining estimate') }}",
+                      "maxLength": 40,
+                      "transform": [
+                        "trim"
+                      ],
+                      "pattern": "^\\s*(\\d{1,6}w)?\\s*(\\d{1,6}d)?\\s*(\\d{1,6}h)?\\s*(\\d{1,6}m)?\\s*$",
+                      "tooltip": "{{ t('time.remaining_help', 'The work left, as 1w 2d 3h 30m; it goes down as work is logged') }}",
+                      "messages": {
+                        "pattern": "{{ t('time.duration_invalid', 'Written as 1w 2d 3h 30m') }}"
+                      },
+                      "emptyText": "{{ t('common.none', 'None') }}",
+                      "readOnlyIf": "{{!form._perm.edit}}"
+                    }
+                  ],
+                  "onSave": [
+                    {
+                      "call": "patchIssue",
+                      "onError": [
+                        {
+                          "if": "{{error.status == 400}}",
+                          "then": [
+                            {
+                              "toast": "{{ t('time.duration_invalid', 'Written as 1w 2d 3h 30m') }}"
+                            }
+                          ],
+                          "else": [
+                            {
+                              "if": "{{error.status == 412}}",
+                              "then": [
+                                {
+                                  "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                }
+                              ],
+                              "else": [
+                                {
+                                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "refresh": "issue"
+                    },
+                    {
+                      "refresh": "activity"
+                    }
+                  ]
+                },
+                {
+                  "id": "worklog-table",
+                  "type": "table",
+                  "source": "worklogs",
+                  "visibleIf": "{{ has(data.worklogs) && size(data.worklogs) > 0 }}",
+                  "columns": [
+                    {
+                      "field": "author",
+                      "label": "{{ t('time.author', 'Who') }}"
+                    },
+                    {
+                      "field": "timeSpent",
+                      "label": "{{ t('time.time_spent', 'Time spent') }}",
+                      "tooltip": "{{ t('time.started_on', 'Started {date}', {'date': row.startedLocal}) }}"
+                    }
+                  ],
+                  "rowActions": [
+                    {
+                      "id": "btn-edit-worklog",
+                      "label": "{{ t('time.edit', 'Edit work log') }}",
+                      "icon": "edit",
+                      "visibleIf": "{{row._perm.edit}}",
+                      "onClick": [
+                        {
+                          "dialog": {
+                            "title": "{{ t('time.edit', 'Edit work log') }}",
+                            "submitLabel": "{{ t('common.save', 'Save') }}",
+                            "initial": {
+                              "timeSpent": "{{row.timeSpent}}",
+                              "started": "{{row.startedLocal}}",
+                              "comment": "{{ row.comment == null ? \"\" : row.comment }}"
+                            },
+                            "fields": [
+                              {
+                                "name": "timeSpent",
+                                "type": "text",
+                                "label": "{{ t('time.time_spent', 'Time spent') }}",
+                                "required": true,
+                                "maxLength": 40,
+                                "transform": [
+                                  "trim"
+                                ],
+                                "pattern": "^\\s*(\\d{1,6}w)?\\s*(\\d{1,6}d)?\\s*(\\d{1,6}h)?\\s*(\\d{1,6}m)?\\s*$",
+                                "tooltip": "{{ t('time.time_spent_help', 'As 1w 2d 3h 30m: a day is {hours} hours, a week {days} days') }}",
+                                "messages": {
+                                  "pattern": "{{ t('time.duration_invalid', 'Written as 1w 2d 3h 30m') }}"
+                                }
+                              },
+                              {
+                                "name": "started",
+                                "type": "datetime",
+                                "label": "{{ t('time.started', 'Started') }}",
+                                "tooltip": "{{ t('time.started_keep_help', 'When the work began') }}"
+                              },
+                              {
+                                "name": "remainingEstimate",
+                                "type": "text",
+                                "label": "{{ t('time.remaining', 'Remaining estimate') }}",
+                                "maxLength": 40,
+                                "transform": [
+                                  "trim"
+                                ],
+                                "pattern": "^\\s*(\\d{1,6}w)?\\s*(\\d{1,6}d)?\\s*(\\d{1,6}h)?\\s*(\\d{1,6}m)?\\s*$",
+                                "tooltip": "{{ t('time.remaining_log_help', 'What remains after this work; if empty it goes down by the time spent') }}",
+                                "messages": {
+                                  "pattern": "{{ t('time.duration_invalid', 'Written as 1w 2d 3h 30m') }}"
+                                }
+                              },
+                              {
+                                "name": "comment",
+                                "type": "textarea",
+                                "label": "{{ t('time.work_description', 'Work description') }}",
+                                "rows": 3,
+                                "maxLength": 32000
+                              }
+                            ],
+                            "onSubmit": [
+                              {
+                                "call": "editWorkLog",
+                                "args": {
+                                  "id": "{{row.id}}",
+                                  "version": "{{row.version}}"
+                                },
+                                "onError": [
+                                  {
+                                    "if": "{{error.status == 400}}",
+                                    "then": [
+                                      {
+                                        "toast": "{{ t('time.duration_invalid', 'Written as 1w 2d 3h 30m') }}"
+                                      }
+                                    ],
+                                    "else": [
+                                      {
+                                        "if": "{{error.status == 412}}",
+                                        "then": [
+                                          {
+                                            "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                          }
+                                        ],
+                                        "else": [
+                                          {
+                                            "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "refresh": "worklogs"
+                              },
+                              {
+                                "refresh": "issue"
+                              },
+                              {
+                                "refresh": "activity"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "btn-remove-worklog",
+                      "label": "{{ t('time.delete', 'Delete work log') }}",
+                      "icon": "delete",
+                      "visibleIf": "{{row._perm.delete}}",
+                      "onClick": [
+                        {
+                          "confirm": "{{ t('time.delete_confirm', 'Delete this work log? Its time goes back to what remains') }}"
+                        },
+                        {
+                          "call": "removeWorkLog",
+                          "args": {
+                            "id": "{{row.id}}"
+                          },
+                          "onError": [
+                            {
+                              "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                            }
+                          ]
+                        },
+                        {
+                          "refresh": "worklogs"
+                        },
+                        {
+                          "refresh": "issue"
+                        },
+                        {
+                          "refresh": "activity"
+                        }
+                      ]
+                    }
+                  ],
+                  "rowActionsInline": 0
+                },
+                {
+                  "id": "worklog-add",
+                  "type": "box",
+                  "variant": "dashed",
+                  "justify": "center",
+                  "visibleIf": "{{ has(data.issue) && data.issue._perm.worklog }}",
+                  "components": [
+                    {
+                      "id": "btn-log-work",
+                      "type": "button",
+                      "label": "{{ t('time.log_work', 'Log work') }}",
+                      "icon": "clock-circle",
+                      "display": "icon",
+                      "tone": "neutral",
+                      "onClick": [
+                        {
+                          "dialog": {
+                            "title": "{{ t('time.log_work_title', 'Log work on {key}', {'key': data.issue.key}) }}",
+                            "submitLabel": "{{ t('time.log', 'Log') }}",
+                            "fields": [
+                              {
+                                "name": "timeSpent",
+                                "type": "text",
+                                "label": "{{ t('time.time_spent', 'Time spent') }}",
+                                "required": true,
+                                "maxLength": 40,
+                                "transform": [
+                                  "trim"
+                                ],
+                                "pattern": "^\\s*(\\d{1,6}w)?\\s*(\\d{1,6}d)?\\s*(\\d{1,6}h)?\\s*(\\d{1,6}m)?\\s*$",
+                                "tooltip": "{{ t('time.time_spent_help', 'As 1w 2d 3h 30m: a day is {hours} hours, a week {days} days') }}",
+                                "messages": {
+                                  "pattern": "{{ t('time.duration_invalid', 'Written as 1w 2d 3h 30m') }}"
+                                }
+                              },
+                              {
+                                "name": "started",
+                                "type": "datetime",
+                                "label": "{{ t('time.started', 'Started') }}",
+                                "tooltip": "{{ t('time.started_help', 'When the work began; now if empty') }}"
+                              },
+                              {
+                                "name": "remainingEstimate",
+                                "type": "text",
+                                "label": "{{ t('time.remaining', 'Remaining estimate') }}",
+                                "maxLength": 40,
+                                "transform": [
+                                  "trim"
+                                ],
+                                "pattern": "^\\s*(\\d{1,6}w)?\\s*(\\d{1,6}d)?\\s*(\\d{1,6}h)?\\s*(\\d{1,6}m)?\\s*$",
+                                "tooltip": "{{ t('time.remaining_log_help', 'What remains after this work; if empty it goes down by the time spent') }}",
+                                "messages": {
+                                  "pattern": "{{ t('time.duration_invalid', 'Written as 1w 2d 3h 30m') }}"
+                                }
+                              },
+                              {
+                                "name": "comment",
+                                "type": "textarea",
+                                "label": "{{ t('time.work_description', 'Work description') }}",
+                                "rows": 3,
+                                "maxLength": 32000
+                              }
+                            ],
+                            "onSubmit": [
+                              {
+                                "call": "addWorkLog",
+                                "onError": [
+                                  {
+                                    "if": "{{error.status == 400}}",
+                                    "then": [
+                                      {
+                                        "toast": "{{ t('time.duration_invalid', 'Written as 1w 2d 3h 30m') }}"
+                                      }
+                                    ],
+                                    "else": [
+                                      {
+                                        "if": "{{error.status == 412}}",
+                                        "then": [
+                                          {
+                                            "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                                          }
+                                        ],
+                                        "else": [
+                                          {
+                                            "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "toast": "{{ t('time.logged', 'Work logged') }}"
+                              },
+                              {
+                                "refresh": "worklogs"
+                              },
+                              {
+                                "refresh": "issue"
+                              },
+                              {
+                                "refresh": "activity"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             },
             {
               "id": "issue-dates",

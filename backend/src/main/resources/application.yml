@@ -230,6 +230,10 @@ odt:
     # again every night, so a day with no change still has its row.
     zone: ${ODT_REPORTING_ZONE:UTC}
     snapshot-cron: "0 5 0 * * *"
+  # How long a day and a week of time tracking are (ADR-30): 1d is 8 hours, 1w 5 days.
+  time-tracking:
+    hours-per-day: ${ODT_TIME_TRACKING_HOURS_PER_DAY:8}
+    days-per-week: ${ODT_TIME_TRACKING_DAYS_PER_WEEK:5}
   # The telemetry of the Quadrava runtime (contracts/telemetry.yaml, #57): traces and logs of the screens, redacted a
   # second time, go to the OTLP/HTTP collector of the installation (http://collector:4318); without one they are
   # accepted and dropped.

@@ -19,9 +19,10 @@ public enum ProjectRole {
 
     VIEWER(Set.of("odt.issue.browse")),
     DEVELOPER(Set.of("odt.issue.browse", "odt.issue.create", "odt.issue.edit", "odt.issue.transition", "odt.issue.comment",
-            "odt.issue.attach", "odt.sprint.manage")),
+            "odt.issue.attach", "odt.sprint.manage", "odt.worklog.add")),
     ADMIN(Set.of("odt.issue.browse", "odt.issue.create", "odt.issue.edit", "odt.issue.transition", "odt.issue.comment",
-            "odt.issue.attach", "odt.sprint.manage", "odt.issue.delete", "odt.issue.move", "odt.reporter.edit",
+            "odt.issue.attach", "odt.sprint.manage", "odt.worklog.add", "odt.worklog.manage", "odt.issue.delete",
+            "odt.issue.move", "odt.reporter.edit",
             "odt.project.edit", "odt.member.manage"));
 
     private final Set<String> permissions;

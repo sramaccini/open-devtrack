@@ -7,6 +7,7 @@ package com.logicwarez.opendevtrack.audit;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logicwarez.opendevtrack.access.ProjectAccess;
 import com.logicwarez.opendevtrack.collaboration.IssueComments;
+import com.logicwarez.opendevtrack.collaboration.IssueWorkLogs;
 import com.logicwarez.opendevtrack.issue.IssueRef;
 import com.logicwarez.opendevtrack.issue.Issues;
 import com.logicwarez.opendevtrack.platform.ApiDoc;
@@ -39,16 +40,19 @@ class ActivityController {
 
     static final String COMMENT = "comment";
     static final String CHANGE = "change";
+    static final String WORKLOG = "worklog";
     private static final int MAX_CHANGES = 500;
 
     private final Issues issues;
     private final IssueChangeRepository changes;
     private final IssueComments comments;
+    private final IssueWorkLogs workLogs;
     private final ProjectAccess access;
     private final CurrentUser user;
 
-    ActivityController(Issues issues, IssueChangeRepository changes, IssueComments comments, ProjectAccess access,
-                       CurrentUser user) {
+    ActivityController(Issues issues, IssueChangeRepository changes, IssueComments comments, IssueWorkLogs workLogs,
+                       ProjectAccess access, CurrentUser user) {
+        this.workLogs = workLogs;
         this.issues = issues;
         this.changes = changes;
         this.comments = comments;
@@ -57,11 +61,13 @@ class ActivityController {
     }
 
     /**
-     * A comment ({@code text}, {@code edited}, {@code version}, {@code _perm} with {@code edit} and {@code delete}) or the
-     * change of a field ({@code field}, {@code from}, {@code to}).
+     * A comment ({@code text}, {@code edited}, {@code version}, {@code _perm} with {@code edit} and {@code delete}), work
+     * logged ({@code minutes}, {@code started}, {@code text}, {@code version}, {@code _perm}) or the change of a field
+     * ({@code field}, {@code from}, {@code to}).
      */
     record Activity(String kind, UUID id, String author, Instant at, String text, boolean edited, Long version,
-                    String field, String from, String to, @JsonProperty("_perm") Map<String, Boolean> perm) {
+                    String field, String from, String to, Integer minutes, Instant started,
+                    @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
     @ApiDoc(value = "The comments and the changes of an issue in one list, oldest first",
@@ -79,7 +85,12 @@ class ActivityController {
         List<Activity> all = new ArrayList<>();
         for (IssueComments.Comment c : comments.of(issue.get().id(), permissions)) {
             all.add(new Activity(COMMENT, c.id(), c.author(), c.createdAt(), c.body(), c.edited(), c.version(),
-                    null, null, null, c.perm()));
+                    null, null, null, null, null, c.perm()));
+        }
+        // Work logged sits where it was logged, as in Jira; started is when the work began.
+        for (IssueWorkLogs.WorkLog w : workLogs.of(issue.get().id(), permissions)) {
+            all.add(new Activity(WORKLOG, w.id(), w.author(), w.createdAt(), w.comment(), false, w.version(),
+                    null, null, null, w.minutes(), w.started(), w.perm()));
         }
         // The newest changes when there are many. The creation, and the values the issue was created with (written at
         // the same instant), are in the details of the issue, not changes.
@@ -89,7 +100,7 @@ class ActivityController {
         for (IssueChangeEntity c : rows) {
             if (!c.changedAt().equals(created)) {
                 all.add(new Activity(CHANGE, null, c.author(), c.changedAt(), null, false, null,
-                        c.field(), c.from(), c.to(), Map.of()));
+                        c.field(), c.from(), c.to(), null, null, Map.of()));
             }
         }
         all.sort(Comparator.comparing(Activity::at));

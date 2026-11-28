@@ -19,11 +19,14 @@ import org.springframework.stereotype.Component;
 class IssueCleanup {
 
     private final CommentRepository comments;
+    private final WorkLogRepository workLogs;
     private final AttachmentRepository attachments;
     private final AttachmentBytes bytes;
 
-    IssueCleanup(CommentRepository comments, AttachmentRepository attachments, AttachmentBytes bytes) {
+    IssueCleanup(CommentRepository comments, WorkLogRepository workLogs, AttachmentRepository attachments,
+                 AttachmentBytes bytes) {
         this.comments = comments;
+        this.workLogs = workLogs;
         this.attachments = attachments;
         this.bytes = bytes;
     }
@@ -36,6 +39,7 @@ class IssueCleanup {
     @ApplicationModuleListener
     void on(IssueDeleted event) {
         comments.deleteByIssue(event.issueId());
+        workLogs.deleteByIssue(event.issueId());
         List<AttachmentEntity> gone = attachments.findByIssueIdOrderByUploadedAtAscIdAsc(event.issueId());
         attachments.deleteAll(gone);
         gone.forEach(bytes::removeAfterCommit);

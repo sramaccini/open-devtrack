@@ -52,6 +52,11 @@ class IssueEntity {
     private LocalDate startOn;
     private String reviewer;
 
+    /** Time tracking in minutes (ADR-30): the estimates, optional, and the sum of the work logs. */
+    private Integer originalEstimate;
+    private Integer remainingEstimate;
+    private int timeSpent;
+
     @JdbcTypeCode(SqlTypes.ARRAY)
     private List<String> labels;
 
@@ -86,7 +91,8 @@ class IssueEntity {
     }
 
     void edit(IssueType type, String summary, String description, Priority priority, String assignee, LocalDate dueOn,
-              LocalDate startOn, String reviewer, List<String> labels, Map<String, Object> custom, Instant now) {
+              LocalDate startOn, String reviewer, List<String> labels, Map<String, Object> custom,
+              Integer originalEstimate, Integer remainingEstimate, Instant now) {
         this.type = type;
         this.summary = summary;
         this.description = description;
@@ -97,6 +103,15 @@ class IssueEntity {
         this.reviewer = reviewer;
         this.labels = labels;
         this.custom = new HashMap<>(custom);
+        this.originalEstimate = originalEstimate;
+        this.remainingEstimate = remainingEstimate;
+        this.updatedAt = now;
+    }
+
+    /** Work logged, changed or deleted: the time spent moves by {@code spent}, the remaining estimate becomes {@code remaining}. */
+    void logged(int spent, Integer remaining, Instant now) {
+        this.timeSpent = Math.max(0, timeSpent + spent);
+        this.remainingEstimate = remaining;
         this.updatedAt = now;
     }
 
@@ -183,6 +198,18 @@ class IssueEntity {
 
     LocalDate startOn() {
         return startOn;
+    }
+
+    Integer originalEstimate() {
+        return originalEstimate;
+    }
+
+    Integer remainingEstimate() {
+        return remainingEstimate;
+    }
+
+    int timeSpent() {
+        return timeSpent;
     }
 
     String reviewer() {

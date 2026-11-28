@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "datasources": "issues",
-  "description": "Issues of a project (module issue) with their custom fields, attachments, links, watchers, flag, votes and transitions (module workflow), the members who can be assigned, the comments (module collaboration) and the changelog (module audit).",
+  "description": "Issues of a project (module issue) with their custom fields, attachments, links, watchers, flag, votes and transitions (module workflow), the members who can be assigned, the comments and the work log (module collaboration) and the changelog (module audit).",
   "sources": {
     "list": {
       "type": "rest",
@@ -348,6 +348,44 @@
       "type": "rest",
       "method": "GET",
       "url": "/api/issues/{{params.issue}}/activity"
+    },
+    "worklogs": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/issues/{{params.issue}}/worklogs"
+    },
+    "addWorkLog": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/issues/{{params.issue}}/worklogs",
+      "body": {
+        "timeSpent": "{{form.timeSpent}}",
+        "started": "{{form.started}}",
+        "comment": "{{form.comment}}",
+        "remainingEstimate": "{{form.remainingEstimate}}"
+      }
+    },
+    "editWorkLog": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/issues/{{params.issue}}/worklogs/{{id}}",
+      "body": {
+        "timeSpent": "{{form.timeSpent}}",
+        "started": "{{form.started}}",
+        "comment": "{{form.comment}}",
+        "remainingEstimate": "{{form.remainingEstimate}}",
+        "version": "{{version}}"
+      }
+    },
+    "removeWorkLog": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/issues/{{params.issue}}/worklogs/{{id}}"
+    },
+    "timeTracking": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/time-tracking"
     }
   }
 }

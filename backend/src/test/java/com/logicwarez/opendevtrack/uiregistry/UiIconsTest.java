@@ -25,11 +25,11 @@ class UiIconsTest {
     /**
      * The icons Quadrava offers for actions (catalogue, § 2.32): those of 0.19.0, flag and like of 0.25.0 (Q41), share
      * of 0.29.0 (Q45). From 0.29.0 any Ant Design name works too; the screens keep to the short names, and an unknown
-     * name shows no icon.
+     * name shows no icon. clock-circle, of Ant Design, logs work (ADR-30): the set has no clock.
      */
     private static final Set<String> ICONS = Set.of("save", "edit", "delete", "plus", "check", "close", "link", "eye",
             "eye-invisible", "user-add", "back", "move", "play", "reload", "download", "upload", "external", "copy",
-            "search", "filter", "settings", "flag", "like", "share");
+            "search", "filter", "settings", "flag", "like", "share", "clock-circle");
     private static final List<String> ACTIONS = List.of("actions", "rowActions", "bulkActions");
 
     @Test

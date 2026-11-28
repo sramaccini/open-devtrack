@@ -36,7 +36,7 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   reorders, `play` starts or sends a test, `check` completes or turns on, `close` signs out or turns off, `link`,
   `eye` and `eye-invisible` for links and watching, `download` exports, `reload` delivers again or renews a secret,
   `filter` and `search` for filters and the search, `settings` for the project, `back` to the page above, `external`
-  to another page.
+  to another page, `clock-circle` (an Ant Design name, Quadrava 0.29.0, since the set has no clock) logs work.
 - **Issue page**: `issue-detail` is a `grid` of 12 columns, as the page of a work item in Jira: on the left (8)
   the summary and the description, two forms with `edit: inline` (Quadrava 0.27.0, Q43) on `issue`, between them the
   `menuButton` «+» (`display: icon`, T15: the popover of «Add subtask», a dialog with the dropzone of the attachments and a
@@ -49,7 +49,7 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   «Add subtask» a `popover` with the summary that calls `addChild` with the `childType` of the answer, ADR-28), Linked
   work items and Activity (the activity feed of Quadrava 0.34.0, Q49: `comments` on `issues/activity` with
   `kindField: kind`, `changes` translated with `values.issue_field` and `values`, `filters`, `orderToggle` newest
-  first, `orderBind` `state.activityOrder`; every step that changed the issue refreshes `activity`); on the right (4) a row with the status and, as icons, the flag, the menu Watchers, the votes, Copy link (the `copyLink` step, Quadrava 0.29.0, Q45), Share and the menu More actions, then Details and Planning. Details and Planning are forms with `edit: inline` too (Quadrava 0.28.0, Q44: lookups and
+  first, `orderBind` `state.activityOrder`, `workLog` with `minutes`: a work log is edited there only by its description, `editWorkLogText`, and deleted with `removeWorkLog`; every step that changed the issue refreshes `activity`); on the right (4) a row with the status and, as icons, the flag, the menu Watchers, the votes, Copy link (the `copyLink` step, Quadrava 0.29.0, Q45), Share and the menu More actions, then Details, Planning and Time tracking (ADR-30: a `progress` of `timeSpentMinutes` against it plus `remainingEstimateMinutes`, the form `time-form` on `issue` with the two estimates saved by `patchIssue`, the table of `worklogs` (who and time spent, the start in the tooltip) with Edit, a `dialog` with `startedLocal` in the `datetime` field, and Delete in «⋯» (`rowActionsInline: 0`), and «Log work», also in «…», a `dialog` on `addWorkLog`). Details and Planning are forms with `edit: inline` too (Quadrava 0.28.0, Q44: lookups and
   selects confirm on pick, checkboxes on toggle, the fields of `fieldsFrom` alike), each field saved on its own by
   `onSave`. The issue forms call `patchIssue` (`issues/patch`, `PATCH /api/issues/{key}`): only the field that
   changed and the version, or all the custom fields when one of them changed (`field` is then `custom.<key>`);

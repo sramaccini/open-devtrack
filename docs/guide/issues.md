@@ -110,6 +110,19 @@ text, and so does an email address.
 The author edits and deletes their comments. An edited comment is marked as such, and only the people mentioned for
 the first time are told. The admins of the project also delete the comments of others.
 
+### Time tracking
+
+Time tracking, on the right under Planning, shows the time logged against the time logged plus what remains, as in
+Jira, with the original estimate and the remaining estimate as fields. Durations are written as `1w 2d 3h 30m`, any of
+the parts in this order (a bare number is minutes); a day is 8 hours and a week 5 days unless the installation says
+otherwise ([configuration](../admin/configuration.md)). The first original estimate is also what remains.
+
+«Log work», in «…» and under the work logged, asks for the time spent, when the work started (now if empty), what
+remains after it (if empty, it goes down by the time spent, never below zero) and a description. Developers and admins
+log work; the author changes or deletes their logs, from the list of Time tracking, and the admins of the project
+also those of others. Changing or deleting a log moves what remains by the difference. The work logged is in the
+Activity, under «Work log», where its description can be edited too.
+
 ### Attachments
 
 Under the list of files, a dashed area with «Add attachment» uploads files at once, chosen with the button or dropped

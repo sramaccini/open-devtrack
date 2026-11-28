@@ -10,6 +10,16 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Added
 
+- **Issues**: time tracking, as in Jira (ADR-30). The original and remaining estimates, written as `1w 2d 3h 30m`,
+  and the time logged, with a bar in Time tracking; «Log work» (in «…» and in Time tracking) with the time spent, the
+  start, what remains and a description, and the list of the work logs, which their author changes or deletes (the
+  admins of the project also those of others). Logging time lowers what remains, unless it is given. The work logged
+  is in the Activity under «Work log», the estimates in the history and the export. New project permissions
+  `odt.worklog.add` (developers) and `odt.worklog.manage` (admins), added to the existing schemes. API:
+  `originalEstimate`, `remainingEstimate` and `timeSpent` (with their `…Minutes`) in an issue and its `PATCH`,
+  `GET|POST /api/issues/{key}/worklogs`, `PUT|DELETE /api/issues/{key}/worklogs/{id}`, `GET /api/time-tracking`,
+  the webhook events `worklog.created`, `worklog.updated` and `worklog.deleted`. Settings
+  `ODT_TIME_TRACKING_HOURS_PER_DAY` and `ODT_TIME_TRACKING_DAYS_PER_WEEK` (#55 T9).
 - **Issues**: parent and subtasks, as in Jira (ADR-28). The new type «Subtask», and «Parent» in the details of an issue: an
   epic for a story, task or bug, a story, task or bug for a subtask, in the same
   project. The page of an issue lists its subtasks («Child work items» on an epic) with their progress, and «Add

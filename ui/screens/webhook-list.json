@@ -90,6 +90,9 @@
                   "comment.posted",
                   "attachment.added",
                   "attachment.removed",
+                  "worklog.created",
+                  "worklog.updated",
+                  "worklog.deleted",
                   "sprint.started",
                   "sprint.completed"
                 ],
@@ -298,6 +301,9 @@
                       "comment.posted",
                       "attachment.added",
                       "attachment.removed",
+                      "worklog.created",
+                      "worklog.updated",
+                      "worklog.deleted",
                       "sprint.started",
                       "sprint.completed"
                     ],

@@ -12,6 +12,7 @@ import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems.FieldError;
 import com.logicwarez.opendevtrack.project.ProjectRef;
 import com.logicwarez.opendevtrack.project.Projects;
+import com.logicwarez.opendevtrack.shared.Durations;
 import com.logicwarez.opendevtrack.workflow.Workflows;
 import com.logicwarez.opendevtrack.workflow.Workflows.Transition;
 import java.time.Instant;
@@ -250,18 +251,58 @@ public class Issues {
     }
 
     /** The issue as it is with the field of the lane changed, as the form would send it. */
-    private static IssueRequest laneRequest(IssueEntity issue, Lane lane) {
-        IssueRequest now = IssueEditor.unchanged(issue);
+    private IssueRequest laneRequest(IssueEntity issue, Lane lane) {
+        IssueRequest now = editor.unchanged(issue);
         String value = IssueEditor.blankToNull(lane.value());
         String given = value == null ? "" : value;
         return switch (lane.field()) {
             case "assignee" -> new IssueRequest(now.type(), now.summary(), now.description(), now.priority(), value,
-                    now.dueOn(), now.startOn(), now.reviewer(), now.labels(), null, null, now.version());
+                    now.dueOn(), now.startOn(), now.reviewer(), now.labels(), null, now.originalEstimate(),
+                    now.remainingEstimate(), null, now.version());
             case "priority" -> new IssueRequest(now.type(), now.summary(), now.description(), given, now.assignee(),
-                    now.dueOn(), now.startOn(), now.reviewer(), now.labels(), null, null, now.version());
+                    now.dueOn(), now.startOn(), now.reviewer(), now.labels(), null, now.originalEstimate(),
+                    now.remainingEstimate(), null, now.version());
             default -> new IssueRequest(given, now.summary(), now.description(), now.priority(), now.assignee(),
-                    now.dueOn(), now.startOn(), now.reviewer(), now.labels(), null, null, now.version());
+                    now.dueOn(), now.startOn(), now.reviewer(), now.labels(), null, now.originalEstimate(),
+                    now.remainingEstimate(), null, now.version());
         };
+    }
+
+    /** The estimates and the time spent of an issue, in minutes (ADR-30). */
+    public record Time(Integer originalEstimate, Integer remainingEstimate, int timeSpent) {
+    }
+
+    public Optional<Time> time(UUID issueId) {
+        return issues.findById(issueId).map(i -> new Time(i.originalEstimate(), i.remainingEstimate(), i.timeSpent()));
+    }
+
+    /**
+     * Work logged, changed ({@code spent} the difference) or deleted ({@code spent} negative) on an issue, in the
+     * transaction of the caller (ADR-30): the time spent moves by it, and the remaining estimate becomes
+     * {@code remaining} when given, else moves the other way, never below zero. The history gets both changes.
+     */
+    @Transactional
+    public void logWork(UUID issueId, int spent, Integer remaining, Instant now) {
+        IssueEntity issue = issues.findById(issueId).orElseThrow();
+        ProjectRef project = projects.byId(issue.projectId()).orElseThrow();
+        Integer before = issue.remainingEstimate();
+        Integer after = remaining != null ? remaining : before == null ? null : Math.max(0, before - spent);
+        int spentBefore = issue.timeSpent();
+        issue.logged(spent, after, now);
+        issues.saveAndFlush(issue);
+        Durations durations = editor.durations();
+        List<FieldChange> changes = new ArrayList<>();
+        if (spentBefore != issue.timeSpent()) {
+            changes.add(new FieldChange("timeSpent", spentBefore == 0 ? null : durations.text(spentBefore),
+                    issue.timeSpent() == 0 ? null : durations.text(issue.timeSpent())));
+        }
+        if (!Objects.equals(before, after)) {
+            changes.add(new FieldChange("remainingEstimate", durations.textOrNull(before), durations.textOrNull(after)));
+        }
+        if (!changes.isEmpty()) {
+            events.publishEvent(new IssueChanged(issue.id(), project.id(), IssueController.key(project, issue),
+                    user.username(), now, changes));
+        }
     }
 
     record Found(ProjectRef project, IssueEntity issue) {

@@ -21,6 +21,8 @@ INSERT INTO app_permission (permission_code, description) VALUES
     ('odt.issue.transition', 'Move the issues of a project through their workflow'),
     ('odt.issue.comment', 'Comment on the issues of a project'),
     ('odt.issue.attach', 'Attach files to the issues of a project'),
+    ('odt.worklog.add', 'Log work on the issues of a project, and change or delete one''s own work logs'),
+    ('odt.worklog.manage', 'Change or delete the work logs of others in a project'),
     ('odt.issue.delete', 'Delete issues of a project'),
     ('odt.reporter.edit', 'Change the reporter of the issues of a project'),
     ('odt.issue.move', 'Move issues of a project to another project'),

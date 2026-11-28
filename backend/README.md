@@ -229,6 +229,16 @@ the values written with it. Both react to the events of `issue` with `@Applicati
 transaction of their own, through the Event Publication Registry in `odt.event_publication` (an event whose listener
 fails is republished at the next start). The comments of a deleted issue are removed the same way.
 
+The work log (ADR-30) is next to the comments, in `odt_collaboration.worklog` (minutes, `started_at`, comment):
+`GET|POST /api/issues/{key}/worklogs`, `PUT|DELETE …/{id}` with the version read; `odt.worklog.add` (developer)
+logs work and changes one's own, `odt.worklog.manage` (admin) those of others. Each change calls `Issues.logWork`,
+which moves `time_spent` of the issue and `remaining_estimate` the other way (or sets it), and publishes
+`IssueChanged` with both as duration text; the estimates are fields of the `PATCH`. Durations are
+`shared.Durations` (`1w 2d 3h 30m`, with `odt.time-tracking.hours-per-day` and `days-per-week`, read by
+`issue.TimeTracking` and answered by `GET /api/time-tracking`). The Activity reads them through `IssueWorkLogs`
+(kind `worklog` with `minutes` and `started`, placed when it was logged); the webhooks get `worklog.created`,
+`worklog.updated` and `worklog.deleted`.
+
 The audit log of the administration (ADR-22, `odt_audit.admin_event`) keeps the changes to the configuration: who,
 when, the tenant, the project if any, the action (`project.*`, `member.*`, `group.*`, `scheme.*`, `workflow.*`,
 `board.*`, `customfield.*`, `webhook.*`), what it changed and the values before and after (JSON). The controllers

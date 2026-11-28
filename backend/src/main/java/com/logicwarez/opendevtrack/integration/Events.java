@@ -9,6 +9,9 @@ import com.logicwarez.opendevtrack.agile.SprintEvents.SprintStarted;
 import com.logicwarez.opendevtrack.collaboration.AttachmentEvents.AttachmentAdded;
 import com.logicwarez.opendevtrack.collaboration.AttachmentEvents.AttachmentRemoved;
 import com.logicwarez.opendevtrack.collaboration.CommentEvents.CommentPosted;
+import com.logicwarez.opendevtrack.collaboration.WorkLogEvents.WorkLogChanged;
+import com.logicwarez.opendevtrack.collaboration.WorkLogEvents.WorkLogDeleted;
+import com.logicwarez.opendevtrack.collaboration.WorkLogEvents.WorkLogged;
 import com.logicwarez.opendevtrack.issue.IssueEvents.FieldChange;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueCreated;
@@ -48,13 +51,17 @@ class Events {
     static final String COMMENT_POSTED = "comment.posted";
     static final String ATTACHMENT_ADDED = "attachment.added";
     static final String ATTACHMENT_REMOVED = "attachment.removed";
+    static final String WORKLOG_CREATED = "worklog.created";
+    static final String WORKLOG_UPDATED = "worklog.updated";
+    static final String WORKLOG_DELETED = "worklog.deleted";
     static final String SPRINT_STARTED = "sprint.started";
     static final String SPRINT_COMPLETED = "sprint.completed";
     /** «Send a test»: sent to that webhook only, whatever it wants. */
     static final String PING = "ping";
 
     static final List<String> TYPES = List.of(ISSUE_CREATED, ISSUE_CHANGED, ISSUE_DELETED, ISSUE_MOVED, COMMENT_POSTED,
-            ATTACHMENT_ADDED, ATTACHMENT_REMOVED, SPRINT_STARTED, SPRINT_COMPLETED);
+            ATTACHMENT_ADDED, ATTACHMENT_REMOVED, WORKLOG_CREATED, WORKLOG_UPDATED, WORKLOG_DELETED, SPRINT_STARTED,
+            SPRINT_COMPLETED);
 
     private static final JsonMapper JSON = JsonMapper.builder().build();
 
@@ -115,6 +122,30 @@ class Events {
     @ApplicationModuleListener
     void on(AttachmentRemoved e) {
         queue(e.projectId(), ATTACHMENT_REMOVED, e.by(), e.at(), attachment(e.issueKey(), e.attachmentId(), e.filename()));
+    }
+
+    @ApplicationModuleListener
+    void on(WorkLogged e) {
+        queue(e.projectId(), WORKLOG_CREATED, e.by(), e.at(), workLog(e.issueKey(), e.workLogId(), e.minutes()));
+    }
+
+    @ApplicationModuleListener
+    void on(WorkLogChanged e) {
+        queue(e.projectId(), WORKLOG_UPDATED, e.by(), e.at(), workLog(e.issueKey(), e.workLogId(), e.minutes()));
+    }
+
+    @ApplicationModuleListener
+    void on(WorkLogDeleted e) {
+        queue(e.projectId(), WORKLOG_DELETED, e.by(), e.at(), workLog(e.issueKey(), e.workLogId(), e.minutes()));
+    }
+
+    private Map<String, Object> workLog(String issueKey, UUID id, int minutes) {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("key", issueKey);
+        data.put("url", api + "/issues/" + issueKey + "/worklogs");
+        data.put("worklog", id.toString());
+        data.put("minutes", minutes);
+        return data;
     }
 
     @ApplicationModuleListener

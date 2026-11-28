@@ -190,6 +190,7 @@ A name used by another webhook of the project, or an eleventh webhook, is 409.
 | `issue.moved` | `key` (the new one), `movedFrom`, `url`, `changes`: project, key, type, status and the values lost; sent to the webhooks of both projects |
 | `comment.posted` | `key`, `url` of its comments, `comment` (id), `edited`; not the text |
 | `attachment.added`, `attachment.removed` | `key`, `url` of its attachments, `attachment` (id), `filename` |
+| `worklog.created`, `worklog.updated`, `worklog.deleted` | `key`, `url` of its work log, `worklog` (id), `minutes`; not the comment. The issue also sends `issue.changed` with `timeSpent` and `remainingEstimate` |
 | `sprint.started` | `sprint` (id), `name`, `url` of the sprints, `startsOn`, `endsOn`, `committedPoints` |
 | `sprint.completed` | `sprint`, `name`, `url`, `done`, `carried`, `donePoints`, `carriedPoints` |
 | `ping` | `webhook`: its name |

@@ -57,6 +57,12 @@
     "POST /api/issues/{issueKey}/watchers" : {
       "$ref" : "#/components/schemas/WatchRequest"
     },
+    "POST /api/issues/{issueKey}/worklogs" : {
+      "$ref" : "#/components/schemas/WorkLogRequest"
+    },
+    "PUT /api/issues/{issueKey}/worklogs/{id}" : {
+      "$ref" : "#/components/schemas/WorkLogRequest"
+    },
     "POST /api/link-types" : {
       "$ref" : "#/components/schemas/LinkTypeRequest"
     },
@@ -416,10 +422,16 @@
               "type" : "string"
             }
           },
+          "originalEstimate" : {
+            "type" : "string"
+          },
           "parent" : {
             "type" : "string"
           },
           "priority" : {
+            "type" : "string"
+          },
+          "remainingEstimate" : {
             "type" : "string"
           },
           "reporter" : {
@@ -466,10 +478,16 @@
               "type" : "string"
             }
           },
+          "originalEstimate" : {
+            "type" : "string"
+          },
           "parent" : {
             "type" : "string"
           },
           "priority" : {
+            "type" : "string"
+          },
+          "remainingEstimate" : {
             "type" : "string"
           },
           "reviewer" : {
@@ -881,6 +899,28 @@
             "type" : "string"
           },
           "url" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "WorkLogRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "comment" : {
+            "type" : "string"
+          },
+          "remainingEstimate" : {
+            "type" : "string"
+          },
+          "started" : {
+            "type" : "string"
+          },
+          "timeSpent" : {
             "type" : "string"
           },
           "version" : {

@@ -109,7 +109,7 @@ class PermissionSchemeApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].default").value(true))
-                .andExpect(jsonPath("$[0].developer.length()").value(7))
+                .andExpect(jsonPath("$[0].developer.length()").value(8))
                 .andExpect(jsonPath("$[0]._perm.edit").value(false));
         mvc.perform(as(get("/api/projects/WEB"), luisa))
                 .andExpect(jsonPath("$.permissionSchemeName").value("Default"))
