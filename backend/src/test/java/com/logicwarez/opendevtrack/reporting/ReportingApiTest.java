@@ -20,6 +20,7 @@ import com.logicwarez.opendevtrack.TestInfrastructure;
 import jakarta.servlet.Filter;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -67,6 +69,10 @@ class ReportingApiTest {
 
     @Autowired
     ReportModel model;
+
+    /** The zone of the days of the reports, not that of the database: its current_date differs near midnight. */
+    @Value("${odt.reporting.zone:UTC}")
+    String zone;
 
     MockMvc mvc;
 
@@ -233,7 +239,9 @@ class ReportingApiTest {
     void theNightlyJobWritesTheDayOfEveryProject() throws Exception {
         jdbc.execute("DELETE FROM odt_reporting.daily_snapshot");
         model.nightly();
-        assertThat(count("SELECT count(*) FROM odt_reporting.daily_snapshot WHERE sprint_id IS NULL AND day = current_date"))
+        LocalDate day = LocalDate.now(ZoneId.of(zone));
+        assertThat(jdbc.queryForObject(
+                "SELECT count(*) FROM odt_reporting.daily_snapshot WHERE sprint_id IS NULL AND day = ?", Integer.class, day))
                 .isEqualTo(1);
         assertThat(count("SELECT todo FROM odt_reporting.daily_snapshot")).isEqualTo(3);
         assertThat(count("SELECT remaining_points FROM odt_reporting.daily_snapshot")).isEqualTo(10);
