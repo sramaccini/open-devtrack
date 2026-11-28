@@ -8,6 +8,11 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+### Changed
+
+- **Issues**: the sections Attachments and Subtasks show their table only when there is something in it, as in
+  Jira; an empty one shows only its «Add» box.
+
 ## [1.0.0-rc.11] - 2026-11-28
 
 ### Added

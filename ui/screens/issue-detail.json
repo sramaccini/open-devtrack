@@ -503,6 +503,7 @@
                   "id": "attachment-table",
                   "type": "table",
                   "source": "attachments",
+                  "visibleIf": "{{ has(data.attachments) && size(data.attachments) > 0 }}",
                   "columns": [
                     {
                       "field": "thumbnail",
@@ -631,6 +632,7 @@
                   "id": "children-table",
                   "type": "table",
                   "source": "children",
+                  "visibleIf": "{{ has(data.children) && data.children.total > 0 }}",
                   "columns": [
                     {
                       "field": "type",
