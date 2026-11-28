@@ -358,6 +358,10 @@ modules; `POST /api/search/reindex` (admin of the tenant) rebuilds the rows of t
   Italian as well as their ids. On a custom field, `=` and `IN` match the value or, for a field with several choices
   (an array), one of its choices, with two containment conditions on the GIN index of `custom`. Hand-written parser
   and compiler to jOOQ conditions: values are always bound.
+- Links (ADR-29): `issue_doc.links` keeps three words per link, `t:<type>`, `i:<issue>` and `r:<type>:<o|i>:<issue>`,
+  from the links of `IssueDocument`; `linked`, `linkType` and `key IN linkedIssues(KEY[, relation])` match them with
+  `&&` on a GIN index, against the issues the keys name in the projects the user sees. The relations come from
+  `Issues.linkRelations`. An issue deleted writes again the issues that named it.
 - `POST /api/search` takes the request of the `serverDataTable` of Quadrava (query, page, size up to 100, sort, column
   filters, groups, distinct values) and answers in its shape; only the projects the user is a member of are searched
   (all for the admin of the tenant). A wrong query is a 400 Problem with `position` (1-based) and `expected`.

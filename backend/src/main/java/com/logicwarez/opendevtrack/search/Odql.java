@@ -22,7 +22,7 @@ import java.util.Set;
  *          | field [NOT] IN ( value {, value} ) | field [NOT] IN function
  *          | field IS [NOT] EMPTY
  * value   := word | "text" | function
- * function:= word ( )
+ * function:= word ( [value {, value}] )
  * order   := field [ASC | DESC]
  * </pre>
  */
@@ -60,8 +60,15 @@ final class Odql {
     record Clause(String field, String op, List<Value> values, int at) implements Expr {
     }
 
-    /** A word, a quoted text or a function ({@code currentUser()}); {@code text} is the name for a function. */
-    record Value(String text, boolean quoted, boolean function, int at) {
+    /**
+     * A word, a quoted text or a function ({@code currentUser()}, {@code linkedIssues(WEB-4, blocks)}); {@code text} is
+     * the name for a function, {@code args} its arguments.
+     */
+    record Value(String text, boolean quoted, boolean function, int at, List<Value> args) {
+
+        Value(String text, boolean quoted, boolean function, int at) {
+            this(text, quoted, function, at, List.of());
+        }
     }
 
     record Order(String field, boolean descending, int at) {
@@ -293,8 +300,14 @@ final class Odql {
                 take();
                 if (peek().symbol("(")) {
                     take();
-                    expectSymbol(")");
-                    return new Value(token.text(), false, true, token.at());
+                    List<Value> args = new ArrayList<>();
+                    if (!accept(")")) {
+                        do {
+                            args.add(value());
+                        } while (accept(","));
+                        expectSymbol(")");
+                    }
+                    return new Value(token.text(), false, true, token.at(), List.copyOf(args));
                 }
                 return new Value(token.text(), false, false, token.at());
             }

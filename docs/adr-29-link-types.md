@@ -65,6 +65,10 @@ the page is done (741be0e), the configurable types are left to this decision.
   since a code is unique only in its tenant); the select of «Add linked work item» reads
   `GET /api/link-types/relations`, which gives each end with its relation and label, and
   `GET /api/link-types?except=` gives the types where the links of one removed can go.
+- As built, step 2: the search document keeps three words per link in `issue_doc.links` (`t:<type>`,
+  `i:<issue>`, `r:<type>:<o|i>:<issue>`, by the identifiers of the issues, which a move does not change), written
+  for the links already there by the migration and kept by the listeners; deleting an issue writes again the issues
+  at the other ends of its links. `linked` and `linkedIssues()` only name issues of the projects the user sees.
 - The guides of issues, search and administration, the API and the screen of the administration change; the tests of
   links run with a custom type too.
 

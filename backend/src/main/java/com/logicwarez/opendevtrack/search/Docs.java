@@ -10,6 +10,7 @@ import static org.jooq.impl.DSL.table;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 import org.jooq.Field;
 import org.jooq.JSONB;
@@ -33,6 +34,8 @@ final class Docs {
     static final Field<String[]> MOVED_KEYS = field(name("moved_keys"), SQLDataType.CLOB.array());
     /** The key of the parent of the issue (ADR-28). */
     static final Field<String> PARENT_KEY = field(name("parent_key"), SQLDataType.VARCHAR);
+    /** The links (ADR-29): t:<type>, i:<other issue>, r:<type>:<o|i>:<other issue>; see {@link #linkWords}. */
+    static final Field<String[]> LINKS = field(name("links"), SQLDataType.CLOB.array());
     static final Field<Long> NUMBER = field(name("number"), SQLDataType.BIGINT);
     static final Field<String> TYPE = field(name("type"), SQLDataType.VARCHAR);
     static final Field<String> STATUS = field(name("status"), SQLDataType.VARCHAR);
@@ -57,6 +60,16 @@ final class Docs {
     static final Field<String> TSV = field(name("tsv"), SQLDataType.VARCHAR);
 
     private Docs() {
+    }
+
+    /** The words of a link in {@link #LINKS}: its type, the other issue, and both with the end of this issue. */
+    static List<String> linkWords(String type, boolean outward, UUID other) {
+        return List.of("t:" + type, "i:" + other, relationWord(type, outward, other));
+    }
+
+    /** {@code r:<type>:<o|i>:<other issue>}: o when the issue is the {@code from} end of the link. */
+    static String relationWord(String type, boolean outward, Object other) {
+        return "r:" + type + (outward ? ":o:" : ":i:") + other;
     }
 
     /** {@code odt_search.fold(value)}: lower case, without accents, as the index of the summaries. */

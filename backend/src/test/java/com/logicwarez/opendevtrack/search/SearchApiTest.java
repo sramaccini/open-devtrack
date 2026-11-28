@@ -240,6 +240,48 @@ class SearchApiTest {
     }
 
     @Test
+    void linksAreSearchedAsInJira() throws Exception {
+        link("ODT-1", "blocks", "ODT-2");
+        link("ODT-3", "relates", "WEB-1");
+        await(() -> jdbc.queryForObject("SELECT count(*) FROM odt_search.issue_doc WHERE cardinality(links) > 0",
+                Integer.class) == 4);
+        assertThat(keys(mario, "linked = ODT-1")).containsExactly("ODT-2");
+        assertThat(keys(mario, "linked IN (ODT-1, WEB-1) ORDER BY key")).containsExactly("ODT-2", "ODT-3");
+        assertThat(keys(mario, "linkType = blocks ORDER BY key")).containsExactly("ODT-1", "ODT-2");
+        assertThat(keys(mario, "linkType != blocks AND linked IS NOT EMPTY ORDER BY key")).containsExactly("ODT-3", "WEB-1");
+        assertThat(keys(mario, "linked IS EMPTY")).isEmpty();
+        // As the issue named reads the link: ODT-1 blocks ODT-2, which is blocked by ODT-1; relates reads alike from both ends.
+        assertThat(keys(mario, "key IN linkedIssues(ODT-1, blocks)")).containsExactly("ODT-2");
+        assertThat(keys(mario, "key IN linkedIssues(ODT-2, blocks)")).isEmpty();
+        assertThat(keys(mario, "key IN linkedIssues(ODT-2, blocked_by)")).containsExactly("ODT-1");
+        assertThat(keys(mario, "key IN linkedIssues(WEB-1, relates)")).containsExactly("ODT-3");
+        assertThat(keys(mario, "key IN (ODT-1, linkedIssues(ODT-3)) ORDER BY key")).containsExactly("ODT-1", "WEB-1");
+        assertThat(keys(mario, "project = ODT AND key NOT IN linkedIssues(ODT-1) ORDER BY key"))
+                .containsExactly("ODT-1", "ODT-3");
+        // An issue of a project the user does not see is not named by the links.
+        assertThat(keys(luisa, "linked = WEB-1")).isEmpty();
+        assertThat(keys(luisa, "key IN linkedIssues(WEB-1)")).isEmpty();
+        for (String wrong : List.of("linkType = causes", "key IN linkedIssues(ODT-1, causes)", "key IN linkedIssues()")) {
+            mvc.perform(as(post("/api/search"), mario).content("{\"query\":" + json(wrong) + "}"))
+                    .andExpect(status().isBadRequest());
+        }
+        // The links of a deleted issue go from the issues at their other ends.
+        mvc.perform(as(delete("/api/issues/ODT-2"), mario)).andExpect(status().isNoContent());
+        await(() -> {
+            try {
+                return keys(mario, "linkType = blocks").isEmpty();
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+        });
+    }
+
+    private void link(String from, String relation, String to) throws Exception {
+        mvc.perform(as(post("/api/issues/" + from + "/links"), mario)
+                .content("{\"relation\":\"" + relation + "\",\"issue\":\"" + to + "\"}")).andExpect(status().isCreated());
+    }
+
+    @Test
     void flaggedIssuesAreSearchedAsInJira() throws Exception {
         mvc.perform(as(put("/api/issues/ODT-2/flag"), mario)).andExpect(status().isNoContent());
         await(() -> jdbc.queryForObject("SELECT flagged IS NOT NULL FROM odt_search.issue_doc WHERE tenant_id = 'ALPHA'"

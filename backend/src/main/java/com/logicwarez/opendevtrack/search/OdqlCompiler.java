@@ -12,6 +12,7 @@ import static com.logicwarez.opendevtrack.search.Docs.CREATED_AT;
 import static com.logicwarez.opendevtrack.search.Docs.CUSTOM;
 import static com.logicwarez.opendevtrack.search.Docs.ISSUE_KEY;
 import static com.logicwarez.opendevtrack.search.Docs.LABELS;
+import static com.logicwarez.opendevtrack.search.Docs.LINKS;
 import static com.logicwarez.opendevtrack.search.Docs.MOVED_KEYS;
 import static com.logicwarez.opendevtrack.search.Docs.PARENT_KEY;
 import static com.logicwarez.opendevtrack.search.Docs.DOC;
@@ -42,6 +43,7 @@ import static org.jooq.impl.DSL.trueCondition;
 import static org.jooq.impl.DSL.val;
 
 import com.logicwarez.opendevtrack.agile.Planning;
+import com.logicwarez.opendevtrack.issue.Issues;
 import com.logicwarez.opendevtrack.search.Odql.And;
 import com.logicwarez.opendevtrack.search.Odql.Clause;
 import com.logicwarez.opendevtrack.search.Odql.Expr;
@@ -80,9 +82,9 @@ import org.jooq.impl.SQLDataType;
 final class OdqlCompiler {
 
     /** The fields of the language, in the order the suggestions show them. */
-    static final List<String> FIELDS = List.of("project", "key", "parent", "type", "status", "category", "priority", "assignee",
-            "reviewer", "reporter", "labels", "flagged", "summary", "text", "created", "updated", "resolved", "due", "sprint",
-            "points", "rank");
+    static final List<String> FIELDS = List.of("project", "key", "parent", "linked", "linkType", "type", "status",
+            "category", "priority", "assignee", "reviewer", "reporter", "labels", "flagged", "summary", "text", "created",
+            "updated", "resolved", "due", "sprint", "points", "rank");
 
     static final List<String> TYPES = List.of("task", "bug", "story", "epic", "subtask");
     static final List<String> PRIORITIES = List.of("lowest", "low", "medium", "high", "highest");
@@ -91,7 +93,7 @@ final class OdqlCompiler {
     /** The one value of {@code flagged}, as Jira names it. */
     static final String IMPEDIMENT = "Impediment";
     static final List<String> FUNCTIONS = List.of("currentUser()", "openSprints()", "standardIssueTypes()",
-            "subTaskIssueTypes()");
+            "subTaskIssueTypes()", "linkedIssues()");
     /** The types of {@code standardIssueTypes()} and {@code subTaskIssueTypes()}, as in Jira (ADR-28). */
     static final List<String> STANDARD_TYPES = List.of("task", "bug", "story", "epic");
     static final List<String> SUBTASK_TYPES = List.of("subtask");
@@ -105,7 +107,16 @@ final class OdqlCompiler {
      * the projects the user sees, and the names of the statuses ({@code "To do"} → {@code todo}).
      */
     record Context(String username, LocalDate today, ZoneId zone, List<Planning.Sprint> sprints,
-                   Map<String, String> statusNames) {
+                   Map<String, String> statusNames, List<UUID> visible, List<Issues.LinkRelation> relations) {
+
+        /**
+         * Without the projects the user sees and the link types of the tenant: the links find nothing, and a link
+         * type or relation is unknown.
+         */
+        Context(String username, LocalDate today, ZoneId zone, List<Planning.Sprint> sprints,
+                Map<String, String> statusNames) {
+            this(username, today, zone, sprints, statusNames, List.of(), List.of());
+        }
     }
 
     /** The condition (true for a query without one) and the order (empty for the default one). */
@@ -155,6 +166,8 @@ final class OdqlCompiler {
             case "project" -> text(c, PROJECT_KEY, v -> v.toUpperCase(Locale.ROOT));
             case "key" -> key(c);
             case "parent" -> parent(c);
+            case "linked" -> linked(c);
+            case "linktype" -> linkType(c);
             case "type" -> type(c);
             case "category" -> text(c, CATEGORY, v -> oneOf(c, v, CATEGORIES, "category"));
             case "status" -> text(c, STATUS, this::status);
@@ -247,9 +260,29 @@ final class OdqlCompiler {
                 .and(key.in(keys).or(condition("{0} && {1}", moved, val(keys, MOVED_KEYS))));
     }
 
-    /** {@code key}: the key now, or one the issue had before it moved to another project (ADR-27). */
+    /**
+     * {@code key}: the key now, or one the issue had before it moved to another project (ADR-27); in IN and NOT IN also
+     * {@code linkedIssues(WEB-4)} and {@code linkedIssues(WEB-4, blocks)}, as in Jira (ADR-29).
+     */
     private Condition key(Clause c) {
         Function<String, String> upper = v -> v.toUpperCase(Locale.ROOT);
+        boolean list = c.op().equals("in") || c.op().equals("notin");
+        if (list && c.values().stream().anyMatch(v -> v.function() && v.text().equalsIgnoreCase("linkedIssues"))) {
+            Condition any = falseCondition();
+            List<String> keys = new ArrayList<>();
+            for (Value v : c.values()) {
+                if (v.function() && v.text().equalsIgnoreCase("linkedIssues")) {
+                    any = any.or(linkedIssues(v));
+                } else {
+                    keys.add(upper.apply(word(c, v)));
+                }
+            }
+            if (!keys.isEmpty()) {
+                String[] named = keys.toArray(String[]::new);
+                any = any.or(ISSUE_KEY.in(named)).or(condition("{0} && {1}", MOVED_KEYS, val(named, MOVED_KEYS)));
+            }
+            return c.op().equals("in") ? any : not(any);
+        }
         return switch (c.op()) {
             case "=", "in" -> {
                 String[] keys = words(c).stream().map(upper).toArray(String[]::new);
@@ -261,6 +294,75 @@ final class OdqlCompiler {
             }
             default -> text(c, ISSUE_KEY, upper);
         };
+    }
+
+    /** {@code linked} (ADR-29): linked in any way to the issues with these keys; IS EMPTY for the issues without links. */
+    private Condition linked(Clause c) {
+        return switch (c.op()) {
+            case "=", "in" -> linkedTo(keys(c), List.of("i:"));
+            case "!=", "notin" -> not(linkedTo(keys(c), List.of("i:")));
+            case "empty" -> field("cardinality({0})", Integer.class, LINKS).eq(0);
+            case "notempty" -> field("cardinality({0})", Integer.class, LINKS).gt(0);
+            default -> throw notAllowed(c, "= != IN NOT IN IS EMPTY");
+        };
+    }
+
+    /** {@code linkType} (ADR-29): with a link of these types, by their codes, from either end. */
+    private Condition linkType(Clause c) {
+        List<String> codes = context.relations().stream().map(Issues.LinkRelation::type).distinct().toList();
+        Function<List<String>, Condition> any = types -> condition("{0} && {1}", LINKS,
+                val(types.stream().map(t -> "t:" + oneOf(c, t, codes, "link type")).toArray(String[]::new), LINKS));
+        return switch (c.op()) {
+            case "=" -> any.apply(List.of(word(c, c.values().getFirst())));
+            case "!=" -> not(any.apply(List.of(word(c, c.values().getFirst()))));
+            case "in" -> any.apply(words(c));
+            case "notin" -> not(any.apply(words(c)));
+            case "empty" -> field("cardinality({0})", Integer.class, LINKS).eq(0);
+            case "notempty" -> field("cardinality({0})", Integer.class, LINKS).gt(0);
+            default -> throw notAllowed(c, "= != IN NOT IN IS EMPTY");
+        };
+    }
+
+    /**
+     * {@code linkedIssues(WEB-4)}: the issues linked to WEB-4; {@code linkedIssues(WEB-4, blocks)}: those WEB-4 reads
+     * so, by the relation of the API ({@code blocks}, {@code blocked_by}, {@code causes:inward}).
+     */
+    private Condition linkedIssues(Value f) {
+        if (f.args().isEmpty() || f.args().size() > 2 || f.args().stream().anyMatch(Value::function)) {
+            throw error(f.at(), "linkedIssues() takes an issue key and, if wanted, a relation",
+                    "linkedIssues(WEB-4) linkedIssues(WEB-4, blocks)");
+        }
+        String[] key = {f.args().getFirst().text().toUpperCase(Locale.ROOT)};
+        if (f.args().size() == 1) {
+            return linkedTo(key, List.of("i:"));
+        }
+        Value named = f.args().get(1);
+        String relation = named.text().toLowerCase(Locale.ROOT);
+        Issues.LinkRelation end = context.relations().stream().filter(r -> r.relation().equals(relation)).findFirst()
+                .orElseThrow(() -> error(named.at(), "Unknown relation '" + named.text() + "'",
+                        String.join(" ", context.relations().stream().map(Issues.LinkRelation::relation).toList())));
+        // The other issue holds the word of the link with its own end: the opposite of the one WEB-4 reads.
+        List<String> prefixes = end.symmetric()
+                ? List.of(Docs.relationWord(end.type(), true, ""), Docs.relationWord(end.type(), false, ""))
+                : List.of(Docs.relationWord(end.type(), !end.outward(), ""));
+        return linkedTo(key, prefixes);
+    }
+
+    /**
+     * The issues with a word in {@link Docs#LINKS} made of one of the prefixes and an issue these keys name (also by
+     * a key it had before it moved), of the tenant of the row and of a project the user sees.
+     */
+    private Condition linkedTo(String[] keys, List<String> prefixes) {
+        return condition("{0} && array(select p || l.issue_id::text from odt_search.issue_doc l, unnest({1}) p "
+                        + "where l.tenant_id = issue_doc.tenant_id and l.project_id = any({2}) "
+                        + "and (l.issue_key = any({3}) or l.moved_keys && {3}))", LINKS,
+                val(prefixes.toArray(String[]::new), LINKS),
+                val(context.visible().toArray(UUID[]::new), SQLDataType.UUID.array()),
+                val(keys, MOVED_KEYS));
+    }
+
+    private String[] keys(Clause c) {
+        return words(c).stream().map(v -> v.toUpperCase(Locale.ROOT)).toArray(String[]::new);
     }
 
     private Condition priority(Clause c) {

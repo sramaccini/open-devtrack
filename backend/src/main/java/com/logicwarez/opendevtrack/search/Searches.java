@@ -35,6 +35,7 @@ import static org.jooq.impl.DSL.val;
 
 import com.logicwarez.opendevtrack.access.ProjectAccess;
 import com.logicwarez.opendevtrack.agile.Planning;
+import com.logicwarez.opendevtrack.issue.Issues;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.project.ProjectRef;
 import com.logicwarez.opendevtrack.project.Projects;
@@ -99,17 +100,19 @@ class Searches {
     private final ProjectAccess access;
     private final CurrentUser user;
     private final Planning planning;
+    private final Issues issues;
     private final ZoneId zone;
     private final Map<String, String> statusNames;
     private final ResourceBundleMessageSource texts = new ResourceBundleMessageSource();
 
-    Searches(DSLContext sql, Projects projects, ProjectAccess access, CurrentUser user, Planning planning,
+    Searches(DSLContext sql, Projects projects, ProjectAccess access, CurrentUser user, Planning planning, Issues issues,
              @Value("${odt.reporting.zone:UTC}") String zone) {
         this.sql = sql;
         this.projects = projects;
         this.access = access;
         this.user = user;
         this.planning = planning;
+        this.issues = issues;
         this.zone = ZoneId.of(zone);
         this.statusNames = statusNames();
         texts.setBasename("search/texts");
@@ -150,7 +153,8 @@ class Searches {
 
     Context context(List<ProjectRef> visible) {
         return new Context(user.username(), LocalDate.now(zone), zone,
-                planning.sprints(visible.stream().map(ProjectRef::id).toList()), statusNames);
+                planning.sprints(visible.stream().map(ProjectRef::id).toList()), statusNames,
+                visible.stream().map(ProjectRef::id).toList(), issues.linkRelations(user.tenantId()));
     }
 
     /** The query compiled for the user, with the projects they see; throws {@link Odql.OdqlException}. */

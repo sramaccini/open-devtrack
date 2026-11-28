@@ -51,9 +51,14 @@ public class Issues {
     private final ApplicationEventPublisher events;
     private final IssueEditor editor;
     private final MovedKeys moved;
+    private final IssueLinkRepository links;
+    private final LinkTypes linkTypes;
 
     Issues(IssueRepository issues, Projects projects, ProjectAccess access, CurrentUser user, Workflows workflows,
-           ApplicationEventPublisher events, IssueEditor editor, MovedKeys moved) {
+           ApplicationEventPublisher events, IssueEditor editor, MovedKeys moved, IssueLinkRepository links,
+           LinkTypes linkTypes) {
+        this.links = links;
+        this.linkTypes = linkTypes;
         this.editor = editor;
         this.moved = moved;
         this.issues = issues;
@@ -102,7 +107,29 @@ public class Issues {
                 i.description(), i.status(), i.priority().value(), i.priority().ordinal() + 1, i.assignee(), i.reporter(),
                 i.dueOn(), i.reviewer(), List.copyOf(i.labels()), new HashMap<>(i.custom()), i.createdAt(), i.updatedAt(),
                 i.flagged(), moved.of(i.id()), i.parentId() == null ? null : issues.findById(i.parentId())
-                        .map(parent -> IssueController.key(p, parent)).orElse(null))));
+                        .map(parent -> IssueController.key(p, parent)).orElse(null),
+                links.findByIssue(i.id()).stream().map(l -> new IssueDocument.Link(l.type(), l.fromId().equals(i.id()),
+                        l.other(i.id()))).toList())));
+    }
+
+    /**
+     * One end of a link type of the tenant (ADR-29), as ODQL names it: the relation of the API ({@code blocks},
+     * {@code blocked_by}, {@code causes:inward}), the code of the type, whether the issue that names it is the
+     * {@code from} end, and whether the type reads alike from both ends ({@code relates}), so either end matches.
+     */
+    public record LinkRelation(String relation, String type, boolean outward, boolean symmetric) {
+    }
+
+    /** The ends of the link types of the tenant, without the session: for the search. */
+    public List<LinkRelation> linkRelations(String tenantId) {
+        List<LinkRelation> all = new ArrayList<>();
+        for (LinkTypeEntity type : linkTypes.of(tenantId)) {
+            all.add(new LinkRelation(LinkTypes.relation(type, true), type.code(), true, type.symmetric()));
+            if (!type.symmetric()) {
+                all.add(new LinkRelation(LinkTypes.relation(type, false), type.code(), false, false));
+            }
+        }
+        return all;
     }
 
     /** The identifiers of every issue of the project, in the order of their numbers: to rebuild an index. */

@@ -122,6 +122,9 @@ class Words {
                 if ("sprint".equalsIgnoreCase(clause)) {
                     open.add(new Word("openSprints() ", "openSprints()", "sprint IN openSprints()"));
                 }
+                if ("key".equalsIgnoreCase(clause)) {
+                    open.add(new Word("linkedIssues(", "linkedIssues()", "key IN linkedIssues(WEB-4, blocks)"));
+                }
                 yield open;
             }
             case VALUE, LIST -> values(clause, current);
@@ -149,6 +152,8 @@ class Words {
         return switch (field) {
             case "project" -> "project = WEB";
             case "key" -> "key = WEB-12";
+            case "linked" -> "linked = WEB-4";
+            case "linkType" -> "linkType = blocks";
             case "type" -> "type = bug";
             case "status" -> "status IN (todo, in_progress)";
             case "category" -> "category != done";
@@ -199,6 +204,8 @@ class Words {
                         .where(label.likeIgnoreCase(prefix.replace("%", "") + "%")).orderBy(label).limit(10)
                         .fetch(label).forEach(values::add);
             }
+            case "linktype" -> searches.context(visible).relations().stream().map(r -> r.type()).distinct()
+                    .forEach(values::add);
             case "sprint" -> {
                 values.add("openSprints()");
                 searches.context(visible).sprints().forEach(s -> values.add(s.name()));
@@ -206,7 +213,7 @@ class Words {
             case "created", "updated", "resolved" -> values.addAll(List.of("today", "-7d", "-14d", "-30d"));
             case "due" -> values.addAll(List.of("today", "7d", "14d", "-7d"));
             default -> {
-                // key, summary, text, points: free values.
+                // key, linked, summary, text, points: free values.
             }
         }
         return values.stream().filter(v -> prefix.isEmpty() || v.toLowerCase(Locale.ROOT).startsWith(prefix)

@@ -54,6 +54,10 @@ An empty query finds every issue. Without `ORDER BY`, the most recently updated 
   `"To do"`, `"Sprint 1"`. A `"` inside a text is written `\"`.
 - The functions are `currentUser()`, the user who runs the query, `openSprints()`, the sprints not completed, and,
   for the type, `standardIssueTypes()` (task, bug, story, epic) and `subTaskIssueTypes()` (subtask), as in Jira.
+- For the key, `linkedIssues(WEB-4)` gives the issues linked to WEB-4, and `linkedIssues(WEB-4, blocks)` those
+  WEB-4 reads so: the issues it blocks. The relation is the one of the API, as WEB-4 reads it: `blocks`,
+  `blocked_by`, `relates`, `duplicates`, `duplicated_by`, `clones`, `cloned_by`, and for a type the admin
+  added its code, or `code:inward` from the other end (`causes`, `causes:inward`).
 
 ### Fields
 
@@ -62,6 +66,8 @@ An empty query finds every issue. Without `ORDER BY`, the most recently updated 
 | `project` | The key of the project: `WEB` | `= != IN NOT IN IS EMPTY` |
 | `key` | The key of the issue: `WEB-4` | `= != IN NOT IN IS EMPTY` |
 | `parent` | The key of the parent: `parent = WEB-1` finds the children of WEB-1 (also by a key it had before a move) | `= != IN NOT IN IS EMPTY` |
+| `linked` | The key of an issue it is linked to, in any way: `linked = WEB-4`; `IS EMPTY` for the issues without links | `= != IN NOT IN IS EMPTY` |
+| `linkType` | The code of the type of one of its links, from either end: `blocks`, `relates`, `duplicates`, `clones` and those the admin added | `= != IN NOT IN IS EMPTY` |
 | `type` | `task`, `bug`, `story`, `epic`, `subtask`; with `IN` and `NOT IN` also `standardIssueTypes()` and `subTaskIssueTypes()` | `= != IN NOT IN IS EMPTY` |
 | `status` | A status, by its code (`in_progress`) or its name in English or Italian (`"In progress"`, `"In corso"`) | `= != IN NOT IN IS EMPTY` |
 | `category` | The category of the status: `todo`, `in_progress`, `done` | `= != IN NOT IN IS EMPTY` |
@@ -90,7 +96,7 @@ An empty query finds every issue. Without `ORDER BY`, the most recently updated 
 | --- | --- |
 | `=`, `!=` | Equal, not equal |
 | `<`, `<=`, `>`, `>=` | Before or after for dates, less or more for numbers and priorities |
-| `IN (a, b)`, `NOT IN (a, b)` | One of the values, none of them. `sprint IN openSprints()` takes the function without parentheses around it |
+| `IN (a, b)`, `NOT IN (a, b)` | One of the values, none of them. `sprint IN openSprints()` and `key IN linkedIssues(WEB-4)` take the function without parentheses around it |
 | `~`, `!~` | Contains, does not contain (below) |
 | `IS EMPTY`, `IS NOT EMPTY` | Has no value, has one. For `labels`: has no label, has some |
 | `AND`, `OR`, `NOT`, `( )` | `NOT` binds first, then `AND`, then `OR`. Parentheses change it |
@@ -158,6 +164,8 @@ the order of dates written as `2026-12-31`.
 | `NOT (type = epic OR category = done)` | Everything open but the epics |
 | `parent = WEB-1 AND category != done` | The open children of WEB-1 |
 | `type = story AND parent IS EMPTY` | The stories in no epic |
+| `key IN linkedIssues(WEB-4, blocked_by) AND category != done` | What still blocks WEB-4 |
+| `linkType = duplicates AND category != done` | Open issues with a duplicate |
 
 ### Errors
 

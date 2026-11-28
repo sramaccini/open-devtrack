@@ -14,6 +14,7 @@ import static com.logicwarez.opendevtrack.search.Docs.DOC;
 import static com.logicwarez.opendevtrack.search.Docs.ISSUE_ID;
 import static com.logicwarez.opendevtrack.search.Docs.ISSUE_KEY;
 import static com.logicwarez.opendevtrack.search.Docs.LABELS;
+import static com.logicwarez.opendevtrack.search.Docs.LINKS;
 import static com.logicwarez.opendevtrack.search.Docs.MOVED_KEYS;
 import static com.logicwarez.opendevtrack.search.Docs.PARENT_KEY;
 import static com.logicwarez.opendevtrack.search.Docs.NUMBER;
@@ -51,7 +52,10 @@ import com.logicwarez.opendevtrack.issue.Issues;
 import com.logicwarez.opendevtrack.workflow.Workflows;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -130,9 +134,13 @@ class IssueIndex {
         }
     }
 
+    /** The issue goes, and with it its links: the issues at their other ends are written again (ADR-29). */
     @ApplicationModuleListener
     void on(IssueDeleted event) {
         sql.deleteFrom(DOC).where(ISSUE_ID.eq(event.issueId())).execute();
+        List<UUID> linked = sql.select(ISSUE_ID).from(DOC)
+                .where(LINKS.contains(new String[] {"i:" + event.issueId()})).fetch(ISSUE_ID);
+        linked.forEach(this::index);
     }
 
     /** Writes the row of the issue as it is now, or removes it when the issue is gone. */
@@ -152,6 +160,9 @@ class IssueIndex {
                 .filter(s -> s.code().equals(issue.status())).map(Workflows.Status::category).findFirst().orElse("todo");
         OffsetDateTime updated = issue.updatedAt().atOffset(ZoneOffset.UTC);
         boolean done = category.equals("done");
+        Set<String> links = new LinkedHashSet<>();
+        issue.links().forEach(l -> links.addAll(Docs.linkWords(l.type(), l.outward(), l.other())));
+        String[] linkWords = links.toArray(String[]::new);
         sql.insertInto(DOC)
                 .set(ISSUE_ID, issue.id())
                 .set(TENANT_ID, issue.tenantId())
@@ -172,6 +183,7 @@ class IssueIndex {
                 .set(DUE_ON, issue.dueOn())
                 .set(FLAGGED, issue.flagged() ? OdqlCompiler.IMPEDIMENT : null)
                 .set(LABELS, issue.labels().toArray(String[]::new))
+                .set(LINKS, linkWords)
                 .set(SUMMARY, issue.summary())
                 .set(CUSTOM, JSONB.valueOf(json.writeValueAsString(issue.custom())))
                 .set(CREATED_AT, issue.createdAt().atOffset(ZoneOffset.UTC))
@@ -200,6 +212,7 @@ class IssueIndex {
                 .set(DUE_ON, issue.dueOn())
                 .set(FLAGGED, issue.flagged() ? OdqlCompiler.IMPEDIMENT : null)
                 .set(LABELS, issue.labels().toArray(String[]::new))
+                .set(LINKS, linkWords)
                 .set(SUMMARY, issue.summary())
                 .set(CUSTOM, JSONB.valueOf(json.writeValueAsString(issue.custom())))
                 .set(UPDATED_AT, updated)
