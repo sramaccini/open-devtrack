@@ -30,7 +30,7 @@ Developers and admins of the project create issues. The fields:
 | Type | Task, Bug, Story, Epic or Subtask ([below](#parent-and-subtasks)). Required |
 | Parent | The epic of a story, task or bug, or the story, task or bug of a subtask, in the same project. Required for a subtask |
 | Priority | Lowest, Low, Medium, High or Highest. Required |
-| Assignee | The member who does it; «Assign to me» under the field, for developers and admins when the issue is not yours yet |
+| Assignee | The member who does it; «Assign to me» under the field, for developers and admins when the issue is not yours yet and you are not its reviewer |
 | Reviewer | The member who checks it: not the assignee |
 | Start date | The day the work should start, as in Jira; never after the due date |
 | Due date | The day it should be done. Past it, and not done, the issue is overdue |

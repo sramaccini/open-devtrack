@@ -62,7 +62,7 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   sends it as `parent`, since a field name has no dots. The parent is in the path above the title, as ADR-28 wants: an
   item of `breadcrumb` with `visibleIf` (Quadrava 0.33.0, #61), only on an issue that has one. «Assign to me» is an
   action under Assignee (Quadrava 0.33.0, Q47): its `value` `user.username` is saved through the `onSave` of the
-  inline form, and it hides once the issue is the user's. The flag
+  inline form, and it hides once the issue is the user's, and to its reviewer (who cannot be its assignee, #69). The flag
   and the votes are `button`s (Quadrava 0.25.1, Q41): the flag with `tone: danger` and `pressed`, shown only while
   flagged; the thumb with `count`, two buttons by `visibleIf` (vote, take the vote back). «Add flag» opens a
   `popover` under «…» for the optional comment. Buttons are icon-only unless a text is

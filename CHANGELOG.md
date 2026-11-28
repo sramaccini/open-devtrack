@@ -80,6 +80,11 @@ The entries are written by hand at each release from the commits ([docs/release.
   tracking (#70); the start of a work log is shown and written in the time zone of the browser, and the list of the
   work logs shows it (#71).
 
+### Fixed
+
+- **Issues**: «Assign to me» under Assignee is no longer offered to the reviewer of the issue, who cannot be its
+  assignee (#69).
+
 ### Upgrading
 
 - The migrations add the column of the parent and the type `subtask`; no existing issue has a parent. A workflow

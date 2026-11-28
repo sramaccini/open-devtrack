@@ -2201,7 +2201,7 @@
                           "label": "{{ t('issues.assign_to_me', 'Assign to me') }}",
                           "icon": "user-add",
                           "value": "{{ user.username }}",
-                          "visibleIf": "{{ form._perm.edit && value != user.username }}"
+                          "visibleIf": "{{ form._perm.edit && value != user.username && form.reviewer != user.username }}"
                         }
                       ]
                     },
