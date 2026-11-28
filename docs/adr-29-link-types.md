@@ -1,6 +1,6 @@
 # ADR-29: Link types configured by the admin of the tenant
 
-Status: Proposed (27 November 2026) — F5
+Status: Accepted (28 November 2026; decided by the maintainer, each proposal of A to C accepted) — F5
 
 ## Context
 
@@ -43,7 +43,7 @@ the page is done (741be0e), the configurable types are left to this decision.
    issues, written as the relation the issue reads and the other key («blocks WEB-2»); with custom types the relation
    is the one of point 4.
 
-## Questions for the maintainer
+## Questions for the maintainer (each proposal accepted)
 
 - **A. Delete of a type in use.** Jira asks to move its links to another type or delete them. Proposal: the same, in
   one call with `replaceWith` (a code) or `deleteLinks: true`, in a transaction, each issue with its event; without
