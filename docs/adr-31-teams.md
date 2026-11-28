@@ -52,8 +52,9 @@ start date, the other half of T10 of the plan towards Jira, is done (b68a700); t
   identifier: the lookup of the screens shows the value it holds, and the history and the webhooks name the team as
   the other fields name their values. The issue keeps `team_id`, so a rename is seen everywhere at once.
 - **The search keeps `team_id`** and ODQL turns the names into identifiers when it compiles a query; an unknown name is
-  an error, as an unknown sprint. The search table has the column Team; grouping by team, and the column in the
-  backlog, are left for later.
+  an error, as an unknown sprint. The tables of the search and of the backlog have the column Team, which sorts,
+  filters and groups by the name: as the sprint, the column is a `CASE` on `team_id` with the teams of the workspace
+  written in the SQL of each request (#72).
 - The screen «Teams» is in the administration for every user, since everyone reads the teams and a lead who is not an
   admin manages the members there; the buttons follow `_perm`.
 

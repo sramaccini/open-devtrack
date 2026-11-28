@@ -169,6 +169,21 @@ class TeamApiTest {
                 .andExpect(status().isBadRequest());
         mvc.perform(as(post("/api/search"), paola).content("{\"query\":\"key = ODT-2\"}"))
                 .andExpect(jsonPath("$.items[0].team").value("Mobile"));
+        // The table groups, filters and sorts by the name of the team.
+        mvc.perform(as(post("/api/search"), paola).content("{\"query\":\"\",\"groupBy\":[\"team\"]}"))
+                .andExpect(jsonPath("$.groups[*].value").value(org.hamcrest.Matchers.contains("Mobile", "Platform")))
+                .andExpect(jsonPath("$.groups[*].count").value(org.hamcrest.Matchers.contains(1, 1)));
+        mvc.perform(as(post("/api/search"), paola).content("""
+                        {"query":"","groupBy":["team"],"groupPath":[{"field":"team","value":"Platform"}]}"""))
+                .andExpect(jsonPath("$.items[*].key").value(org.hamcrest.Matchers.contains("ODT-1")));
+        mvc.perform(as(post("/api/search"), paola).content("{\"query\":\"\",\"distinct\":\"team\"}"))
+                .andExpect(jsonPath("$.values").value(org.hamcrest.Matchers.contains("Mobile", "Platform")));
+        mvc.perform(as(post("/api/search"), paola).content("""
+                        {"query":"","filters":[{"field":"team","kind":"select","values":["Mobile"]}]}"""))
+                .andExpect(jsonPath("$.items[*].key").value(org.hamcrest.Matchers.contains("ODT-2")));
+        mvc.perform(as(post("/api/search"), paola).content("""
+                        {"query":"","sort":{"field":"team","direction":"desc"}}"""))
+                .andExpect(jsonPath("$.items[*].key").value(org.hamcrest.Matchers.contains("ODT-1", "ODT-2")));
         mvc.perform(as(get("/api/issues/ODT-2/history"), paola))
                 .andExpect(jsonPath("$[?(@.field == 'team')].to").value(org.hamcrest.Matchers.hasItem("Mobile")));
         // Deleted: the issue keeps no team, with a row of history by its name; the search no longer finds it.

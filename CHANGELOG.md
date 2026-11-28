@@ -13,7 +13,8 @@ The entries are written by hand at each release from the commits ([docs/release.
 - **Teams**, as in Jira (ADR-31). Administration › Teams: the admin of the workspace creates, renames and removes teams
   and sets their lead, who manages the members; a team gives no access. «Team» in the details of an issue and in a new
   issue (any team of the workspace), in the history, the export and the webhooks; ODQL `team = Platform`,
-  `team IN (...)`, `team IS EMPTY` and the column Team of the search. A team removed leaves its issues without a team.
+  `team IN (...)`, `team IS EMPTY` and the column Team of the search and of the backlog, which sorts, filters and
+  groups by team (#72). A team removed leaves its issues without a team.
   «Your data» lists the teams of a user, and erasing a user takes them out of their teams. API: `/api/teams`,
   `/api/teams/{id}/members`, `team` in an issue and its requests (#55 T10).
 - **Issues**: time tracking, as in Jira (ADR-30). The original and remaining estimates, written as `1w 2d 3h 30m`,

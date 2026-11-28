@@ -65,7 +65,7 @@ project = WEB AND type IN standardIssueTypes() AND (sprint IN openSprints() OR (
 the issues of the sprints not completed, and those not done that are in no sprint, in the order of the project; the
 subtasks are on the page of their parent and on the boards, as cards of their own ([Issues](issues.md#parent-and-subtasks)). The
 table groups them by sprint: the active sprint first, then the planned ones, then the backlog. Change the query, sort,
-filter and group as in the search; «Group by» without «Sprint» shows the plain order.
+filter and group as in the search, by team too (the column Team); «Group by» without «Sprint» shows the plain order.
 
 Each row has three actions, for developers and admins:
 

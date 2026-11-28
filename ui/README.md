@@ -178,7 +178,7 @@ the back end (`columnsFrom`), one component whose lanes follow `data.board.lane`
 the rows of `issue-list` (`flagged` in the rows of the list) and, from Quadrava 0.32.0 (Q50), those of the
 `serverDataTable` of `backlog`, `search` and `dashboard` (`flag` in the rows of the search). `backlog` (params `key`) is a search (ADR-26): the query field
 of `search`, filled with the sprints not completed and the backlog of the project in their order, and a
-`serverDataTable` on `search/search` grouped by `sprint`, with the row actions «Move to sprint…» (a `lookup` on
+`serverDataTable` on `search/search` grouped by `sprint` (also groupable by `team`, as in `search`), with the row actions «Move to sprint…» (a `lookup` on
 `boards/planColumns`, the sprints of the row's project) and «To the top», «To the bottom» (`boards/backlogPlan`),
 and a selection (`state.chosen`, by key) with the bulk action «Move to sprint…» (`boards/projectColumns`,
 `boards/backlogPlanMany`, Q28), on for rows of the project only. A `grid` puts on its left the panel of the epics (`issues/epics`: a click on an

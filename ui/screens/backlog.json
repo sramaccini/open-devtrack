@@ -432,6 +432,13 @@
                   "groupable": true
                 },
                 {
+                  "field": "team",
+                  "label": "{{ t('issues.team', 'Team') }}",
+                  "sortable": true,
+                  "filter": "select",
+                  "groupable": true
+                },
+                {
                   "field": "points",
                   "label": "{{ t('agile.points_short', 'Points') }}",
                   "sortable": true,

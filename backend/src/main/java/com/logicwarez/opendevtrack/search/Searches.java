@@ -69,6 +69,7 @@ import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.SortField;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -90,7 +91,8 @@ class Searches {
 
     /**
      * The columns of the results: what the table shows, filters, sorts and groups by. Besides these, {@code sprint}: the
-     * name of the sprint of the issue, or «Backlog» (ADR-26), which depends on the sprints the user sees.
+     * name of the sprint of the issue, or «Backlog» (ADR-26), which depends on the sprints the user sees, and
+     * {@code team}: the name of its team (ADR-31), which depends on the teams of the workspace.
      */
     static final Map<String, Field<?>> COLUMNS = Map.ofEntries(
             Map.entry("key", ISSUE_KEY), Map.entry("project", PROJECT_KEY), Map.entry("type", TYPE),
@@ -101,9 +103,10 @@ class Searches {
             Map.entry("created", CREATED_AT), Map.entry("points", POINTS), Map.entry("originalEstimate", ORIGINAL_ESTIMATE),
             Map.entry("remainingEstimate", REMAINING_ESTIMATE), Map.entry("timeSpent", TIME_SPENT));
 
-    static final Set<String> GROUPS = Set.of("project", "type", "status", "category", "priority", "assignee", "sprint");
+    static final Set<String> GROUPS = Set.of("project", "type", "status", "category", "priority", "assignee", "sprint", "team");
 
     static final String SPRINT = "sprint";
+    static final String TEAM = "team";
     static final String PLAN = "odt.sprint.manage";
     static final String RANK = "odt.issue.edit";
 
@@ -244,7 +247,7 @@ class Searches {
         List<ProjectRef> visible = visible();
         Context context = context(visible);
         Compiled compiled = OdqlCompiler.compile(request.query(), context);
-        Columns columns = new Columns(context.sprints(), backlog());
+        Columns columns = new Columns(context.sprints(), backlog(), teams.of(user.tenantId()));
         Condition where = TENANT_ID.eq(user.tenantId()).and(PROJECT_ID.in(visible.stream().map(ProjectRef::id).toList()))
                 .and(compiled.where()).and(filters(request.filters(), columns));
         List<String> groupBy = request.groupBy() == null ? List.of() : request.groupBy();
@@ -366,8 +369,9 @@ class Searches {
     /**
      * The columns of one request: those of {@link #COLUMNS} and {@code sprint}, the name of the sprint of each issue
      * among the sprints the user sees, «Backlog» for none, with {@code sprintOrder} to sort it: the active sprints, the
-     * planned ones from the oldest, the completed ones from the most recent, then the backlog. The values are written
-     * in the SQL (not bound), so that a group by the sprint is the same expression in SELECT and GROUP BY.
+     * planned ones from the oldest, the completed ones from the most recent, then the backlog; and {@code team}, the name
+     * of the team of each issue among the teams of the workspace, empty for none. The values are written in the SQL
+     * (not bound), so that a group by the sprint or the team is the same expression in SELECT and GROUP BY.
      */
     static final class Columns {
 
@@ -375,9 +379,11 @@ class Searches {
         final Field<Integer> sprintOrder;
         final Map<UUID, Planning.Sprint> sprints = new HashMap<>();
         final String backlog;
+        final Field<String> team;
 
-        Columns(List<Planning.Sprint> visible, String backlog) {
+        Columns(List<Planning.Sprint> visible, String backlog, List<Teams.Team> teams) {
             this.backlog = backlog;
+            this.team = team(teams);
             List<Planning.Sprint> ordered = new ArrayList<>();
             visible.stream().filter(s -> "active".equals(s.state())).forEach(ordered::add);
             visible.reversed().stream().filter(s -> "planned".equals(s.state())).forEach(ordered::add);
@@ -398,8 +404,20 @@ class Searches {
             sprintOrder = position.otherwise(inline(ordered.size()));
         }
 
+        private static Field<String> team(List<Teams.Team> teams) {
+            if (teams.isEmpty()) {
+                return inline((String) null, SQLDataType.VARCHAR);
+            }
+            var name = DSL.case_(TEAM_ID).when(inline(teams.getFirst().id()), inline(teams.getFirst().name()));
+            for (int i = 1; i < teams.size(); i++) {
+                name = name.when(inline(teams.get(i).id()), inline(teams.get(i).name()));
+            }
+            return name.otherwise(inline((String) null, SQLDataType.VARCHAR));
+        }
+
         Field<?> get(String name) {
-            Field<?> column = SPRINT.equals(name) ? sprint : name == null ? null : COLUMNS.get(name);
+            Field<?> column = SPRINT.equals(name) ? sprint : TEAM.equals(name) ? team
+                    : name == null ? null : COLUMNS.get(name);
             if (column == null) {
                 throw new BadRequest("Unknown column " + name);
             }

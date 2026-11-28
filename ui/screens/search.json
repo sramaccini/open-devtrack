@@ -213,7 +213,10 @@
         },
         {
           "field": "team",
-          "label": "{{ t('issues.team', 'Team') }}"
+          "label": "{{ t('issues.team', 'Team') }}",
+          "sortable": true,
+          "filter": "select",
+          "groupable": true
         },
         {
           "field": "start",
