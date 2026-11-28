@@ -220,6 +220,11 @@ texts in English), A4 (bearer access for tools), A5 (read-only list of the tenan
      the asset pack `odt` (runtime without brand mounts), the telemetry contract. Green at the first run; image
      @sha256:7b674641… with its signature and SBOM verified by cosign. The demo is upgraded to it (old `.env` in
      /root/odt-demo-env.rc9.bak, log /var/log/odt-demo-upgrade-rc10.log); `watch.sh` ok.
+   - `v1.0.0-rc.11` tagged on 0135ead with Quadrava 0.35.0: subtasks and epics (ADR-28), link types and ODQL on links
+     (ADR-29), start date, attachments, shortcuts, the top bar search and Create, the Activity feed, time tracking
+     (ADR-30) and teams (ADR-31). Green at the first run; image @sha256:89e9718a… with its signature and SBOM
+     (234 components) verified by cosign. The demo is upgraded to it (old `.env` in /root/odt-demo-env.rc10.bak, log
+     /var/log/odt-demo-upgrade-rc11.log); `watch.sh` ok.
    Next: the screen reader lines and the ZAP baseline on the current candidate.
 2. Deployment: `deploy/compose` (ADR-25 step 1) runs the back end, the runtime, PostgreSQL and Redis, with Caddy and
    Keycloak as optional profiles. `odt.sh first-admin` creates the first tenant and global administrator (one-off
