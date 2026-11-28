@@ -8,6 +8,8 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ## [Unreleased]
 
+## [1.0.0-rc.11] - 2026-11-28
+
 ### Added
 
 - **Teams**, as in Jira (ADR-31). Administration › Teams: the admin of the workspace creates, renames and removes teams
@@ -88,6 +90,10 @@ The entries are written by hand at each release from the commits ([docs/release.
 
 ### Upgrading
 
+From 1.0.0-rc.10: put the digest of the new image in `.env`, then `./odt.sh up` and `./odt.sh publish-ui`
+([upgrades-and-backups.md](docs/admin/upgrades-and-backups.md)). The Compose files take the Quadrava runtime 0.35.0. The
+schema changes by itself at start-up, and the search documents need no rebuild:
+
 - The migrations add the column of the parent and the type `subtask`; no existing issue has a parent. A workflow
   scheme without `subtask` gives subtasks its default workflow. The default query of the backlog changes: a saved
   filter made from it still lists subtasks until `type IN standardIssueTypes()` is added.
@@ -96,6 +102,11 @@ The entries are written by hand at each release from the commits ([docs/release.
 - The migrations `V46` and `V47` add the start date to the issues and to the index, empty for every issue.
 - The migration `V45` adds the links to the search documents, from the links already there: no rebuild of the
   index is needed.
+- The migrations `V48` to `V51` add time tracking: the estimates of the issues, empty, and the work log; the
+  permissions `odt.worklog.add` (developers) and `odt.worklog.manage` (admins) are added to every permission scheme.
+  New optional settings: `ODT_TIME_TRACKING_HOURS_PER_DAY` (8) and `ODT_TIME_TRACKING_DAYS_PER_WEEK` (5)
+  ([configuration.md](docs/admin/configuration.md)).
+- The migrations `V52` to `V54` add the teams, none at first, and the team of an issue, empty for every issue.
 
 ## [1.0.0-rc.10] - 2026-11-27
 
