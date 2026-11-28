@@ -103,6 +103,20 @@
         }
       }
     },
+    "topBar": {
+      "type": "object",
+      "required": [
+        "screen"
+      ],
+      "additionalProperties": false,
+      "description": "A screen drawn in the top bar, between the title and the bell, such as a search box and a Create button: its components side by side, without its title, with its own data sources, steps and permissions. Nothing if absent.",
+      "properties": {
+        "screen": {
+          "$ref": "#/$defs/id",
+          "description": "Identifier of the screen of the top bar (a screen of the application with a search and buttons)."
+        }
+      }
+    },
     "userMenu": {
       "type": "array",
       "description": "Items of the application in the user menu, before the built-in settings and sign-out: each one opens a screen with its parameters. Items the user may not see (requires, visibleIf) are left out.",

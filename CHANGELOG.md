@@ -42,7 +42,7 @@ The entries are written by hand at each release from the commits ([docs/release.
 ### Changed
 
 - **Issues**: «Assign to me» is a link under Assignee, as in Jira, in place of the item of «…» (#55 T4).
-- Quadrava 0.33.0: runtime image, CLI, schemas and kits.
+- Quadrava 0.34.0: runtime image, CLI, schemas and kits.
 
 ### Upgrading
 

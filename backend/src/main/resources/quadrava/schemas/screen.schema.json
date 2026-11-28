@@ -56,6 +56,14 @@
         "$ref": "#/$defs/steps"
       }
     },
+    "shortcuts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/shortcut"
+      },
+      "description": "Keyboard shortcuts of the screen: a key runs steps, as a button would. They do not work while the user is typing in a field or while a window is open over the screen; ? shows the list of those available. (no shortcuts if absent)"
+    },
     "components": {
       "type": "array",
       "description": "Components of the screen, from the top.",
@@ -247,6 +255,18 @@
         },
         {
           "$ref": "#/$defs/stepPrint"
+        },
+        {
+          "$ref": "#/$defs/stepFocus"
+        },
+        {
+          "$ref": "#/$defs/stepPreview"
+        },
+        {
+          "$ref": "#/$defs/stepOpenScreen"
+        },
+        {
+          "$ref": "#/$defs/stepClose"
         },
         {
           "$ref": "#/$defs/stepExport"
@@ -771,7 +791,7 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 100,
-          "description": "For multiselect and tags: maximum number of choices or tags."
+          "description": "For multiselect and tags: maximum number of choices or tags. For a file field with multiple: maximum number of files."
         },
         "transform": {
           "type": "array",
@@ -972,6 +992,10 @@
           "minimum": 1,
           "maximum": 102400,
           "description": "For type file: maximum size in KB (1024 if absent). Up to 102400 with multipart upload; base64 content is limited to 10240."
+        },
+        "multiple": {
+          "type": "boolean",
+          "description": "For type file: several files, each checked and uploaded on its own with its progress and its error; the value is the list of the files (maxItems the most). One file if absent."
         },
         "display": {
           "enum": [
@@ -1298,7 +1322,29 @@
           },
           "then": {
             "properties": {
-              "minItems": false,
+              "minItems": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "not": {
+                  "enum": [
+                    "multiselect",
+                    "tags",
+                    "file"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
               "maxItems": false
             }
           }
@@ -1372,7 +1418,8 @@
             "progress",
             "timeline",
             "kanban",
-            "comments"
+            "comments",
+            "search"
           ],
           "description": "Type of component; the other properties depend on it."
         },
@@ -3440,6 +3487,108 @@
                 ],
                 "description": "Order of the comments by date: oldest first, the newest next to the box for writing (asc, default), or newest first (desc)."
               },
+              "kindField": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Field of the row that says what it is, for a feed of activity that mixes comments, changes and work: the rows whose value is the kind of changes or of workLog are drawn as those, every other row is a comment."
+              },
+              "changes": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Value of kindField of a change (change if absent)."
+                  },
+                  "fieldField": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Field of the row with the name of the field changed (field if absent)."
+                  },
+                  "fromField": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Field of the row with the old value (from if absent). Without a value the line reads «set Priority to High»."
+                  },
+                  "toField": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Field of the row with the new value (to if absent). Without a value the line reads «cleared Due date»."
+                  },
+                  "fieldKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Catalogue prefix of the names of the fields: the key is the prefix, a dot and the name (issue.fields.status). The name as it is if absent or not translated."
+                  },
+                  "valueKey": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Catalogue prefix of the values: the key is the prefix, the name of the field and the value, separated by dots (values.status.done). The value as it is if absent or not translated."
+                  }
+                },
+                "description": "Rows that record the change of a field, drawn as a line: «Luca Bianchi changed Status from To do to In progress». They have no Edit or Delete buttons. Needs kindField."
+              },
+              "workLog": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Value of kindField of a work log (worklog if absent)."
+                  },
+                  "minutesField": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Field of the row with the time spent, in minutes (minutes if absent)."
+                  }
+                },
+                "description": "Rows that record time spent, drawn as a line «Anna Rossi logged 2 hr 30 min» with the text of the row, if any, under it. They have the Edit and Delete buttons as comments. Needs kindField."
+              },
+              "filters": {
+                "description": "Chips above the feed that show only some rows, filtered in the page. true gives All, Comments and, when the feed has them, History (changes) and Work log; a list gives the chips of the screen, in order, each with its label and the values of kindField it shows (all rows without kinds). The first chip is chosen at the start. Needs kindField. (no chips if absent)",
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "array",
+                    "minItems": 2,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "label"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "description": "Text of the chip; it can contain {{ }}, for example a translation with t()."
+                        },
+                        "kinds": {
+                          "type": "array",
+                          "minItems": 1,
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "description": "Values of kindField of the rows the chip shows, for example [\"comment\", \"attachment\"]. Every row if absent."
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "orderToggle": {
+                "type": "boolean",
+                "description": "A button above the feed with which the user turns the order between newest first and oldest first; it starts from order. (false if absent)"
+              },
+              "orderBind": {
+                "$ref": "#/$defs/statePath",
+                "description": "State where the order chosen with orderToggle is kept (asc or desc), so that the screen can read it or keep it while it is open."
+              },
               "onPost": {
                 "$ref": "#/$defs/steps",
                 "description": "Steps that publish a comment: they see text (the Markdown written, without spaces at the ends) and mentions (the values of the people mentioned who are still in the text). Without onPost the thread is read-only. The box is emptied when the steps succeed, so they usually end with a refresh of source."
@@ -3496,6 +3645,73 @@
                     "description": "Letters after @ before asking (1 if absent; 0 = right after @)."
                   }
                 }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "search"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "required": [
+              "source"
+            ],
+            "properties": {
+              "source": {
+                "type": "string",
+                "description": "GET data source asked while the user types, with the text in the search variable (for example ?q={{ search }}); it returns the results, a list or the items of a page."
+              },
+              "label": {
+                "type": "string",
+                "description": "Accessible name of the box, also its placeholder when placeholder is absent: plain text or {{ }}. «Search» if absent."
+              },
+              "placeholder": {
+                "type": "string",
+                "description": "Text shown in the empty box, such as «Search issues»; it can contain {{ }}. The label if absent."
+              },
+              "minChars": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10,
+                "description": "Characters typed before the search starts (2 if absent)."
+              },
+              "labelField": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Field of a result with its text (label if absent)."
+              },
+              "secondaryField": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Field of a result with a second, smaller text, such as the key and the project. None if absent."
+              },
+              "iconField": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Field of a result with the name of an icon of the built-in set or of Ant Design. None if absent."
+              },
+              "onPick": {
+                "$ref": "#/$defs/steps",
+                "description": "Steps run when the user picks a result (click, or Enter on the result chosen with the arrows): they see the result in row and the text in search, for example a navigate step to its screen."
+              },
+              "onSubmit": {
+                "$ref": "#/$defs/steps",
+                "description": "Steps run by Enter when no result is chosen: they see the text in search, for example a navigate step to a page of results. Enter does nothing if absent."
+              },
+              "width": {
+                "type": "integer",
+                "minimum": 120,
+                "maximum": 800,
+                "description": "Width of the box in pixels (280 if absent); it narrows with the space."
               }
             }
           }
@@ -3580,11 +3796,13 @@
             "percent",
             "date",
             "datetime",
+            "relative",
             "boolean",
             "badge",
-            "markdown"
+            "markdown",
+            "image"
           ],
-          "description": "How to show the value: number (number with digits grouped according to the language, `decimals` decimals), currency (amount with symbol), percent (the value is already in percentage points, 10 = 10 %), date and datetime (ISO 8601 text), boolean (Yes/No), badge (coloured label according to `badges`). markdown: formatted text (restricted Markdown); in the detail it is shown formatted, in tables as plain text."
+          "description": "How to show the value: number (number with digits grouped according to the language, `decimals` decimals), currency (amount with symbol), percent (the value is already in percentage points, 10 = 10 %), date and datetime (ISO 8601 text), relative (the distance from now, such as «3 days ago» or «in 2 hours», with the full date as tooltip; ISO 8601 text), boolean (Yes/No), badge (coloured label according to `badges`). image: a small picture from the address in the value (a path of the same application or https), with the file name for screen readers. markdown: formatted text (restricted Markdown); in the detail it is shown formatted, in tables as plain text."
         },
         "currency": {
           "type": "string",
@@ -4103,6 +4321,126 @@
         "print": {
           "const": true,
           "description": "Opens the browser's print dialog: menus, bars and buttons are not printed."
+        }
+      }
+    },
+    "stepFocus": {
+      "type": "object",
+      "required": [
+        "focus"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "focus": {
+          "description": "Brings a component into view and moves the focus into it: its first field, or the field named. An inline form opens the editor of that field. The step waits a moment for a component the previous steps have just shown; a component or field not found is reported in the diagnostics and the sequence goes on.",
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "description": "The id of the component."
+            },
+            {
+              "type": "object",
+              "required": [
+                "component"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "component": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The id of the component."
+                },
+                "field": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The name of a field of the form; its first field if absent."
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "stepPreview": {
+      "type": "object",
+      "required": [
+        "preview"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "preview": {
+          "type": "object",
+          "required": [
+            "source"
+          ],
+          "additionalProperties": false,
+          "description": "Shows the files of the rows of a data source in a window over the whole page, images and PDFs, with next and previous. Rows of other types are left out. The window also offers the download of the file.",
+          "properties": {
+            "source": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The data source whose rows are the files, already loaded (the one of the table of the attachments)."
+            },
+            "start": {
+              "type": "string",
+              "description": "The address of the file shown first, usually {{ row.url }} in a row action; the first file if absent or not found."
+            },
+            "urlField": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Field of the row with the address of the file: a path of the same application (url if absent)."
+            },
+            "nameField": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Field of the row with the name of the file, shown as the title (name if absent; the end of the address without it)."
+            },
+            "typeField": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Field of the row with the type of the file, such as image/png or application/pdf (type if absent; without it the extension of the name decides)."
+            }
+          }
+        }
+      }
+    },
+    "stepOpenScreen": {
+      "type": "object",
+      "required": [
+        "openScreen"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "openScreen": {
+          "$ref": "#/$defs/id",
+          "description": "Identifier of a screen opened in a window over the page, such as the creation of an issue: it has its own data sources, steps and permissions, and its title is the title of the window. The sequence goes on when a close step of the screen closes the window; if the user closes it (Esc, the cross) the sequence stops."
+        },
+        "params": {
+          "type": "object",
+          "description": "Parameters of the screen, resolved before opening it, for example { \"project\": \"{{ params.key }}\" }; the screen reads them as params."
+        },
+        "size": {
+          "enum": [
+            "small",
+            "medium",
+            "large",
+            "full"
+          ],
+          "description": "Width of the window: small 520 px, medium 720 px, large 960 px, full the page (medium if absent)."
+        }
+      }
+    },
+    "stepClose": {
+      "type": "object",
+      "required": [
+        "close"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "close": {
+          "const": true,
+          "description": "Closes the window the screen was opened in by openScreen, as done: the sequence that opened it goes on. In a screen that is not in such a window it is reported and stops the sequence."
         }
       }
     },
@@ -5285,6 +5623,43 @@
         "visibleIf": {
           "$ref": "#/$defs/expression",
           "description": "The item is in the path only while the expression is true, for example the parent of an issue that has one: {{ has(data.issue) && data.issue.parent != null }}. An expression in error leaves it out."
+        }
+      }
+    },
+    "shortcut": {
+      "type": "object",
+      "required": [
+        "key",
+        "label",
+        "onClick"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^(?:(?:ctrl|alt|shift|meta)\\+)*(?:[a-z0-9]|f[1-9]|f1[0-2])$",
+          "description": "The key, in lower case: a letter, a digit or f1 to f12, after the modifiers it needs joined with +, for example m, shift+e or ctrl+k. ? is kept for the list of shortcuts."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What the shortcut does, shown in the list opened with ?: plain text or an expression such as {{ t('issue.comment', 'Comment') }}."
+        },
+        "onClick": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/step"
+          },
+          "description": "Steps run by the key, in order."
+        },
+        "visibleIf": {
+          "$ref": "#/$defs/expression",
+          "description": "The shortcut works, and is in the list, only while the expression is true. An expression in error turns it off."
+        },
+        "enabledIf": {
+          "$ref": "#/$defs/expression",
+          "description": "As visibleIf, for a shortcut whose button is shown but disabled: the key does nothing while the expression is not true."
         }
       }
     },

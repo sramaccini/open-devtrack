@@ -83,7 +83,7 @@ services:
   # The screens: the Quadrava runtime with the definitions of ui/ published in the registry of the back end
   # (environment production). The proxy sends the paths of the BFF to the back end, so QUADRAVA_BFF_URL is not set.
   runtime:
-    image: ghcr.io/sramaccini/quadrava-runtime:0.33.0
+    image: ghcr.io/sramaccini/quadrava-runtime:0.34.0
     restart: unless-stopped
     environment:
       QUADRAVA_REGISTRY_APP: opendevtrack
