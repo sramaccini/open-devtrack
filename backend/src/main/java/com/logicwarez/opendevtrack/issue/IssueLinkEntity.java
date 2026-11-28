@@ -6,8 +6,6 @@ package com.logicwarez.opendevtrack.issue;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
@@ -25,9 +23,9 @@ class IssueLinkEntity {
     private UUID fromId;
     private UUID toId;
 
-    @Enumerated(EnumType.STRING)
+    /** The code of its type (ADR-29), of the tenant of its issues. */
     @Column(name = "link_type")
-    private LinkType type;
+    private String type;
 
     private String createdBy;
     private Instant createdAt;
@@ -35,7 +33,7 @@ class IssueLinkEntity {
     protected IssueLinkEntity() {
     }
 
-    IssueLinkEntity(UUID fromId, UUID toId, LinkType type, String createdBy, Instant createdAt) {
+    IssueLinkEntity(UUID fromId, UUID toId, String type, String createdBy, Instant createdAt) {
         this.fromId = fromId;
         this.toId = toId;
         this.type = type;
@@ -55,8 +53,13 @@ class IssueLinkEntity {
         return toId;
     }
 
-    LinkType type() {
+    String type() {
         return type;
+    }
+
+    /** The link becomes one of another type, when its type is removed in favour of that one (ADR-29). */
+    void retype(String type) {
+        this.type = type;
     }
 
     /** The issue at the other end, seen from {@code issueId}. */

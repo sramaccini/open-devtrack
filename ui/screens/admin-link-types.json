@@ -1,0 +1,270 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "admin-link-types",
+  "title": "{{ t('admin.link_types', 'Link types') }}",
+  "requires": "odt.project.admin",
+  "dataSources": {
+    "linkTypes": {
+      "ref": "admin/linkTypes"
+    },
+    "addLinkType": {
+      "ref": "admin/addLinkType"
+    },
+    "saveLinkType": {
+      "ref": "admin/saveLinkType"
+    },
+    "removeLinkType": {
+      "ref": "admin/removeLinkType"
+    },
+    "otherLinkTypes": {
+      "ref": "admin/otherLinkTypes"
+    }
+  },
+  "components": [
+    {
+      "id": "link-types-help",
+      "type": "text",
+      "text": "{{ t('admin.link_types_help', 'How two issues can be linked, read from each end. The four types every workspace starts with are shown in the language of each user until their descriptions are changed; «clones», written by «Clone», cannot be removed.') }}"
+    },
+    {
+      "id": "btn-add-link-type",
+      "type": "button",
+      "label": "{{ t('admin.add_link_type', 'New link type') }}",
+      "icon": "plus",
+      "onClick": [
+        {
+          "dialog": {
+            "title": "{{ t('admin.add_link_type', 'New link type') }}",
+            "submitLabel": "{{ t('projects.add', 'Add') }}",
+            "fields": [
+              {
+                "name": "code",
+                "type": "text",
+                "label": "{{ t('admin.link_code', 'Code') }}",
+                "required": true,
+                "maxLength": 30,
+                "tooltip": "{{ t('admin.link_code_help', 'Lowercase letters, digits and _; it never changes') }}"
+              },
+              {
+                "name": "outward",
+                "type": "text",
+                "label": "{{ t('admin.link_outward', 'From one end') }}",
+                "required": true,
+                "maxLength": 60,
+                "tooltip": "{{ t('admin.link_outward_help', 'How the issue that links reads it, for example «causes»') }}"
+              },
+              {
+                "name": "inward",
+                "type": "text",
+                "label": "{{ t('admin.link_inward', 'From the other end') }}",
+                "required": true,
+                "maxLength": 60,
+                "tooltip": "{{ t('admin.link_inward_help', 'How the linked issue reads it, for example «is caused by»; the same text for a type read alike from both') }}"
+              }
+            ],
+            "onSubmit": [
+              {
+                "call": "addLinkType",
+                "onError": [
+                  {
+                    "if": "{{error.status == 412}}",
+                    "then": [
+                      {
+                        "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                      }
+                    ],
+                    "else": [
+                      {
+                        "if": "{{error.status == 409}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('admin.link_type_exists', 'A link type or a relation has this code') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "refresh": "linkTypes"
+        }
+      ]
+    },
+    {
+      "id": "link-type-table",
+      "type": "table",
+      "source": "linkTypes",
+      "columns": [
+        {
+          "field": "code",
+          "label": "{{ t('admin.link_code', 'Code') }}"
+        },
+        {
+          "field": "outwardLabel",
+          "label": "{{ t('admin.link_outward', 'From one end') }}"
+        },
+        {
+          "field": "inwardLabel",
+          "label": "{{ t('admin.link_inward', 'From the other end') }}"
+        },
+        {
+          "field": "links",
+          "label": "{{ t('admin.link_count', 'Links') }}"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-edit-link-type",
+          "label": "{{ t('projects.edit_field', 'Edit') }}",
+          "icon": "edit",
+          "visibleIf": "{{row._perm.edit}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('admin.edit_link_type', 'Edit {code}', {'code': row.code}) }}",
+                "submitLabel": "{{ t('common.save', 'Save') }}",
+                "initial": {
+                  "outward": "{{row.outward}}",
+                  "inward": "{{row.inward}}",
+                  "version": "{{row.version}}"
+                },
+                "fields": [
+                  {
+                    "name": "outward",
+                    "type": "text",
+                    "label": "{{ t('admin.link_outward', 'From one end') }}",
+                    "required": true,
+                    "maxLength": 60,
+                    "tooltip": "{{ t('admin.link_outward_help', 'How the issue that links reads it, for example «causes»') }}"
+                  },
+                  {
+                    "name": "inward",
+                    "type": "text",
+                    "label": "{{ t('admin.link_inward', 'From the other end') }}",
+                    "required": true,
+                    "maxLength": 60,
+                    "tooltip": "{{ t('admin.link_inward_help', 'How the linked issue reads it, for example «is caused by»; the same text for a type read alike from both') }}"
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "saveLinkType",
+                    "args": {
+                      "code": "{{row.code}}"
+                    },
+                    "onError": [
+                      {
+                        "if": "{{error.status == 412}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "if": "{{error.status == 409}}",
+                            "then": [
+                              {
+                                "toast": "{{ t('admin.link_type_symmetry', 'A type in use stays read alike from both ends, or not') }}"
+                              }
+                            ],
+                            "else": [
+                              {
+                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "linkTypes"
+            }
+          ]
+        },
+        {
+          "id": "btn-remove-link-type",
+          "label": "{{ t('common.remove', 'Remove') }}",
+          "icon": "delete",
+          "visibleIf": "{{row._perm.remove}}",
+          "onClick": [
+            {
+              "if": "{{row.links == 0}}",
+              "then": [
+                {
+                  "confirm": "{{ t('admin.remove_link_type', 'Remove the link type {code}?', {'code': row.code}) }}"
+                },
+                {
+                  "call": "removeLinkType",
+                  "args": {
+                    "code": "{{row.code}}",
+                    "replaceWith": "",
+                    "deleteLinks": false
+                  },
+                  "onError": [
+                    {
+                      "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                    }
+                  ]
+                }
+              ],
+              "else": [
+                {
+                  "dialog": {
+                    "title": "{{ t('admin.remove_link_type_used', '{count, plural, one {Remove {code}, used by # link} other {Remove {code}, used by # links}}', dyn({'code': row.code, 'count': row.links})) }}",
+                    "submitLabel": "{{ t('common.remove', 'Remove') }}",
+                    "fields": [
+                      {
+                        "name": "replaceWith",
+                        "type": "lookup",
+                        "label": "{{ t('admin.link_replace', 'Move its links to') }}",
+                        "tooltip": "{{ t('admin.link_replace_help', 'Another link type; empty to delete the links') }}",
+                        "lookup": {
+                          "source": "otherLinkTypes",
+                          "valueField": "code",
+                          "labelField": "outwardLabel",
+                          "minChars": 0
+                        }
+                      }
+                    ],
+                    "onSubmit": [
+                      {
+                        "call": "removeLinkType",
+                        "args": {
+                          "code": "{{row.code}}",
+                          "replaceWith": "{{ has(form.replaceWith) && form.replaceWith != null ? form.replaceWith : '' }}",
+                          "deleteLinks": "{{ !(has(form.replaceWith) && form.replaceWith != null && form.replaceWith != '') }}"
+                        },
+                        "onError": [
+                          {
+                            "toast": "{{ t('admin.link_replace_failed', 'Not removed: pick another link type, or none to delete the links') }}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "refresh": "linkTypes"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

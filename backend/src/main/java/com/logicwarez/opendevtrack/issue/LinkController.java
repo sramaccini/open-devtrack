@@ -9,7 +9,7 @@ import com.logicwarez.opendevtrack.access.ProjectAccess;
 import com.logicwarez.opendevtrack.issue.IssueEvents.FieldChange;
 import com.logicwarez.opendevtrack.issue.IssueEvents.IssueChanged;
 import com.logicwarez.opendevtrack.issue.Issues.Found;
-import com.logicwarez.opendevtrack.issue.LinkType.Relation;
+import com.logicwarez.opendevtrack.issue.LinkTypes.Relation;
 import com.logicwarez.opendevtrack.platform.ApiDoc;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
 import com.logicwarez.opendevtrack.platform.Problems;
@@ -42,8 +42,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Links between issues (E2): {@code blocks} / {@code blocked_by}, {@code relates}, {@code duplicates} /
- * {@code duplicated_by}. Whoever sees an issue reads its links, without the issues of projects they do not see;
+ * Links between issues (E2), of the link types of the tenant (ADR-29): {@code blocks} / {@code blocked_by},
+ * {@code relates}, {@code duplicates} / {@code duplicated_by} and those its admin adds. Whoever sees an issue reads its links, without the issues of projects they do not see;
  * {@code odt.issue.edit} on the issue adds and removes them, towards an issue of the tenant they see. Each link added
  * or removed is a change of both issues, in their changelog (field {@code links}).
  */
@@ -66,9 +66,10 @@ class LinkController {
     private final ProjectAccess access;
     private final CurrentUser user;
     private final ApplicationEventPublisher events;
+    private final LinkTypes types;
 
     LinkController(IssueRepository issues, IssueLinkRepository links, Issues finder, Projects projects,
-                   ProjectAccess access, CurrentUser user, ApplicationEventPublisher events) {
+                   ProjectAccess access, CurrentUser user, ApplicationEventPublisher events, LinkTypes types) {
         this.issues = issues;
         this.links = links;
         this.finder = finder;
@@ -76,10 +77,14 @@ class LinkController {
         this.access = access;
         this.user = user;
         this.events = events;
+        this.types = types;
     }
 
-    /** A link as one of its issues reads it: the relation and the issue at the other end. */
-    record LinkView(UUID id, String relation, String key, String project, String summary, String status,
+    /**
+     * A link as one of its issues reads it: the relation, its type and end ({@code outward} at the {@code from} end),
+     * what it reads ({@code label}), and the issue at the other end.
+     */
+    record LinkView(UUID id, String relation, String type, boolean outward, String label, String key, String project, String summary, String status,
                     @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
@@ -102,18 +107,18 @@ class LinkController {
             return Problems.forbidden(NOT_A_MEMBER);
         }
         UUID id = found.get().issue().id();
+        Map<String, LinkTypeEntity> byCode = byCode(found.get().issue().tenantId());
         List<IssueLinkEntity> all = links.findByIssue(id);
         Map<UUID, IssueEntity> others = issues.findByIdIn(all.stream().map(l -> l.other(id)).distinct().toList()).stream()
                 .collect(Collectors.toMap(IssueEntity::id, Function.identity()));
         Map<UUID, Optional<ProjectRef>> visible = new HashMap<>();
         boolean edit = permissions.contains("odt.issue.edit");
         return ResponseEntity.ok(all.stream()
-                .filter(l -> others.containsKey(l.other(id)))
+                .filter(l -> others.containsKey(l.other(id)) && byCode.containsKey(l.type()))
                 .flatMap(l -> {
                     IssueEntity other = others.get(l.other(id));
                     return visible.computeIfAbsent(other.projectId(), this::browsable).stream()
-                            .map(p -> new LinkView(l.id(), l.type().relation(l.fromId().equals(id)), key(p, other), p.key(),
-                                    other.summary(), other.status(), Map.of("delete", edit)));
+                            .map(p -> view(l, byCode.get(l.type()), id, key(p, other), p.key(), other, edit));
                 })
                 .toList());
     }
@@ -151,9 +156,11 @@ class LinkController {
         if (!permissions.contains("odt.issue.edit")) {
             return Problems.forbidden(NOT_AN_EDITOR);
         }
-        Optional<Relation> relation = LinkType.parse(request.relation());
+        String tenant = found.get().issue().tenantId();
+        Optional<Relation> relation = types.parse(tenant, request.relation());
         if (relation.isEmpty()) {
-            return Problems.badRequest("The relation is one of " + String.join(", ", LinkType.relations()));
+            return Problems.badRequest("The relation is one of " + String.join(", ",
+                    types.choices(tenant).stream().map(LinkTypes.Choice::relation).toList()));
         }
         Optional<Found> target = request.issue() == null ? Optional.empty()
                 : finder.findEntity(request.issue().strip().toUpperCase(Locale.ROOT))
@@ -166,25 +173,24 @@ class LinkController {
         if (issue.id().equals(other.id())) {
             return Problems.badRequest("An issue is not linked to itself");
         }
-        LinkType type = relation.get().type();
+        LinkTypeEntity type = relation.get().type();
         UUID from = relation.get().outward() ? issue.id() : other.id();
         UUID to = relation.get().outward() ? other.id() : issue.id();
-        if (links.existsByFromIdAndToIdAndType(from, to, type)
-                || type == LinkType.RELATES && links.existsByFromIdAndToIdAndType(to, from, type)) {
+        if (links.existsByFromIdAndToIdAndType(from, to, type.code())
+                || type.symmetric() && links.existsByFromIdAndToIdAndType(to, from, type.code())) {
             return Problems.conflict("The issues are already linked this way");
         }
         if (links.findByIssue(issue.id()).size() >= MAX_LINKS) {
             return Problems.badRequest("At most " + MAX_LINKS + " links per issue");
         }
         Instant now = Instant.now();
-        IssueLinkEntity link = links.saveAndFlush(new IssueLinkEntity(from, to, type, user.username(), now));
+        IssueLinkEntity link = links.saveAndFlush(new IssueLinkEntity(from, to, type.code(), user.username(), now));
         String key = key(found.get().project(), issue);
         String otherKey = key(target.get().project(), other);
-        changed(issue, key, now, null, link.type().relation(link.fromId().equals(issue.id())) + " " + otherKey);
-        changed(other, otherKey, now, null, link.type().relation(link.fromId().equals(other.id())) + " " + key);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new LinkView(link.id(),
-                link.type().relation(link.fromId().equals(issue.id())), otherKey, target.get().project().key(),
-                other.summary(), other.status(), Map.of("delete", true)));
+        changed(issue, key, now, null, LinkTypes.relation(type, from.equals(issue.id())) + " " + otherKey);
+        changed(other, otherKey, now, null, LinkTypes.relation(type, from.equals(other.id())) + " " + key);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(view(link, type, issue.id(), otherKey, target.get().project().key(), other, true));
     }
 
     @ApiDoc(value = "Removes a link", status = 204, project = "odt.issue.edit")
@@ -204,15 +210,32 @@ class LinkController {
         if (!permissions(found.get().project()).contains("odt.issue.edit")) {
             return Problems.forbidden(NOT_AN_EDITOR);
         }
+        Optional<LinkTypeEntity> type = types.find(issue.tenantId(), link.get().type());
         links.delete(link.get());
         Instant now = Instant.now();
         String key = key(found.get().project(), issue);
         issues.findById(link.get().other(issue.id())).ifPresent(other -> projects.get(other.projectId()).ifPresent(p -> {
             String otherKey = key(p, other);
-            changed(issue, key, now, link.get().type().relation(link.get().fromId().equals(issue.id())) + " " + otherKey, null);
-            changed(other, otherKey, now, link.get().type().relation(link.get().fromId().equals(other.id())) + " " + key, null);
+            changed(issue, key, now, relation(type, link.get(), issue.id()) + " " + otherKey, null);
+            changed(other, otherKey, now, relation(type, link.get(), other.id()) + " " + key, null);
         }));
         return ResponseEntity.noContent().build();
+    }
+
+    private LinkView view(IssueLinkEntity link, LinkTypeEntity type, UUID issueId, String otherKey, String project,
+                          IssueEntity other, boolean delete) {
+        boolean outward = link.fromId().equals(issueId);
+        return new LinkView(link.id(), LinkTypes.relation(type, outward), type.code(), outward, types.label(type, outward),
+                otherKey, project, other.summary(), other.status(), Map.of("delete", delete));
+    }
+
+    private Map<String, LinkTypeEntity> byCode(String tenantId) {
+        return types.of(tenantId).stream().collect(Collectors.toMap(LinkTypeEntity::code, Function.identity()));
+    }
+
+    /** The relation of the link read from the issue, or its code if its type is gone. */
+    private static String relation(Optional<LinkTypeEntity> type, IssueLinkEntity link, UUID issueId) {
+        return type.map(t -> LinkTypes.relation(t, link.fromId().equals(issueId))).orElse(link.type());
     }
 
     private void changed(IssueEntity issue, String key, Instant now, String from, String to) {

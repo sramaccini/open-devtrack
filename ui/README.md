@@ -255,6 +255,11 @@ The area `admin` (ADR-22), shown to whoever holds `authz.rbac.manage` in the ten
   OpenDevTrack (`/api/permission-schemes`), New (a copy of the default), Edit (name, description, the permissions of
   each project role), Remove (not the default, not one in use). A refused change (400) says the rules: every role sees
   the issues, the admin always edits the project and manages its members.
+- `admin-link-types` (`odt.project.admin`): the link types of the tenant (`/api/link-types`, ADR-29) with their links,
+  New (code and a description from each end), Edit (the descriptions) and Remove: a type with no links after a
+  confirm, one in use with a dialog that moves its links to another type, a lookup on `/api/link-types?except=` with
+  the code of the row, or deletes them when it is left empty. On `issue-detail` the relation of «Add linked work item»
+  is a lookup on `/api/link-types/relations`, and the links are grouped by their `label`.
 
 Each item has its own `requires`; an area with no item to show is hidden, so the area shows to the admin of the users
 and to the admin of the projects alike. In `project-detail` the form shows the scheme of the project, and «Change the

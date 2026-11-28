@@ -114,7 +114,9 @@ An installation may also set:
 
 ### Links
 
-A link says how two issues are related. It is read from both ends:
+A link says how two issues are related. It is read from both ends. Every workspace starts with these types, and its
+admin adds others, as «causes» / «is caused by», in Administration › Link types
+([administrator guide](../admin/administration.md#link-types)):
 
 | From one end | From the other |
 | --- | --- |
@@ -123,6 +125,7 @@ A link says how two issues are related. It is read from both ends:
 | duplicates | is duplicated by |
 | clones | is cloned by |
 
+These four are shown in your language until the admin changes their descriptions; the others as the admin wrote them.
 The links are grouped by relation, as in Jira: «blocks», «is blocked by» and so on. «Add linked work item» opens, in
 the section, the relation and the other issue, by its key or by words of its summary; «Link» adds it, «Cancel» closes
 it. The other issue may be in another project of the tenant. A link to an issue you cannot see is not shown.

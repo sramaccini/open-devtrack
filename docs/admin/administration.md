@@ -50,6 +50,15 @@ they belong to, as the permission scheme of the project says. That role is given
   it, and each project picks its scheme in its details. Every role sees the issues, and the admin always edits the
   project and its members. A scheme in use, or the default one, cannot be removed.
 
+## Link types
+
+*Link types* (`ODT_ADMIN`, ADR-29): how two issues of the tenant can be linked, each with a code and a description
+from each end, as «causes» and «is caused by» (the same text twice for a type read alike from both, as «relates to»).
+Every tenant starts with `blocks`, `relates`, `duplicates` and `clones`, shown in the language of each user until
+their descriptions are changed. The code never changes, and a type in use cannot become read alike from both ends, or
+stop being so. *Remove* on a type in use asks where to move its links; with none, they are deleted (a link the other
+type already makes goes). `clones`, written by «Clone», cannot be removed. Every change is in the administration log.
+
 ## Logs
 
 - *Administration log* (`ODT_ADMIN`): the changes of the configuration of OpenDevTrack (projects, members, groups,

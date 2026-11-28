@@ -68,6 +68,7 @@
               "workflow.",
               "board.",
               "customfield.",
+              "linktype.",
               "webhook.",
               "user."
             ],

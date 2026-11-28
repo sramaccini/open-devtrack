@@ -57,6 +57,12 @@
     "POST /api/issues/{issueKey}/watchers" : {
       "$ref" : "#/components/schemas/WatchRequest"
     },
+    "POST /api/link-types" : {
+      "$ref" : "#/components/schemas/LinkTypeRequest"
+    },
+    "PATCH /api/link-types/{code}" : {
+      "$ref" : "#/components/schemas/LinkTypeChange"
+    },
     "PUT /api/notifications/preferences" : {
       "$ref" : "#/components/schemas/PreferencesRequest"
     },
@@ -486,6 +492,37 @@
             "type" : "string"
           },
           "relation" : {
+            "type" : "string"
+          }
+        }
+      },
+      "LinkTypeChange" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "inward" : {
+            "type" : "string"
+          },
+          "outward" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "LinkTypeRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "code" : {
+            "type" : "string"
+          },
+          "inward" : {
+            "type" : "string"
+          },
+          "outward" : {
             "type" : "string"
           }
         }

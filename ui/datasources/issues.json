@@ -316,6 +316,14 @@
         "issues": "{{issues}}",
         "epic": "{{epic}}"
       }
+    },
+    "linkRelations": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/link-types/relations",
+      "params": {
+        "q": "{{search}}"
+      }
     }
   }
 }

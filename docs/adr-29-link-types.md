@@ -60,6 +60,11 @@ the page is done (741be0e), the configurable types are left to this decision.
 - A migration creates `odt_issue.link_type` per tenant with the four system types and turns
   `issue_link.link_type` into a reference to it (the check of the four values goes); `LinkType` becomes a lookup.
 - The export, the webhooks payload (`relation` as today) and the JSON of an issue use the stored descriptions.
+- As built: the rows of a tenant are made the first time its types are read, as its default schemes, not by the
+  migration; `issue_link.link_type` keeps the code of the type (lowercased by the migration, with no foreign key,
+  since a code is unique only in its tenant); the select of «Add linked work item» reads
+  `GET /api/link-types/relations`, which gives each end with its relation and label, and
+  `GET /api/link-types?except=` gives the types where the links of one removed can go.
 - The guides of issues, search and administration, the API and the screen of the administration change; the tests of
   links run with a custom type too.
 

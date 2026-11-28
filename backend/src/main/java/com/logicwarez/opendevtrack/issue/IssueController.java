@@ -113,11 +113,13 @@ class IssueController {
     private final IssueEditor editor;
     private final IssueMover mover;
     private final Clock clock;
+    private final LinkTypes linkTypes;
 
     IssueController(IssueRepository issues, IssueLinkRepository links, Issues finder, Projects projects, ProjectAccess access, CurrentUser user,
                     ApplicationEventPublisher events, Workflows workflows, WatcherRepository watchers,
                     VoteRepository votes, CustomFields customFields, IssueEditor editor, IssueMover mover,
-                    @Value("${odt.reporting.zone:UTC}") String zone) {
+                    LinkTypes linkTypes, @Value("${odt.reporting.zone:UTC}") String zone) {
+        this.linkTypes = linkTypes;
         this.editor = editor;
         this.mover = mover;
         this.clock = Clock.system(ZoneId.of(zone));
@@ -241,13 +243,15 @@ class IssueController {
         } catch (InvalidCustom e) {
             return Problems.invalidFields(InvalidCustom.TITLE, e.errors);
         }
-        links.saveAndFlush(new IssueLinkEntity(clone.id(), original.id(), LinkType.CLONES, user.username(), now));
+        // clones is a system type (ADR-29): never removed, made with the others if the tenant has none yet.
+        LinkTypeEntity clones = linkTypes.find(original.tenantId(), LinkTypeDefaults.CLONES).orElseThrow();
+        links.saveAndFlush(new IssueLinkEntity(clone.id(), original.id(), clones.code(), user.username(), now));
         String cloneKey = key(project, clone);
         String originalKey = key(project, original);
         events.publishEvent(new IssueChanged(clone.id(), project.id(), cloneKey, user.username(), now,
-                List.of(new FieldChange("links", null, LinkType.CLONES.relation(true) + " " + originalKey))));
+                List.of(new FieldChange("links", null, LinkTypes.relation(clones, true) + " " + originalKey))));
         events.publishEvent(new IssueChanged(original.id(), project.id(), originalKey, user.username(), now,
-                List.of(new FieldChange("links", null, LinkType.CLONES.relation(false) + " " + cloneKey))));
+                List.of(new FieldChange("links", null, LinkTypes.relation(clones, false) + " " + cloneKey))));
         return ResponseEntity.status(HttpStatus.CREATED).body(view(project, clone, permissions));
     }
 

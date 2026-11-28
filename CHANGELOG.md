@@ -28,6 +28,12 @@ The entries are written by hand at each release from the commits ([docs/release.
   going down to their sections (#55 T15).
 - **Issues**: linked work items grouped by relation, and «Add linked work item» opens in the section instead of a
   dialog, as in Jira (#55 T6).
+- **Administration**: link types configured by the admin of the tenant, as in Jira (ADR-29). «Link types» lists them
+  with their links, adds one with a description from each end, changes the descriptions and removes a type, moving its
+  links to another or deleting them. The four types of before stay, translated while unchanged; `clones` cannot be
+  removed. API: `GET/POST /api/link-types`, `PATCH/DELETE /api/link-types/{code}` (`replaceWith`, `deleteLinks`);
+  a link carries `type`, `outward` and `label` besides `relation`, and a new type reads `code` from one end and
+  `code:inward` from the other (#55 T6).
 
 ### Changed
 
@@ -39,6 +45,8 @@ The entries are written by hand at each release from the commits ([docs/release.
 - The migrations add the column of the parent and the type `subtask`; no existing issue has a parent. A workflow
   scheme without `subtask` gives subtasks its default workflow. The default query of the backlog changes: a saved
   filter made from it still lists subtasks until `type IN standardIssueTypes()` is added.
+- The migration `V44` adds the table of the link types and stores the type of each link in lowercase (`blocks`,
+  not `BLOCKS`); the relations of the API (`blocks`, `blocked_by`, …) do not change.
 
 ## [1.0.0-rc.10] - 2026-11-27
 

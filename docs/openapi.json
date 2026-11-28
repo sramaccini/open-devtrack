@@ -2582,6 +2582,223 @@
         "x-project-permissions" : [ "odt.issue.browse" ]
       }
     },
+    "/api/link-types" : {
+      "get" : {
+        "operationId" : "linkType.list",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "except",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/LinkTypeView"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          }
+        },
+        "summary" : "The link types of the workspace, the system ones first; except leaves one out, as the choice of where to move the links of a type removed",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.browse" ]
+      },
+      "post" : {
+        "operationId" : "linkType.add",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LinkTypeRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LinkTypeView"
+                }
+              }
+            },
+            "description" : "Created"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          }
+        },
+        "summary" : "Adds a link type",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.admin" ]
+      }
+    },
+    "/api/link-types/relations" : {
+      "get" : {
+        "operationId" : "linkType.relations",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Choice"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          }
+        },
+        "summary" : "The relations an issue may have with another, one per end of each link type, matching q",
+        "tags" : [ "issue" ],
+        "x-internal" : true,
+        "x-permissions" : [ "odt.project.browse" ]
+      }
+    },
+    "/api/link-types/{code}" : {
+      "delete" : {
+        "operationId" : "linkType.remove",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "code",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "replaceWith",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "deleteLinks",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean",
+            "default" : false
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Done"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Removes a link type, moving its links to another type or deleting them",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.admin" ]
+      },
+      "patch" : {
+        "operationId" : "linkType.change",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "code",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LinkTypeChange"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LinkTypeView"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          },
+          "412" : {
+            "$ref" : "#/components/responses/ChangedMeanwhile"
+          }
+        },
+        "summary" : "Changes the descriptions of a link type",
+        "tags" : [ "issue" ],
+        "x-permissions" : [ "odt.project.admin" ]
+      }
+    },
     "/api/me/export" : {
       "get" : {
         "operationId" : "privacy.mine",
@@ -7067,6 +7284,20 @@
           }
         }
       },
+      "Choice" : {
+        "type" : "object",
+        "properties" : {
+          "label" : {
+            "type" : "string"
+          },
+          "relation" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string"
+          }
+        }
+      },
       "CloneRequest" : {
         "type" : "object",
         "additionalProperties" : false,
@@ -7802,6 +8033,81 @@
           }
         }
       },
+      "LinkTypeChange" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "inward" : {
+            "type" : "string"
+          },
+          "outward" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "LinkTypeRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "code" : {
+            "type" : "string"
+          },
+          "inward" : {
+            "type" : "string"
+          },
+          "outward" : {
+            "type" : "string"
+          }
+        }
+      },
+      "LinkTypeView" : {
+        "type" : "object",
+        "properties" : {
+          "_perm" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "boolean"
+            }
+          },
+          "code" : {
+            "type" : "string"
+          },
+          "inward" : {
+            "type" : "string"
+          },
+          "inwardLabel" : {
+            "type" : "string"
+          },
+          "links" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "outward" : {
+            "type" : "string"
+          },
+          "outwardLabel" : {
+            "type" : "string"
+          },
+          "system" : {
+            "type" : "boolean"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updatedBy" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
       "LinkView" : {
         "type" : "object",
         "properties" : {
@@ -7818,6 +8124,12 @@
           "key" : {
             "type" : "string"
           },
+          "label" : {
+            "type" : "string"
+          },
+          "outward" : {
+            "type" : "boolean"
+          },
           "project" : {
             "type" : "string"
           },
@@ -7828,6 +8140,9 @@
             "type" : "string"
           },
           "summary" : {
+            "type" : "string"
+          },
+          "type" : {
             "type" : "string"
           }
         }

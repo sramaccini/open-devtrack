@@ -111,6 +111,13 @@
           "requires": "odt.project.admin"
         },
         {
+          "id": "admin-link-types",
+          "label": "{{ t('nav.admin_link_types', 'Link types') }}",
+          "icon": "link",
+          "screen": "admin-link-types",
+          "requires": "odt.project.admin"
+        },
+        {
           "id": "admin-config-log",
           "label": "{{ t('nav.admin_config_log', 'Administration log') }}",
           "icon": "list",

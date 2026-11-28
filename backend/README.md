@@ -148,8 +148,13 @@ checked before any changes. ODQL expands `standardIssueTypes()` and `subTaskIssu
 
 ## Links (`issue`)
 
-Links between two issues of the tenant (`odt_issue.issue_link`), one row read from both ends: `blocks` /
-`blocked_by`, `relates`, `duplicates` / `duplicated_by`. `GET /api/issues/{key}/links` lists them without the
+Links between two issues of the tenant (`odt_issue.issue_link`), one row read from both ends, of a type of the tenant
+(`odt_issue.link_type`, ADR-29): `LinkTypes` makes the four system types the first time and names each end of a type
+as a relation of the API, `blocks` / `blocked_by`, `relates`, `duplicates` / `duplicated_by` for the system ones and
+`code` / `code:inward` for the others, with its label (a system type unchanged in the language of the user).
+`LinkTypeController` serves `/api/link-types` to the admin of the tenant: a type in use changes its descriptions but
+not its symmetry, and is removed moving its links to another type (`replaceWith`) or deleting them (`deleteLinks`),
+each issue with its event. `GET /api/issues/{key}/links` lists them without the
 issues of projects the user does not see; `odt.issue.edit` adds one (`POST` with `relation` and `issue`, towards an
 issue the user sees; 409 if it is already there) and removes it. `GET …/links/candidates?q=` proposes the issues of
 the same project by key, number or text. Each link added or removed is in the changelog of both issues (field

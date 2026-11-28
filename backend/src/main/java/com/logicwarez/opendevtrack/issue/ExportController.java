@@ -74,13 +74,15 @@ class ExportController {
     private final List<IssueContent> modules;
     private final CurrentUser user;
     private final ZoneId zone;
+    private final LinkTypes linkTypes;
     private final ResourceBundleMessageSource texts = new ResourceBundleMessageSource();
 
     ExportController(Issues finder, IssueRepository issues, IssueLinkRepository links, Projects projects,
                      ProjectAccess access, Watchers watchers, VoteRepository votes, CustomFields customFields,
-                     List<IssueContent> modules,
+                     List<IssueContent> modules, LinkTypes linkTypes,
                      CurrentUser user, @Value("${odt.reporting.zone:UTC}") String zone) {
         this.finder = finder;
+        this.linkTypes = linkTypes;
         this.issues = issues;
         this.links = links;
         this.projects = projects;
@@ -225,7 +227,7 @@ class ExportController {
             blocks.add(new Heading(1, text("links")));
             blocks.add(new Table(List.of(text("link.relation"), text("link.issue"), text("field.status")),
                     linked.stream().map(l -> List.of(
-                            text("relation." + l.get("relation"), (String) l.get("relation")),
+                            (String) l.get("label"),
                             l.get("key") + " " + l.get("summary"),
                             text("status." + l.get("status"), (String) l.get("status")))).toList()));
         }
@@ -261,20 +263,25 @@ class ExportController {
     private List<Map<String, Object>> links(IssueEntity issue) {
         UUID id = issue.id();
         List<IssueLinkEntity> all = links.findByIssue(id);
+        Map<String, LinkTypeEntity> types = linkTypes.of(issue.tenantId()).stream()
+                .collect(Collectors.toMap(LinkTypeEntity::code, Function.identity()));
         Map<UUID, IssueEntity> others = issues.findByIdIn(all.stream().map(l -> l.other(id)).distinct().toList()).stream()
                 .collect(Collectors.toMap(IssueEntity::id, Function.identity()));
         Map<UUID, Optional<ProjectRef>> visible = new HashMap<>();
         List<Map<String, Object>> rows = new ArrayList<>();
         for (IssueLinkEntity l : all) {
             IssueEntity other = others.get(l.other(id));
-            if (other == null) {
+            LinkTypeEntity type = types.get(l.type());
+            if (other == null || type == null) {
                 continue;
             }
             visible.computeIfAbsent(other.projectId(), p -> projects.get(p)
                     .filter(r -> access.permissions(r.id(), user.username()).contains("odt.issue.browse")))
                     .ifPresent(p -> {
                         Map<String, Object> row = new LinkedHashMap<>();
-                        row.put("relation", l.type().relation(l.fromId().equals(id)));
+                        boolean outward = l.fromId().equals(id);
+                        row.put("relation", LinkTypes.relation(type, outward));
+                        row.put("label", linkTypes.label(type, outward));
                         row.put("key", IssueController.key(p, other));
                         row.put("summary", other.summary());
                         row.put("status", other.status());

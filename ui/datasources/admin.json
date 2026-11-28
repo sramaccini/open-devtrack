@@ -178,6 +178,44 @@
         "from": "{{ state.from }}",
         "to": "{{ state.to }}"
       }
+    },
+    "linkTypes": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/link-types"
+    },
+    "addLinkType": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/link-types",
+      "body": "{{formFields}}"
+    },
+    "saveLinkType": {
+      "type": "rest",
+      "method": "PATCH",
+      "url": "/api/link-types/{{code}}",
+      "body": {
+        "outward": "{{formFields.outward}}",
+        "inward": "{{formFields.inward}}",
+        "version": "{{form.version}}"
+      }
+    },
+    "removeLinkType": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/link-types/{{code}}",
+      "params": {
+        "replaceWith": "{{replaceWith}}",
+        "deleteLinks": "{{deleteLinks}}"
+      }
+    },
+    "otherLinkTypes": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/link-types",
+      "params": {
+        "except": "{{row.code}}"
+      }
     }
   }
 }
