@@ -177,8 +177,96 @@
     },
     "linkRelations": {
       "ref": "issues/linkRelations"
+    },
+    "assign": {
+      "ref": "issues/assign"
     }
   },
+  "shortcuts": [
+    {
+      "key": "e",
+      "label": "{{ t('issues.shortcut_description', 'Edit the description') }}",
+      "visibleIf": "{{ has(data.issue) && data.issue._perm.edit }}",
+      "onClick": [
+        {
+          "focus": {
+            "component": "issue-description-form",
+            "field": "description"
+          }
+        }
+      ]
+    },
+    {
+      "key": "a",
+      "label": "{{ t('issues.shortcut_assignee', 'Change the assignee') }}",
+      "visibleIf": "{{ has(data.issue) && data.issue._perm.edit }}",
+      "onClick": [
+        {
+          "focus": {
+            "component": "issue-form",
+            "field": "assignee"
+          }
+        }
+      ]
+    },
+    {
+      "key": "i",
+      "label": "{{ t('issues.assign_to_me', 'Assign to me') }}",
+      "visibleIf": "{{ has(data.issue) && data.issue._perm.edit && data.issue.assignee != user.username && data.issue.reviewer != user.username }}",
+      "onClick": [
+        {
+          "call": "assign",
+          "args": {
+            "assignee": "{{ user.username }}",
+            "version": "{{ data.issue.version }}"
+          },
+          "onError": [
+            {
+              "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+            }
+          ]
+        },
+        {
+          "refresh": "issue"
+        },
+        {
+          "refresh": "history"
+        }
+      ]
+    },
+    {
+      "key": "l",
+      "label": "{{ t('issues.shortcut_labels', 'Edit the labels') }}",
+      "visibleIf": "{{ has(data.issue) && data.issue._perm.edit }}",
+      "onClick": [
+        {
+          "focus": {
+            "component": "issue-form",
+            "field": "labels"
+          }
+        }
+      ]
+    },
+    {
+      "key": "k",
+      "label": "{{ t('issues.link_item', 'Link work item') }}",
+      "visibleIf": "{{ has(data.issue) && data.issue._perm.edit }}",
+      "onClick": [
+        {
+          "set": {
+            "path": "state.linking",
+            "value": true
+          }
+        },
+        {
+          "focus": {
+            "component": "link-form",
+            "field": "issue"
+          }
+        }
+      ]
+    }
+  ],
   "components": [
     {
       "id": "issue-page",

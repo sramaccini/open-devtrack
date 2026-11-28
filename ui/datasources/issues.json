@@ -325,6 +325,15 @@
       "params": {
         "q": "{{search}}"
       }
+    },
+    "assign": {
+      "type": "rest",
+      "method": "PATCH",
+      "url": "/api/issues/{{params.issue}}",
+      "body": {
+        "assignee": "{{assignee}}",
+        "version": "{{version}}"
+      }
     }
   }
 }

@@ -58,6 +58,12 @@ On the left is what the issue says and what happened to it:
 - **Linked work items**: the other issues it is linked to; «Add linked work item», under them, adds one ([below](#links));
 - **Activity**: its comments and its history.
 
+The page has keyboard shortcuts, as in Jira; **?** lists those you may use. **E** edits the description, **A** opens
+Assignee, **I** assigns the issue to you (not when you are its assignee or its reviewer), **L** opens Labels and **K**
+opens the form of the links, the cursor in Issue. They are off while you type in a field or a window is open. **M**,
+which puts the cursor in the comment box in Jira, comes with the next Quadrava
+([#68](https://github.com/sramaccini/open-devtrack/issues/68)).
+
 On the right is what describes it:
 
 - the **status** button at the top, coloured by the category of the status (grey to do, blue in progress, green done).

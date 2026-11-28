@@ -733,5 +733,8 @@
   "issues.start_on_help": "Il giorno in cui il lavoro deve iniziare; mai dopo la scadenza",
   "issues.start": "Inizio",
   "values.issue_field.start": "Data di inizio",
-  "issues.attachment_preview": "Anteprima"
+  "issues.attachment_preview": "Anteprima",
+  "issues.shortcut_description": "Modifica la descrizione",
+  "issues.shortcut_assignee": "Cambia l'assegnatario",
+  "issues.shortcut_labels": "Modifica le etichette"
 }

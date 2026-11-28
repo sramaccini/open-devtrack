@@ -41,7 +41,10 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
   the summary and the description, two forms with `edit: inline` (Quadrava 0.27.0, Q43) on `issue`, between them the
   `menuButton` «+» (`display: icon`, T15: the popover of «Add subtask», a dialog with the dropzone of the attachments and a
   «Link work item», which opens `link-form` with `state.linking` and the step `focus` on its field `issue`, Quadrava
-  0.34.0, Q55): the summary with `display: heading`,
+  0.34.0, Q55): the summary with `display: heading`; the screen has `shortcuts` (Quadrava 0.34.0, Q53): E and L and
+  A the step `focus` on `description`, `labels` and `assignee`, K that of «Link work item», I `issues/assign`
+  (`PATCH` with `assignee` and `version`) with the user, hidden to the assignee and to the reviewer; M waits for
+  Q56 (`focus` on a `comments` node goes to its first button, #68);
   each field saved on its own by `onSave` with `patchIssue`, then the sections Attachments, Subtasks («Child work items» on an epic: a `progress` and a `table` on `children`,
   «Add subtask» a `popover` with the summary that calls `addChild` with the `childType` of the answer, ADR-28), Linked
   work items and Activity (tabs Comments and

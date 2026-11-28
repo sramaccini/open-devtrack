@@ -733,5 +733,8 @@
   "issues.start_on_help": "The day the work should start; never after the due date",
   "issues.start": "Start",
   "values.issue_field.start": "Start date",
-  "issues.attachment_preview": "Preview"
+  "issues.attachment_preview": "Preview",
+  "issues.shortcut_description": "Edit the description",
+  "issues.shortcut_assignee": "Change the assignee",
+  "issues.shortcut_labels": "Edit the labels"
 }
