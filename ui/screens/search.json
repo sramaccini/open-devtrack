@@ -248,7 +248,7 @@
         {
           "field": "updated",
           "label": "{{ t('issues.updated', 'Updated') }}",
-          "format": "datetime",
+          "format": "relative",
           "sortable": true,
           "filter": "date"
         }

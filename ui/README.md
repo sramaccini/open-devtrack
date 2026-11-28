@@ -40,7 +40,8 @@ loads them from the registry of the back end (module `uiregistry`, ADR-03).
 - **Issue page**: `issue-detail` is a `grid` of 12 columns, as the page of a work item in Jira: on the left (8)
   the summary and the description, two forms with `edit: inline` (Quadrava 0.27.0, Q43) on `issue`, between them the
   `menuButton` «+» (`display: icon`, T15: the popover of «Add subtask», a dialog with the dropzone of the attachments and a
-  dialog with relation and issue for `addLink`; no step scrolls to a section): the summary with `display: heading`,
+  «Link work item», which opens `link-form` with `state.linking` and the step `focus` on its field `issue`, Quadrava
+  0.34.0, Q55): the summary with `display: heading`,
   each field saved on its own by `onSave` with `patchIssue`, then the sections Attachments, Subtasks («Child work items» on an epic: a `progress` and a `table` on `children`,
   «Add subtask» a `popover` with the summary that calls `addChild` with the `childType` of the answer, ADR-28), Linked
   work items and Activity (tabs Comments and

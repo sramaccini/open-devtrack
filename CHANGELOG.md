@@ -25,7 +25,10 @@ The entries are written by hand at each release from the commits ([docs/release.
 - **Search**: the ODQL functions `standardIssueTypes()` and `subTaskIssueTypes()` for the type, as in Jira (#55 T5).
 - **Issues**: the parent of an issue in the path above its title, as in Jira (#61).
 - **Issues**: «+» under the summary, as in Jira: add a subtask (a child on an epic), an attachment or a link without
-  going down to their sections (#55 T15).
+  going down to their sections; «Link work item» opens the form of the links in its section and brings it into view,
+  the cursor in Issue (#55 T15, Q55).
+- **Issues**: «Created» and «Updated» of an issue, and the column Updated of the issues and of the search, as a time
+  from now («3 days ago»), the date and time in the tooltip, as in Jira (#55 T16, Q48).
 - **Issues**: linked work items grouped by relation, and «Add linked work item» opens in the section instead of a
   dialog, as in Jira (#55 T6).
 - **Administration**: link types configured by the admin of the tenant, as in Jira (ADR-29). «Link types» lists them

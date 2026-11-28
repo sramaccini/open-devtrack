@@ -321,66 +321,16 @@
                       "visibleIf": "{{ has(data.issue) && data.issue._perm.edit }}",
                       "onClick": [
                         {
-                          "dialog": {
-                            "title": "{{ t('issues.add_linked_item', 'Add linked work item') }}",
-                            "submitLabel": "{{ t('issues.add_link', 'Link') }}",
-                            "initial": {
-                              "relation": "relates"
-                            },
-                            "fields": [
-                              {
-                                "name": "relation",
-                                "type": "lookup",
-                                "label": "{{ t('issues.relation', 'Relation') }}",
-                                "required": true,
-                                "lookup": {
-                                  "source": "linkRelations",
-                                  "valueField": "relation",
-                                  "labelField": "label",
-                                  "minChars": 0
-                                }
-                              },
-                              {
-                                "name": "issue",
-                                "type": "lookup",
-                                "label": "{{ t('issues.linked_issue', 'Issue') }}",
-                                "tooltip": "{{ t('issues.linked_issue_help', 'Its key or words of its summary') }}",
-                                "required": true,
-                                "lookup": {
-                                  "source": "linkCandidates",
-                                  "valueField": "key",
-                                  "labelField": "label",
-                                  "minChars": 0
-                                }
-                              }
-                            ],
-                            "onSubmit": [
-                              {
-                                "call": "addLink",
-                                "onError": [
-                                  {
-                                    "if": "{{error.status == 409}}",
-                                    "then": [
-                                      {
-                                        "toast": "{{ t('issues.already_linked', 'The issues are already linked this way') }}"
-                                      }
-                                    ],
-                                    "else": [
-                                      {
-                                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
-                                      }
-                                    ]
-                                  }
-                                ]
-                              }
-                            ]
+                          "set": {
+                            "path": "state.linking",
+                            "value": true
                           }
                         },
                         {
-                          "refresh": "links"
-                        },
-                        {
-                          "refresh": "history"
+                          "focus": {
+                            "component": "link-form",
+                            "field": "issue"
+                          }
                         }
                       ]
                     }
@@ -735,6 +685,12 @@
                           "set": {
                             "path": "state.linking",
                             "value": true
+                          }
+                        },
+                        {
+                          "focus": {
+                            "component": "link-form",
+                            "field": "issue"
                           }
                         }
                       ],
@@ -2177,22 +2133,18 @@
             },
             {
               "id": "issue-dates",
-              "type": "form",
-              "layout": "grid",
+              "type": "detail",
               "source": "issue",
-              "edit": "inline",
               "fields": [
                 {
-                  "name": "createdAt",
-                  "type": "datetime",
+                  "field": "createdAt",
                   "label": "{{ t('issues.created_at', 'Created') }}",
-                  "readOnlyIf": "{{ true }}"
+                  "format": "relative"
                 },
                 {
-                  "name": "updatedAt",
-                  "type": "datetime",
+                  "field": "updatedAt",
                   "label": "{{ t('issues.updated', 'Updated') }}",
-                  "readOnlyIf": "{{ true }}"
+                  "format": "relative"
                 }
               ]
             }

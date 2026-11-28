@@ -52,7 +52,8 @@ On the left is what the issue says and what happened to it:
   Jira. The summary is confirmed with ✓ or Enter, the description with «Save» or Ctrl+Enter; ✕, «Cancel» or Escape
   leave it as it was. Each is saved on its own;
 - under the summary, **+** (Add), as in Jira: «Add subtask» («Add child work item» on an epic), «Attachment» and
-  «Link work item», each for whoever may do it, without going down to their sections;
+  «Link work item», each for whoever may do it, without going down to their sections. «Link work item» opens the form
+  of the links and brings it into view, the cursor in Issue;
 - **Attachments**: the files of the issue ([below](#attachments));
 - **Linked work items**: the other issues it is linked to; «Add linked work item», under them, adds one ([below](#links));
 - **Activity**: its comments and its history.
@@ -77,7 +78,9 @@ On the right is what describes it:
   attachments, watchers, votes, the flag and the plan stay here. «Print» prints the page without menus and buttons. Delete cannot be undone, and the
   comments, attachments and links of the issue go with it;
 - **Details**: its key, type, priority, assignee, reviewer, reporter, start and due dates, labels and custom fields;
-- **Planning**: its story points (0 to 999, empty when not estimated) and the sprint it is planned in.
+- **Planning**: its story points (0 to 999, empty when not estimated) and the sprint it is planned in;
+- under them, when it was **created** and last **updated**, as a time from now («3 days ago»); the date and time are
+  in the tooltip.
 - Under them, when the issue was created and when it last changed, in your time zone.
 
 The fields of Details and Planning are changed in place, like the summary: a click opens one of them. A
