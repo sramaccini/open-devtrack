@@ -7164,6 +7164,333 @@
         "x-project-permissions" : [ "odt.sprint.manage" ]
       }
     },
+    "/api/teams" : {
+      "get" : {
+        "operationId" : "team.list",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "q",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/TeamView"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          }
+        },
+        "summary" : "The teams of the workspace; q keeps those whose name contains it",
+        "tags" : [ "access" ],
+        "x-permissions" : [ "odt.project.browse" ]
+      },
+      "post" : {
+        "operationId" : "team.add",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TeamRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TeamView"
+                }
+              }
+            },
+            "description" : "Created"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "412" : {
+            "$ref" : "#/components/responses/ChangedMeanwhile"
+          }
+        },
+        "summary" : "Adds a team",
+        "tags" : [ "access" ],
+        "x-permissions" : [ "odt.project.admin" ]
+      }
+    },
+    "/api/teams/{id}" : {
+      "delete" : {
+        "operationId" : "team.remove",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Done"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Removes a team: the issues that name it are left without a team",
+        "tags" : [ "access" ],
+        "x-permissions" : [ "odt.project.admin" ]
+      },
+      "get" : {
+        "operationId" : "team.get",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TeamView"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "A team",
+        "tags" : [ "access" ],
+        "x-permissions" : [ "odt.project.browse" ]
+      },
+      "put" : {
+        "operationId" : "team.edit",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TeamRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TeamView"
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          },
+          "412" : {
+            "$ref" : "#/components/responses/ChangedMeanwhile"
+          }
+        },
+        "summary" : "Changes the name, the description and the lead of a team",
+        "tags" : [ "access" ],
+        "x-permissions" : [ "odt.project.admin" ]
+      }
+    },
+    "/api/teams/{id}/members" : {
+      "get" : {
+        "operationId" : "team.members",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/TeamMemberView"
+                  }
+                }
+              }
+            },
+            "description" : "OK"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "The members of a team",
+        "tags" : [ "access" ],
+        "x-permissions" : [ "odt.project.browse" ]
+      },
+      "post" : {
+        "operationId" : "team.addMember",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/TeamMemberRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/TeamMemberView"
+                }
+              }
+            },
+            "description" : "Created"
+          },
+          "400" : {
+            "$ref" : "#/components/responses/BadRequest"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Adds a user of the workspace to a team: the admin or the lead of the team",
+        "tags" : [ "access" ],
+        "x-permissions" : [ "odt.project.browse" ]
+      }
+    },
+    "/api/teams/{id}/members/{username}" : {
+      "delete" : {
+        "operationId" : "team.removeMember",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "in" : "path",
+          "name" : "username",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Done"
+          },
+          "401" : {
+            "$ref" : "#/components/responses/Unauthorized"
+          },
+          "403" : {
+            "$ref" : "#/components/responses/Forbidden"
+          },
+          "404" : {
+            "$ref" : "#/components/responses/NotFound"
+          }
+        },
+        "summary" : "Removes a user from a team: the admin or the lead of the team",
+        "tags" : [ "access" ],
+        "x-permissions" : [ "odt.project.browse" ]
+      }
+    },
     "/api/time-tracking" : {
       "get" : {
         "operationId" : "workLog.settings",
@@ -8159,6 +8486,9 @@
           "summary" : {
             "type" : "string"
           },
+          "team" : {
+            "type" : "string"
+          },
           "type" : {
             "type" : "string"
           },
@@ -8210,6 +8540,9 @@
             "type" : "string"
           },
           "summary" : {
+            "type" : "string"
+          },
+          "team" : {
             "type" : "string"
           },
           "type" : {
@@ -8351,6 +8684,9 @@
             "type" : "string"
           },
           "summary" : {
+            "type" : "string"
+          },
+          "team" : {
             "type" : "string"
           },
           "timeSpent" : {
@@ -9355,6 +9691,87 @@
           "position" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "TeamMemberRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "username" : {
+            "type" : "string"
+          }
+        }
+      },
+      "TeamMemberView" : {
+        "type" : "object",
+        "properties" : {
+          "_perm" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "boolean"
+            }
+          },
+          "addedAt" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "addedBy" : {
+            "type" : "string"
+          },
+          "username" : {
+            "type" : "string"
+          }
+        }
+      },
+      "TeamRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "description" : {
+            "type" : "string"
+          },
+          "lead" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "TeamView" : {
+        "type" : "object",
+        "properties" : {
+          "_perm" : {
+            "type" : "object",
+            "additionalProperties" : {
+              "type" : "boolean"
+            }
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "lead" : {
+            "type" : "string"
+          },
+          "members" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "name" : {
+            "type" : "string"
           },
           "version" : {
             "type" : "integer",

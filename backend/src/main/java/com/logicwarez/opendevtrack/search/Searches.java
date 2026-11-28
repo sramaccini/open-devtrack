@@ -18,6 +18,7 @@ import static com.logicwarez.opendevtrack.search.Docs.NUMBER;
 import static com.logicwarez.opendevtrack.search.Docs.ORIGINAL_ESTIMATE;
 import static com.logicwarez.opendevtrack.search.Docs.POINTS;
 import static com.logicwarez.opendevtrack.search.Docs.REMAINING_ESTIMATE;
+import static com.logicwarez.opendevtrack.search.Docs.TEAM_ID;
 import static com.logicwarez.opendevtrack.search.Docs.TIME_SPENT;
 import static com.logicwarez.opendevtrack.search.Docs.PRIORITY;
 import static com.logicwarez.opendevtrack.search.Docs.PRIORITY_ORDER;
@@ -39,6 +40,7 @@ import static org.jooq.impl.DSL.val;
 
 import com.logicwarez.opendevtrack.access.ProjectAccess;
 import com.logicwarez.opendevtrack.agile.Planning;
+import com.logicwarez.opendevtrack.access.Teams;
 import com.logicwarez.opendevtrack.issue.Issues;
 import com.logicwarez.opendevtrack.issue.TimeTracking;
 import com.logicwarez.opendevtrack.shared.Durations;
@@ -55,6 +57,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Objects;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -111,11 +115,13 @@ class Searches {
     private final Issues issues;
     private final ZoneId zone;
     private final Durations durations;
+    private final Teams teams;
     private final Map<String, String> statusNames;
     private final ResourceBundleMessageSource texts = new ResourceBundleMessageSource();
 
     Searches(DSLContext sql, Projects projects, ProjectAccess access, CurrentUser user, Planning planning, Issues issues,
-             TimeTracking time, @Value("${odt.reporting.zone:UTC}") String zone) {
+             TimeTracking time, Teams teams, @Value("${odt.reporting.zone:UTC}") String zone) {
+        this.teams = teams;
         this.durations = time.durations();
         this.sql = sql;
         this.projects = projects;
@@ -164,7 +170,19 @@ class Searches {
     Context context(List<ProjectRef> visible) {
         return new Context(user.username(), LocalDate.now(zone), zone,
                 planning.sprints(visible.stream().map(ProjectRef::id).toList()), statusNames,
-                visible.stream().map(ProjectRef::id).toList(), issues.linkRelations(user.tenantId()), durations);
+                visible.stream().map(ProjectRef::id).toList(), issues.linkRelations(user.tenantId()), teamIds(), durations);
+    }
+
+    /** The names of the teams of the workspace, for the suggestions. */
+    List<String> teamNames() {
+        return teams.of(user.tenantId()).stream().map(Teams.Team::name).toList();
+    }
+
+    /** The teams of the workspace by their name in lower case (ADR-31). */
+    private Map<String, UUID> teamIds() {
+        Map<String, UUID> ids = new HashMap<>();
+        teams.of(user.tenantId()).forEach(t -> ids.put(t.name().toLowerCase(Locale.ROOT), t.id()));
+        return ids;
     }
 
     /** The query compiled for the user, with the projects they see; throws {@link Odql.OdqlException}. */
@@ -269,10 +287,13 @@ class Searches {
         LocalDate today = today();
         List<Record> records = new ArrayList<>(sql.select(ISSUE_KEY, PROJECT_KEY, TYPE, STATUS, CATEGORY, PRIORITY,
                         ASSIGNEE, REVIEWER, REPORTER, SUMMARY, DUE_ON, START_ON, UPDATED_AT, CREATED_AT, POINTS, SPRINT_ID,
-                        FLAGGED, PARENT_KEY, ORIGINAL_ESTIMATE, REMAINING_ESTIMATE, TIME_SPENT)
+                        FLAGGED, PARENT_KEY, ORIGINAL_ESTIMATE, REMAINING_ESTIMATE, TIME_SPENT, TEAM_ID)
                 .from(DOC).where(where).orderBy(order).limit(size).offset(page * size).fetch());
         Map<String, Map<String, Boolean>> perm = perm(records, visible);
-        List<Map<String, Object>> items = records.stream().map(r -> row(r, today, columns, durations, perm)).toList();
+        Map<UUID, String> teamNames = teams.names(records.stream().map(r -> r.get(TEAM_ID)).filter(Objects::nonNull)
+                .collect(Collectors.toSet()));
+        List<Map<String, Object>> items = records.stream().map(r -> row(r, today, columns, durations, perm, teamNames))
+                .toList();
         return Map.of("items", items, "total", total);
     }
 
@@ -414,7 +435,7 @@ class Searches {
     }
 
     private static Map<String, Object> row(Record r, LocalDate today, Columns columns, Durations durations,
-                                           Map<String, Map<String, Boolean>> perm) {
+                                           Map<String, Map<String, Boolean>> perm, Map<UUID, String> teamNames) {
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("key", r.get(ISSUE_KEY));
         row.put("project", r.get(PROJECT_KEY));
@@ -442,6 +463,7 @@ class Searches {
         row.put("originalEstimate", durations.textOrNull(r.get(ORIGINAL_ESTIMATE)));
         row.put("remainingEstimate", durations.textOrNull(r.get(REMAINING_ESTIMATE)));
         row.put("timeSpent", durations.textOrNull(r.get(TIME_SPENT)));
+        row.put("team", r.get(TEAM_ID) == null ? null : teamNames.get(r.get(TEAM_ID)));
         Planning.Sprint sprint = columns.sprints.get(r.get(SPRINT_ID));
         row.put("sprint", sprint == null ? columns.backlog : sprint.name());
         row.put("sprintState", sprint == null ? null : sprint.state());

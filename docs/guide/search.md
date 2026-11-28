@@ -74,6 +74,7 @@ An empty query finds every issue. Without `ORDER BY`, the most recently updated 
 | `priority` | `lowest`, `low`, `medium`, `high`, `highest`, in this order | `= != < <= > >= IN NOT IN` |
 | `assignee` | A user name, or `currentUser()` | `= != IN NOT IN IS EMPTY` |
 | `reviewer` | A user name, or `currentUser()` | `= != IN NOT IN IS EMPTY` |
+| `team` | A team of the workspace, by its name | `= != IN NOT IN IS EMPTY` |
 | `reporter` | A user name, or `currentUser()` | `= != IN NOT IN IS EMPTY` |
 | `labels` | One of the labels of the issue | `= != IN NOT IN IS EMPTY` |
 | `flagged` | `Impediment` when the issue is flagged, as in Jira, else empty | `= != IN NOT IN IS EMPTY` |

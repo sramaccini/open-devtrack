@@ -34,7 +34,8 @@
         "labels": "{{formFields.labels}}",
         "description": "{{formFields.description}}",
         "custom": "{{formFields.custom}}",
-        "version": "{{form.version}}"
+        "version": "{{form.version}}",
+        "team": "{{formFields.team}}"
       }
     },
     "patch": {
@@ -386,6 +387,14 @@
       "type": "rest",
       "method": "GET",
       "url": "/api/time-tracking"
+    },
+    "teams": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/teams",
+      "params": {
+        "q": "{{search}}"
+      }
     }
   }
 }

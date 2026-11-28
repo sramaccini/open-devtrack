@@ -1,0 +1,241 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "admin-teams",
+  "title": "{{ t('admin.teams', 'Teams') }}",
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "teams": {
+      "ref": "admin/teams"
+    },
+    "addTeam": {
+      "ref": "admin/addTeam"
+    },
+    "saveTeam": {
+      "ref": "admin/saveTeam"
+    },
+    "removeTeam": {
+      "ref": "admin/removeTeam"
+    },
+    "users": {
+      "ref": "users/search"
+    }
+  },
+  "components": [
+    {
+      "id": "teams-help",
+      "type": "text",
+      "text": "{{ t('admin.teams_help', 'A team names who does the work of an issue, in any project. It gives no access: roles come from the members of the projects and the groups. The admin of the workspace manages the teams, their lead their members.') }}"
+    },
+    {
+      "id": "btn-add-team",
+      "type": "button",
+      "label": "{{ t('admin.add_team', 'New team') }}",
+      "icon": "plus",
+      "visibleIf": "{{ can('odt.project.admin') }}",
+      "onClick": [
+        {
+          "dialog": {
+            "title": "{{ t('admin.add_team', 'New team') }}",
+            "submitLabel": "{{ t('projects.add', 'Add') }}",
+            "fields": [
+              {
+                "name": "name",
+                "type": "text",
+                "label": "{{ t('admin.name', 'Name') }}",
+                "required": true,
+                "maxLength": 100
+              },
+              {
+                "name": "description",
+                "type": "text",
+                "label": "{{ t('admin.description', 'Description') }}",
+                "maxLength": 500
+              },
+              {
+                "name": "lead",
+                "type": "lookup",
+                "label": "{{ t('admin.team_lead', 'Lead') }}",
+                "tooltip": "{{ t('admin.team_lead_help', 'Manages the members of the team') }}",
+                "lookup": {
+                  "source": "users",
+                  "valueField": "username",
+                  "labelField": "username",
+                  "minChars": 1
+                }
+              }
+            ],
+            "onSubmit": [
+              {
+                "call": "addTeam",
+                "onError": [
+                  {
+                    "if": "{{error.status == 409}}",
+                    "then": [
+                      {
+                        "toast": "{{ t('admin.team_exists', 'A team with this name exists') }}"
+                      }
+                    ],
+                    "else": [
+                      {
+                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "refresh": "teams"
+        }
+      ]
+    },
+    {
+      "id": "team-table",
+      "type": "table",
+      "source": "teams",
+      "columns": [
+        {
+          "field": "name",
+          "label": "{{ t('admin.name', 'Name') }}"
+        },
+        {
+          "field": "description",
+          "label": "{{ t('admin.description', 'Description') }}"
+        },
+        {
+          "field": "lead",
+          "label": "{{ t('admin.team_lead', 'Lead') }}"
+        },
+        {
+          "field": "members",
+          "label": "{{ t('admin.group_members', 'Members') }}"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-open-team",
+          "label": "{{ t('admin.open', 'Open') }}",
+          "icon": "external",
+          "onClick": [
+            {
+              "navigate": "admin-team-detail",
+              "params": {
+                "id": "{{row.id}}"
+              }
+            }
+          ]
+        },
+        {
+          "id": "btn-edit-team",
+          "label": "{{ t('projects.edit_field', 'Edit') }}",
+          "icon": "edit",
+          "visibleIf": "{{row._perm.edit}}",
+          "onClick": [
+            {
+              "dialog": {
+                "title": "{{ t('admin.edit_team', 'Edit {name}', {'name': row.name}) }}",
+                "submitLabel": "{{ t('common.save', 'Save') }}",
+                "initial": {
+                  "name": "{{row.name}}",
+                  "description": "{{row.description}}",
+                  "lead": "{{row.lead}}",
+                  "version": "{{row.version}}"
+                },
+                "fields": [
+                  {
+                    "name": "name",
+                    "type": "text",
+                    "label": "{{ t('admin.name', 'Name') }}",
+                    "required": true,
+                    "maxLength": 100
+                  },
+                  {
+                    "name": "description",
+                    "type": "text",
+                    "label": "{{ t('admin.description', 'Description') }}",
+                    "maxLength": 500
+                  },
+                  {
+                    "name": "lead",
+                    "type": "lookup",
+                    "label": "{{ t('admin.team_lead', 'Lead') }}",
+                    "tooltip": "{{ t('admin.team_lead_help', 'Manages the members of the team') }}",
+                    "lookup": {
+                      "source": "users",
+                      "valueField": "username",
+                      "labelField": "username",
+                      "minChars": 1
+                    }
+                  }
+                ],
+                "onSubmit": [
+                  {
+                    "call": "saveTeam",
+                    "args": {
+                      "id": "{{row.id}}"
+                    },
+                    "onError": [
+                      {
+                        "if": "{{error.status == 412}}",
+                        "then": [
+                          {
+                            "toast": "{{ t('common.changed_meanwhile', 'Someone else changed it in the meantime: reload and try again') }}"
+                          }
+                        ],
+                        "else": [
+                          {
+                            "if": "{{error.status == 409}}",
+                            "then": [
+                              {
+                                "toast": "{{ t('admin.team_exists', 'A team with this name exists') }}"
+                              }
+                            ],
+                            "else": [
+                              {
+                                "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "refresh": "teams"
+            }
+          ]
+        },
+        {
+          "id": "btn-remove-team",
+          "label": "{{ t('common.remove', 'Remove') }}",
+          "icon": "delete",
+          "visibleIf": "{{row._perm.remove}}",
+          "onClick": [
+            {
+              "confirm": "{{ t('admin.remove_team', 'Remove the team {name}? Its issues are left without a team.', {'name': row.name}) }}"
+            },
+            {
+              "call": "removeTeam",
+              "args": {
+                "id": "{{row.id}}"
+              },
+              "onError": [
+                {
+                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                }
+              ]
+            },
+            {
+              "refresh": "teams"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

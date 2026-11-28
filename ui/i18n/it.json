@@ -778,5 +778,22 @@
   "values.webhook_event.worklog.created": "Lavoro registrato",
   "values.webhook_event.worklog.updated": "Registrazione modificata",
   "values.webhook_event.worklog.deleted": "Registrazione eliminata",
-  "time.started_on": "Iniziato {date}"
+  "time.started_on": "Iniziato {date}",
+  "nav.admin_teams": "Team",
+  "admin.teams": "Team",
+  "admin.team": "Team",
+  "admin.teams_help": "Un team indica chi fa il lavoro di una issue, in qualunque progetto. Non dà accessi: i ruoli vengono dai membri dei progetti e dai gruppi. L'amministratore dello spazio di lavoro gestisce i team, il loro responsabile i membri.",
+  "admin.add_team": "Nuovo team",
+  "admin.edit_team": "Modifica {name}",
+  "admin.team_exists": "Esiste già un team con questo nome",
+  "admin.team_lead": "Responsabile",
+  "admin.team_lead_help": "Gestisce i membri del team",
+  "admin.team_led_by": "Responsabile: {name}",
+  "admin.team_no_lead": "Nessun responsabile",
+  "admin.remove_team": "Eliminare il team {name}? Le sue issue restano senza team.",
+  "admin.team_member_exists": "Già nel team",
+  "admin.remove_team_member": "Togliere {name} dal team?",
+  "issues.team": "Team",
+  "issues.team_help": "Il team che fa il lavoro, qualunque team dello spazio di lavoro",
+  "values.issue_field.team": "Team"
 }

@@ -265,6 +265,10 @@ The area `admin` (ADR-22), shown to whoever holds `authz.rbac.manage` in the ten
   Remove, Open) and the members of one (Add member with a lookup on the users, Remove). A multiselect cannot list the
   users (the options of Quadrava are static), so members are added one at a time. A removal that would leave a project
   without an admin answers 409 and the toast says so.
+- `admin-teams` and `admin-team-detail` (params `id`) (`odt.project.browse`, ADR-31): the teams of the tenant, which
+  everyone reads; New, Edit (name, description, lead) and Remove follow `can('odt.project.admin')` and `_perm`, and
+  Add member and Remove on a team follow `_perm.members` (the admin or the lead). The Team of an issue is the lookup
+  `team` on `issues/teams` in Details, after Reviewer, and in `issue-new`, by name; the search has the column Team.
 - `admin-permission-schemes` (`odt.project.admin`, the admin of the projects of the tenant): the permission schemes of
   OpenDevTrack (`/api/permission-schemes`), New (a copy of the default), Edit (name, description, the permissions of
   each project role), Remove (not the default, not one in use). A refused change (400) says the rules: every role sees

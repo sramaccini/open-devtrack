@@ -161,6 +161,7 @@ class Words {
             case "assignee" -> "assignee = currentUser()";
             case "reviewer" -> "reviewer = currentUser()";
             case "reporter" -> "reporter = currentUser()";
+            case "team" -> "team = Platform";
             case "labels" -> "labels = backend";
             case "flagged" -> "flagged IS NOT EMPTY";
             case "summary" -> "summary ~ checkout";
@@ -208,6 +209,7 @@ class Words {
                         .where(label.likeIgnoreCase(prefix.replace("%", "") + "%")).orderBy(label).limit(10)
                         .fetch(label).forEach(values::add);
             }
+            case "team" -> searches.teamNames().forEach(values::add);
             case "linktype" -> searches.context(visible).relations().stream().map(r -> r.type()).distinct()
                     .forEach(values::add);
             case "sprint" -> {

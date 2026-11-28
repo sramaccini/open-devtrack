@@ -111,7 +111,7 @@ public class Issues {
                         .map(parent -> IssueController.key(p, parent)).orElse(null),
                 links.findByIssue(i.id()).stream().map(l -> new IssueDocument.Link(l.type(), l.fromId().equals(i.id()),
                         l.other(i.id()))).toList(), i.originalEstimate(),
-                i.remainingEstimate(), i.timeSpent())));
+                i.remainingEstimate(), i.timeSpent(), i.teamId())));
     }
 
     /**
@@ -259,13 +259,13 @@ public class Issues {
         return switch (lane.field()) {
             case "assignee" -> new IssueRequest(now.type(), now.summary(), now.description(), now.priority(), value,
                     now.dueOn(), now.startOn(), now.reviewer(), now.labels(), null, now.originalEstimate(),
-                    now.remainingEstimate(), null, now.version());
+                    now.remainingEstimate(), now.team(), null, now.version());
             case "priority" -> new IssueRequest(now.type(), now.summary(), now.description(), given, now.assignee(),
                     now.dueOn(), now.startOn(), now.reviewer(), now.labels(), null, now.originalEstimate(),
-                    now.remainingEstimate(), null, now.version());
+                    now.remainingEstimate(), now.team(), null, now.version());
             default -> new IssueRequest(given, now.summary(), now.description(), now.priority(), now.assignee(),
                     now.dueOn(), now.startOn(), now.reviewer(), now.labels(), null, now.originalEstimate(),
-                    now.remainingEstimate(), null, now.version());
+                    now.remainingEstimate(), now.team(), null, now.version());
         };
     }
 
@@ -303,6 +303,21 @@ public class Issues {
         if (!changes.isEmpty()) {
             events.publishEvent(new IssueChanged(issue.id(), project.id(), IssueController.key(project, issue),
                     user.username(), now, changes));
+        }
+    }
+
+    /**
+     * A team was deleted (ADR-31): its issues are left without a team, each with a row of history by the name it had and
+     * its event, as by whoever deleted it.
+     */
+    @Transactional
+    public void teamDeleted(UUID teamId, String tenantId, String name, String by, Instant now) {
+        for (IssueEntity issue : issues.findByTenantIdAndTeamId(tenantId, teamId)) {
+            issue.teamDeleted(now);
+            issues.saveAndFlush(issue);
+            projects.byId(issue.projectId()).ifPresent(project -> events.publishEvent(new IssueChanged(issue.id(),
+                    project.id(), IssueController.key(project, issue), by, now,
+                    List.of(new FieldChange("team", name, null)))));
         }
     }
 

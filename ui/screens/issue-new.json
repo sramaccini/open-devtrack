@@ -41,6 +41,9 @@
     },
     "newParents": {
       "ref": "issues/newParents"
+    },
+    "teams": {
+      "ref": "issues/teams"
     }
   },
   "components": [
@@ -135,6 +138,19 @@
             "source": "assignees",
             "valueField": "username",
             "labelField": "username",
+            "minChars": 0
+          }
+        },
+        {
+          "name": "team",
+          "type": "lookup",
+          "label": "{{ t('issues.team', 'Team') }}",
+          "width": "m",
+          "tooltip": "{{ t('issues.team_help', 'The team that does the work, any team of the workspace') }}",
+          "lookup": {
+            "source": "teams",
+            "valueField": "name",
+            "labelField": "name",
             "minChars": 0
           }
         },

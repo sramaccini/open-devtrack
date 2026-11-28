@@ -5,6 +5,7 @@
 package com.logicwarez.opendevtrack.issue;
 
 import com.logicwarez.opendevtrack.access.ProjectAccess;
+import com.logicwarez.opendevtrack.access.Teams;
 import com.logicwarez.opendevtrack.issue.IssueDocuments.Block;
 import com.logicwarez.opendevtrack.issue.IssueDocuments.Heading;
 import com.logicwarez.opendevtrack.issue.IssueDocuments.Paragraph;
@@ -79,12 +80,14 @@ class ExportController {
     private final ResourceBundleMessageSource texts = new ResourceBundleMessageSource();
 
     private final Durations durations;
+    private final Teams teams;
 
     ExportController(Issues finder, IssueRepository issues, IssueLinkRepository links, Projects projects,
                      ProjectAccess access, Watchers watchers, VoteRepository votes, CustomFields customFields,
-                     List<IssueContent> modules, LinkTypes linkTypes, TimeTracking time,
+                     List<IssueContent> modules, LinkTypes linkTypes, TimeTracking time, Teams teams,
                      CurrentUser user, @Value("${odt.reporting.zone:UTC}") String zone) {
         this.durations = time.durations();
+        this.teams = teams;
         this.finder = finder;
         this.linkTypes = linkTypes;
         this.issues = issues;
@@ -168,6 +171,7 @@ class ExportController {
         fields.put("originalEstimateMinutes", i.originalEstimate());
         fields.put("remainingEstimateMinutes", i.remainingEstimate());
         fields.put("timeSpentMinutes", i.timeSpent());
+        fields.put("team", team(i));
         fields.put("labels", i.labels());
         fields.put("parent", parent);
         fields.put("flagged", i.flagged());
@@ -219,6 +223,8 @@ class ExportController {
         rows.add(List.of(text("field.original_estimate"), duration(i.originalEstimate())));
         rows.add(List.of(text("field.remaining_estimate"), duration(i.remainingEstimate())));
         rows.add(List.of(text("field.time_spent"), durations.text(i.timeSpent())));
+        String team = team(i);
+        rows.add(List.of(text("field.team"), team == null ? text("none") : team));
         rows.add(List.of(text("field.labels"), i.labels().isEmpty() ? text("none") : String.join(", ", i.labels())));
         rows.add(List.of(text("field.flagged"), text(i.flagged() ? "yes" : "no")));
         rows.add(List.of(text("field.votes"), String.valueOf(votes.countByIssueId(i.id()))));
@@ -351,6 +357,10 @@ class ExportController {
                         .filename(name, StandardCharsets.UTF_8).build().toString())
                 .contentType(type)
                 .body(body);
+    }
+
+    private String team(IssueEntity i) {
+        return i.teamId() == null ? null : teams.names(List.of(i.teamId())).get(i.teamId());
     }
 
     private String duration(Integer minutes) {

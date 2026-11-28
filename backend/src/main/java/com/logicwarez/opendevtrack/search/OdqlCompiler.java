@@ -22,6 +22,7 @@ import static com.logicwarez.opendevtrack.search.Docs.NUMBER;
 import static com.logicwarez.opendevtrack.search.Docs.ORIGINAL_ESTIMATE;
 import static com.logicwarez.opendevtrack.search.Docs.POINTS;
 import static com.logicwarez.opendevtrack.search.Docs.REMAINING_ESTIMATE;
+import static com.logicwarez.opendevtrack.search.Docs.TEAM_ID;
 import static com.logicwarez.opendevtrack.search.Docs.TIME_SPENT;
 import static com.logicwarez.opendevtrack.search.Docs.PRIORITY_ORDER;
 import static com.logicwarez.opendevtrack.search.Docs.PROJECT_KEY;
@@ -88,7 +89,7 @@ final class OdqlCompiler {
 
     /** The fields of the language, in the order the suggestions show them. */
     static final List<String> FIELDS = List.of("project", "key", "parent", "linked", "linkType", "type", "status",
-            "category", "priority", "assignee", "reviewer", "reporter", "labels", "flagged", "summary", "text", "created",
+            "category", "priority", "assignee", "reviewer", "reporter", "team", "labels", "flagged", "summary", "text", "created",
             "updated", "resolved", "start", "due", "sprint", "points", "originalEstimate", "remainingEstimate", "timeSpent",
             "rank");
 
@@ -114,15 +115,15 @@ final class OdqlCompiler {
      */
     record Context(String username, LocalDate today, ZoneId zone, List<Planning.Sprint> sprints,
                    Map<String, String> statusNames, List<UUID> visible, List<Issues.LinkRelation> relations,
-                   Durations durations) {
+                   Map<String, UUID> teams, Durations durations) {
 
         /**
          * Without the projects the user sees and the link types of the tenant: the links find nothing, and a link
-         * type or relation is unknown; a day is 8 hours and a week 5 days.
+         * type or relation is unknown; no team is known; a day is 8 hours and a week 5 days.
          */
         Context(String username, LocalDate today, ZoneId zone, List<Planning.Sprint> sprints,
                 Map<String, String> statusNames) {
-            this(username, today, zone, sprints, statusNames, List.of(), List.of(), new Durations(8, 5));
+            this(username, today, zone, sprints, statusNames, List.of(), List.of(), Map.of(), new Durations(8, 5));
         }
     }
 
@@ -182,6 +183,7 @@ final class OdqlCompiler {
             case "assignee" -> text(c, ASSIGNEE, v -> v);
             case "reviewer" -> text(c, REVIEWER, v -> v);
             case "reporter" -> text(c, REPORTER, v -> v);
+            case "team" -> team(c);
             case "labels" -> labels(c);
             case "flagged" -> text(c, FLAGGED, v -> {
                 oneOf(c, v, List.of("impediment"), "flag");
@@ -513,6 +515,27 @@ final class OdqlCompiler {
             case "notempty" -> field.isNotNull();
             default -> throw notAllowed(c, "= != < <= > >= IS EMPTY");
         };
+    }
+
+    /** {@code team} (ADR-31): a team of the workspace by its name, in any case; the index keeps its identifier. */
+    private Condition team(Clause c) {
+        return switch (c.op()) {
+            case "=" -> TEAM_ID.eq(teamId(c, c.values().getFirst()));
+            case "!=" -> TEAM_ID.ne(teamId(c, c.values().getFirst()));
+            case "in" -> TEAM_ID.in(c.values().stream().map(v -> teamId(c, v)).toList());
+            case "notin" -> TEAM_ID.notIn(c.values().stream().map(v -> teamId(c, v)).toList());
+            case "empty" -> TEAM_ID.isNull();
+            case "notempty" -> TEAM_ID.isNotNull();
+            default -> throw notAllowed(c, "= != IN NOT IN IS EMPTY");
+        };
+    }
+
+    private UUID teamId(Clause c, Value v) {
+        UUID id = context.teams().get(word(c, v).toLowerCase(Locale.ROOT));
+        if (id == null) {
+            throw error(v.at(), "No team is called '" + v.text() + "'", null);
+        }
+        return id;
     }
 
     /** A sprint by name (or identifier) among those of the projects the user sees; {@code openSprints()}. */

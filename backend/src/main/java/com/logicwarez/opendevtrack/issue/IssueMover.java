@@ -186,7 +186,8 @@ class IssueMover {
                     + ": list them in fields.drop to move the issue without them", undeclared);
         }
         Fields fields = new Fields(type, issue.summary(), issue.description(), issue.priority(), assignee, issue.dueOn(),
-                issue.startOn(), reviewer, issue.labels(), kept, issue.originalEstimate(), issue.remainingEstimate());
+                issue.startOn(), reviewer, issue.labels(), kept, issue.originalEstimate(), issue.remainingEstimate(),
+                issue.teamId());
         Map<IssueEntity, String> subtaskStatus = new LinkedHashMap<>();
         try {
             editor.checkRequired(target, null, fields, status, issue.reporter(), there);
@@ -197,7 +198,7 @@ class IssueMover {
                 subtaskStatus.put(s, to);
                 editor.checkRequired(target, null, new Fields(IssueType.SUBTASK, s.summary(), s.description(),
                         s.priority(), l.assignee(), s.dueOn(), s.startOn(), l.reviewer(), s.labels(), l.kept(), s.originalEstimate(),
-                        s.remainingEstimate()), to, s.reporter(), there);
+                        s.remainingEstimate(), s.teamId()), to, s.reporter(), there);
             }
         } catch (InvalidCustom e) {
             return Problems.invalidFields(InvalidCustom.TITLE, e.errors);

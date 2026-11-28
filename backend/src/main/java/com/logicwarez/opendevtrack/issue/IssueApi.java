@@ -33,7 +33,7 @@ final class IssueApi {
                      LocalDate startOn, String reviewer, List<String> labels, Map<String, Object> custom, Instant createdAt, Instant updatedAt, long version, boolean watching,
                      boolean flagged, long votes, boolean voted, ParentView parent, String parentKey,
                      String originalEstimate, Integer originalEstimateMinutes, String remainingEstimate,
-                     Integer remainingEstimateMinutes, String timeSpent, int timeSpentMinutes,
+                     Integer remainingEstimateMinutes, String timeSpent, int timeSpentMinutes, String team,
                      @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
 
@@ -120,6 +120,7 @@ final class IssueApi {
         private String originalEstimate;
         private String remainingEstimate;
         private String reviewer;
+        private String team;
         private String reporter;
         private List<String> labels;
         private Map<String, Object> custom;
@@ -196,6 +197,15 @@ final class IssueApi {
         public void setOriginalEstimate(String originalEstimate) {
             this.originalEstimate = originalEstimate;
             given.add("originalEstimate");
+        }
+
+        public String getTeam() {
+            return team;
+        }
+
+        public void setTeam(String team) {
+            this.team = team;
+            given.add("team");
         }
 
         public String getRemainingEstimate() {
@@ -301,10 +311,10 @@ final class IssueApi {
     /**
      * Fields of a new issue or of a change; {@code version} only for a change. {@code parent} (ADR-28): the key of the
      * parent, in the same project; without it the issue keeps its parent (a new one has none), and an empty one
-     * removes it.
+     * removes it. {@code team} (ADR-31): the name of a team of the workspace, empty for none.
      */
     record IssueRequest(String type, String summary, String description, String priority, String assignee,
                         String dueOn, String startOn, String reviewer, List<String> labels, Map<String, Object> custom,
-                        String originalEstimate, String remainingEstimate, String parent, Long version) {
+                        String originalEstimate, String remainingEstimate, String team, String parent, Long version) {
     }
 }

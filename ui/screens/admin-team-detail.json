@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0",
+  "screen": "admin-team-detail",
+  "title": "{{ t('admin.team', 'Team') }}",
+  "breadcrumb": [
+    {
+      "label": "{{ t('nav.admin', 'Administration') }}"
+    },
+    {
+      "label": "{{ t('nav.admin_teams', 'Teams') }}",
+      "navigate": "admin-teams"
+    },
+    {
+      "label": "{{ has(data.team) ? data.team.name : '' }}"
+    }
+  ],
+  "requires": "odt.project.browse",
+  "dataSources": {
+    "team": {
+      "ref": "admin/team"
+    },
+    "teamMembers": {
+      "ref": "admin/teamMembers"
+    },
+    "addTeamMember": {
+      "ref": "admin/addTeamMember"
+    },
+    "removeTeamMember": {
+      "ref": "admin/removeTeamMember"
+    },
+    "users": {
+      "ref": "users/search"
+    }
+  },
+  "components": [
+    {
+      "id": "team-name",
+      "type": "text",
+      "style": "heading",
+      "text": "{{ data.team != null ? data.team.name : '' }}"
+    },
+    {
+      "id": "team-description",
+      "type": "text",
+      "text": "{{ data.team != null && data.team.description != null ? data.team.description : '' }}"
+    },
+    {
+      "id": "team-lead",
+      "type": "text",
+      "text": "{{ data.team != null && data.team.lead != null ? t('admin.team_led_by', 'Lead: {name}', {'name': data.team.lead}) : t('admin.team_no_lead', 'No lead') }}"
+    },
+    {
+      "id": "btn-add-team-member",
+      "type": "button",
+      "label": "{{ t('admin.add_group_member', 'Add member') }}",
+      "icon": "user-add",
+      "visibleIf": "{{ has(data.team) && data.team._perm.members }}",
+      "onClick": [
+        {
+          "dialog": {
+            "title": "{{ t('admin.add_group_member', 'Add member') }}",
+            "submitLabel": "{{ t('projects.add', 'Add') }}",
+            "fields": [
+              {
+                "name": "username",
+                "type": "lookup",
+                "label": "{{ t('projects.user', 'User') }}",
+                "required": true,
+                "lookup": {
+                  "source": "users",
+                  "valueField": "username",
+                  "labelField": "username",
+                  "minChars": 1
+                }
+              }
+            ],
+            "onSubmit": [
+              {
+                "call": "addTeamMember",
+                "onError": [
+                  {
+                    "if": "{{error.status == 409}}",
+                    "then": [
+                      {
+                        "toast": "{{ t('admin.team_member_exists', 'Already in the team') }}"
+                      }
+                    ],
+                    "else": [
+                      {
+                        "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "refresh": "teamMembers"
+        },
+        {
+          "refresh": "team"
+        }
+      ]
+    },
+    {
+      "id": "team-member-table",
+      "type": "table",
+      "source": "teamMembers",
+      "columns": [
+        {
+          "field": "username",
+          "label": "{{ t('projects.user', 'User') }}"
+        },
+        {
+          "field": "addedBy",
+          "label": "{{ t('admin.added_by', 'Added by') }}"
+        },
+        {
+          "field": "addedAt",
+          "label": "{{ t('admin.added_at', 'Added') }}",
+          "format": "datetime"
+        }
+      ],
+      "rowActions": [
+        {
+          "id": "btn-remove-team-member",
+          "label": "{{ t('common.remove', 'Remove') }}",
+          "icon": "delete",
+          "visibleIf": "{{row._perm.remove}}",
+          "onClick": [
+            {
+              "confirm": "{{ t('admin.remove_team_member', 'Remove {name} from the team?', {'name': row.username}) }}"
+            },
+            {
+              "call": "removeTeamMember",
+              "args": {
+                "username": "{{row.username}}"
+              },
+              "onError": [
+                {
+                  "toast": "{{ t('common.saving_failed', 'Saving failed') }}"
+                }
+              ]
+            },
+            {
+              "refresh": "teamMembers"
+            },
+            {
+              "refresh": "team"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

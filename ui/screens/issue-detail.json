@@ -200,6 +200,9 @@
         "comment": "{{text}}",
         "version": "{{row.version}}"
       }
+    },
+    "teams": {
+      "ref": "issues/teams"
     }
   },
   "shortcuts": [
@@ -2148,6 +2151,20 @@
                         "source": "assignees",
                         "valueField": "username",
                         "labelField": "username",
+                        "minChars": 0
+                      },
+                      "readOnlyIf": "{{!form._perm.edit}}"
+                    },
+                    {
+                      "name": "team",
+                      "type": "lookup",
+                      "label": "{{ t('issues.team', 'Team') }}",
+                      "emptyText": "{{ t('common.none', 'None') }}",
+                      "tooltip": "{{ t('issues.team_help', 'The team that does the work, any team of the workspace') }}",
+                      "lookup": {
+                        "source": "teams",
+                        "valueField": "name",
+                        "labelField": "name",
                         "minChars": 0
                       },
                       "readOnlyIf": "{{!form._perm.edit}}"

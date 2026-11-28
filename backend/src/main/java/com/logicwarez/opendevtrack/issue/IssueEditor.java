@@ -5,6 +5,7 @@
 package com.logicwarez.opendevtrack.issue;
 
 import com.logicwarez.opendevtrack.access.ProjectAccess;
+import com.logicwarez.opendevtrack.access.Teams;
 import com.logicwarez.opendevtrack.issue.IssueApi.IssueRequest;
 import com.logicwarez.opendevtrack.issue.IssueEvents.FieldChange;
 import com.logicwarez.opendevtrack.platform.CurrentUser;
@@ -24,6 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -52,9 +54,12 @@ class IssueEditor {
     private final Projects projects;
     private final MovedKeys moved;
     private final Durations durations;
+    private final Teams teams;
 
     IssueEditor(ProjectAccess access, CustomFields customFields, Workflows workflows, WatcherRepository watchers,
-                CurrentUser user, IssueRepository issues, Projects projects, MovedKeys moved, TimeTracking time) {
+                CurrentUser user, IssueRepository issues, Projects projects, MovedKeys moved, TimeTracking time,
+                Teams teams) {
+        this.teams = teams;
         this.durations = time.durations();
         this.issues = issues;
         this.projects = projects;
@@ -88,7 +93,7 @@ class IssueEditor {
         checkRequired(project, IssueController.key(project, issue), fields, status, issue.reporter(), permissions);
         Parent before = parentOf(project, issue);
         Parent parent = parent(project, issue, fields.type(), request.parent(), before);
-        List<FieldChange> changes = new ArrayList<>(fields.changesFrom(Fields.of(issue), durations));
+        List<FieldChange> changes = new ArrayList<>(fields.changesFrom(Fields.of(issue), durations, this::teamName));
         if (!Objects.equals(before.key(), parent.key())) {
             changes.add(new FieldChange("parent", before.key(), parent.key()));
         }
@@ -211,8 +216,8 @@ class IssueEditor {
         return new IssueRequest(issue.type().value(), issue.summary(), issue.description(), issue.priority().value(),
                 issue.assignee(), issue.dueOn() == null ? null : issue.dueOn().toString(),
                 issue.startOn() == null ? null : issue.startOn().toString(), issue.reviewer(),
-                issue.labels(), null, durations(issue.originalEstimate()), durations(issue.remainingEstimate()), null,
-                issue.version());
+                issue.labels(), null, durations(issue.originalEstimate()), durations(issue.remainingEstimate()),
+                teamName(issue.teamId()), null, issue.version());
     }
 
     /** An issue as the conditions see it (ADR-10, ADR-11), also one not saved yet ({@code key} null). */
@@ -231,6 +236,7 @@ class IssueEditor {
         issue.put("dueOn", f.dueOn() == null ? null : f.dueOn().toString());
         issue.put("startOn", f.startOn() == null ? null : f.startOn().toString());
         issue.put("reviewer", f.reviewer());
+        issue.put("team", f.teamId() == null ? null : f.teamId().toString());
         issue.put("labels", f.labels() == null ? List.of() : f.labels());
         issue.put("custom", f.custom());
         return issue;
@@ -249,24 +255,24 @@ class IssueEditor {
     /** The fields of a request, checked; type and priority default to task and medium. */
     record Fields(IssueType type, String summary, String description, Priority priority, String assignee,
                   LocalDate dueOn, LocalDate startOn, String reviewer, List<String> labels,
-                  Map<String, Object> custom, Integer originalEstimate, Integer remainingEstimate) {
+                  Map<String, Object> custom, Integer originalEstimate, Integer remainingEstimate, UUID teamId) {
 
         void applyTo(IssueEntity issue, Instant now) {
             issue.edit(type, summary, description, priority, assignee, dueOn, startOn, reviewer, labels, custom,
-                    originalEstimate, remainingEstimate, now);
+                    originalEstimate, remainingEstimate, teamId, now);
         }
 
         static final Fields EMPTY = new Fields(null, null, null, null, null, null, null, null, List.of(), Map.of(), null,
-                null);
+                null, null);
 
         static Fields of(IssueEntity issue) {
             return new Fields(issue.type(), issue.summary(), issue.description(), issue.priority(), issue.assignee(),
                     issue.dueOn(), issue.startOn(), issue.reviewer(), issue.labels(), issue.custom(),
-                    issue.originalEstimate(), issue.remainingEstimate());
+                    issue.originalEstimate(), issue.remainingEstimate(), issue.teamId());
         }
 
-        /** The fields that differ from {@code before}, in the order of the form. */
-        List<FieldChange> changesFrom(Fields before, Durations durations) {
+        /** The fields that differ from {@code before}, in the order of the form; a team by its name. */
+        List<FieldChange> changesFrom(Fields before, Durations durations, Function<UUID, String> teamName) {
             List<FieldChange> changes = new ArrayList<>();
             change(changes, "type", before.type == null ? null : before.type.value(), type == null ? null : type.value());
             change(changes, "summary", before.summary, summary);
@@ -274,6 +280,9 @@ class IssueEditor {
                     priority == null ? null : priority.value());
             change(changes, "assignee", before.assignee, assignee);
             change(changes, "reviewer", before.reviewer, reviewer);
+            if (!Objects.equals(before.teamId, teamId)) {
+                changes.add(new FieldChange("team", teamName.apply(before.teamId), teamName.apply(teamId)));
+            }
             change(changes, "due", before.dueOn == null ? null : before.dueOn.toString(),
                     dueOn == null ? null : dueOn.toString());
             change(changes, "start", before.startOn == null ? null : before.startOn.toString(),
@@ -373,6 +382,11 @@ class IssueEditor {
         if (remainingEstimate == null && originalEstimate != null && before.originalEstimate() == null) {
             remainingEstimate = originalEstimate;
         }
+        UUID teamId = null;
+        if (blankToNull(request.team()) != null) {
+            teamId = teams.named(user.tenantId(), request.team()).map(Teams.Team::id)
+                    .orElseThrow(() -> new InvalidField("No team with this name in the workspace"));
+        }
         Map<String, Object> custom = before.custom();
         if (request.custom() != null) {
             CustomFields.Checked checked = customFields.check(project.id(), request.custom(), before.custom());
@@ -382,7 +396,7 @@ class IssueEditor {
             custom = checked.values();
         }
         return new Fields(type, request.summary().strip(), blankToNull(request.description()), priority, assignee,
-                dueOn, startOn, reviewer, labels(request.labels()), custom, originalEstimate, remainingEstimate);
+                dueOn, startOn, reviewer, labels(request.labels()), custom, originalEstimate, remainingEstimate, teamId);
     }
 
     /** The text of an estimate for a request, {@code null} for none. */
@@ -392,6 +406,11 @@ class IssueEditor {
 
     Durations durations() {
         return durations;
+    }
+
+    /** The name of a team, {@code null} for none or one gone (ADR-31). */
+    String teamName(UUID teamId) {
+        return teamId == null ? null : teams.names(List.of(teamId)).get(teamId);
     }
 
     /** Labels in lower case, without repetitions, in the order given. */

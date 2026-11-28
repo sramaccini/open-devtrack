@@ -16,6 +16,8 @@ interface IssueRepository extends JpaRepository<IssueEntity, UUID> {
 
     Optional<IssueEntity> findByProjectIdAndNumber(UUID projectId, long number);
 
+    List<IssueEntity> findByTenantIdAndTeamId(String tenantId, UUID teamId);
+
     /** Issues of a project, newest first; each filter is ignored when null ({@code text}: lower case, with the %). */
     @Query("""
             SELECT i FROM IssueEntity i

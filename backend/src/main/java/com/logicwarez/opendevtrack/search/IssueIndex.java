@@ -22,6 +22,7 @@ import static com.logicwarez.opendevtrack.search.Docs.NUMBER;
 import static com.logicwarez.opendevtrack.search.Docs.ORIGINAL_ESTIMATE;
 import static com.logicwarez.opendevtrack.search.Docs.POINTS;
 import static com.logicwarez.opendevtrack.search.Docs.REMAINING_ESTIMATE;
+import static com.logicwarez.opendevtrack.search.Docs.TEAM_ID;
 import static com.logicwarez.opendevtrack.search.Docs.TIME_SPENT;
 import static com.logicwarez.opendevtrack.search.Docs.PRIORITY;
 import static com.logicwarez.opendevtrack.search.Docs.PRIORITY_ORDER;
@@ -189,6 +190,7 @@ class IssueIndex {
                 .set(ORIGINAL_ESTIMATE, issue.originalEstimate())
                 .set(REMAINING_ESTIMATE, issue.remainingEstimate())
                 .set(TIME_SPENT, issue.timeSpent())
+                .set(TEAM_ID, issue.teamId())
                 .set(FLAGGED, issue.flagged() ? OdqlCompiler.IMPEDIMENT : null)
                 .set(LABELS, issue.labels().toArray(String[]::new))
                 .set(LINKS, linkWords)
@@ -222,6 +224,7 @@ class IssueIndex {
                 .set(ORIGINAL_ESTIMATE, issue.originalEstimate())
                 .set(REMAINING_ESTIMATE, issue.remainingEstimate())
                 .set(TIME_SPENT, issue.timeSpent())
+                .set(TEAM_ID, issue.teamId())
                 .set(FLAGGED, issue.flagged() ? OdqlCompiler.IMPEDIMENT : null)
                 .set(LABELS, issue.labels().toArray(String[]::new))
                 .set(LINKS, linkWords)

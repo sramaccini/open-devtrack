@@ -234,7 +234,7 @@ class IssueController {
                 original.priority().value(), original.assignee(),
                 original.dueOn() == null ? null : original.dueOn().toString(),
                 original.startOn() == null ? null : original.startOn().toString(), original.reviewer(), original.labels(),
-                original.custom(), editor.durations(original.originalEstimate()), null,
+                original.custom(), editor.durations(original.originalEstimate()), null, editor.teamName(original.teamId()),
                 editor.parentOf(project, original).key(), null);
         Instant now = Instant.now();
         IssueEntity clone;
@@ -299,7 +299,8 @@ class IssueController {
         watchers.watch(issue.id(), issue.reporter(), now);
         editor.watchAssignee(issue, now);
         editor.watchReviewer(issue, now);
-        List<FieldChange> created = new ArrayList<>(Fields.of(issue).changesFrom(Fields.EMPTY, editor.durations()));
+        List<FieldChange> created = new ArrayList<>(Fields.of(issue).changesFrom(Fields.EMPTY, editor.durations(),
+                editor::teamName));
         if (parent.key() != null) {
             created.add(new FieldChange("parent", null, parent.key()));
         }
@@ -410,6 +411,7 @@ class IssueController {
                 custom,
                 patch.has("originalEstimate") ? patch.getOriginalEstimate() : editor.durations(issue.originalEstimate()),
                 patch.has("remainingEstimate") ? patch.getRemainingEstimate() : editor.durations(issue.remainingEstimate()),
+                patch.has("team") ? patch.getTeam() : editor.teamName(issue.teamId()),
                 patch.has("parent") ? (patch.getParent() == null ? "" : patch.getParent()) : null,
                 patch.getVersion());
     }
@@ -734,6 +736,6 @@ class IssueController {
                 i.flagged(), votes.countByIssueId(i.id()), votes.existsByIssueIdAndUsername(i.id(), user.username()), parent,
                 parent == null ? null : parent.key(), editor.durations(i.originalEstimate()), i.originalEstimate(),
                 editor.durations(i.remainingEstimate()), i.remainingEstimate(), editor.durations(i.timeSpent()), i.timeSpent(),
-                perm);
+                editor.teamName(i.teamId()), perm);
     }
 }

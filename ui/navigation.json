@@ -107,6 +107,13 @@
           "requires": "odt.project.admin"
         },
         {
+          "id": "admin-teams",
+          "label": "{{ t('nav.admin_teams', 'Teams') }}",
+          "icon": "team",
+          "screen": "admin-teams",
+          "requires": "odt.project.browse"
+        },
+        {
           "id": "admin-permission-schemes",
           "label": "{{ t('nav.admin_schemes', 'Permission schemes') }}",
           "icon": "check-circle",

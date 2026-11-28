@@ -80,10 +80,11 @@ On the right is what describes it:
 - «…», more actions: «Add flag» or «Remove flag», «Add vote» or «Remove vote» ([below](#flag-and-votes)), «Clone», «Move» ([below](#move)),
   «Print», the three exports ([below](#export)), «All issues», and «Delete», for the admins of the project. «Clone» asks the summary of the copy («CLONE -»
   and this one) and opens it: it has the type, priority, assignee, reviewer, start and due dates, description, labels
-  and custom fields of this issue, you as reporter, the first status of its workflow and the link «clones» to this one; comments,
+  team and custom fields of this issue, you as reporter, the first status of its workflow and the link «clones» to this one; comments,
   attachments, watchers, votes, the flag and the plan stay here. «Print» prints the page without menus and buttons. Delete cannot be undone, and the
   comments, attachments and links of the issue go with it;
-- **Details**: its key, type, priority, assignee, reviewer, reporter, start and due dates, labels and custom fields;
+- **Details**: its key, type, priority, assignee, reviewer, team, reporter, start and due dates, labels and custom
+  fields. The team is any team of the workspace ([Administration › Teams](../admin/administration.md#groups-and-permission-schemes)): who does the work, not who may see it;
 - **Planning**: its story points (0 to 999, empty when not estimated) and the sprint it is planned in;
 - under them, when it was **created** and last **updated**, as a time from now («3 days ago»); the date and time, in
   your time zone, are in the tooltip.

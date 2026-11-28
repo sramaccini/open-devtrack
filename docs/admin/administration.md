@@ -46,6 +46,10 @@ they belong to, as the permission scheme of the project says. That role is given
 - *Groups* (`ODT_ADMIN`): named sets of users of the tenant. A group is a member of a project with a role, and a
   user's role in a project is the highest of their own and those of their groups. A change that would leave a project
   without an admin is refused.
+- *Teams* (ADR-31): who does the work. An issue names a team of the tenant, in any project, and the search finds it
+  (`team = Platform`). A team gives no access. `ODT_ADMIN` creates, renames and removes the teams and sets their lead;
+  the lead, or `ODT_ADMIN`, adds and removes the members. Every user sees the teams. Removing a team leaves its issues
+  without a team, with a row in their history.
 - *Permission schemes* (`ODT_ADMIN`): what each project role may do. Every tenant has a default scheme. *New* copies
   it, and each project picks its scheme in its details. Every role sees the issues, and the admin always edits the
   project and its members. A scheme in use, or the default one, cannot be removed.

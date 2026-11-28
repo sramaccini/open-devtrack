@@ -60,6 +60,7 @@ final class Docs {
     static final Field<Integer> ORIGINAL_ESTIMATE = field(name("original_estimate"), SQLDataType.INTEGER);
     static final Field<Integer> REMAINING_ESTIMATE = field(name("remaining_estimate"), SQLDataType.INTEGER);
     static final Field<Integer> TIME_SPENT = field(name("time_spent"), SQLDataType.INTEGER);
+    static final Field<UUID> TEAM_ID = field(name("team_id"), SQLDataType.UUID);
     /** A tsvector; String only for jOOQ, the value is always written by {@code odt_search.text_vector}. */
     static final Field<String> TSV = field(name("tsv"), SQLDataType.VARCHAR);
 

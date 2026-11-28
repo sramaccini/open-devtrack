@@ -13,7 +13,7 @@ import java.util.UUID;
 /**
  * An issue with every field, as the index of the module search reads it (ADR-16): type and priority as in the API,
  * custom fields by their key, the keys it had before it moved to another project (ADR-27) and the key of its parent
- * (ADR-28), its links from both ends (ADR-29), and its estimates and time spent in minutes (ADR-30).
+ * (ADR-28), its links from both ends (ADR-29), its estimates and time spent in minutes (ADR-30) and its team (ADR-31).
  */
 public record IssueDocument(UUID id, String tenantId, UUID projectId, String projectKey, String key, long number,
                             String type, String summary, String description, String status, String priority,
@@ -22,7 +22,7 @@ public record IssueDocument(UUID id, String tenantId, UUID projectId, String pro
                             List<String> labels, Map<String, Object> custom, Instant createdAt, Instant updatedAt,
                             boolean flagged, List<String> movedKeys, String parentKey,
                             List<IssueDocument.Link> links, Integer originalEstimate, Integer remainingEstimate,
-                            int timeSpent) {
+                            int timeSpent, UUID teamId) {
 
     /** A link of the issue: the code of its type, whether the issue is its {@code from} end, and the other issue. */
     public record Link(String type, boolean outward, UUID other) {

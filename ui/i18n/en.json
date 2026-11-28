@@ -778,5 +778,22 @@
   "values.webhook_event.worklog.created": "Work logged",
   "values.webhook_event.worklog.updated": "Work log changed",
   "values.webhook_event.worklog.deleted": "Work log deleted",
-  "time.started_on": "Started {date}"
+  "time.started_on": "Started {date}",
+  "nav.admin_teams": "Teams",
+  "admin.teams": "Teams",
+  "admin.team": "Team",
+  "admin.teams_help": "A team names who does the work of an issue, in any project. It gives no access: roles come from the members of the projects and the groups. The admin of the workspace manages the teams, their lead their members.",
+  "admin.add_team": "New team",
+  "admin.edit_team": "Edit {name}",
+  "admin.team_exists": "A team with this name exists",
+  "admin.team_lead": "Lead",
+  "admin.team_lead_help": "Manages the members of the team",
+  "admin.team_led_by": "Lead: {name}",
+  "admin.team_no_lead": "No lead",
+  "admin.remove_team": "Remove the team {name}? Its issues are left without a team.",
+  "admin.team_member_exists": "Already in the team",
+  "admin.remove_team_member": "Remove {name} from the team?",
+  "issues.team": "Team",
+  "issues.team_help": "The team that does the work, any team of the workspace",
+  "values.issue_field.team": "Team"
 }

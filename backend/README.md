@@ -103,6 +103,11 @@ the search and the notifications follow. The members of a project include those 
 member is refused with 409 when no admin would be left. Mentions and assignments stay per user. The codes are
 in the catalogue (ADR-07) and reach the screens as `_perm` on rows and forms; `POST /authz/check` decides them for a
 `project` or `issue` resource (`ProjectPermissions`, the `PermissionContributor` of authz-library 2.2.0, A1). `identity`
+Teams (ADR-31, `odt_access.team`, `team_member`) name who does the work and give no permission: the admin of the tenant
+manages them (`/api/teams`), their lead or the admin their members; `Teams` gives them to `issue` (the `team_id` of an
+issue, set by its name in the requests, answered and written to the history by name) and to `search` (the index keeps
+`team_id`, ODQL `team` turns names into identifiers when it compiles, so a rename needs no reindex). `TeamDeleted`
+clears the team of its issues in `issue` (`TeamCleanup`), each with a row of history and `IssueChanged`. `identity`
 lists the users of the tenant for the pickers (`GET /api/users`) from the `TenantDirectory` of authz-library (A5). The
 tables of authz-library are in the schema `authz` (`authz.rbac.schema`, A2). A database created before keeps the old
 tables in `public`, unused, and the users and roles are those of the seeds again: `stack/stack.sh reset` starts clean.

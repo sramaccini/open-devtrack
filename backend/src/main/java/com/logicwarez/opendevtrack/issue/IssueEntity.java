@@ -56,6 +56,7 @@ class IssueEntity {
     private Integer originalEstimate;
     private Integer remainingEstimate;
     private int timeSpent;
+    private UUID teamId;
 
     @JdbcTypeCode(SqlTypes.ARRAY)
     private List<String> labels;
@@ -92,7 +93,7 @@ class IssueEntity {
 
     void edit(IssueType type, String summary, String description, Priority priority, String assignee, LocalDate dueOn,
               LocalDate startOn, String reviewer, List<String> labels, Map<String, Object> custom,
-              Integer originalEstimate, Integer remainingEstimate, Instant now) {
+              Integer originalEstimate, Integer remainingEstimate, UUID teamId, Instant now) {
         this.type = type;
         this.summary = summary;
         this.description = description;
@@ -105,6 +106,13 @@ class IssueEntity {
         this.custom = new HashMap<>(custom);
         this.originalEstimate = originalEstimate;
         this.remainingEstimate = remainingEstimate;
+        this.teamId = teamId;
+        this.updatedAt = now;
+    }
+
+    /** Its team was deleted (ADR-31). */
+    void teamDeleted(Instant now) {
+        this.teamId = null;
         this.updatedAt = now;
     }
 
@@ -210,6 +218,10 @@ class IssueEntity {
 
     int timeSpent() {
         return timeSpent;
+    }
+
+    UUID teamId() {
+        return teamId;
     }
 
     String reviewer() {

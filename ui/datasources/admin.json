@@ -216,6 +216,57 @@
       "params": {
         "except": "{{row.code}}"
       }
+    },
+    "teams": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/teams",
+      "params": {
+        "q": "{{search}}"
+      }
+    },
+    "team": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/teams/{{params.id}}"
+    },
+    "addTeam": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/teams",
+      "body": "{{formFields}}"
+    },
+    "saveTeam": {
+      "type": "rest",
+      "method": "PUT",
+      "url": "/api/teams/{{id}}",
+      "body": {
+        "name": "{{formFields.name}}",
+        "description": "{{formFields.description}}",
+        "lead": "{{formFields.lead}}",
+        "version": "{{form.version}}"
+      }
+    },
+    "removeTeam": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/teams/{{id}}"
+    },
+    "teamMembers": {
+      "type": "rest",
+      "method": "GET",
+      "url": "/api/teams/{{params.id}}/members"
+    },
+    "addTeamMember": {
+      "type": "rest",
+      "method": "POST",
+      "url": "/api/teams/{{params.id}}/members",
+      "body": "{{formFields}}"
+    },
+    "removeTeamMember": {
+      "type": "rest",
+      "method": "DELETE",
+      "url": "/api/teams/{{params.id}}/members/{{username}}"
     }
   }
 }

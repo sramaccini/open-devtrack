@@ -176,6 +176,15 @@
     },
     "POST /api/sprints/{id}/start" : {
       "$ref" : "#/components/schemas/SprintRequest"
+    },
+    "POST /api/teams" : {
+      "$ref" : "#/components/schemas/TeamRequest"
+    },
+    "PUT /api/teams/{id}" : {
+      "$ref" : "#/components/schemas/TeamRequest"
+    },
+    "POST /api/teams/{id}/members" : {
+      "$ref" : "#/components/schemas/TeamMemberRequest"
     }
   },
   "components" : {
@@ -446,6 +455,9 @@
           "summary" : {
             "type" : "string"
           },
+          "team" : {
+            "type" : "string"
+          },
           "type" : {
             "type" : "string"
           },
@@ -497,6 +509,9 @@
             "type" : "string"
           },
           "summary" : {
+            "type" : "string"
+          },
+          "team" : {
             "type" : "string"
           },
           "type" : {
@@ -853,6 +868,34 @@
           "position" : {
             "type" : "integer",
             "format" : "int32"
+          },
+          "version" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }
+      },
+      "TeamMemberRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "username" : {
+            "type" : "string"
+          }
+        }
+      },
+      "TeamRequest" : {
+        "type" : "object",
+        "additionalProperties" : false,
+        "properties" : {
+          "description" : {
+            "type" : "string"
+          },
+          "lead" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
           },
           "version" : {
             "type" : "integer",
