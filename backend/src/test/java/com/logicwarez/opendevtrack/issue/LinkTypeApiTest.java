@@ -22,6 +22,7 @@ import jakarta.servlet.Filter;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +78,12 @@ class LinkTypeApiTest {
     private final SessionAuthentication mario = session("mario", "ALPHA", ADMIN);
     private final SessionAuthentication luisa = session("luisa", "ALPHA", MEMBER);
     private final SessionAuthentication ugo = session("ugo", "BETA", ADMIN);
+
+    /** The other tests find the types of the tenant as made: this one adds, changes and removes them. */
+    @AfterEach
+    void tearDown() {
+        jdbc.execute("TRUNCATE odt_issue.link_type");
+    }
 
     @BeforeEach
     void setUp() throws Exception {
