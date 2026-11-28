@@ -1,6 +1,6 @@
 # ADR-31: Teams, and the Team of an issue
 
-Status: Proposed (28 November 2026) — F5
+Status: Accepted (28 November 2026; decided by the maintainer, each proposal of A to C accepted) — F5
 
 ## Context
 
@@ -36,7 +36,7 @@ start date, the other half of T10 of the plan towards Jira, is done (b68a700); t
 7. **Personal data.** Being a member or the lead of a team is personal data: it is in «Your data», and erasing a user
    removes them from the teams (a team whose lead is erased has no lead until one is set).
 
-## Questions for the maintainer
+## Questions for the maintainer (each proposal accepted)
 
 - **A. Team or group.** Proposal: a new entity, as in Jira, so that putting a person in a team never gives access.
   Alternative: a group marked as a team (a flag on `user_group`): no new tables and one place for sets of people, but

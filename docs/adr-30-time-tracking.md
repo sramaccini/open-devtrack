@@ -1,6 +1,6 @@
 # ADR-30: Time tracking and work log, as in Jira
 
-Status: Proposed (28 November 2026) — F5
+Status: Accepted (28 November 2026; decided by the maintainer, each proposal of A to D accepted) — F5
 
 ## Context
 
@@ -56,7 +56,7 @@ of the plan towards Jira.
    comment when a user is erased. `WorkLogged`, `WorkLogChanged` and `WorkLogDeleted` are events of `collaboration`;
    the webhooks get `worklog_created`, `worklog_updated` and `worklog_deleted`.
 
-## Questions for the maintainer
+## Questions for the maintainer (each proposal accepted)
 
 - **A. Where the work log lives.** Proposal: `collaboration`, with the comments (same permissions pattern, same Markdown,
   same reading by `audit`). Alternative: a new module `timetracking` with the estimates too, more separated but with a
