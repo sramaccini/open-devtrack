@@ -296,7 +296,8 @@ The name given by the user never reaches a path or an object name. At start the 
 and the back end refuses to start if attachments are kept in another store: changing the store is a migration.
 `GET /api/issues/{key}/attachments` lists them for whoever sees the issue; `POST` (multipart, part `file`) needs
 `odt.issue.attach` (developer, admin); `GET …/attachments/{id}/content` downloads one, always as a download
-(`Content-Disposition: attachment`, `nosniff`); `DELETE …/attachments/{id}` is for the uploader or an admin of the
+(`Content-Disposition: attachment`, `nosniff`), its address in `url` of the list, and in `thumbnail` for a picture
+whose first bytes are PNG, JPEG, GIF or WebP; `DELETE …/attachments/{id}` is for the uploader or an admin of the
 project. At most `odt.attachments.max-size` per file (25 MB) and 100 per issue; each one added or removed is in the
 changelog (`attachments`).
 

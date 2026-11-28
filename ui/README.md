@@ -125,8 +125,9 @@ field `overdue` of the rows: the `badges` of a Quadrava column colour by value, 
 
 The Attachments section of `issue-detail` lists the attachments, with remove for whoever may; under them a `file`
 input with `display: dropzone` (Quadrava 0.26.0, Q42), a dashed area with «Add attachment» and the limit as its
-`hint`, uploads a file at once, chosen or dropped (`issues/uploadAttachment`, shown when
-`data.issue._perm.attach`); after the upload a `set` step empties the input, so the last file is not shown again.
+`hint`, uploads files at once, chosen or dropped, `multiple` up to 10 with a progress each (Quadrava 0.34.0, Q52;
+`issues/uploadAttachment`, shown when `data.issue._perm.attach`); the first column draws `thumbnail` with the
+format `image` and «Preview» (`eye`, on pictures and PDFs) runs the step `preview` on `attachments` from `url`; after the upload a `set` step empties the input, so the last file is not shown again.
 Linked work items is a `dataTable` grouped by `relation` (the headers take its `valueKey`) and has «Add linked work item», `tone: neutral`, in a `box` with `variant: dashed`, the same look: it sets `state.linking`, which shows the form `link-form` (`layout: flow`, relation and a lookup on `linkCandidates`) in place of the box; «Link» calls `addLink` with the fields of the form and hides it again.
 The name of a file downloads it
 (`href` of the column, Quadrava 0.9.0, request Q10), and the field allows 25 MB, as the back end: the runtime image

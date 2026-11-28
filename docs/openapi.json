@@ -7037,11 +7037,17 @@
             "type" : "integer",
             "format" : "int64"
           },
+          "thumbnail" : {
+            "type" : "string"
+          },
           "uploadedAt" : {
             "type" : "string",
             "format" : "date-time"
           },
           "uploadedBy" : {
+            "type" : "string"
+          },
+          "url" : {
             "type" : "string"
           }
         }

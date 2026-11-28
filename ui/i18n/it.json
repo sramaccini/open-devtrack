@@ -248,7 +248,7 @@
   "values.transition.reopen": "Riapri",
   "issues.attachments": "Allegati",
   "issues.add_attachment": "Aggiungi allegato",
-  "issues.attachment_limit": "Fino a 25 MB per file",
+  "issues.attachment_limit": "Fino a 10 file alla volta, 25 MB ciascuno",
   "issues.attachment_name": "File",
   "issues.attachment_size": "Dimensione (byte)",
   "issues.attachment_by": "Aggiunto da",
@@ -732,5 +732,6 @@
   "issues.start_on": "Data di inizio",
   "issues.start_on_help": "Il giorno in cui il lavoro deve iniziare; mai dopo la scadenza",
   "issues.start": "Inizio",
-  "values.issue_field.start": "Data di inizio"
+  "values.issue_field.start": "Data di inizio",
+  "issues.attachment_preview": "Anteprima"
 }

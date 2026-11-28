@@ -100,9 +100,16 @@ class AttachmentController {
         this.metrics = metrics;
     }
 
+    /**
+     * An attachment; {@code url} is the address of its content, {@code thumbnail} the same for a picture (PNG, JPEG, GIF,
+     * WebP, whose first bytes were checked) and null for any other file, for the small picture of the list.
+     */
     record AttachmentView(UUID id, String filename, String mediaType, long size, String sha256, String uploadedBy,
-                          Instant uploadedAt, @JsonProperty("_perm") Map<String, Boolean> perm) {
+                          Instant uploadedAt, String url, String thumbnail,
+                          @JsonProperty("_perm") Map<String, Boolean> perm) {
     }
+
+    private static final Set<String> PICTURES = Set.of("image/png", "image/jpeg", "image/gif", "image/webp");
 
     @ApiDoc(value = "The attachments of an issue",
             answer = AttachmentView.class, list = true, project = "odt.issue.browse")
@@ -117,7 +124,7 @@ class AttachmentController {
             return Problems.forbidden("Only the members of the project see its issues");
         }
         return ResponseEntity.ok(attachments.findByIssueIdOrderByUploadedAtAscIdAsc(issue.get().id()).stream()
-                .map(a -> view(a, permissions)).toList());
+                .map(a -> view(a, issue.get().key(), permissions)).toList());
     }
 
     @ApiDoc(value = "Attaches a file to an issue (multipart, part file)",
@@ -164,7 +171,7 @@ class AttachmentController {
         }
         events.publishEvent(new AttachmentAdded(attachment.id(), issue.get().id(), issue.get().projectId(),
                 issue.get().key(), attachment.filename(), user.username(), now));
-        return ResponseEntity.status(HttpStatus.CREATED).body(view(attachment, permissions));
+        return ResponseEntity.status(HttpStatus.CREATED).body(view(attachment, issue.get().key(), permissions));
     }
 
     @ApiDoc(value = "The content of an attachment, with its media type", project = "odt.issue.browse")
@@ -297,8 +304,10 @@ class AttachmentController {
         }
     }
 
-    private AttachmentView view(AttachmentEntity a, Set<String> permissions) {
+    private AttachmentView view(AttachmentEntity a, String issueKey, Set<String> permissions) {
+        String url = "/api/issues/" + issueKey + "/attachments/" + a.id() + "/content";
         return new AttachmentView(a.id(), a.filename(), a.mediaType(), a.size(), a.sha256(), a.uploadedBy(),
-                a.uploadedAt(), Map.of("delete", canDelete(a, permissions)));
+                a.uploadedAt(), url, PICTURES.contains(a.mediaType()) ? url : null,
+                Map.of("delete", canDelete(a, permissions)));
     }
 }

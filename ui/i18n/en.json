@@ -248,7 +248,7 @@
   "values.transition.reopen": "Reopen",
   "issues.attachments": "Attachments",
   "issues.add_attachment": "Add attachment",
-  "issues.attachment_limit": "Up to 25 MB per file",
+  "issues.attachment_limit": "Up to 10 files at once, 25 MB each",
   "issues.attachment_name": "File",
   "issues.attachment_size": "Size (bytes)",
   "issues.attachment_by": "Added by",
@@ -732,5 +732,6 @@
   "issues.start_on": "Start date",
   "issues.start_on_help": "The day the work should start; never after the due date",
   "issues.start": "Start",
-  "values.issue_field.start": "Start date"
+  "values.issue_field.start": "Start date",
+  "issues.attachment_preview": "Preview"
 }

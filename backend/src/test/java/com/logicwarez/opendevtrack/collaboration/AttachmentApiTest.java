@@ -51,6 +51,8 @@ class AttachmentApiTest extends AttachmentTestBase {
                 .andExpect(jsonPath("$[0].size").value(content.length))
                 .andExpect(jsonPath("$[0].sha256").value(HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(content))))
                 .andExpect(jsonPath("$[0].uploadedBy").value("luisa"))
+                .andExpect(jsonPath("$[0].url").value("/api/issues/ODT-1/attachments/" + id + "/content"))
+                .andExpect(jsonPath("$[0].thumbnail").doesNotExist())
                 .andExpect(jsonPath("$[0]._perm.delete").value(false));
         mvc.perform(as(get("/api/issues/ODT-1/attachments"), luisa)).andExpect(jsonPath("$[0]._perm.delete").value(true));
 
@@ -96,7 +98,11 @@ class AttachmentApiTest extends AttachmentTestBase {
 
     @Test
     void theUploaderOrAnAdminRemovesAndTheChangelogTellsIt() throws Exception {
-        String id = upload(luisa, "screenshot.png", "image/png", new byte[] {(byte) 0x89, 'P', 'N', 'G'});
+        String id = upload(luisa, "screenshot.png", "image/png",
+                new byte[] {(byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A});
+        // A picture has a thumbnail: the address of its content.
+        mvc.perform(as(get("/api/issues/ODT-1/attachments"), luisa))
+                .andExpect(jsonPath("$[0].thumbnail").value("/api/issues/ODT-1/attachments/" + id + "/content"));
         mvc.perform(as(delete("/api/issues/ODT-1/attachments/" + id), paola)).andExpect(status().isForbidden());
         mvc.perform(as(delete("/api/issues/ODT-1/attachments/" + id), mario)).andExpect(status().isNoContent());
         mvc.perform(as(get("/api/issues/ODT-1/attachments/" + id + "/content"), luisa)).andExpect(status().isNotFound());

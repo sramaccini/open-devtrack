@@ -106,8 +106,11 @@ the first time are told. The admins of the project also delete the comments of o
 
 ### Attachments
 
-Under the list of files, a dashed area with «Add attachment» uploads a file at once, chosen with the button or dropped
-on the area, up to 25 MB and 100 files per issue. Clicking the name of a file downloads it.
+Under the list of files, a dashed area with «Add attachment» uploads files at once, chosen with the button or dropped
+on the area: up to 10 at a time, each with its progress and, when refused, its own reason; 25 MB per file and 100
+files per issue. Clicking the name of a file downloads it. A picture (PNG, JPEG, GIF, WebP) shows small in the list;
+«Preview» shows pictures and PDFs as large as the page, one after the other with ‹ and › (or the arrow keys), with a
+button to download them.
 Whoever attached a file removes it, and so do the admins of the project.
 
 An installation may also set:

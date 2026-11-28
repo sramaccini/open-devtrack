@@ -27,6 +27,9 @@ The entries are written by hand at each release from the commits ([docs/release.
 - **Issues**: «+» under the summary, as in Jira: add a subtask (a child on an epic), an attachment or a link without
   going down to their sections; «Link work item» opens the form of the links in its section and brings it into view,
   the cursor in Issue (#55 T15, Q55).
+- **Issues**: attachments as in Jira: up to 10 files at once, each with its progress; a small picture of each image,
+  and «Preview» for images and PDFs, as large as the page, one after the other. API: `url` and `thumbnail` in an
+  attachment (#55 T7, Q52).
 - **Issues**: «Created» and «Updated» of an issue, and the column Updated of the issues and of the search, as a time
   from now («3 days ago»), the date and time in the tooltip, as in Jira (#55 T16, Q48).
 - **Issues**: linked work items grouped by relation, and «Add linked work item» opens in the section instead of a

@@ -298,9 +298,11 @@
                                 "type": "file",
                                 "label": "{{ t('issues.add_attachment', 'Add attachment') }}",
                                 "display": "dropzone",
-                                "hint": "{{ t('issues.attachment_limit', 'Up to 25 MB per file') }}",
+                                "hint": "{{ t('issues.attachment_limit', 'Up to 10 files at once, 25 MB each') }}",
                                 "upload": "uploadAttachment",
-                                "maxSizeKb": 25600
+                                "maxSizeKb": 25600,
+                                "multiple": true,
+                                "maxItems": 10
                               }
                             ],
                             "onSubmit": [
@@ -387,6 +389,11 @@
                   "source": "attachments",
                   "columns": [
                     {
+                      "field": "thumbnail",
+                      "label": "{{ t('issues.attachment_preview', 'Preview') }}",
+                      "format": "image"
+                    },
+                    {
                       "field": "filename",
                       "label": "{{ t('issues.attachment_name', 'File') }}",
                       "href": "/api/issues/{{ params.issue }}/attachments/{{ row.id }}/content",
@@ -405,10 +412,27 @@
                     {
                       "field": "uploadedAt",
                       "label": "{{ t('issues.attachment_at', 'When') }}",
-                      "format": "datetime"
+                      "format": "relative"
                     }
                   ],
                   "rowActions": [
+                    {
+                      "id": "btn-preview-attachment",
+                      "label": "{{ t('issues.attachment_preview', 'Preview') }}",
+                      "icon": "eye",
+                      "visibleIf": "{{ row.thumbnail != null || row.mediaType == 'application/pdf' }}",
+                      "onClick": [
+                        {
+                          "preview": {
+                            "source": "attachments",
+                            "start": "{{ row.url }}",
+                            "urlField": "url",
+                            "nameField": "filename",
+                            "typeField": "mediaType"
+                          }
+                        }
+                      ]
+                    },
                     {
                       "id": "btn-remove-attachment",
                       "label": "{{ t('issues.remove_link', 'Remove') }}",
@@ -449,9 +473,11 @@
                     "type": "file",
                     "label": "{{ t('issues.add_attachment', 'Add attachment') }}",
                     "display": "dropzone",
-                    "hint": "{{ t('issues.attachment_limit', 'Up to 25 MB per file') }}",
+                    "hint": "{{ t('issues.attachment_limit', 'Up to 10 files at once, 25 MB each') }}",
                     "upload": "uploadAttachment",
-                    "maxSizeKb": 25600
+                    "maxSizeKb": 25600,
+                    "multiple": true,
+                    "maxItems": 10
                   },
                   "onChange": [
                     {
