@@ -110,7 +110,8 @@ public class Issues {
                 i.flagged(), moved.of(i.id()), i.parentId() == null ? null : issues.findById(i.parentId())
                         .map(parent -> IssueController.key(p, parent)).orElse(null),
                 links.findByIssue(i.id()).stream().map(l -> new IssueDocument.Link(l.type(), l.fromId().equals(i.id()),
-                        l.other(i.id()))).toList())));
+                        l.other(i.id()))).toList(), i.originalEstimate(),
+                i.remainingEstimate(), i.timeSpent())));
     }
 
     /**

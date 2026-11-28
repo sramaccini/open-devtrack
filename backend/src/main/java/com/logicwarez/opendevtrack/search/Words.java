@@ -172,6 +172,9 @@ class Words {
             case "due" -> "due < today";
             case "sprint" -> "sprint IN openSprints()";
             case "points" -> "points >= 5";
+            case "originalEstimate" -> "originalEstimate > 1d";
+            case "remainingEstimate" -> "remainingEstimate IS EMPTY";
+            case "timeSpent" -> "timeSpent >= \"1d 4h\"";
             case "rank" -> "ORDER BY rank";
             default -> null;
         };
@@ -213,6 +216,7 @@ class Words {
             }
             case "created", "updated", "resolved" -> values.addAll(List.of("today", "-7d", "-14d", "-30d"));
             case "start", "due" -> values.addAll(List.of("today", "7d", "14d", "-7d"));
+            case "originalestimate", "remainingestimate", "timespent" -> values.addAll(List.of("30m", "1h", "4h", "1d", "1w"));
             default -> {
                 // key, linked, summary, text, points: free values.
             }

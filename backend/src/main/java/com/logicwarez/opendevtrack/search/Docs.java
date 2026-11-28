@@ -57,6 +57,9 @@ final class Docs {
     static final Field<UUID> SPRINT_ID = field(name("sprint_id"), SQLDataType.UUID);
     static final Field<Integer> POINTS = field(name("points"), SQLDataType.INTEGER);
     static final Field<String> RANK = field(name("rank"), SQLDataType.VARCHAR);
+    static final Field<Integer> ORIGINAL_ESTIMATE = field(name("original_estimate"), SQLDataType.INTEGER);
+    static final Field<Integer> REMAINING_ESTIMATE = field(name("remaining_estimate"), SQLDataType.INTEGER);
+    static final Field<Integer> TIME_SPENT = field(name("time_spent"), SQLDataType.INTEGER);
     /** A tsvector; String only for jOOQ, the value is always written by {@code odt_search.text_vector}. */
     static final Field<String> TSV = field(name("tsv"), SQLDataType.VARCHAR);
 

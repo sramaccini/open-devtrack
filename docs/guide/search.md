@@ -86,6 +86,9 @@ An empty query finds every issue. Without `ORDER BY`, the most recently updated 
 | `due` | Its due date | `= != < <= > >= IS EMPTY` |
 | `sprint` | A sprint, by its name, or `openSprints()` | `= != IN NOT IN IS EMPTY` |
 | `points` | The story points, a whole number | `= != < <= > >= IN NOT IN IS EMPTY` |
+| `originalEstimate` | The original estimate, a duration | `= != < <= > >= IS EMPTY` |
+| `remainingEstimate` | The remaining estimate, a duration | `= != < <= > >= IS EMPTY` |
+| `timeSpent` | The time logged, a duration (`0m` when none) | `= != < <= > >= IS EMPTY` |
 | `custom.<key>` | A custom field of the project, by its key ([Issues](issues.md#custom-fields)) | `= != < <= > >= ~ !~ IN NOT IN IS EMPTY` |
 | `rank` | The order of the project, only in `ORDER BY` | |
 
@@ -121,6 +124,13 @@ A day is the whole day in the time zone of the installation: `created = today` f
 `created >= -7d` what was created in the last seven days, today included. `due < today AND category != done` finds the
 issues past their due date.
 
+### Durations
+
+`originalEstimate`, `remainingEstimate` and `timeSpent` take a duration as the issue writes it, `1w 2d 3h 30m`, in
+quotes when it has more than one part: `timeSpent > 4h`, `originalEstimate >= "1d 4h"`; a bare number is minutes.
+A day and a week are as long as in the installation (8 hours and 5 days unless it says otherwise).
+`remainingEstimate = 0` finds the issues with nothing left, `originalEstimate IS EMPTY` those not estimated.
+
 ### Order
 
 `ORDER BY` takes one or more fields, each with `ASC` (the default) or `DESC`, separated by commas:
@@ -130,8 +140,8 @@ ORDER BY priority DESC, due ASC
 ```
 
 The fields are `project`, `key`, `type`, `status`, `category`, `priority`, `assignee`, `reviewer`, `reporter`,
-`summary`, `created`, `updated`, `resolved`, `start`, `due`, `points`, `rank` and `custom.<key>`. Empty values come
-last.
+`summary`, `created`, `updated`, `resolved`, `start`, `due`, `points`, `originalEstimate`, `remainingEstimate`,
+`timeSpent`, `rank` and `custom.<key>`. Empty values come last.
 `project` and `key` order by project, then by number, so `WEB-10` comes after `WEB-9`. `rank` is the order of the
 project, the one of the backlog.
 

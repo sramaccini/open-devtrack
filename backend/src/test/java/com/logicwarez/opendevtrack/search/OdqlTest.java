@@ -96,11 +96,22 @@ class OdqlTest {
         assertThat(error("type ~ bug").getMessage()).isEqualTo("The operator ~ cannot be used with type");
         assertThat(error("text = word").getMessage()).isEqualTo("The operator = cannot be used with text");
         assertThat(error("points > many").getMessage()).isEqualTo("Expected a whole number, not 'many'");
+        assertThat(error("timeSpent > \"2 hours\"").getMessage())
+                .isEqualTo("Expected a duration such as 2h or \"1d 4h\", not '2 hours'");
+        assertThat(error("timeSpent IN (1h)").getMessage()).isEqualTo("The operator IN cannot be used with timeSpent");
         assertThat(error("created > yesterday").getMessage()).startsWith("Expected a date");
         assertThat(error("sprint = \"Sprint 9\"").getMessage()).isEqualTo("No sprint is called 'Sprint 9'");
         assertThat(error("assignee = me()").getMessage()).isEqualTo("Unknown function me() for assignee");
         assertThat(error("rank = 1").getMessage()).isEqualTo("rank can only be used in ORDER BY");
         assertThat(error("type = bug ORDER BY text").getMessage()).isEqualTo("Cannot order by 'text'");
+    }
+
+    @Test
+    void estimatesAndTimeSpentAreMinutes() {
+        assertThat(sql("timeSpent >= \"1d 4h\"")).contains("\"time_spent\" >= 720");
+        assertThat(sql("originalEstimate < 1w")).contains("\"original_estimate\" < 2400");
+        assertThat(sql("remainingEstimate IS EMPTY")).contains("\"remaining_estimate\" is null");
+        assertThat(order("ORDER BY timeSpent DESC")).contains("\"time_spent\" desc nulls last");
     }
 
     @Test

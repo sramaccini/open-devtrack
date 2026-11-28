@@ -9,6 +9,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -88,7 +89,7 @@ class SearchApiTest {
         jdbc.execute("TRUNCATE odt_project.project, odt_access.project_member, odt_issue.issue, "
                 + "odt_issue.field_definition, odt_agile.issue_plan, "
                 + "odt_agile.sprint, odt_agile.sprint_issue, odt_agile.board, odt_agile.board_column, "
-                + "odt_search.issue_doc, odt_search.filter CASCADE");
+                + "odt_collaboration.worklog, odt_search.issue_doc, odt_search.filter CASCADE");
         for (String project : List.of("ODT", "WEB")) {
             mvc.perform(as(post("/api/projects"), mario).content("{\"key\":\"" + project + "\",\"name\":\"" + project + "\"}"))
                     .andExpect(status().isCreated());
@@ -300,6 +301,29 @@ class SearchApiTest {
         await(() -> jdbc.queryForObject("SELECT flagged IS NULL FROM odt_search.issue_doc WHERE tenant_id = 'ALPHA'"
                 + " AND issue_key = 'ODT-2'", Boolean.class));
         assertThat(keys(mario, "flagged IS NOT EMPTY")).isEmpty();
+    }
+
+    @Test
+    void estimatesAndTimeSpentAreSearched() throws Exception {
+        int version = JsonPath.read(mvc.perform(as(get("/api/issues/ODT-1"), mario)).andReturn().getResponse()
+                .getContentAsString(), "$.version");
+        mvc.perform(as(patch("/api/issues/ODT-1"), mario).content("""
+                        {"originalEstimate":"1d","version":%d}""".formatted(version)))
+                .andExpect(status().isOk());
+        mvc.perform(as(post("/api/issues/ODT-1/worklogs"), mario).content("{\"timeSpent\":\"1d 2h\"}"))
+                .andExpect(status().isCreated());
+        await(() -> jdbc.queryForObject("SELECT time_spent FROM odt_search.issue_doc WHERE tenant_id = 'ALPHA'"
+                + " AND issue_key = 'ODT-1'", Integer.class) == 600);
+        assertThat(keys(mario, "timeSpent > 1d")).containsExactly("ODT-1");
+        assertThat(keys(mario, "originalEstimate = 8h AND remainingEstimate = 0")).containsExactly("ODT-1");
+        assertThat(keys(mario, "originalEstimate IS EMPTY ORDER BY key")).containsExactly("ODT-2", "ODT-3", "WEB-1");
+        mvc.perform(as(post("/api/search"), mario).content("{\"query\":\"key = ODT-1\"}"))
+                .andExpect(jsonPath("$.items[0].timeSpent").value("1d 2h"))
+                .andExpect(jsonPath("$.items[0].originalEstimate").value("1d"))
+                .andExpect(jsonPath("$.items[0].remainingEstimate").value("0m"));
+        mvc.perform(as(post("/api/search"), mario).content("{\"query\":\"key = ODT-2\"}"))
+                .andExpect(jsonPath("$.items[0].timeSpent").value("0m"))
+                .andExpect(jsonPath("$.items[0].originalEstimate").value(org.hamcrest.Matchers.nullValue()));
     }
 
     @Test

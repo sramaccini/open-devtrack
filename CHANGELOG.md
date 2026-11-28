@@ -20,6 +20,9 @@ The entries are written by hand at each release from the commits ([docs/release.
   `GET|POST /api/issues/{key}/worklogs`, `PUT|DELETE /api/issues/{key}/worklogs/{id}`, `GET /api/time-tracking`,
   the webhook events `worklog.created`, `worklog.updated` and `worklog.deleted`. Settings
   `ODT_TIME_TRACKING_HOURS_PER_DAY` and `ODT_TIME_TRACKING_DAYS_PER_WEEK` (#55 T9).
+- **Search**: the ODQL fields `originalEstimate`, `remainingEstimate` and `timeSpent`, compared with durations
+  (`timeSpent > 4h`, `originalEstimate >= "1d 4h"`, `remainingEstimate IS EMPTY`) and in `ORDER BY`; the column Time
+  spent of the search, and the three values in its rows (ADR-30 step 2, #55 T9).
 - **Issues**: parent and subtasks, as in Jira (ADR-28). The new type «Subtask», and «Parent» in the details of an issue: an
   epic for a story, task or bug, a story, task or bug for a subtask, in the same
   project. The page of an issue lists its subtasks («Child work items» on an epic) with their progress, and «Add

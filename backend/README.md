@@ -377,6 +377,9 @@ modules; `POST /api/search/reindex` (admin of the tenant) rebuilds the rows of t
   from the links of `IssueDocument`; `linked`, `linkType` and `key IN linkedIssues(KEY[, relation])` match them with
   `&&` on a GIN index, against the issues the keys name in the projects the user sees. The relations come from
   `Issues.linkRelations`. An issue deleted writes again the issues that named it.
+- Time tracking (ADR-30): `original_estimate`, `remaining_estimate` and `time_spent` in minutes, from `IssueDocument`;
+  `originalEstimate`, `remainingEstimate` and `timeSpent` compare them with durations read by `shared.Durations` with the
+  hours per day and days per week of `TimeTracking`, and the rows of the search give them as duration text.
 - `POST /api/search` takes the request of the `serverDataTable` of Quadrava (query, page, size up to 100, sort, column
   filters, groups, distinct values) and answers in its shape; only the projects the user is a member of are searched
   (all for the admin of the tenant). A wrong query is a 400 Problem with `position` (1-based) and `expected`.

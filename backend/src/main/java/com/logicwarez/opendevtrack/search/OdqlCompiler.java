@@ -19,7 +19,10 @@ import static com.logicwarez.opendevtrack.search.Docs.PARENT_KEY;
 import static com.logicwarez.opendevtrack.search.Docs.DOC;
 import static com.logicwarez.opendevtrack.search.Docs.TENANT_ID;
 import static com.logicwarez.opendevtrack.search.Docs.NUMBER;
+import static com.logicwarez.opendevtrack.search.Docs.ORIGINAL_ESTIMATE;
 import static com.logicwarez.opendevtrack.search.Docs.POINTS;
+import static com.logicwarez.opendevtrack.search.Docs.REMAINING_ESTIMATE;
+import static com.logicwarez.opendevtrack.search.Docs.TIME_SPENT;
 import static com.logicwarez.opendevtrack.search.Docs.PRIORITY_ORDER;
 import static com.logicwarez.opendevtrack.search.Docs.PROJECT_KEY;
 import static com.logicwarez.opendevtrack.search.Docs.RANK;
@@ -45,6 +48,7 @@ import static org.jooq.impl.DSL.val;
 
 import com.logicwarez.opendevtrack.agile.Planning;
 import com.logicwarez.opendevtrack.issue.Issues;
+import com.logicwarez.opendevtrack.shared.Durations;
 import com.logicwarez.opendevtrack.search.Odql.And;
 import com.logicwarez.opendevtrack.search.Odql.Clause;
 import com.logicwarez.opendevtrack.search.Odql.Expr;
@@ -85,7 +89,8 @@ final class OdqlCompiler {
     /** The fields of the language, in the order the suggestions show them. */
     static final List<String> FIELDS = List.of("project", "key", "parent", "linked", "linkType", "type", "status",
             "category", "priority", "assignee", "reviewer", "reporter", "labels", "flagged", "summary", "text", "created",
-            "updated", "resolved", "start", "due", "sprint", "points", "rank");
+            "updated", "resolved", "start", "due", "sprint", "points", "originalEstimate", "remainingEstimate", "timeSpent",
+            "rank");
 
     static final List<String> TYPES = List.of("task", "bug", "story", "epic", "subtask");
     static final List<String> PRIORITIES = List.of("lowest", "low", "medium", "high", "highest");
@@ -108,15 +113,16 @@ final class OdqlCompiler {
      * the projects the user sees, and the names of the statuses ({@code "To do"} → {@code todo}).
      */
     record Context(String username, LocalDate today, ZoneId zone, List<Planning.Sprint> sprints,
-                   Map<String, String> statusNames, List<UUID> visible, List<Issues.LinkRelation> relations) {
+                   Map<String, String> statusNames, List<UUID> visible, List<Issues.LinkRelation> relations,
+                   Durations durations) {
 
         /**
          * Without the projects the user sees and the link types of the tenant: the links find nothing, and a link
-         * type or relation is unknown.
+         * type or relation is unknown; a day is 8 hours and a week 5 days.
          */
         Context(String username, LocalDate today, ZoneId zone, List<Planning.Sprint> sprints,
                 Map<String, String> statusNames) {
-            this(username, today, zone, sprints, statusNames, List.of(), List.of());
+            this(username, today, zone, sprints, statusNames, List.of(), List.of(), new Durations(8, 5));
         }
     }
 
@@ -190,6 +196,9 @@ final class OdqlCompiler {
             case "due" -> day(c, DUE_ON);
             case "sprint" -> sprint(c);
             case "points" -> number(c, POINTS);
+            case "originalestimate" -> duration(c, ORIGINAL_ESTIMATE);
+            case "remainingestimate" -> duration(c, REMAINING_ESTIMATE);
+            case "timespent" -> duration(c, TIME_SPENT);
             case "rank" -> throw error(c.at(), "rank can only be used in ORDER BY", null);
             default -> throw error(c.at(), "Unknown field '" + c.field() + "'", String.join(" ", FIELDS));
         };
@@ -488,6 +497,24 @@ final class OdqlCompiler {
         };
     }
 
+    /**
+     * An estimate or the time spent (ADR-30), in minutes: compared with durations as Jira writes them, {@code 2h} or
+     * {@code "1d 4h"}, a bare number being minutes.
+     */
+    private Condition duration(Clause c, Field<Integer> field) {
+        return switch (c.op()) {
+            case "=" -> field.eq(minutes(c.values().getFirst()));
+            case "!=" -> field.ne(minutes(c.values().getFirst()));
+            case "<" -> field.lt(minutes(c.values().getFirst()));
+            case "<=" -> field.le(minutes(c.values().getFirst()));
+            case ">" -> field.gt(minutes(c.values().getFirst()));
+            case ">=" -> field.ge(minutes(c.values().getFirst()));
+            case "empty" -> field.isNull();
+            case "notempty" -> field.isNotNull();
+            default -> throw notAllowed(c, "= != < <= > >= IS EMPTY");
+        };
+    }
+
     /** A sprint by name (or identifier) among those of the projects the user sees; {@code openSprints()}. */
     private Condition sprint(Clause c) {
         return switch (c.op()) {
@@ -598,10 +625,13 @@ final class OdqlCompiler {
             case "start" -> START_ON;
             case "due" -> DUE_ON;
             case "points" -> POINTS;
+            case "originalestimate" -> ORIGINAL_ESTIMATE;
+            case "remainingestimate" -> REMAINING_ESTIMATE;
+            case "timespent" -> TIME_SPENT;
             case "rank" -> RANK;
             default -> throw error(o.at(), "Cannot order by '" + o.field() + "'",
                     "project key type status category priority assignee reviewer reporter summary created updated "
-                            + "resolved start due points rank");
+                            + "resolved start due points originalEstimate remainingEstimate timeSpent rank");
         };
     }
 
@@ -642,6 +672,14 @@ final class OdqlCompiler {
             return Integer.valueOf(v.text());
         } catch (NumberFormatException e) {
             throw error(v.at(), "Expected a whole number, not '" + v.text() + "'", "a number");
+        }
+    }
+
+    private Integer minutes(Value v) {
+        try {
+            return context.durations().minutesOrZero(v.text());
+        } catch (Durations.WrongDuration e) {
+            throw error(v.at(), "Expected a duration such as 2h or \"1d 4h\", not '" + v.text() + "'", "2h 1d 1w");
         }
     }
 

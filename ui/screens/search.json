@@ -239,6 +239,11 @@
           "filter": "number"
         },
         {
+          "field": "timeSpent",
+          "label": "{{ t('time.time_spent', 'Time spent') }}",
+          "sortable": true
+        },
+        {
           "field": "sprint",
           "label": "{{ t('agile.sprint', 'Sprint') }}",
           "sortable": true,

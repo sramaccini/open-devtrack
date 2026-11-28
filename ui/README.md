@@ -196,7 +196,8 @@ and checked as one types (`search/check`), shown above the board when it has one
 and values as one types (`suggest` from `/api/search/words`), the results in a `serverDataTable` with column filters
 and groups computed by the back end, and the saved filters below (use, edit, remove; save the current query as a new
 one). The field checks the query on the back end as one types and says where it is wrong; Enter runs it.
-`issue-list` opens the search on its project («Open in search»).
+`issue-list` opens the search on its project («Open in search»). The column Time spent (ADR-30) is sortable; the
+estimates are in the rows of the API but not columns, since the table has no chooser of columns.
 
 The top bar (`topBar` in `navigation.json`, Quadrava 0.34.0, Q54) is the screen `top-bar`: a `search` on
 `search/quick` (`/api/search/quick`, `summary` with `key` under it) whose `onPick` opens `issue-detail` and whose
